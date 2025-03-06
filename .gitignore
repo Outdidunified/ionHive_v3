@@ -1,0 +1,10 @@
+
+# MacOS system files
+.DS_Store
+APP/FRONTEND/**/.DS_Store
+
+# Node.js dependencies
+APP/BACKEND/node_modules/
+APP/BACKEND/Log/*.log
+ADMIN/BACKEND/Log/*.log
+
