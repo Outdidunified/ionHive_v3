@@ -4,9 +4,9 @@ const Controller = require("../controllers/profileController");
 const authUser = require("../middlewares/authenticated");
 
 
-router.post('/CompleteProfile', authUser.isAuthenticated,Controller.CompleteProfile);
+router.post('/CompleteProfile', authUser.isAuthenticated, Controller.CompleteProfile);
 
-router.post('/deleteAccount', authUser.isAuthenticated,Controller.deleteAccount);
+router.post('/deleteAccount', authUser.isAuthenticated, Controller.deleteAccount);
 
 
 // Export the router

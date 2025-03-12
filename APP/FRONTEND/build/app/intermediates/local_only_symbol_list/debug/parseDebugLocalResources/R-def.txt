@@ -1,0 +1,7 @@
+R_DEF: Internal format may change without notice
+local
+drawable launch_background
+mipmap ic_launcher
+string google_client_id
+style LaunchTheme
+style NormalTheme

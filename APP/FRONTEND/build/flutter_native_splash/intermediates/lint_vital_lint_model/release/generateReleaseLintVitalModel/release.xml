@@ -1,0 +1,31 @@
+<variant
+    name="release"
+    package="net.jonhanson.flutter_native_splash"
+    minSdkVersion="16"
+    targetSdkVersion="16"
+    mergedManifest="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/flutter_native_splash/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml"
+    manifestMergeReport="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/flutter_native_splash/outputs/logs/manifest-merger-release-report.txt"
+    proguardFiles="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/flutter_native_splash/intermediates/default_proguard_files/global/proguard-android.txt-8.7.0"
+    partialResultsDir="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/flutter_native_splash/intermediates/lint_vital_partial_results/release/lintVitalAnalyzeRelease/out">
+  <buildFeatures
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+    <sourceProvider
+        manifests="src/main/AndroidManifest.xml"
+        javaDirectories="src/main/java:src/release/java:src/main/kotlin:src/release/kotlin"
+        resDirectories="src/main/res:src/release/res"
+        assetsDirectories="src/main/assets:src/release/assets"/>
+  </sourceProviders>
+  <testSourceProviders>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <artifact
+      classOutputs="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/flutter_native_splash/intermediates/javac/release/compileReleaseJavaWithJavac/classes:/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/flutter_native_splash/intermediates/compile_r_class_jar/release/generateReleaseRFile/R.jar"
+      type="MAIN"
+      applicationId="net.jonhanson.flutter_native_splash"
+      generatedSourceFolders="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/flutter_native_splash/generated/ap_generated_sources/release/out"
+      generatedResourceFolders="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/flutter_native_splash/generated/res/resValues/release"
+      desugaredMethodsFiles="/Users/outdid/.gradle/caches/8.10.2/transforms/c205ee2f03940358ec9a2d2be9875fae/transformed/D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

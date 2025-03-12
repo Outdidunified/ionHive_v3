@@ -1,0 +1,237 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.outdidev.ev_app"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="35" />
+10    <!--
+11         The INTERNET permission is required for development. Specifically,
+12         the Flutter tool needs it to communicate with the running application
+13         to allow setting breakpoints, to provide hot reload, etc.
+14    -->
+15    <uses-permission android:name="android.permission.INTERNET" />
+15-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:4:5-67
+15-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:4:22-64
+16    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Location Permissions -->
+16-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:5:5-79
+16-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:5:22-76
+17    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+17-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:8:5-79
+17-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:8:22-76
+18    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Bluetooth Permissions -->
+18-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:9:5-81
+18-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:9:22-78
+19    <uses-permission android:name="android.permission.BLUETOOTH" />
+19-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:12:5-68
+19-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:12:22-65
+20    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- Required for Bluetooth on Android 12 and higher -->
+20-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:13:5-74
+20-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:13:22-71
+21    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+21-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:16:5-73
+21-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:16:22-70
+22    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+22-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:17:5-76
+22-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:17:22-73
+23    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+23-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:18:5-78
+23-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:18:22-75
+24
+25    <queries>
+25-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:61:5-76:15
+26        <intent>
+26-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:62:9-65:18
+27            <action android:name="android.intent.action.PROCESS_TEXT" />
+27-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:63:13-72
+27-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:63:21-70
+28
+29            <data android:mimeType="text/plain" />
+29-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:64:13-50
+29-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:64:19-48
+30        </intent>
+31        <!-- Queries to ensure Bluetooth and related features are available -->
+32        <intent>
+32-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:67:9-69:18
+33            <action android:name="android.bluetooth.adapter.action.REQUEST_ENABLE" />
+33-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:68:13-86
+33-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:68:21-83
+34        </intent>
+35        <intent>
+35-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:70:9-72:18
+36            <action android:name="android.intent.action.BLUETOOTH_ADMIN" />
+36-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:71:13-76
+36-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:71:21-73
+37        </intent>
+38        <intent>
+38-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:73:9-75:18
+39            <action android:name="android.intent.action.BLUETOOTH" />
+39-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:74:13-70
+39-->/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:74:21-67
+40        </intent>
+41    </queries>
+42
+43    <permission
+43-->[androidx.core:core:1.13.1] /Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+44        android:name="com.outdidev.ev_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+44-->[androidx.core:core:1.13.1] /Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+45        android:protectionLevel="signature" />
+45-->[androidx.core:core:1.13.1] /Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+46
+47    <uses-permission android:name="com.outdidev.ev_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+47-->[androidx.core:core:1.13.1] /Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+47-->[androidx.core:core:1.13.1] /Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+48
+49    <application
+50        android:name="android.app.Application"
+51        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+51-->[androidx.core:core:1.13.1] /Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+52        android:debuggable="true"
+53        android:enableOnBackInvokedCallback="true"
+54        android:extractNativeLibs="true"
+55        android:icon="@mipmap/ic_launcher"
+56        android:label="ionhive"
+57        android:usesCleartextTraffic="true" >
+58        <activity
+59            android:name="com.outdidev.ev_app.MainActivity"
+60            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+61            android:exported="true"
+62            android:hardwareAccelerated="true"
+63            android:launchMode="singleTop"
+64            android:taskAffinity=""
+65            android:theme="@style/LaunchTheme"
+66            android:windowSoftInputMode="adjustResize" >
+67            <meta-data
+68                android:name="io.flutter.embedding.android.NormalTheme"
+69                android:resource="@style/NormalTheme" />
+70
+71            <intent-filter>
+72                <action android:name="android.intent.action.MAIN" />
+73
+74                <category android:name="android.intent.category.LAUNCHER" />
+75            </intent-filter>
+76        </activity>
+77
+78        <meta-data
+79            android:name="flutterEmbedding"
+80            android:value="2" />
+81
+82        <!-- Google Sign-In Metadata -->
+83        <meta-data
+84            android:name="com.google.android.gms.client_id"
+85            android:value="@string/google_client_id" />
+86        <meta-data
+87            android:name="com.google.android.gms.version"
+88            android:value="@integer/google_play_services_version" />
+89
+90        <activity
+90-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:23:9-27:75
+91            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+91-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:24:13-93
+92            android:excludeFromRecents="true"
+92-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:25:13-46
+93            android:exported="false"
+93-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:26:13-37
+94            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+94-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:27:13-72
+95        <!--
+96            Service handling Google Sign-In user revocation. For apps that do not integrate with
+97            Google Sign-In, this service will never be started.
+98        -->
+99        <service
+99-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:33:9-37:51
+100            android:name="com.google.android.gms.auth.api.signin.RevocationBoundService"
+100-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:34:13-89
+101            android:exported="true"
+101-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:35:13-36
+102            android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION"
+102-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:36:13-107
+103            android:visibleToInstantApps="true" />
+103-->[com.google.android.gms:play-services-auth:21.0.0] /Users/outdid/.gradle/caches/8.10.2/transforms/0a642d7d914df5b1457bd601ae314127/transformed/jetified-play-services-auth-21.0.0/AndroidManifest.xml:37:13-48
+104
+105        <activity
+105-->[com.google.android.gms:play-services-base:18.0.1] /Users/outdid/.gradle/caches/8.10.2/transforms/d5a90d880711c0baff6cb8ee6cb72f44/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:20:9-22:45
+106            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+106-->[com.google.android.gms:play-services-base:18.0.1] /Users/outdid/.gradle/caches/8.10.2/transforms/d5a90d880711c0baff6cb8ee6cb72f44/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:20:19-85
+107            android:exported="false"
+107-->[com.google.android.gms:play-services-base:18.0.1] /Users/outdid/.gradle/caches/8.10.2/transforms/d5a90d880711c0baff6cb8ee6cb72f44/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:22:19-43
+108            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+108-->[com.google.android.gms:play-services-base:18.0.1] /Users/outdid/.gradle/caches/8.10.2/transforms/d5a90d880711c0baff6cb8ee6cb72f44/transformed/jetified-play-services-base-18.0.1/AndroidManifest.xml:21:19-78
+109
+110        <uses-library
+110-->[androidx.window:window:1.2.0] /Users/outdid/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:23:9-25:40
+111            android:name="androidx.window.extensions"
+111-->[androidx.window:window:1.2.0] /Users/outdid/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:24:13-54
+112            android:required="false" />
+112-->[androidx.window:window:1.2.0] /Users/outdid/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:25:13-37
+113        <uses-library
+113-->[androidx.window:window:1.2.0] /Users/outdid/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:26:9-28:40
+114            android:name="androidx.window.sidecar"
+114-->[androidx.window:window:1.2.0] /Users/outdid/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:27:13-51
+115            android:required="false" />
+115-->[androidx.window:window:1.2.0] /Users/outdid/.gradle/caches/8.10.2/transforms/aed2861b2b6894f7067df3f3f96b791f/transformed/jetified-window-1.2.0/AndroidManifest.xml:28:13-37
+116
+117        <provider
+117-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/outdid/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:24:9-32:20
+118            android:name="androidx.startup.InitializationProvider"
+118-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/outdid/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:25:13-67
+119            android:authorities="com.outdidev.ev_app.androidx-startup"
+119-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/outdid/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:26:13-68
+120            android:exported="false" >
+120-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/outdid/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:27:13-37
+121            <meta-data
+121-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/outdid/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
+122                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+122-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/outdid/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
+123                android:value="androidx.startup" />
+123-->[androidx.lifecycle:lifecycle-process:2.7.0] /Users/outdid/.gradle/caches/8.10.2/transforms/bb10008c4b33ee9597583412a41828ed/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
+124            <meta-data
+124-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+125                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+126                android:value="androidx.startup" />
+126-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+127        </provider>
+128
+129        <receiver
+129-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+130            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+130-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+131            android:directBootAware="false"
+131-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+132            android:enabled="true"
+132-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+133            android:exported="true"
+133-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+134            android:permission="android.permission.DUMP" >
+134-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+135            <intent-filter>
+135-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+136                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+136-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+136-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+137            </intent-filter>
+138            <intent-filter>
+138-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+139                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+139-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+139-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+140            </intent-filter>
+141            <intent-filter>
+141-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+142                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+142-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+142-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+143            </intent-filter>
+144            <intent-filter>
+144-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+145                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+145-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+145-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/outdid/.gradle/caches/8.10.2/transforms/5aacd87baa6feaa7bece87b01e7698f0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+146            </intent-filter>
+147        </receiver>
+148    </application>
+149
+150</manifest>
