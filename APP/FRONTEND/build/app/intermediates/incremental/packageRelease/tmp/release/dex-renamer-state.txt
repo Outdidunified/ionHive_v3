@@ -1,4 +1,0 @@
-#Wed Mar 12 10:02:47 IST 2025
-base.0=/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/app/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-path.0=classes.dex
-renamed.0=classes.dex
