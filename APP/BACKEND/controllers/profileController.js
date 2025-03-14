@@ -70,7 +70,7 @@ const fetchuserprofile = async (req, res) => {
         }
 
         // Connect to database
-        const db = await database.connectToDatabase();
+        const db = await db_conn.connectToDatabase();
         const usersCollection = db.collection("users");
 
         // Find user with active status
@@ -394,6 +394,7 @@ const fetchSavedDevices = async (req, res) => {
         });
     }
 };
+
 // VEHICLE
 //  - vehicle model details with images
 // Adding vehicle Model and is details
@@ -613,7 +614,7 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
 };
 
 
-// STATIONS
+// STATIONS //TODO  -  implement this after map module
 // SAVE STATIONS
 // Save Stations
 const SaveStations = async (req, res) => {
@@ -621,7 +622,7 @@ const SaveStations = async (req, res) => {
         const { user_id, email_id, LatLong, address, landmark, status } = req.body;
 
         // Validate request body
-        if (!user_id || !email_id || !LatLong || !address || status === undefined) {
+        if (!user_id || !email_id || !LatLong || !address || !status === undefined) {
             return res.status(400).json({
                 success: false,
                 message: 'Missing required fields: user_id, email_id, LatLong, address, or status',
