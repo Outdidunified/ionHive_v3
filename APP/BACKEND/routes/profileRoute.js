@@ -2,56 +2,47 @@ const express = require('express');
 const router = express.Router();
 const Controller = require("../controllers/profileController");
 const authUser = require("../middlewares/authenticated");
-
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 
 // USER DETAILS
-// CompleteProfile
-router.post('/CompleteProfile', authUser.isAuthenticated, Controller.CompleteProfile);
+router.post("/fetchuserprofile", upload.single("profilePic"), Controller.fetchuserprofile); // Route to fetch user profile
+router.post('/CompleteProfile', authUser.isAuthenticated, Controller.CompleteProfile); // Route to CompleteProfile
 
 // MANAGE ALL 
 // RFID
-// Route to fetch RFID
-router.post('/fetchRFID', authUser.isAuthenticated, Controller.fetchRFID);
-// Route to Deactiva RFID
-router.post('/DeactivateRFID', authUser.isAuthenticated, Controller.DeactivateRFID);
+router.post('/fetchRFID', authUser.isAuthenticated, Controller.fetchRFID); // Route to fetch RFID
+router.post('/DeactivateRFID', authUser.isAuthenticated, Controller.DeactivateRFID); // Route to Deactiva RFID
 // Order new RFID Card  //TODO - V3.1
 // Linking an existing RFID Card  //TODO - V3.1
 // DEVICES
-// Route to Fetch Saved Devices
-router.post('/fetchSavedDevices', authUser.isAuthenticated, Controller.fetchSavedDevices);
-// Route to save Devices
-router.post('/SaveDevices', authUser.isAuthenticated, Controller.SaveDevices);
+router.post('/fetchSavedDevices', authUser.isAuthenticated, Controller.fetchSavedDevices); // Route to Fetch Saved Devices
+router.post('/SaveDevices', authUser.isAuthenticated, Controller.SaveDevices); // Route to save Devices
 // VEHICLE
-//  - Fetch the vehicle of the paticular user
-//  - available car model details with images
-//  - add vehchle {model car , Vechle number }
-// Route to fetch the vehicle details
-// router.post('/fetchVehicleDetails', authUser.isAuthenticated, Controller.fetchVehicleDetails);
-// Route to Fetch Saved Vehicles
-// router.post('/fetchSavedVehicles', authUser.isAuthenticated, Controller.fetchSavedVehicles);
-// Route to save Vehicles
-// router.post('/SaveVehicles', authUser.isAuthenticated, Controller.SaveVehicles);
-
+//  - vehicle model details with images
+router.post("/addvehicleModel", upload.single("vehicle_image"), authUser.isAuthenticated, Controller.savevehicleModel); // Adding vehicle model and details
+router.get("/getAllvehicleModels", authUser.isAuthenticated, Controller.getAllvehicleModels); // fetching all vehicle models and details
+//  - Vehicle of the paticular user
+router.post('/SaveVehiclesOfUser', authUser.isAuthenticated, Controller.SaveVehiclesOfUser); // add vehchle { model vehicle , Vechle number }
+router.post('/fetchSavedVehiclesOfUser', authUser.isAuthenticated, Controller.fetchSavedVehiclesOfUser); // Fetch the vehicle of the paticular user
 
 
 // MANAGE CHARGING STATIONS
 // SAVED CHARGING STATIONS
-// Route to Fetch Saved Stations
-router.post('/fetchSavedStations', authUser.isAuthenticated, Controller.fetchSavedStations);
-// Route to save Stations
-router.post('/SaveStations', authUser.isAuthenticated, Controller.SaveStations);
+router.post('/fetchSavedStations', authUser.isAuthenticated, Controller.fetchSavedStations); // Route to Fetch Saved Stations
+router.post('/SaveStations', authUser.isAuthenticated, Controller.SaveStations); // Route to save Stations
 // CAPITATIVE CHARGING STATIONS  //TODO - V3.1
 
-// PAYMENT HOSTORY
+// PAYMENT HISTORY
+// Route to fetch payment history
 
-// VECHICLE
-
-
-
-
-
-
+// CHARGING HISTORY
+// Route to fetch payment history
 
 // ACCOUNT
 // deleteAccount

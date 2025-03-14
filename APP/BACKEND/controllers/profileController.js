@@ -2,6 +2,7 @@ const db_conn = require('../config/db');
 const emailer = require('../middlewares/emailer');
 const logger = require('../utils/logger');
 
+
 // USER DETAILS
 // CompleteProfile
 const CompleteProfile = async (req, res) => {
@@ -53,6 +54,65 @@ const CompleteProfile = async (req, res) => {
     } catch (error) {
         logger.error(`editAccount - ${error.message}`);
         res.status(500).json({ error: true, message: 'Internal Server Error' });
+    }
+};
+// fetch User Profile
+const fetchuserprofile = async (req, res) => {
+    try {
+        const { user_id, email_id } = req.body;
+
+        // Validate input
+        if (!user_id || !Number.isInteger(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid input: user_id must be a valid integer and email_id must be a non-empty string.',
+            });
+        }
+
+        // Connect to database
+        const db = await database.connectToDatabase();
+        const usersCollection = db.collection("users");
+
+        // Find user with active status
+        const user = await usersCollection.findOne({ user_id, email_id, status: true });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found or inactive.',
+            });
+        }
+
+        // Prepare user data response
+        const userData = {
+            user_id: user.user_id,
+            username: user.username,
+            email_id: user.email_id,
+            phone_no: user.phone_no,
+            password: user.password,
+            autostop: {
+                price: user.autostop_price,
+                time: user.autostop_time,
+                unit: user.autostop_unit,
+                price_isChecked: user.autostop_price_is_checked,
+                time_isChecked: user.autostop_time_is_checked,
+                unit_isChecked: user.autostop_unit_is_checked,
+            },
+        };
+
+        return res.status(200).json({
+            success: true,
+            message: 'User profile retrieved successfully.',
+            data: userData,
+        });
+
+    } catch (error) {
+        logger.error(`Error fetching user profile for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: error.message,
+        });
     }
 };
 
@@ -335,6 +395,222 @@ const fetchSavedDevices = async (req, res) => {
     }
 };
 // VEHICLE
+//  - vehicle model details with images
+// Adding vehicle Model and is details
+const savevehicleModel = async (req, res) => {
+    try {
+        const { vehicle_model, vehicle_company, year, battery_capacity, range, charger_type } = req.body;
+
+        // Validate required fields
+        if (!vehicle_model || !battery_capacity) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields: vehicle_model, battery_capacity",
+            });
+        }
+
+        const db = await db_conn.connectToDatabase();
+        const vehicleCollection = db.collection("vehicle_models");
+
+        const lastvehicle = await vehicleCollection.find().sort({ vehicle_id: -1 }).limit(1).toArray();
+        const nextvehicleId = lastvehicle.length > 0 ? lastvehicle[0].vehicle_id + 1 : 1;
+
+        let imageBase64 = null;
+        if (req.file && req.file.buffer) {
+            imageBase64 = req.file.buffer.toString("base64");
+        } else {
+            logger.warn("No image provided.");
+        }
+
+        const vehicleData = {
+            vehicle_id: nextvehicleId,
+            vehicle_model,
+            vehicle_company,
+            year,
+            battery_capacity,
+            range: range || null,
+            charger_type,
+            vehicle_image: imageBase64,
+        };
+
+
+        await vehicleCollection.insertOne(vehicleData);
+
+        logger.info("vehicle model added successfully.");
+        return res.status(201).json({
+            success: true,
+            message: "vehicle model added successfully",
+            vehicleData,
+        });
+
+    } catch (error) {
+        logger.error(`Internal Server Error: ${error.message}`);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
+    }
+};
+// fetching vehicle models and its details
+const getAllvehicleModels = async (req, res) => {
+    try {
+
+        const db = await db_conn.connectToDatabase();
+        const vehicleCollection = db.collection("vehicle_models");
+
+        const vehicleModels = await vehicleCollection.find({}).toArray();
+        logger.info(`Fetched ${vehicleModels.length} vehicle models from database.`);
+
+        return res.status(200).json({
+            success: true,
+            vehicleModels,
+        });
+
+    } catch (error) {
+        logger.error(`Error fetching vehicle models: ${error.message}`);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
+    }
+};
+//  - add vehchle { model vehicle , Vechle number }
+// Save Vehicles of User
+const SaveVehiclesOfUser = async (req, res) => {
+    try {
+        const { user_id, email_id, vehicle_number, vehicle_id } = req.body;
+        // Validate input
+        if (
+            !user_id || !email_id || !vehicle_number || !vehicle_id ||
+            !Number.isInteger(user_id) || typeof email_id !== 'string' || email_id.trim() === '' ||
+            typeof vehicle_number !== 'string' || vehicle_number.trim() === '' ||
+            !Number.isInteger(vehicle_id)
+        ) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: user_id and vehicle_id must be integers, email_id and vehicle_number must be non-empty strings.',
+            });
+        }
+
+        const db = await db_conn.connectToDatabase();
+        const usersCollection = db.collection('users');
+
+        // Find the user with both user_id and email_id
+        const user = await usersCollection.findOne({ user_id: user_id, email_id });
+
+        if (!user) {
+            return res.status(404).json({
+                error: true,
+                message: 'User not found.',
+            });
+        }
+
+        let updatedVehicles = user.vehicles || [];
+
+        // Check if vehicle already exists
+        const index = updatedVehicles.findIndex(v => v.vehicle_id === vehicle_id);
+
+        if (index === -1) {
+            // If vehicle does not exist, add it to the array
+            updatedVehicles.push({ vehicle_number, vehicle_id });
+        } else {
+            // If vehicle exists, update vehicle_number
+            updatedVehicles[index].vehicle_number = vehicle_number;
+        }
+
+        // Update the user's vehicles array
+        const updateResult = await usersCollection.updateOne(
+            { user_id: user_id, email_id },
+            { $set: { vehicles: updatedVehicles } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.warn(`Failed to update vehicles for user ${user_id} with email ${email_id}.`);
+            return res.status(500).json({
+                error: true,
+                message: 'Failed to update vehicles.',
+            });
+        }
+
+        logger.info(`Vehicle updated successfully for user ${user_id} with email ${email_id}.`);
+        return res.status(200).json({
+            error: false,
+            message: 'Vehicle updated successfully',
+            updatedVehicles,
+        });
+
+    } catch (error) {
+        logger.error(`SaveVehiclesOfUser - ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+        });
+    }
+};
+// Fetch the Saved Vehicles of User
+const fetchSavedVehiclesOfUser = async (req, res) => {
+    try {
+        const { user_id, email_id } = req.body;
+
+        // Validate request parameters
+        if (!user_id || isNaN(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid input: user_id must be a valid number and email_id must be a non-empty string',
+            });
+        }
+
+        const db = await db_conn.connectToDatabase();
+        const usersCollection = db.collection("users");
+        const vehicleModelsCollection = db.collection("vehicle_models");
+
+        // Find user and retrieve saved vehicles
+        const user = await usersCollection.findOne(
+            { user_id, email_id },
+            { projection: { vehicles: 1, _id: 0 } } // Only fetch vehicles
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        let savedVehicles = user.vehicles || [];
+
+        // Fetch vehicle details for each vehicle_id
+        const vehicleDetails = await Promise.all(savedVehicles.map(async (vehicle) => {
+            const vehicleData = await vehicleModelsCollection.findOne(
+                { vehicle_id: vehicle.vehicle_id },
+                { projection: { _id: 0 } } // Exclude _id from result
+            );
+            return {
+                vehicle_number: vehicle.vehicle_number,
+                vehicle_id: vehicle.vehicle_id,
+                details: vehicleData || null, // Attach vehicle details or null if not found
+            };
+        }));
+
+        logger.info(`Vehicles with details retrieved successfully for user: ${user_id}`);
+
+        return res.status(200).json({
+            success: true,
+            message: "Vehicles with details retrieved successfully",
+            vehicles: vehicleDetails,
+        });
+
+    } catch (error) {
+        logger.error(`Error fetching vehicles for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
+    }
+};
 
 
 // STATIONS
@@ -458,13 +734,6 @@ const fetchSavedStations = async (req, res) => {
 };
 
 
-// PAYMENT HOSTORY
-
-// VECHICLE
-
-
-
-
 
 
 
@@ -527,8 +796,8 @@ const deleteAccount = async (req, res) => {
 
 module.exports = {
     // USER DETAILS
+    fetchuserprofile,
     CompleteProfile,
-
     // MANAGE ALL 
     // RFID
     fetchRFID,
@@ -536,6 +805,11 @@ module.exports = {
     // DEVICES
     SaveDevices,
     fetchSavedDevices,
+    SaveVehiclesOfUser,
+    fetchSavedVehiclesOfUser,
+    // VEHCILE
+    savevehicleModel,
+    getAllvehicleModels,
     // STATIONS
     SaveStations,
     fetchSavedStations,
