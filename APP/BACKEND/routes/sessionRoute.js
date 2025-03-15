@@ -8,9 +8,10 @@ const authUser = require("../middlewares/authenticated");
 router.post("/fetchTotalChargingSessionDetails", authUser.isAuthenticated, Controller.fetchTotalChargingSessionDetails); // Route to  fetch total session details
 
 // CHARGING HISTORY 
+router.post("/fetchChargingSessionHistoryFilter", authUser.isAuthenticated, Controller.fetchChargingSessionHistoryFilter); // Route to fetchChargingSessionHistoryFilter
+router.post("/saveChargingSessionHistoryFilter", authUser.isAuthenticated, Controller.saveChargingSessionHistoryFilter); // Route to saveChargingSessionHistoryFilter
 // Fetch all charging session details
 router.post("/fetchChargingSessionDetails", authUser.isAuthenticated, Controller.fetchChargingSessionDetails); // Route to fetch charging session details
-//TODO - what to add filter option 
 
 // DOWNLOAD CHARGING HISTORY 
 // download all user charging session details

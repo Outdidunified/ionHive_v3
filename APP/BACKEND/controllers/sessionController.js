@@ -5,9 +5,9 @@ const PDFDocument = require('pdfkit');
 // TOTAL CHARGING SESSION 
 // Total Charging session details
 const fetchTotalChargingSessionDetails = async (req, res) => {
-    try {
-        const { email_id } = req.body;
+    const { email_id } = req.body;
 
+    try {
         // Validate input
         if (!email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
@@ -17,11 +17,11 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
         }
 
         // Connect to database
-        const db = await database.connectToDatabase();
+        const db = await db_conn.connectToDatabase();
         const collection = db.collection('device_session_details');
 
         // Fetch sessions where stop_time is not null
-        const result = await collection.find({ user: email_id, stop_time: { $ne: null } })
+        const result = await collection.find({ email_id: email_id, stop_time: { $ne: null } })
             .sort({ stop_time: -1 })
             .toArray();
 
@@ -32,23 +32,28 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
             });
         }
 
-        // Calculate total charging time and count sessions
+        // Calculate total charging time, count sessions, and total energy consumed
         let totalChargingTime = 0;
+        let totalEnergyConsumed = 0;
         result.forEach(session => {
             const startTime = new Date(session.start_time);
             const stopTime = new Date(session.stop_time);
             const sessionDuration = (stopTime - startTime) / 1000; // Duration in seconds
             totalChargingTime += sessionDuration;
+
+            if (session.unit_consummed) {
+                totalEnergyConsumed += session.unit_consummed;
+            }
         });
 
         const totalChargingTimeInHours = (totalChargingTime / 3600).toFixed(2); // Convert to hours
-        const totalSessions = result.length;
 
         return res.status(200).json({
             success: true,
             message: 'Total charging session data retrieved successfully.',
             totalChargingTimeInHours,
-            totalSessions,
+            totalSessions: result.length,
+            totalEnergyConsumed: totalEnergyConsumed.toFixed(2) // Energy in kWh
         });
 
     } catch (error) {
@@ -63,10 +68,98 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
 
 
 // CHARGING HISTORY 
-// Fetch all charging session details
+// to save the Charging Session History filter to the user
+const saveChargingSessionHistoryFilter = async (req, res) => {
+    const { user_id, email_id, days } = req.body;
+
+    try {
+        // Validate input
+        if (!user_id || !email_id || !days ||
+            !Number.isInteger(Number(user_id)) || typeof email_id !== 'string' ||
+            !Number.isInteger(Number(days))) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: user_id and days must be integers, email_id must be a string.',
+            });
+        }
+
+        const db = await db_conn.connectToDatabase();
+        const usersCollection = db.collection('users');
+
+        // Find the user
+        const user = await usersCollection.findOne({ user_id, email_id });
+
+        if (!user) {
+            return res.status(404).json({
+                error: true,
+                message: 'User not found.',
+            });
+        }
+
+        const updatedChargingSessionHistoryFilter = [{ days }];
+
+        const updateResult = await usersCollection.updateOne(
+            { user_id, email_id },
+            { $set: { ChargingSessionHistoryFilter: updatedChargingSessionHistoryFilter } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.warn(`Failed to update Charging SessionHistory Filter for user ${user_id} with email ${email_id}.`);
+            return res.status(500).json({
+                error: true,
+                message: 'Failed to update Charging SessionHistory Filter .',
+            });
+        }
+
+        logger.info(`Charging SessionHistory  filter updated successfully for user ${user_id} with email ${email_id}.`);
+        return res.status(200).json({
+            error: false,
+            message: 'Charging SessionHistory  filter updated successfully',
+            updatedChargingSessionHistoryFilter,
+        });
+
+    } catch (error) {
+        logger.error(`Error in updatedChargingSessionHistoryFilter - ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+        });
+    }
+};
+// to fetch the Charging SessionHistory filter to the user
+const fetchChargingSessionHistoryFilter = async (req, res) => {
+    const { user_id, email_id } = req.body;
+
+    try {
+
+        // Validate input
+        if (!user_id || !email_id || !Number.isInteger(Number(user_id)) || typeof email_id !== 'string') {
+            return res.status(400).json({ success: false, message: 'Valid user_id and email_id are required!' });
+        }
+
+        const db = await db_conn.connectToDatabase();
+        const usersCollection = db.collection('users');
+
+        // Find user
+        const user = await usersCollection.findOne(
+            { user_id: Number(user_id), email_id },
+            { projection: { ChargingSessionHistoryFilter: 1, _id: 0 } }
+        );
+
+        if (!user || !user.ChargingSessionHistoryFilter) {
+            return res.status(200).json({ success: true, message: 'No Charging SessionHistory filter found.', filter: {} });
+        }
+
+        return res.status(200).json({ success: true, message: 'Charging SessionHistory filter retrieved successfully.', filter: user.ChargingSessionHistoryFilter });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+    }
+};
+// Fetch all charging session details //TODO -  want to fix the filter issue 
 const fetchChargingSessionDetails = async (req, res) => {
     try {
-        const { email_id } = req.body;
+        const { email_id, days } = req.body;
 
         // Validate input
         if (!email_id || typeof email_id !== 'string' || email_id.trim() === '') {
@@ -78,12 +171,32 @@ const fetchChargingSessionDetails = async (req, res) => {
 
         // Connect to database
         const db = await db_conn.connectToDatabase();
+        const usersCollection = db.collection('users');
         const collection = db.collection('device_session_details');
 
-        // Fetch sessions in descending order by stop_time (completed sessions)
-        const result = await collection.find({ user: email_id, stop_time: { $ne: null } })
-            .sort({ stop_time: -1 })
-            .toArray();
+        // Verify User
+        const user = await usersCollection.findOne({ email_id });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+
+        let query = { email_id: email_id, stop_time: { $ne: null } };
+
+        if (days && Number.isInteger(days)) {
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days);
+
+            query = {
+                $and: [
+                    { email_id: email_id },
+                    { stop_time: { $ne: null } },
+                    { stop_time: { $gte: cutoffDate } } // Apply date filter correctly
+                ]
+            };
+        }
+
+        // Fetch filtered sessions in descending order by stop_time
+        const result = await collection.find(query).sort({ stop_time: -1 }).toArray();
 
         if (!result || result.length === 0) {
             return res.status(404).json({
@@ -111,9 +224,10 @@ const fetchChargingSessionDetails = async (req, res) => {
 // DOWNLOAD CHARGING HISTORY 
 // download all user charging session details
 const DownloadChargingSessionDetails = async (req, res) => {
+    const { email_id, total_unit_consumed } = req.query;
+
     try {
 
-        const { email_id, total_unit_consumed } = req.query;
         // Validate input
         if (!email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
@@ -246,6 +360,8 @@ module.exports = {
     // TOTAL CHARGING SESSION 
     fetchTotalChargingSessionDetails,
     // CHARGING HISTORY 
+    saveChargingSessionHistoryFilter,
+    fetchChargingSessionHistoryFilter,
     fetchChargingSessionDetails,
     // DOWNLOAD CHARGING HISTORY
     DownloadChargingSessionDetails

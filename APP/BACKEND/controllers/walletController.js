@@ -196,7 +196,7 @@ const savePaymentDetails = async (req, res) => {
 };
 
 // TRANSACTION HOSTORY 
-// 
+// to save the transaction filter to the user
 const saveTransactionFilter = async (req, res) => {
     const { user_id, email_id, days, status } = req.body;
 
@@ -257,8 +257,7 @@ const saveTransactionFilter = async (req, res) => {
         });
     }
 };
-
-// 
+// to fetch the transaction filter to the user
 const fetchTransactionFilter = async (req, res) => {
     const { user_id, email_id } = req.body;
 
@@ -288,7 +287,7 @@ const fetchTransactionFilter = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
     }
 };
-//
+// to get the transaction details
 const getTransactionDetails = async (req, res) => {
     const { user_id, email_id, days, status } = req.body;
 
@@ -307,7 +306,6 @@ const getTransactionDetails = async (req, res) => {
         // Verify User
         const user = await usersCollection.findOne({ user_id: user_id, email_id });
         if (!user) {
-            logger.warn(`User ${user_id} with email ${email_id} not found.`);
             return res.status(404).json({ success: false, message: 'User not found.' });
         }
 
