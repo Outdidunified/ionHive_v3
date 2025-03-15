@@ -4,24 +4,7 @@
             "outputFile": "com.aboutyou.dart_packages.sign_in_with_apple-mergeReleaseResources-24:/values-zh-rCN/values-zh-rCN.xml",
             "map": [
                 {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/res/values-zh-rCN/values-zh-rCN.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,147,248,342,436,529,623,719",
-                        "endColumns": "91,100,93,93,92,93,95,100",
-                        "endOffsets": "142,243,337,431,524,618,714,815"
-                    },
-                    "to": {
-                        "startLines": "2,3,4,5,6,7,8,13",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,147,248,342,436,529,623,1088",
-                        "endColumns": "91,100,93,93,92,93,95,100",
-                        "endOffsets": "142,243,337,431,524,618,714,1184"
-                    }
-                },
-                {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/cab666fc52ee4414f985256ec946b7fc/transformed/browser-1.5.0/res/values-zh-rCN/values-zh-rCN.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/c380960f7ba8ac2055a6aa684077e78d/transformed/browser-1.5.0/res/values-zh-rCN/values-zh-rCN.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",
@@ -35,6 +18,23 @@
                         "startOffsets": "719,802,894,995",
                         "endColumns": "82,91,100,92",
                         "endOffsets": "797,889,990,1083"
+                    }
+                },
+                {
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/06f1d28345e99554a5d9fca85b6b394d/transformed/core-1.13.1/res/values-zh-rCN/values-zh-rCN.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,147,248,342,436,529,623,719",
+                        "endColumns": "91,100,93,93,92,93,95,100",
+                        "endOffsets": "142,243,337,431,524,618,714,815"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,13",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,147,248,342,436,529,623,1088",
+                        "endColumns": "91,100,93,93,92,93,95,100",
+                        "endOffsets": "142,243,337,431,524,618,714,1184"
                     }
                 }
             ]
@@ -43,24 +43,7 @@
             "outputFile": "com.aboutyou.dart_packages.sign_in_with_apple-release-26:/values-zh-rCN/values-zh-rCN.xml",
             "map": [
                 {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/res/values-zh-rCN/values-zh-rCN.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,147,248,342,436,529,623,719",
-                        "endColumns": "91,100,93,93,92,93,95,100",
-                        "endOffsets": "142,243,337,431,524,618,714,815"
-                    },
-                    "to": {
-                        "startLines": "2,3,4,5,6,7,8,13",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,147,248,342,436,529,623,1088",
-                        "endColumns": "91,100,93,93,92,93,95,100",
-                        "endOffsets": "142,243,337,431,524,618,714,1184"
-                    }
-                },
-                {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/cab666fc52ee4414f985256ec946b7fc/transformed/browser-1.5.0/res/values-zh-rCN/values-zh-rCN.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/c380960f7ba8ac2055a6aa684077e78d/transformed/browser-1.5.0/res/values-zh-rCN/values-zh-rCN.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",
@@ -74,6 +57,23 @@
                         "startOffsets": "719,802,894,995",
                         "endColumns": "82,91,100,92",
                         "endOffsets": "797,889,990,1083"
+                    }
+                },
+                {
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/06f1d28345e99554a5d9fca85b6b394d/transformed/core-1.13.1/res/values-zh-rCN/values-zh-rCN.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,147,248,342,436,529,623,719",
+                        "endColumns": "91,100,93,93,92,93,95,100",
+                        "endOffsets": "142,243,337,431,524,618,714,815"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,13",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,147,248,342,436,529,623,1088",
+                        "endColumns": "91,100,93,93,92,93,95,100",
+                        "endOffsets": "142,243,337,431,524,618,714,1184"
                     }
                 }
             ]

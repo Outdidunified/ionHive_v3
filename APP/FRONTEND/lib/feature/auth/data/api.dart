@@ -50,9 +50,17 @@ class AuthAPICalls {
           'email_id': email,
         }),
       )
-          .timeout(const Duration(seconds: 10), onTimeout: () {
+          .timeout(const Duration(seconds: 30 ), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
+
       });
+      // Print raw response details
+      debugPrint('Response Status Code: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+
+      // Parse and print the response data
+      final responseData = _handleResponse(response);
+      debugPrint('Parsed Response Data: $responseData');
       return _handleResponse(response);
     } on http.ClientException {
       throw HttpException(503, 'Please check your internet connection.');

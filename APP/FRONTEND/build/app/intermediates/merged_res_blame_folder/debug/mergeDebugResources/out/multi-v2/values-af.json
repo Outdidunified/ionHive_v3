@@ -21,6 +21,23 @@
                     }
                 },
                 {
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/5870f29bca51ebd23f00e720f39b68c5/transformed/browser-1.8.0/res/values-af/values-af.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,160,262,375",
+                        "endColumns": "104,101,112,99",
+                        "endOffsets": "155,257,370,470"
+                    },
+                    "to": {
+                        "startLines": "55,57,58,59",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "5776,5969,6071,6184",
+                        "endColumns": "104,101,112,99",
+                        "endOffsets": "5876,6066,6179,6279"
+                    }
+                },
+                {
                     "source": "/Users/apple/.gradle/caches/8.10.2/transforms/06f1d28345e99554a5d9fca85b6b394d/transformed/core-1.13.1/res/values-af/values-af.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
@@ -86,23 +103,6 @@
                         "startOffsets": "4503",
                         "endColumns": "142",
                         "endOffsets": "4641"
-                    }
-                },
-                {
-                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/c380960f7ba8ac2055a6aa684077e78d/transformed/browser-1.5.0/res/values-af/values-af.xml",
-                    "from": {
-                        "startLines": "2,3,4,5",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "55,160,262,375",
-                        "endColumns": "104,101,112,99",
-                        "endOffsets": "155,257,370,470"
-                    },
-                    "to": {
-                        "startLines": "55,57,58,59",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "5776,5969,6071,6184",
-                        "endColumns": "104,101,112,99",
-                        "endOffsets": "5876,6066,6179,6279"
                     }
                 }
             ]

@@ -1,0 +1,1 @@
+ /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/.dart_tool/flutter_build/34ec82aad49165877a40c0d30bcdb8e5/native_assets.yaml: 

@@ -3,10 +3,10 @@
     package="io.flutter.plugins.sharedpreferences"
     minSdkVersion="19"
     targetSdkVersion="19"
-    mergedManifest="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml"
-    manifestMergeReport="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/outputs/logs/manifest-merger-release-report.txt"
-    proguardFiles="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/default_proguard_files/global/proguard-android.txt-8.7.0"
-    partialResultsDir="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/lint_partial_results/release/lintAnalyzeRelease/out">
+    mergedManifest="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml"
+    manifestMergeReport="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/outputs/logs/manifest-merger-release-report.txt"
+    proguardFiles="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/default_proguard_files/global/proguard-android.txt-8.7.0"
+    partialResultsDir="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/lint_partial_results/release/lintAnalyzeRelease/out">
   <buildFeatures
       namespacing="REQUIRED"/>
   <sourceProviders>
@@ -21,11 +21,11 @@
   <testFixturesSourceProviders>
   </testFixturesSourceProviders>
   <artifact
-      classOutputs="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/javac/release/compileReleaseJavaWithJavac/classes:/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/tmp/kotlin-classes/release:/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/compile_r_class_jar/release/generateReleaseRFile/R.jar"
+      classOutputs="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/javac/release/compileReleaseJavaWithJavac/classes:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/tmp/kotlin-classes/release:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/compile_r_class_jar/release/generateReleaseRFile/R.jar"
       type="MAIN"
       applicationId="io.flutter.plugins.sharedpreferences"
-      generatedSourceFolders="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/generated/ap_generated_sources/release/out"
-      generatedResourceFolders="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/generated/res/resValues/release"
-      desugaredMethodsFiles="/Users/outdid/.gradle/caches/8.10.2/transforms/fbecfe94b3479b79f4cfc2149be70a0a/transformed/D8BackportedDesugaredMethods.txt">
+      generatedSourceFolders="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/generated/ap_generated_sources/release/out"
+      generatedResourceFolders="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/generated/res/resValues/release"
+      desugaredMethodsFiles="/Users/apple/.gradle/caches/8.10.2/transforms/5eeba8d9630bbcab133d18d6760e7c1c/transformed/D8BackportedDesugaredMethods.txt">
   </artifact>
 </variant>

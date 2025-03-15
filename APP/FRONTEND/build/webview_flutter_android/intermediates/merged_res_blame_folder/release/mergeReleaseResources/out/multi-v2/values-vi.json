@@ -4,7 +4,7 @@
             "outputFile": "io.flutter.plugins.webviewflutter.webview_flutter_android-mergeReleaseResources-24:/values-vi/values-vi.xml",
             "map": [
                 {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/res/values-vi/values-vi.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/06f1d28345e99554a5d9fca85b6b394d/transformed/core-1.13.1/res/values-vi/values-vi.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -19,7 +19,7 @@
             "outputFile": "io.flutter.plugins.webviewflutter.webview_flutter_android-release-26:/values-vi/values-vi.xml",
             "map": [
                 {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/res/values-vi/values-vi.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/06f1d28345e99554a5d9fca85b6b394d/transformed/core-1.13.1/res/values-vi/values-vi.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",

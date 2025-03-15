@@ -2,22 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LandingPageController extends GetxController {
-  var pageIndex = 0.obs; // Observable variable to track page index
-  final PageController pageController = PageController();
+  var pageIndex = 0.obs;
+  late PageController pageController; // Declare but don't initialize here
+
+  @override
+  void onInit() {
+    super.onInit();
+    pageController = PageController(); // Initialize in onInit()
+  }
 
   void changePage(int index) {
-    pageIndex.value = index;
-    pageController.jumpToPage(index);
+    if (pageController.hasClients) {
+      pageIndex.value = index;
+      pageController.jumpToPage(index);
+    }
   }
 
   void clearPageIndex() {
-    pageIndex.value = 0; // Reset the index to the Home page
-    pageController.jumpToPage(0); // Ensure the PageView goes to the first page
+    if (pageController.hasClients) {
+      pageIndex.value = 0;
+      pageController.jumpToPage(0);
+    }
   }
 
   @override
   void onClose() {
-    pageController.dispose(); // Dispose of the PageController
+    pageController.dispose();
     super.onClose();
   }
 }

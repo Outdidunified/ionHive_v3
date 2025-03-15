@@ -3,10 +3,10 @@
     package="com.aboutyou.dart_packages.sign_in_with_apple"
     minSdkVersion="16"
     targetSdkVersion="16"
-    mergedManifest="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml"
-    manifestMergeReport="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/outputs/logs/manifest-merger-release-report.txt"
-    proguardFiles="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/default_proguard_files/global/proguard-android.txt-8.7.0"
-    partialResultsDir="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/lint_vital_partial_results/release/lintVitalAnalyzeRelease/out">
+    mergedManifest="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml"
+    manifestMergeReport="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/outputs/logs/manifest-merger-release-report.txt"
+    proguardFiles="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/default_proguard_files/global/proguard-android.txt-8.7.0"
+    partialResultsDir="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/lint_vital_partial_results/release/lintVitalAnalyzeRelease/out">
   <buildFeatures
       namespacing="REQUIRED"/>
   <sourceProviders>
@@ -21,11 +21,11 @@
   <testFixturesSourceProviders>
   </testFixturesSourceProviders>
   <artifact
-      classOutputs="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/javac/release/compileReleaseJavaWithJavac/classes:/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/tmp/kotlin-classes/release:/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/compile_r_class_jar/release/generateReleaseRFile/R.jar"
+      classOutputs="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/javac/release/compileReleaseJavaWithJavac/classes:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/tmp/kotlin-classes/release:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/compile_r_class_jar/release/generateReleaseRFile/R.jar"
       type="MAIN"
       applicationId="com.aboutyou.dart_packages.sign_in_with_apple"
-      generatedSourceFolders="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/generated/ap_generated_sources/release/out"
-      generatedResourceFolders="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/generated/res/resValues/release"
-      desugaredMethodsFiles="/Users/outdid/.gradle/caches/8.10.2/transforms/c205ee2f03940358ec9a2d2be9875fae/transformed/D8BackportedDesugaredMethods.txt">
+      generatedSourceFolders="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/generated/ap_generated_sources/release/out"
+      generatedResourceFolders="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/generated/res/resValues/release"
+      desugaredMethodsFiles="/Users/apple/.gradle/caches/8.10.2/transforms/a425ccb6965928f95aac3ff6673ebc3f/transformed/D8BackportedDesugaredMethods.txt">
   </artifact>
 </variant>

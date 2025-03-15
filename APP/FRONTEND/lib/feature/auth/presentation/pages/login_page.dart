@@ -89,74 +89,74 @@ class LoginPage extends StatelessWidget {
                           );
                         }),
                         const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: Colors.grey.shade400,
-                                thickness: 1,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              "OR",
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Divider(
-                                color: Colors.grey.shade400,
-                                thickness: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        // Apple and Google login buttons with dynamic circular background
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                // Apple login logic
-                                controller.handleAppleSignIn();
-                              },
-                              child: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: theme.primaryColor.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.apple, size: 30),
-                              ),
-                            ),
-                            const SizedBox(width: 32),
-                            GestureDetector(
-                              onTap: () {
-                                // Google login logic
-                                controller.handleGoogleSignIn();
-                              },
-                              child: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: theme.primaryColor.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Transform.translate(
-                                  offset: const Offset(0, 2),
-                                  child: const Icon(Icons.g_mobiledata_rounded,
-                                      size: 35),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        // Terms and conditions
+                        // Row(
+                        //   children: [
+                        //     Expanded(
+                        //       child: Divider(
+                        //         color: Colors.grey.shade400,
+                        //         thickness: 1,
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: 8),
+                        //     Text(
+                        //       "OR",
+                        //       style: theme.textTheme.bodyMedium?.copyWith(
+                        //         color: Colors.grey.shade600,
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: 8),
+                        //     Expanded(
+                        //       child: Divider(
+                        //         color: Colors.grey.shade400,
+                        //         thickness: 1,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        // const SizedBox(height: 24),
+                        // // Apple and Google login buttons with dynamic circular background
+                        // Row(
+                        //   mainAxisAlignment: MainAxisAlignment.center,
+                        //   children: [
+                        //     GestureDetector(
+                        //       onTap: () {
+                        //         // Apple login logic
+                        //         controller.handleAppleSignIn();
+                        //       },
+                        //       child: Container(
+                        //         width: 50,
+                        //         height: 50,
+                        //         decoration: BoxDecoration(
+                        //           color: theme.primaryColor.withOpacity(0.1),
+                        //           shape: BoxShape.circle,
+                        //         ),
+                        //         child: const Icon(Icons.apple, size: 30),
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: 32),
+                        //     GestureDetector(
+                        //       onTap: () {
+                        //         // Google login logic
+                        //         controller.handleGoogleSignIn();
+                        //       },
+                        //       child: Container(
+                        //         width: 50,
+                        //         height: 50,
+                        //         decoration: BoxDecoration(
+                        //           color: theme.primaryColor.withOpacity(0.1),
+                        //           shape: BoxShape.circle,
+                        //         ),
+                        //         child: Transform.translate(
+                        //           offset: const Offset(0, 2),
+                        //           child: const Icon(Icons.g_mobiledata_rounded,
+                        //               size: 35),
+                        //         ),
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        // const SizedBox(height: 24),
+                        // // Terms and conditions
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

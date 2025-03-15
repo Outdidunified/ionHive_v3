@@ -4,7 +4,7 @@
             "outputFile": "com.aboutyou.dart_packages.sign_in_with_apple-release-26:/values-ja/values-ja.xml",
             "map": [
                 {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/cab666fc52ee4414f985256ec946b7fc/transformed/browser-1.5.0/res/values-ja/values-ja.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/c380960f7ba8ac2055a6aa684077e78d/transformed/browser-1.5.0/res/values-ja/values-ja.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",
@@ -21,7 +21,7 @@
                     }
                 },
                 {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/res/values-ja/values-ja.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/06f1d28345e99554a5d9fca85b6b394d/transformed/core-1.13.1/res/values-ja/values-ja.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -43,7 +43,7 @@
             "outputFile": "com.aboutyou.dart_packages.sign_in_with_apple-mergeReleaseResources-24:/values-ja/values-ja.xml",
             "map": [
                 {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/cab666fc52ee4414f985256ec946b7fc/transformed/browser-1.5.0/res/values-ja/values-ja.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/c380960f7ba8ac2055a6aa684077e78d/transformed/browser-1.5.0/res/values-ja/values-ja.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",
@@ -60,7 +60,7 @@
                     }
                 },
                 {
-                    "source": "/Users/outdid/.gradle/caches/8.10.2/transforms/dfc2fbca530748e569b0737b09fa016f/transformed/core-1.13.1/res/values-ja/values-ja.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/06f1d28345e99554a5d9fca85b6b394d/transformed/core-1.13.1/res/values-ja/values-ja.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",

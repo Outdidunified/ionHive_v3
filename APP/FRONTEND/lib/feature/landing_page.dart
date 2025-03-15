@@ -11,30 +11,29 @@ import 'package:ionhive/feature/more/presentation/pages/more_page.dart'; // More
 class LandingPage extends StatelessWidget {
   LandingPage({super.key});
 
-  // Instantiate the controller
-  final LandingPageController controller = Get.put(LandingPageController());
+  // Retrieve the existing controller instance
+  final LandingPageController controller = Get.find<LandingPageController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView(
         controller: controller.pageController,
-        onPageChanged: (index) {
-          controller.changePage(index); // Update the page index
-        },
+        onPageChanged: controller.changePage,
         children: [
-          const HomePage(), // Home page (index 0)
-          const WalletPage(), // Wallet page (index 1)
-          const TripMapPage(), // Trip page (index 2)
-          MoreePage(), // More page (index 3)
+          const HomePage(),
+          const WalletPage(),
+          const TripMapPage(),
+          MoreePage(),
         ],
       ),
       bottomNavigationBar: Obx(
-        () => Footer(
-          onTabChanged: controller.changePage, // Callback for tab click
-          currentIndex: controller.pageIndex.value, // Reactive value
+            () => Footer(
+          onTabChanged: controller.changePage,
+          currentIndex: controller.pageIndex.value,
         ),
       ),
     );
   }
 }
+

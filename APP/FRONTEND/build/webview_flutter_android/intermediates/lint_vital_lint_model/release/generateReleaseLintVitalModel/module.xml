@@ -1,12 +1,12 @@
 <lint-module
     format="1"
-    dir="/Users/outdid/.pub-cache/hosted/pub.dev/webview_flutter_android-4.3.3/android"
+    dir="/Users/apple/.pub-cache/hosted/pub.dev/webview_flutter_android-4.3.3/android"
     name=":webview_flutter_android"
     type="LIBRARY"
     maven="io.flutter.plugins.webviewflutter:webview_flutter_android:1.0-SNAPSHOT"
     agpVersion="8.7.0"
-    buildFolder="/Users/outdid/Desktop/Work/ionHive_v3/APP/FRONTEND/build/webview_flutter_android"
-    bootClassPath="/Users/outdid/Library/Android/sdk/platforms/android-35/android.jar:/Users/outdid/Library/Android/sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    buildFolder="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/webview_flutter_android"
+    bootClassPath="/Users/apple/Library/Android/sdk/platforms/android-35/android.jar:/Users/apple/Library/Android/sdk/build-tools/34.0.0/core-lambda-stubs.jar"
     javaSourceLevel="11"
     compileTarget="android-35"
     neverShrinking="true">

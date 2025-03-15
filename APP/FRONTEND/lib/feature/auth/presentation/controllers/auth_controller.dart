@@ -69,6 +69,7 @@ class AuthController extends GetxController {
     try {
       final otpResponse = await _authRepository.GetOTP(email);
 
+
       if (!otpResponse.error) {
         // Check the 'error' field
         Get.to(() => OtpPage(email: email));

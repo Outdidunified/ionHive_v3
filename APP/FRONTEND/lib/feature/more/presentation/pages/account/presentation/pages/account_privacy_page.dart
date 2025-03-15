@@ -11,9 +11,11 @@ class AccountAndPrivacyPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account Privacy'),
+        title: const Text(''),
         centerTitle: true,
-        backgroundColor: theme.primaryColor,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -36,7 +38,7 @@ class AccountAndPrivacyPage extends StatelessWidget {
                         'This Privacy Policy describes how we collect, use, process, and disclose your information, including personal information, in conjunction with your access to and use of our website and mobile application, ',
                   ),
                   TextSpan(
-                    text: 'www.statiq.in ("Website").',
+                    text: 'https://outdidunified.com/ ',
                     style: const TextStyle(color: Colors.blue),
                   ),
                 ],
@@ -57,7 +59,7 @@ class AccountAndPrivacyPage extends StatelessWidget {
                         'If you have any questions or complaints about this Privacy Policy or Company\'s information handling practices, you may email us at ',
                   ),
                   TextSpan(
-                    text: 'dataprivacy@statiq.in',
+                    text: 'info@outdidunified.com',
                     style: const TextStyle(color: Colors.blue),
                   ),
                   const TextSpan(text: '.'),
@@ -87,6 +89,8 @@ class AccountAndPrivacyPage extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
+              Icon(Icons.delete, color: Colors.red, size: 24), // Delete bin icon
+              const SizedBox(width: 12), // Space between icon and text
               Expanded(
                 child: Text(
                   'Delete Account',
@@ -103,5 +107,6 @@ class AccountAndPrivacyPage extends StatelessWidget {
         ),
       ),
     );
+
   }
 }

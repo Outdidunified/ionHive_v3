@@ -1,34 +1,53 @@
+import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 
 class ConnectivityController extends GetxController {
-  var isConnected = true.obs; // Track internet connectivity status
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _subscription;
+
+  RxBool isConnected = true.obs;
+  String? lastRoute; // Store the last visited screen
 
   @override
   void onInit() {
     super.onInit();
-    _monitorConnectivity(); // Start monitoring connectivity on app startup
+    checkConnection();
+    _subscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
 
-  void _monitorConnectivity() async {
-    // Check the initial connectivity status
-    List<ConnectivityResult> results = await Connectivity().checkConnectivity();
-
-    // Use the first result from the list to set the initial connectivity status
-    isConnected.value = _isConnected(results.first);
-
-    // Listen for connectivity changes
-    Connectivity()
-        .onConnectivityChanged
-        .listen((List<ConnectivityResult> results) {
-      // Handle the list of connectivity results and update the connection status
-      isConnected.value = _isConnected(results.first);
-    });
+  Future<void> checkConnection() async {
+    ConnectivityResult result = await _connectivity.checkConnectivity();
+    _updateConnectionStatus(result);
   }
 
-  bool _isConnected(ConnectivityResult result) {
-    // Return true if the device is connected to either Wi-Fi or mobile data
-    return result == ConnectivityResult.wifi ||
-        result == ConnectivityResult.mobile;
+  void _updateConnectionStatus(ConnectivityResult result) {
+    bool wasConnected = isConnected.value;
+    isConnected.value = (result != ConnectivityResult.none);
+
+    if (!isConnected.value) {
+      // Store the last route before redirecting
+      if (lastRoute == null || lastRoute != '/noInternet') {
+        lastRoute = Get.currentRoute.isNotEmpty ? Get.currentRoute : '/';
+      }
+
+      // Navigate to NoInternetScreen if not already there
+      if (Get.currentRoute != '/noInternet') {
+        Get.offAllNamed('/noInternet');
+      }
+    } else {
+      // If internet is back, go back to the last visited screen
+      if (!wasConnected && lastRoute != null && lastRoute != '/noInternet') {
+        Get.offAllNamed(lastRoute!);
+      } else {
+        Get.offAllNamed('/'); // Default to SplashScreen
+      }
+    }
+  }
+
+  @override
+  void onClose() {
+    _subscription.cancel();
+    super.onClose();
   }
 }
