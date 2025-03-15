@@ -19,9 +19,11 @@ router.post('/CompleteProfile', authUser.isAuthenticated, Controller.CompletePro
 // WALLET BALANCE
 router.post("/FetchWalletBalance", authUser.isAuthenticated, WalletController.FetchWalletBalance);
 
-// PAYMENT HISTORY // TODO: filter route from wallet Controller
-router.post("/FetchTransactionDetails", authUser.isAuthenticated, WalletController.getTransactionDetails);
-// days , status
+// PAYMENT HISTORY
+router.post("/fetchTransactionFilter", authUser.isAuthenticated, WalletController.fetchTransactionFilter); // Route to fetchTransactionFilter
+router.post("/saveTransactionFilter", authUser.isAuthenticated, WalletController.saveTransactionFilter); // Route to saveTransactionFilter
+router.post("/FetchTransactionDetails", authUser.isAuthenticated, WalletController.getTransactionDetails); // Route to FetchTransactionDetails
+
 // TOTAL SESSIONS
 router.post("/fetchTotalChargingSessionDetails", authUser.isAuthenticated, SessionController.fetchTotalChargingSessionDetails);
 
@@ -51,8 +53,9 @@ router.post('/SaveStations', authUser.isAuthenticated, Controller.SaveStations);
 // CAPITATIVE CHARGING STATIONS  //TODO - V3.1
 
 
-// CHARGING HISTORY
+// CHARGING HISTORY //TODO - want to add filter option 
 // Route to fetch payment history
+router.post("/fetchChargingSessionDetails", authUser.isAuthenticated, SessionController.fetchChargingSessionDetails); // Route to fetch charging session details
 
 // ACCOUNT
 // deleteAccount

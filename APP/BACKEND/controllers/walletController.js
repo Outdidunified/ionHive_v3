@@ -196,63 +196,164 @@ const savePaymentDetails = async (req, res) => {
 };
 
 // TRANSACTION HOSTORY 
-const getTransactionDetails = async (req, res) => {
+// 
+const saveTransactionFilter = async (req, res) => {
+    const { user_id, email_id, days, status } = req.body;
 
-    const { email_id } = req.body;
+    try {
+        // Validate input
+        if (!user_id || !email_id || !days || !status ||
+            !Number.isInteger(Number(user_id)) || typeof email_id !== 'string' ||
+            !Number.isInteger(Number(days)) || typeof status !== 'string' ||
+            !['credited', 'debited', 'faulted', 'all'].includes(status.toLowerCase())) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: user_id and days must be integers, email_id must be a string, and status must be one of ["credited", "debited", "faulted", "all"].',
+            });
+        }
+
+        const db = await db_conn.connectToDatabase();
+        const usersCollection = db.collection('users');
+
+        // Find the user
+        const user = await usersCollection.findOne({ user_id, email_id });
+
+        if (!user) {
+            return res.status(404).json({
+                error: true,
+                message: 'User not found.',
+            });
+        }
+
+        // Replace the old transaction filter with the new one
+        const updatedTransactionFilter = [{ days, status }];
+
+        // Update the user's transactionFilter array
+        const updateResult = await usersCollection.updateOne(
+            { user_id, email_id },
+            { $set: { transactionFilter: updatedTransactionFilter } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.warn(`Failed to update transaction filter for user ${user_id} with email ${email_id}.`);
+            return res.status(500).json({
+                error: true,
+                message: 'Failed to update transaction filter.',
+            });
+        }
+
+        logger.info(`Transaction filter updated successfully for user ${user_id} with email ${email_id}.`);
+        return res.status(200).json({
+            error: false,
+            message: 'Transaction filter updated successfully',
+            updatedTransactionFilter,
+        });
+
+    } catch (error) {
+        logger.error(`Error in updateTransactionFilter - ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+        });
+    }
+};
+
+// 
+const fetchTransactionFilter = async (req, res) => {
+    const { user_id, email_id } = req.body;
 
     try {
 
-        // Validate Email ID
-        if (!email_id || typeof email_id !== 'string') {
-            return res.status(400).json({ success: false, message: 'Valid Email ID is required!' });
+        // Validate input
+        if (!user_id || !email_id || !Number.isInteger(Number(user_id)) || typeof email_id !== 'string') {
+            return res.status(400).json({ success: false, message: 'Valid user_id and email_id are required!' });
         }
 
-
-        // Connect to Database
         const db = await db_conn.connectToDatabase();
+        const usersCollection = db.collection('users');
+
+        // Find user
+        const user = await usersCollection.findOne(
+            { user_id: Number(user_id), email_id },
+            { projection: { transactionFilter: 1, _id: 0 } }
+        );
+
+        if (!user || !user.transactionFilter) {
+            return res.status(200).json({ success: true, message: 'No transaction filter found.', filter: {} });
+        }
+
+        return res.status(200).json({ success: true, message: 'Transaction filter retrieved successfully.', filter: user.transactionFilter });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+    }
+};
+//
+const getTransactionDetails = async (req, res) => {
+    const { user_id, email_id, days, status } = req.body;
+
+    try {
+
+        // Validate Input
+        if (!user_id || !email_id || !Number.isInteger(Number(user_id)) || typeof email_id !== 'string') {
+            return res.status(400).json({ success: false, message: 'Valid user_id and email_id are required!' });
+        }
+
+        const db = await db_conn.connectToDatabase();
+        const usersCollection = db.collection('users');
         const CharSessionCollection = db.collection('device_session_details');
         const walletTransCollection = db.collection('paymentDetails');
 
-        // Fetch Charging Sessions and Payment Details
+        // Verify User
+        const user = await usersCollection.findOne({ user_id: user_id, email_id });
+        if (!user) {
+            logger.warn(`User ${user_id} with email ${email_id} not found.`);
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+
+        let dateFilter = {};
+        if (days) {
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days);
+            dateFilter = { time: { $gte: cutoffDate.toISOString() } };
+        }
+
+        // Fetch Transactions
         const chargingSessions = await CharSessionCollection.find({ email_id: email_id }).toArray();
         const paymentDetails = await walletTransCollection.find({ email_id: email_id }).toArray();
 
+        // Process Transactions
+        const deductedTransactions = chargingSessions
+            .filter(session => session.StopTimestamp !== null)
+            .map(session => ({
+                status: 'Deducted',
+                amount: session.price,
+                time: session.stop_time
+            }))
+            .filter(txn => !days || new Date(txn.time) >= new Date(dateFilter.time.$gte));
 
-        if (chargingSessions.length || paymentDetails.length) {
-            // Deducted Transactions
-            const deductedTransactions = chargingSessions
-                .filter(session => session.StopTimestamp !== null)
-                .map(session => ({
-                    status: 'Deducted',
-                    amount: session.price,
-                    time: session.stop_time,
-                    sessiom_id: session.sessiom_id,
-                    payment_method: "wallet",
-                }));
-
-            // Credited Transactions
-            const creditedTransactions = paymentDetails.map(payment => ({
+        const creditedTransactions = paymentDetails
+            .map(payment => ({
                 status: 'Credited',
                 amount: payment.recharge_amount,
-                time: payment.recharged_date,
-                transaction_id: payment.transaction_id,
-                payment_method: payment.payment_method,
-            }));
+                time: payment.recharged_date
+            }))
+            .filter(txn => !days || new Date(txn.time) >= new Date(dateFilter.time.$gte));
+        // Apply Status Filter
+        let filteredTransactions = [...creditedTransactions, ...deductedTransactions];
 
-            // Merge and Sort Transactions by Time (Descending)
-            const mergedTransactions = [...creditedTransactions, ...deductedTransactions].sort(
-                (a, b) => new Date(b.time) - new Date(a.time)
-            );
-
-            logger.info(`Returning ${mergedTransactions.length} merged transactions for ${email_id}`);
-            return res.status(200).json({ success: true, data: mergedTransactions });
+        if (status) {
+            filteredTransactions = filteredTransactions.filter(txn => txn.status === status);
         }
 
-        logger.warn(`No transactions found for email: ${email_id}`);
-        return res.status(200).json({ success: true, data: [], message: 'No Record Found!' });
+        // Sort by Date (Descending)
+        filteredTransactions.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+        logger.info(`Returning ${filteredTransactions.length} transactions for user ${user_id} with email ${email_id}`);
+        return res.status(200).json({ success: true, data: filteredTransactions });
 
     } catch (error) {
-        logger.error(`Error in getTransactionDetails for email: ${email_id} - ${error.message}`);
+        logger.error(`Error in getTransactionDetails for user ${user_id} with email: ${email_id} - ${error.message}`);
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
@@ -265,5 +366,7 @@ module.exports = {
     createOrder,
     savePaymentDetails,
     // TRANSACTION HOSTORY 
+    saveTransactionFilter,
+    fetchTransactionFilter,
     getTransactionDetails
 };

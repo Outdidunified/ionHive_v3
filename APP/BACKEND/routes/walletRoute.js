@@ -12,7 +12,9 @@ router.post("/fetchWalletBalance", authUser.isAuthenticated, Controller.FetchWal
 router.post("/createOrder", authUser.isAuthenticated, Controller.createOrder); // Route to createOrder
 router.post("/savePayments", authUser.isAuthenticated, Controller.savePaymentDetails); // Route to savePaymentDetails
 
-// TRANSACTION HOSTORY //TODO - filter options
+// TRANSACTION HOSTORY 
+router.post("/fetchTransactionFilter", authUser.isAuthenticated, Controller.fetchTransactionFilter); // Route to fetchTransactionFilter
+router.post("/saveTransactionFilter", authUser.isAuthenticated, Controller.saveTransactionFilter); // Route to saveTransactionFilter
 router.post("/FetchTransactionDetails", authUser.isAuthenticated, Controller.getTransactionDetails); // Route to FetchTransactionDetails
 
 
