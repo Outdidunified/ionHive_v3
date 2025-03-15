@@ -187,16 +187,18 @@ const fetchChargingSessionDetails = async (req, res) => {
             cutoffDate.setDate(cutoffDate.getDate() - days);
 
             query = {
-                $and: [
-                    { email_id: email_id },
-                    { stop_time: { $ne: null } },
-                    { stop_time: { $gte: cutoffDate } } // Apply date filter correctly
-                ]
+                email_id: email_id,
+                stop_time: {
+                    $ne: null,
+                    $gte: cutoffDate
+                }
             };
         }
+        console.log(query);
 
         // Fetch filtered sessions in descending order by stop_time
         const result = await collection.find(query).sort({ stop_time: -1 }).toArray();
+        console.log(result);
 
         if (!result || result.length === 0) {
             return res.status(404).json({
