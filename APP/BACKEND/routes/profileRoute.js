@@ -37,7 +37,7 @@ router.post('/DeactivateRFID', authUser.isAuthenticated, Controller.DeactivateRF
 // DEVICES
 router.post('/fetchSavedDevices', authUser.isAuthenticated, Controller.fetchSavedDevices); // Route to Fetch Saved Devices
 router.post('/SaveDevices', authUser.isAuthenticated, Controller.SaveDevices); // Route to save Devices
-// VEHICLE
+// VEHICLE //TODO -  want to update the insertion in DB  
 //  - vehicle model details with images
 router.post("/addvehicleModel", authUser.isAuthenticated, upload.single("vehicle_image"), Controller.savevehicleModel); // Adding vehicle model and details
 router.get("/getAllvehicleModels", authUser.isAuthenticated, Controller.getAllvehicleModels); // fetching all vehicle models and details

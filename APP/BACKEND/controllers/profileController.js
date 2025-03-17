@@ -400,13 +400,13 @@ const fetchSavedDevices = async (req, res) => {
 // Adding vehicle Model and is details
 const savevehicleModel = async (req, res) => {
     try {
-        const { vehicle_model, vehicle_company, year, battery_capacity, range, charger_type } = req.body;
+        const { model, vehicle_company, year, battery_size_kwh, range, charger_type } = req.body;
 
         // Validate required fields
-        if (!vehicle_model || !battery_capacity) {
+        if (!model || !battery_size_kwh) {
             return res.status(400).json({
                 success: false,
-                message: "Missing required fields: vehicle_model, battery_capacity",
+                message: "Missing required fields: model, battery_size_kwh",
             });
         }
 
@@ -425,10 +425,10 @@ const savevehicleModel = async (req, res) => {
 
         const vehicleData = {
             vehicle_id: nextvehicleId,
-            vehicle_model,
+            model,
             vehicle_company,
             year,
-            battery_capacity,
+            battery_size_kwh,
             range: range || null,
             charger_type,
             vehicle_image: imageBase64,
