@@ -224,18 +224,31 @@ const savePaymentDetails = async (req, res) => {
 // to save the transaction filter to the user
 const saveTransactionFilter = async (req, res) => {
     const { user_id, email_id, days, status } = req.body;
-
     try {
         // Validate input
-        if (!user_id || !email_id || !days || !status ||
-            !Number.isInteger(Number(user_id)) || typeof email_id !== 'string' ||
-            !Number.isInteger(Number(days)) || typeof status !== 'string' ||
-            !['credited', 'debited', 'faulted', 'all'].includes(status.toLowerCase())) {
+        if (!user_id || !email_id ||
+            !Number.isInteger(Number(user_id)) || typeof email_id !== 'string') {
             return res.status(400).json({
                 error: true,
-                message: 'Invalid input: user_id and days must be integers, email_id must be a string, and status must be one of ["credited", "debited", "faulted", "all"].',
+                message: 'Invalid input: user_id must be an integer, and email_id must be a string.',
             });
         }
+
+        // Set default values if status and days are not provided
+        if (days && !Number.isInteger(Number(days))) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: days must be an integer.',
+            });
+        }
+
+        if (status && (typeof status !== 'string' || !['credited', 'debited', 'failed', 'all'].includes(status.toLowerCase()))) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: status must be one of ["credited", "debited", "faulted", "all"].',
+            });
+        }
+
 
 
         if (!db) {
