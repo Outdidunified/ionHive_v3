@@ -28,11 +28,13 @@ const auth = require('./routes/authRoute');
 const profile = require('./routes/profileRoute');
 const session = require('./routes/sessionRoute');
 const wallet = require('./routes/walletRoute');
+const map = require('./routes/mapRoute');
 
 app.use('/auth', auth);
 app.use('/profile', profile);
 app.use('/session', session);
 app.use('/wallet', wallet);
+app.use('/map', map);
 
 
 // Default route for unknown endpoints

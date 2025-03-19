@@ -1,6 +1,14 @@
 const db_conn = require('../config/db');
 const logger = require('../utils/logger');
 const PDFDocument = require('pdfkit');
+let db;
+const initializeDB = async () => {
+    if (!db) {
+        db = await db_conn.connectToDatabase();
+    }
+};
+initializeDB(); // Initialize the DB connection once
+
 
 // TOTAL CHARGING SESSION 
 // Total Charging session details
@@ -11,13 +19,19 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
         // Validate input
         if (!email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Invalid input: email_id must be a non-empty string.',
             });
         }
 
         // Connect to database
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const collection = db.collection('device_session_details');
 
         // Fetch sessions where stop_time is not null
@@ -26,9 +40,10 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
             .toArray();
 
         if (!result || result.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return res.status(200).json({
+                error: false,
                 message: 'No charging session records found!',
+
             });
         }
 
@@ -49,7 +64,7 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
         const totalChargingTimeInHours = (totalChargingTime / 3600).toFixed(2); // Convert to hours
 
         return res.status(200).json({
-            success: true,
+            error: false,
             message: 'Total charging session data retrieved successfully.',
             totalChargingTimeInHours,
             totalSessions: result.length,
@@ -59,13 +74,12 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
     } catch (error) {
         logger.error(`Error fetching total session data for email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
-            success: false,
+            error: true,
             message: 'Internal Server Error',
             error: error.message,
         });
     }
 };
-
 
 // CHARGING HISTORY 
 // to save the Charging Session History filter to the user
@@ -83,7 +97,13 @@ const saveChargingSessionHistoryFilter = async (req, res) => {
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
 
         // Find the user
@@ -137,7 +157,13 @@ const fetchChargingSessionHistoryFilter = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Valid user_id and email_id are required!' });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
 
         // Find user
@@ -170,7 +196,13 @@ const fetchChargingSessionDetails = async (req, res) => {
         }
 
         // Connect to database
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
         const collection = db.collection('device_session_details');
 
@@ -238,7 +270,13 @@ const DownloadChargingSessionDetails = async (req, res) => {
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const Collection = db.collection('device_session_details');
 
         const sessions = await Collection.find({ user: email_id, stop_time: { $ne: null } })
@@ -365,7 +403,6 @@ module.exports = {
     saveChargingSessionHistoryFilter,
     fetchChargingSessionHistoryFilter,
     fetchChargingSessionDetails,
-    // DOWNLOAD CHARGING HISTORY
+    // DOWNLOAD CHARGING HISTORYx
     DownloadChargingSessionDetails
-
 };

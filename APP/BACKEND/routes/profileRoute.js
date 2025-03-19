@@ -22,6 +22,7 @@ router.post("/FetchWalletBalance", authUser.isAuthenticated, WalletController.Fe
 // PAYMENT HISTORY
 router.post("/fetchTransactionFilter", authUser.isAuthenticated, WalletController.fetchTransactionFilter); // Route to fetchTransactionFilter
 router.post("/saveTransactionFilter", authUser.isAuthenticated, WalletController.saveTransactionFilter); // Route to saveTransactionFilter
+router.post("/clearTransactionFilter", authUser.isAuthenticated, WalletController.clearTransactionFilter); // Route to clearTransactionFilter
 router.post("/FetchTransactionDetails", authUser.isAuthenticated, WalletController.getTransactionDetails); // Route to FetchTransactionDetails
 
 // TOTAL SESSIONS

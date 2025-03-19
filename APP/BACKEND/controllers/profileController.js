@@ -1,6 +1,13 @@
 const db_conn = require('../config/db');
 const emailer = require('../middlewares/emailer');
 const logger = require('../utils/logger');
+let db;
+const initializeDB = async () => {
+    if (!db) {
+        db = await db_conn.connectToDatabase();
+    }
+};
+initializeDB(); // Initialize the DB connection once
 
 
 // USER DETAILS
@@ -21,13 +28,22 @@ const CompleteProfile = async (req, res) => {
         }
 
 
-        const db = await db_conn.connectToDatabase();
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
 
         // Check if the user exists
         const existingUser = await usersCollection.findOne({ user_id: user_id });
         if (!existingUser) {
             return res.status(404).json({ error: true, message: 'User not found' });
+        }
+
+        if (existingUser.username === username && existingUser.phone_no === phone_number) {
+            return res.status(401).json({ error: true, message: 'no changes found' });
         }
 
         // Update user status
@@ -64,13 +80,19 @@ const fetchuserprofile = async (req, res) => {
         // Validate input
         if (!user_id || !Number.isInteger(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Invalid input: user_id must be a valid integer and email_id must be a non-empty string.',
             });
         }
 
         // Connect to database
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection("users");
 
         // Find user with active status
@@ -78,7 +100,7 @@ const fetchuserprofile = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                success: false,
+                error: true,
                 message: 'User not found or inactive.',
             });
         }
@@ -101,7 +123,7 @@ const fetchuserprofile = async (req, res) => {
         };
 
         return res.status(200).json({
-            success: true,
+            error: false,
             message: 'User profile retrieved successfully.',
             data: userData,
         });
@@ -109,7 +131,7 @@ const fetchuserprofile = async (req, res) => {
     } catch (error) {
         logger.error(`Error fetching user profile for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
-            success: false,
+            error: true,
             message: 'Internal Server Error',
             error: error.message,
         });
@@ -132,7 +154,13 @@ const fetchRFID = async (req, res) => {
         }
 
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
         const tagIdCollection = db.collection('tag_id');
 
@@ -147,7 +175,7 @@ const fetchRFID = async (req, res) => {
 
         // Check if RFID is null or undefined
         if (!RFID) {
-            return res.status(401).json({ error: true, message: 'RFID is not assigned yet' });
+            return res.status(200).json({ error: true, message: 'RFID is not assigned yet' });
         }
 
         const fetchTagID = await tagIdCollection.findOne({ id: RFID });
@@ -168,22 +196,27 @@ const fetchRFID = async (req, res) => {
 // Deactivate RFID
 const DeactivateRFID = async (req, res) => {
     try {
-        const { user_id, email_id, username, status, tag_id } = req.body;
+        const { user_id, email_id, status, tag_id } = req.body;
 
         // Validate the input
-        if (!username || typeof username !== 'string' ||
-            !email_id || typeof email_id !== 'string' ||
+        if (!email_id || typeof email_id !== 'string' ||
             !Number.isInteger(Number(user_id)) ||
             !tag_id || typeof tag_id !== 'string' ||
             typeof status !== 'boolean') {
             return res.status(400).json({
                 error: true,
-                message: 'Invalid input: Please provide a valid username (string), email ID (string), user ID (integer), tag ID (string), and status (boolean).'
+                message: 'Invalid input: Please provide a valid , email ID (string), user ID (integer), tag ID (string), and status (boolean).'
             });
         }
 
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
         const tagIdCollection = db.collection('tag_id');
 
@@ -218,7 +251,7 @@ const DeactivateRFID = async (req, res) => {
             return res.status(500).json({ error: true, message: 'Failed to update RFID status' });
         }
 
-        logger.info(`RFID ${tag_id} deactivated successfully by ${username}`);
+        logger.info(`RFID ${tag_id} deactivated successfully by ${email_id}`);
         return res.status(200).json({ error: false, message: `RFID ${tag_id} deactivated successfully` });
 
     } catch (error) {
@@ -242,7 +275,13 @@ const SaveDevices = async (req, res) => {
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
 
         // Find the user with both user_id and email_id
@@ -312,12 +351,18 @@ const fetchSavedDevices = async (req, res) => {
         // Validate request parameters
         if (!user_id || isNaN(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Invalid input: user_id must be a valid number and email_id must be a non-empty string',
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
         const chargerDetailsCollection = db.collection('charger_details');
         const chargerStatusCollection = db.collection('charger_status');
@@ -331,7 +376,7 @@ const fetchSavedDevices = async (req, res) => {
 
         if (!user?.favChargers?.length) {
             return res.status(200).json({
-                success: true,
+                error: false,
                 message: 'No favorite chargers found for this user',
                 favChargers: []
             });
@@ -379,7 +424,7 @@ const fetchSavedDevices = async (req, res) => {
         logger.info('Successfully fetched favorite chargers', { user_id, count: detailedFavChargers.length });
 
         return res.status(200).json({
-            success: true,
+            error: false,
             message: 'Favorite chargers retrieved successfully',
             favChargers: user.favChargers,
             favChargersDetails: detailedFavChargers
@@ -388,7 +433,7 @@ const fetchSavedDevices = async (req, res) => {
     } catch (error) {
         logger.error('Error fetching favorite chargers', { error: error.message });
         return res.status(500).json({
-            success: false,
+            error: true,
             message: 'Internal Server Error',
             error: error.message,
         });
@@ -401,16 +446,27 @@ const fetchSavedDevices = async (req, res) => {
 const savevehicleModel = async (req, res) => {
     try {
         const { model, vehicle_company, year, battery_size_kwh, range, charger_type } = req.body;
-
         // Validate required fields
-        if (!model || !battery_size_kwh) {
+        if (
+            !model ||
+            typeof model !== "string" ||
+            !battery_size_kwh ||
+            (typeof battery_size_kwh !== "number")
+        ) {
             return res.status(400).json({
-                success: false,
-                message: "Missing required fields: model, battery_size_kwh",
+                error: true,
+                message: "Invalid input: 'model' must be a string and 'battery_size_kwh' must be a number (integer or float)",
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const vehicleCollection = db.collection("vehicle_models");
 
         const lastvehicle = await vehicleCollection.find().sort({ vehicle_id: -1 }).limit(1).toArray();
@@ -439,7 +495,7 @@ const savevehicleModel = async (req, res) => {
 
         logger.info("vehicle model added successfully.");
         return res.status(201).json({
-            success: true,
+            error: false,
             message: "vehicle model added successfully",
             vehicleData,
         });
@@ -447,7 +503,7 @@ const savevehicleModel = async (req, res) => {
     } catch (error) {
         logger.error(`Internal Server Error: ${error.message}`);
         return res.status(500).json({
-            success: false,
+            error: true,
             message: "Internal Server Error",
             error: error.message,
         });
@@ -457,21 +513,27 @@ const savevehicleModel = async (req, res) => {
 const getAllvehicleModels = async (req, res) => {
     try {
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const vehicleCollection = db.collection("vehicle_models");
 
         const vehicleModels = await vehicleCollection.find({}).toArray();
         logger.info(`Fetched ${vehicleModels.length} vehicle models from database.`);
 
         return res.status(200).json({
-            success: true,
+            error: false,
             vehicleModels,
         });
 
     } catch (error) {
         logger.error(`Error fetching vehicle models: ${error.message}`);
         return res.status(500).json({
-            success: false,
+            error: true,
             message: "Internal Server Error",
             error: error.message,
         });
@@ -495,7 +557,13 @@ const SaveVehiclesOfUser = async (req, res) => {
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
 
         // Find the user with both user_id and email_id
@@ -558,12 +626,18 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
         // Validate request parameters
         if (!user_id || isNaN(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Invalid input: user_id must be a valid number and email_id must be a non-empty string',
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection("users");
         const vehicleModelsCollection = db.collection("vehicle_models");
 
@@ -575,7 +649,7 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                success: false,
+                error: true,
                 message: "User not found",
             });
         }
@@ -588,17 +662,29 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
                 { vehicle_id: vehicle.vehicle_id },
                 { projection: { _id: 0 } } // Exclude _id from result
             );
+            let imageBase64 = null;
+            if (vehicleData && vehicleData.battery_size_kwh) {
+                imageBase64 = Buffer.from(vehicleData.battery_size_kwh).toString('base64');
+            }
+
             return {
                 vehicle_number: vehicle.vehicle_number,
                 vehicle_id: vehicle.vehicle_id,
-                details: vehicleData || null, // Attach vehicle details or null if not found
+                details: vehicleData ? {
+                    model: vehicleData.model,
+                    range: vehicleData.range,
+                    charger_type: vehicleData.charger_type,
+                    battery_size_kwh: vehicleData.battery_size,
+                    vehicle_company: vehicleData.vehicle_company,
+                    image_base64: imageBase64 // Add formatted image
+                } : null,
             };
         }));
 
         logger.info(`Vehicles with details retrieved successfully for user: ${user_id}`);
 
         return res.status(200).json({
-            success: true,
+            error: false,
             message: "Vehicles with details retrieved successfully",
             vehicles: vehicleDetails,
         });
@@ -606,7 +692,7 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
     } catch (error) {
         logger.error(`Error fetching vehicles for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
-            success: false,
+            error: true,
             message: "Internal Server Error",
             error: error.message,
         });
@@ -624,12 +710,18 @@ const SaveStations = async (req, res) => {
         // Validate request body
         if (!user_id || !email_id || !LatLong || !address || !status === undefined) {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Missing required fields: user_id, email_id, LatLong, address, or status',
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
 
         // Find user by user_id and email_id
@@ -637,7 +729,7 @@ const SaveStations = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                success: false,
+                error: true,
                 message: 'User not found',
             });
         }
@@ -672,7 +764,7 @@ const SaveStations = async (req, res) => {
         logger.info(`Favorite stations updated successfully for user ${user_id}`);
 
         return res.status(200).json({
-            success: true,
+            error: false,
             message: status ? 'Favorite station updated successfully' : 'Favorite station removed successfully',
             updatedFavStations,
         });
@@ -680,7 +772,7 @@ const SaveStations = async (req, res) => {
     } catch (error) {
         logger.error(`Error updating favorite station for user_id=${req.body.user_id}, email_id=${req.body.email_id}: ${error.message}`, error);
         return res.status(500).json({
-            success: false,
+            error: true,
             message: 'Internal Server Error',
             error: error.message,
         });
@@ -694,12 +786,18 @@ const fetchSavedStations = async (req, res) => {
         // Validate request parameters
         if (!user_id || isNaN(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Invalid input: user_id must be a valid number and email_id must be a non-empty string',
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection("users");
 
 
@@ -711,7 +809,7 @@ const fetchSavedStations = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                success: false,
+                error: true,
                 message: "User not found",
             });
         }
@@ -719,7 +817,7 @@ const fetchSavedStations = async (req, res) => {
         logger.info(`Favorite stations retrieved successfully for user: ${user_id}`);
 
         return res.status(200).json({
-            success: true,
+            error: false,
             message: "Favorite stations retrieved successfully",
             favStations: user.favStations || [],
         });
@@ -727,14 +825,12 @@ const fetchSavedStations = async (req, res) => {
     } catch (error) {
         logger.error(`Error fetching favorite stations for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
-            success: false,
+            error: true,
             message: "Internal Server Error",
             error: error.message,
         });
     }
 };
-
-
 
 
 
@@ -754,7 +850,13 @@ const deleteAccount = async (req, res) => {
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
 
         // Check if the user exists

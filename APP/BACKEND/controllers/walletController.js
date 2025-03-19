@@ -6,6 +6,13 @@ const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
+let db;
+const initializeDB = async () => {
+    if (!db) {
+        db = await db_conn.connectToDatabase();
+    }
+};
+initializeDB(); // Initialize the DB connection once
 
 // MANAGE ALL
 // fetch wallet balance
@@ -16,13 +23,19 @@ const FetchWalletBalance = async (req, res) => {
         // Validate input
         if (!user_id || !Number.isInteger(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: "Invalid input: user_id must be a valid integer and email_id must be a non-empty string.",
             });
         }
 
         // Connect to database
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection("users");
 
         // Find user by user_id and email_id
@@ -30,7 +43,7 @@ const FetchWalletBalance = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                success: false,
+                error: true,
                 message: "User not found.",
             });
         }
@@ -38,7 +51,7 @@ const FetchWalletBalance = async (req, res) => {
         logger.info(`Wallet balance fetched successfully for user_id=${user_id}, email_id=${email_id}`);
 
         return res.status(200).json({
-            success: true,
+            error: false,
             message: "Wallet balance retrieved successfully.",
             data: { wallet_balance: user.wallet_bal || 0 },
         });
@@ -46,7 +59,7 @@ const FetchWalletBalance = async (req, res) => {
     } catch (error) {
         logger.error(`Error fetching wallet balance for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
-            success: false,
+            error: true,
             message: "Internal Server Error",
             error: error.message,
         });
@@ -69,12 +82,18 @@ const createOrder = async (req, res) => {
             (!currency || typeof currency !== "string" || currency.trim().length !== 3) // Currency validation
         ) {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: "Invalid input. Ensure a valid user_id or email_id, a positive amount, and a correct 3-letter currency code.",
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection("users");
 
         // Find user by user_id or email_id
@@ -85,7 +104,7 @@ const createOrder = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                success: false,
+                error: true,
                 message: "Your account has been deactivated. Please contact admin.",
             });
         }
@@ -102,7 +121,7 @@ const createOrder = async (req, res) => {
     } catch (error) {
         logger.error(`Error creating order: ${error.message}`);
         res.status(500).json({
-            success: false,
+            error: true,
             message: "Internal Server Error",
             error: error.message,
         });
@@ -124,12 +143,18 @@ const savePaymentDetails = async (req, res) => {
             !paymentMethod || typeof paymentMethod !== "string"
         ) {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: "Invalid input. Ensure a valid user_id or email_id, a positive amount, a transaction ID, response code, valid date, and a payment method.",
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const paymentCollection = db.collection("paymentDetails");
         const usersCollection = db.collection("users");
 
@@ -141,7 +166,7 @@ const savePaymentDetails = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                success: false,
+                error: true,
                 message: "Your account has been deactivated. Please contact admin.",
             });
         }
@@ -183,15 +208,15 @@ const savePaymentDetails = async (req, res) => {
         try {
             await emailer.sendPaymentEmail(user.email_id, RechargeAmt, transactionId, date_time, paymentMethod);
             logger.info(`Wallet updated and email sent successfully for user_id=${user.user_id}, email=${user.email_id}`);
-            return res.status(200).json({ success: true, message: "Payment saved successfully. Email sent." });
+            return res.status(200).json({ error: false, message: "Payment saved successfully. Email sent." });
         } catch (emailError) {
             logger.error(`Payment saved, but email failed: ${emailError.message}`);
-            return res.status(200).json({ success: true, message: "Payment saved, but email failed." });
+            return res.status(200).json({ error: false, message: "Payment saved, but email failed." });
         }
 
     } catch (error) {
         logger.error(`Error saving payment details: ${error.message}`);
-        return res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
+        return res.status(500).json({ error: true, message: "Internal Server Error", error: error.message });
     }
 };
 
@@ -212,7 +237,13 @@ const saveTransactionFilter = async (req, res) => {
             });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
 
         // Find the user
@@ -265,10 +296,16 @@ const fetchTransactionFilter = async (req, res) => {
 
         // Validate input
         if (!user_id || !email_id || !Number.isInteger(Number(user_id)) || typeof email_id !== 'string') {
-            return res.status(400).json({ success: false, message: 'Valid user_id and email_id are required!' });
+            return res.status(400).json({ error: true, message: 'Valid user_id and email_id are required!' });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
 
         // Find user
@@ -278,15 +315,76 @@ const fetchTransactionFilter = async (req, res) => {
         );
 
         if (!user || !user.transactionFilter) {
-            return res.status(200).json({ success: true, message: 'No transaction filter found.', filter: {} });
+            return res.status(200).json({ error: false, message: 'No transaction filter found.', filter: {} });
         }
 
-        return res.status(200).json({ success: true, message: 'Transaction filter retrieved successfully.', filter: user.transactionFilter });
+        return res.status(200).json({ error: false, message: 'Transaction filter retrieved successfully.', filter: user.transactionFilter });
 
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
+        return res.status(500).json({ error: true, message: 'Internal Server Error', error: error.message });
     }
 };
+// to cleare the transaction filter
+const clearTransactionFilter = async (req, res) => {
+    const { user_id, email_id } = req.body;
+
+    try {
+        // Validate input
+        if (!user_id || !email_id || !Number.isInteger(Number(user_id)) || typeof email_id !== 'string') {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: user_id must be an integer and email_id must be a string.',
+            });
+        }
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
+
+        const usersCollection = db.collection('users');
+
+        // Find the user
+        const user = await usersCollection.findOne({ user_id, email_id });
+
+        if (!user) {
+            return res.status(404).json({
+                error: true,
+                message: 'User not found.',
+            });
+        }
+
+        // Clear the transaction filter field
+        const updateResult = await usersCollection.updateOne(
+            { user_id, email_id },
+            { $unset: { transactionFilter: "" } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.warn(`Failed to clear transaction filter for user ${user_id} with email ${email_id}.`);
+            return res.status(500).json({
+                error: true,
+                message: 'Failed to clear transaction filter.',
+            });
+        }
+
+        logger.info(`Transaction filter cleared successfully for user ${user_id} with email ${email_id}.`);
+        return res.status(200).json({
+            error: false,
+            message: 'Transaction filter cleared successfully',
+        });
+
+    } catch (error) {
+        logger.error(`Error in clearTransactionFilter - ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+        });
+    }
+};
+
 // to get the transaction details
 const getTransactionDetails = async (req, res) => {
     const { user_id, email_id, days, status } = req.body;
@@ -295,10 +393,16 @@ const getTransactionDetails = async (req, res) => {
 
         // Validate Input
         if (!user_id || !email_id || !Number.isInteger(Number(user_id)) || typeof email_id !== 'string') {
-            return res.status(400).json({ success: false, message: 'Valid user_id and email_id are required!' });
+            return res.status(400).json({ error: true, message: 'Valid user_id and email_id are required!' });
         }
 
-        const db = await db_conn.connectToDatabase();
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
         const usersCollection = db.collection('users');
         const CharSessionCollection = db.collection('device_session_details');
         const walletTransCollection = db.collection('paymentDetails');
@@ -306,7 +410,7 @@ const getTransactionDetails = async (req, res) => {
         // Verify User
         const user = await usersCollection.findOne({ user_id: user_id, email_id });
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found.' });
+            return res.status(404).json({ error: true, message: 'User not found.' });
         }
 
         let dateFilter = {};
@@ -344,15 +448,19 @@ const getTransactionDetails = async (req, res) => {
             filteredTransactions = filteredTransactions.filter(txn => txn.status === status);
         }
 
+        if (filteredTransactions.length === 0) {
+            return res.status(200).json({ error: false, message: 'No transactions found.' });
+        }
+
         // Sort by Date (Descending)
         filteredTransactions.sort((a, b) => new Date(b.time) - new Date(a.time));
 
         logger.info(`Returning ${filteredTransactions.length} transactions for user ${user_id} with email ${email_id}`);
-        return res.status(200).json({ success: true, data: filteredTransactions });
+        return res.status(200).json({ error: false, data: filteredTransactions });
 
     } catch (error) {
         logger.error(`Error in getTransactionDetails for user ${user_id} with email: ${email_id} - ${error.message}`);
-        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        return res.status(500).json({ error: true, message: 'Internal Server Error' });
     }
 };
 
@@ -366,5 +474,6 @@ module.exports = {
     // TRANSACTION HOSTORY 
     saveTransactionFilter,
     fetchTransactionFilter,
+    clearTransactionFilter,
     getTransactionDetails
 };
