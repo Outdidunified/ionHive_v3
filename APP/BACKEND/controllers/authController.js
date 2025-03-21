@@ -14,16 +14,17 @@ const initializeDB = async () => {
     if (!db) {
         db = await db_conn.connectToDatabase();
     }
+    return db;
 };
 initializeDB(); // Initialize the DB connection once
 
 const GenerateOTP = async (req, res) => {
-    try {
-        const { email_id } = req.body;
+    const { email_id } = req.body;
 
+    try {
         // Check if email is missing
         if (!email_id) {
-            logger.info(`${email_id} - Email ID is Empty !`);
+            logger.loggerWarn(`${email_id} - Email ID is Empty !`);
             res.status(401).json({ error: true, message: 'Email ID is Empty. Please try again later !' });
         }
 
@@ -34,29 +35,27 @@ const GenerateOTP = async (req, res) => {
             if (sendEmail) {
                 // Store OTP in memory with a timestamp
                 otpStore.set(email_id, { otp, expiresAt: Date.now() + 5 * 60 * 1000 }); // Expires in 5 minutes
-                console.log(`Generated OTP for ${email_id}:`, otp);
-                logger.info(`${email_id} - OTP is Generated`);
+                logger.loggerInfo(`Generated OTP for ${email_id}: ${otp}`);
                 res.status(200).json({ error: false, message: `OTP is sent to ${email_id}` });
             } else {
-                console.log(`Email is not to ${email_id}`);
-                logger.info(`${email_id} - Email is not sent`);
+                logger.loggerWarn(`Email is not to ${email_id}`);
                 res.status(400).json({ error: true, message: `Email is not to ${email_id}` });
             }
         } else {
-            console.log(`OTP is not generated for ${email_id}`);
-            logger.info(`${email_id} - OTP is not Generated`);
+            logger.loggerWarn(`OTP is not generated for ${email_id}`);
             res.status(400).json({ error: true, message: 'OTP is not generated' });
         }
 
     } catch (error) {
-        logger.info(`GenerateOTP - ${error.message}`);
+        logger.loggerError(`GenerateOTP - ${error.message} for ${email_id}`);
         res.status(500).json({ error: true, message: error.message });
     }
 };
 
 const authOTP = async (req, res) => {
+    const { email_id, otp } = req.body;
+
     try {
-        const { email_id, otp } = req.body;
 
         if (!email_id || !otp) {
             res.status(401).json({ error: true, message: 'Email ID / OTP is missing. Please try again later !' });
@@ -68,15 +67,14 @@ const authOTP = async (req, res) => {
             // Check OTP expiration
             if (storedOTP.expiresAt < Date.now()) {
                 otpStore.delete(email_id);
-                logger.info(`${email_id} - OTP has expired`);
+                logger.loggerInfo(`${email_id} - OTP has expired`);
                 return res.status(400).json({ error: true, message: 'OTP has expired' });
             }
 
             // Validate OTP (check if it's correct)
             if (storedOTP.otp === otp) {
 
-                console.log(`OTP validated successfully for ${email_id}`);
-                logger.info(`${email_id} - OTP validated successfully`);
+                logger.loggerSuccess(`${email_id} - OTP validated successfully`);
 
                 const saveDetails = await saveUserdetails(email_id);
 
@@ -91,18 +89,16 @@ const authOTP = async (req, res) => {
                 }
             } else {
                 // OTP is incorrect
-                console.log(`Invalid OTP for ${email_id}`);
-                logger.info(`${email_id} - Invalid OTP`);
+                logger.loggerWarn(`Invalid OTP for ${email_id}`);
                 res.status(400).json({ error: true, message: 'Invalid OTP' });
             }
         } else {
-            console.log(`OTP is not available / expired for ${email_id}`);
-            logger.info(`${email_id} - OTP is not available / expired`);
+            logger.loggerError(`OTP is not available / expired for ${email_id}`);
             res.status(400).json({ error: true, message: 'OTP is not available, please try again later !' });
         }
 
     } catch (error) {
-        logger.info(`authOTP - ${error.message}`);
+        logger.loggerError(`authOTP - ${error.message}`);
         res.status(500).json({ error: true, message: error.message });
     }
 }
@@ -136,11 +132,11 @@ async function saveUserdetails(email_id, name) {
             );
 
             if (updateResult.matchedCount === 0) {
-                logger.info(`${email_id} - Failed to Register, Please try again later !`);
+                logger.loggerWarn(`${email_id} - Failed to Register, Please try again later !`);
                 return { error: true, message: 'Failed to Register, Please try again later !' };
             }
 
-            logger.info(`${email_id} - Registered successfully !`);
+            logger.loggerSuccess(`${email_id} - Registered successfully !`);
             return { error: false, message: `Registered successfully !`, data: { email_id, user_id: existingUser.user_id } };
         } else {
             // Use aggregation to fetch the highest user_id
@@ -175,24 +171,24 @@ async function saveUserdetails(email_id, name) {
             });
 
             if (insertResult.acknowledged) {
-                logger.info(`${email_id} - Registered successfully !`);
+                logger.loggerSuccess(`${email_id} - Registered successfully !`);
                 return { error: false, message: `Registered successfully !`, data: { email_id, user_id: newUserId, username: name } };
             } else {
-                logger.info(`${email_id} - Failed to Register, Please try again later !`);
+                logger.loggerSuccess(`${email_id} - Failed to Register, Please try again later !`);
                 return { error: true, message: `Failed to Register, Please try again later !` };
             }
         }
 
     } catch (error) {
-        console.error(`saveUserdetails - ${error.message}`);
-        logger.info(`saveUserdetails - ${error.message}`);
+        logger.loggerError(`saveUserdetails - ${error.message} for ${email_id}`);
         return { error: true, message: error.message };
     }
 }
 
 const googleSignIN = async (req, res) => {
+    const { idToken } = req.body;
+
     try {
-        const { idToken } = req.body;
 
         if (!idToken) return res.status(401).json({ error: true, message: 'Google id token is missing. Please try again later !' });
 
@@ -216,8 +212,7 @@ const googleSignIN = async (req, res) => {
         }
 
     } catch (error) {
-        console.log(`googleSignIN - ${error.message}`);
-        logger.info(`googleSignIN - ${error.message}`);
+        logger.loggerError(`googleSignIN - ${error.message} for for ${idToken}`);
         res.status(500).json({ error: true, message: error.message });
     }
 }

@@ -26,10 +26,11 @@ const sendEmail = async (to, subject, text) => {
             html: `<p>${text}</p>`, // HTML body
         });
 
-        logger.info('Message sent: %s', info.messageId);
+        logger.loggerInfo(`Message sent: ${info.messageId}`);
+        console
         return true;
     } catch (error) {
-        logger.error('Error sending email:', error);
+        logger.loggerError(`Error sending email: ${error}`);
         return false;
     }
 }
@@ -144,7 +145,7 @@ const EmailConfig = async (email, mailHead, otp) => {
         const result = await sendEmail(sendTo, mail_subject, mail_body);
         return result;
     } catch (error) {
-        logger.error('Error sending email:', error);
+        logger.loggerError(`Error sending email: ${error}`);
         return false;
     }
 }
@@ -225,11 +226,11 @@ const sendPaymentEmail = async (email, amount, transactionId, date, paymentMetho
         };
 
         await transporter.sendMail(mailOptions);
-        logger.info(`Email sent successfully to ${email}`);
+        logger.loggerInfo(`Email sent successfully to ${email}`);
 
         fs.unlinkSync(pdfPath);
     } catch (error) {
-        logger.error(`Error sending email: ${error.message}`);
+        logger.loggerError(`Error sending email: ${error.message}`);
     }
 };
 

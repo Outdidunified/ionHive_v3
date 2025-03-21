@@ -8,12 +8,14 @@ const authUser = require("../middlewares/authenticated");
 
 
 // MANAGE CHARGER IN STATION  //TODO - 2
+router.post('/fetchSpecificStationsChragerDetailsWithConnector', authUser.isAuthenticated, Controller.getSpecificStationsChargerDetailsWithConnector);// fetch the spefic stations charger details with connector
 
 
 
 // MANAGE CHARGING SESSION FOR USER  //TODO - 3
 // FETCH ACTIVE CHARGING SESSION OF USER
 //
+
 
 
 // Export the router

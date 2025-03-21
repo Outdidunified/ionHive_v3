@@ -6,6 +6,7 @@ const initializeDB = async () => {
     if (!db) {
         db = await db_conn.connectToDatabase();
     }
+    return db;
 };
 initializeDB(); // Initialize the DB connection once
 
@@ -60,15 +61,15 @@ const CompleteProfile = async (req, res) => {
         );
 
         if (updateResult.matchedCount === 0) {
-            logger.info(`${email_id} - Failed to update account, please try again later!`);
+            loggerWarn(`${email_id} - Failed to update account, please try again later!`);
             return res.status(500).json({ error: true, message: 'Failed to update account, please try again later!' });
         }
 
-        logger.info(`${email_id} - Account updated successfully!`);
+        loggerSuccess(`${email_id} - Account updated successfully!`);
         return res.status(200).json({ error: false, message: 'Account updated successfully!' });
 
     } catch (error) {
-        logger.error(`editAccount - ${error.message}`);
+        loggerError(`editAccount - ${error.message}`);
         res.status(500).json({ error: true, message: 'Internal Server Error' });
     }
 };
