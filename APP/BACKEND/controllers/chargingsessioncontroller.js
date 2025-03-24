@@ -24,7 +24,7 @@ const fetchLastStatus = async (req, res) => {
 
 
         if (!db) {
-            logger.error('Database connection failed.');
+            logger.loggerError('Database connection failed.');
             return res.status(500).json({
                 error: true,
                 message: 'Database connection failed. Please try again later.',
@@ -69,21 +69,21 @@ const fetchLastStatus = async (req, res) => {
                 error_code: latestStatus.error_code,
                 ChargerCapacity: convertedCapacity
             };
-            logger.info(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - Last status fetched successfully`);
+            logger.loggerSuccess(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - Last status fetched successfully`);
             return res.status(200).json({
                 error: false,
                 message: 'Last status fetched successfully',
                 data: responseData,
             });
         } else {
-            logger.warn(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - No last status found`);
+            logger.loggerWarn(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - No last status found`);
             return res.status(404).json({
                 error: true,
                 message: `ChargerID - ${charger_id}, ConnectorID - ${connector_id} No last data found`
             });
         }
     } catch (error) {
-        logger.error(`Error in fetchLastStatus: ChargerID: ${charger_id}, ConnectorID: ${connector_id} - ${error.message}`);
+        logger.loggerError(`Error in fetchLastStatus: ChargerID: ${charger_id}, ConnectorID: ${connector_id} - ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',

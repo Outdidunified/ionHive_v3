@@ -4,11 +4,30 @@ const Controller = require("../controllers/profileController");
 const WalletController = require("../controllers/walletController");
 const SessionController = require("../controllers/sessionController");
 const authUser = require("../middlewares/authenticated");
+const path = require("path");
+const fs = require("fs");
 const multer = require("multer");
-const storage = multer.memoryStorage();
+
+// Ensure the uploads directory exists
+const uploadDir = path.join(__dirname, "../public/uploads/vehicle_images");
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Multer storage configuration for saving files
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir); // Save files in public/uploads
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, uniqueSuffix + path.extname(file.originalname)); // Unique filename
+    },
+});
+
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB file size limit
 });
 
 

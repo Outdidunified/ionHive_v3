@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
+const path = require("path");
 const logger = require('./utils/logger');
 const { loggerInfo, loggerError, loggerDebug, loggerWarn } = require('./utils/logger');
 const { initializeWebSocket } = require('./Websocket/Websocket');
@@ -27,6 +28,7 @@ const app = express();
 // Initialize WebSocket servers
 const webSocketServer = http.createServer();
 const clientWebSocketServer = http.createServer();
+
 initializeWebSocket(webSocketServer, clientWebSocketServer);
 
 // Middleware
@@ -35,6 +37,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
+app.use("/vehicle_images", express.static(path.join(__dirname, "public/uploads/vehicle_images")));
 
 // Rate Limiting
 const apiLimiter = rateLimit({

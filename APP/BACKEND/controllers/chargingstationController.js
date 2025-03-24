@@ -35,7 +35,7 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
         }
 
         if (!db) {
-            logger.error('Database connection failed.');
+            logger.loggerError('Database connection failed.');
             return res.status(500).json({
                 error: true,
                 message: 'Database connection failed. Please try again later.',
@@ -124,7 +124,7 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
             };
         });
 
-        logger.info(`Successfully retrieved charger details for station_id: ${station_id}`);
+        logger.loggerSuccess(`Successfully retrieved charger details for station_id: ${station_id}`);
         return res.status(200).json({
             error: false,
             message: 'Charger details retrieved successfully.',
@@ -132,7 +132,7 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error in getSpecificStationsChargerDetailsWithConnector: ${error.message}`);
+        logger.loggerError(`Error in getSpecificStationsChargerDetailsWithConnector: ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',

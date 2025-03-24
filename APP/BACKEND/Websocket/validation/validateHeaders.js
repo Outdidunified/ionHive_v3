@@ -3,8 +3,7 @@ const dbService = require('../services/dbService');
 
 const validateWebSocketHeaders = (request, ws) => {
     if (!request.headers['sec-websocket-key']) {
-        logger.warn('WebSocket headers missing required key');
-        console.warn('WebSocket headers missing required key');
+        logger.loggerError('WebSocket headers missing required key');
         ws.terminate();
         return false;
     }
@@ -25,8 +24,7 @@ const getUniqueIdentifierFromRequest = async (request, ws) => {
     );
 
     if (!isValidRoute) {
-        logger.error(`Invalid WebSocket route: ${request.url}`);
-        console.error(`Invalid WebSocket route: ${request.url}`);
+        logger.loggerError(`Invalid WebSocket route: ${request.url}`);
         ws.terminate();
         return null;
     }
@@ -35,8 +33,7 @@ const getUniqueIdentifierFromRequest = async (request, ws) => {
 
     const chargerId = identifier.toString();
     if (!await dbService.checkChargerIdInDatabase(chargerId)) {
-        logger.warn(`Charger ID ${chargerId} not found`);
-        console.warn(`Charger ID ${chargerId} not found`);
+        logger.loggerWarn(`Charger ID ${chargerId} not found in database`);
         ws.terminate();
         return null;
     }

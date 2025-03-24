@@ -74,14 +74,14 @@ const SaveSearchFilter = async (req, res) => {
         );
 
         if (updateResult.modifiedCount === 0) {
-            logger.warn(`Failed to update search filters for user ${user_id} with email ${email_id}.`);
+            logger.loggerWarn(`Failed to update search filters for user ${user_id} with email ${email_id}.`);
             return res.status(200).json({
                 error: false,
                 message: 'Failed to update search filters. (no changes found)',
             });
         }
 
-        logger.info(`Search filters updated successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Search filters updated successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
             message: 'Search filters updated successfully',
@@ -90,7 +90,7 @@ const SaveSearchFilter = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`SaveSearchFilter - ${error.message}`);
+        logger.loggerError(`SaveSearchFilter - ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -176,7 +176,7 @@ const fetchSavedSearchFilter = async (req, res) => {
             return { ...charger, status: status || null, unit_price: unitPrice };
         }));
 
-        logger.info('Successfully fetched favorite chargers', { user_id, count: detailedFavChargers.length });
+        logger.loggerSuccess('Successfully fetched favorite chargers', { user_id, count: detailedFavChargers.length });
 
         return res.status(200).json({
             error: false,
@@ -186,7 +186,7 @@ const fetchSavedSearchFilter = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error('Error fetching favorite chargers', { error: error.message });
+        logger.loggerError('Error fetching favorite chargers', { error: error.message });
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -213,7 +213,7 @@ const getNearbyStations = async (req, res) => {
 
         // Ensure database connection exists
         if (!db) {
-            logger.error("Database connection failed");
+            logger.loggerError("Database connection failed");
             return res.status(500).json({
                 error: true,
                 message: "Database connection failed. Please try again later.",
@@ -308,7 +308,7 @@ const getNearbyStations = async (req, res) => {
             { $sort: { distance: 1 } } // Sort nearest first
         ]).toArray();
 
-        logger.info(`Found ${nearbyStations.length} nearby stations`);
+        logger.loggerSuccess(`Found ${nearbyStations.length} nearby stations & retrieved successfully`);
 
         return res.status(200).json({
             error: false,
@@ -317,7 +317,7 @@ const getNearbyStations = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error fetching nearby stations: ${error.message}`);
+        logger.loggerError(`Error fetching nearby stations: ${error.message}`);
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",

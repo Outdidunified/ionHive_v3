@@ -35,7 +35,7 @@ const GenerateOTP = async (req, res) => {
             if (sendEmail) {
                 // Store OTP in memory with a timestamp
                 otpStore.set(email_id, { otp, expiresAt: Date.now() + 5 * 60 * 1000 }); // Expires in 5 minutes
-                logger.loggerInfo(`Generated OTP for ${email_id}: ${otp}`);
+                logger.loggerSuccess(`Generated OTP for ${email_id}: ${otp}`);
                 res.status(200).json({ error: false, message: `OTP is sent to ${email_id}` });
             } else {
                 logger.loggerWarn(`Email is not to ${email_id}`);
@@ -67,7 +67,7 @@ const authOTP = async (req, res) => {
             // Check OTP expiration
             if (storedOTP.expiresAt < Date.now()) {
                 otpStore.delete(email_id);
-                logger.loggerInfo(`${email_id} - OTP has expired`);
+                logger.loggerWarn(`${email_id} - OTP has expired`);
                 return res.status(400).json({ error: true, message: 'OTP has expired' });
             }
 
@@ -118,6 +118,7 @@ async function saveUserdetails(email_id, name) {
         const existingUser = await usersCollection.findOne({ email_id: email_id });
 
         if (existingUser && existingUser.status === true) {
+            logger.loggerWarn(`${email_id} - Already Registered! and now logged in successfully `);
             return { error: false, message: 'Logged In successfully', data: { email_id, user_id: existingUser.user_id, username: existingUser.username } };
         } else if (existingUser && existingUser.status === false) {
             const updateResult = await usersCollection.updateOne(
@@ -207,8 +208,10 @@ const googleSignIN = async (req, res) => {
         if (saveDetails.error === false && saveDetails.message) {
             const token = jwt.sign({ email }, JWT_SECRET);
             res.status(200).json({ error: false, message: saveDetails.message, token, data: saveDetails.data });
+            logger.loggerSuccess(`${email} - Logged In successfully`);
         } else {
             res.status(400).json({ error: true, message: saveDetails.message });
+            logger.loggerWarn(`${email} - Failed to Log In`);
         }
 
     } catch (error) {
