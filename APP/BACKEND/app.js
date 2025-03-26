@@ -37,7 +37,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
-app.use("/vehicle_images", express.static(path.join(__dirname, "public/uploads/vehicle_images")));
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads/vehicle_images")));
 
 // Rate Limiting
 const apiLimiter = rateLimit({

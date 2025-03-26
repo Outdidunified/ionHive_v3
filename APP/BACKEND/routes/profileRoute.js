@@ -63,6 +63,7 @@ router.post("/addvehicleModel", authUser.isAuthenticated, upload.single("vehicle
 router.get("/getAllvehicleModels", authUser.isAuthenticated, Controller.getAllvehicleModels); // fetching all vehicle models and details
 //  - Vehicle of the paticular user
 router.post('/SaveVehiclesOfUser', authUser.isAuthenticated, Controller.SaveVehiclesOfUser); // add vehchle { model vehicle , Vechle number }
+router.post('/RemoveVehiclesOfUser', authUser.isAuthenticated, Controller.RemoveVehicleOfUser); // add vehchle { model vehicle , Vechle number }
 router.post('/fetchSavedVehiclesOfUser', authUser.isAuthenticated, Controller.fetchSavedVehiclesOfUser); // Fetch the vehicle of the paticular user
 
 

@@ -447,8 +447,7 @@ const fetchSavedDevices = async (req, res) => {
 
 const savevehicleModel = async (req, res) => {
     try {
-        const { model, vehicle_company, year, battery_size_kwh, range, charger_type } = req.body;
-        console.log(req.body);
+        const { model, vehicle_company, battery_size_kwh, type, charger_type } = req.body;
 
         // Validate required fields
         if (!model || typeof model !== "string" || !battery_size_kwh) {
@@ -481,12 +480,11 @@ const savevehicleModel = async (req, res) => {
         const vehicleData = {
             vehicle_id: nextVehicleId,
             model,
+            type: type || null,
             vehicle_company,
-            year,
             battery_size_kwh,
-            range: range || null,
             charger_type,
-            vehicle_image: imagePath, // Store file path in DB
+            vehicle_image: imagePath || null, // Store file path in DB
         };
         const result = await vehicleCollection.insertOne(vehicleData);
 
@@ -549,20 +547,19 @@ const getAllvehicleModels = async (req, res) => {
 // Save Vehicles of User
 const SaveVehiclesOfUser = async (req, res) => {
     try {
-        const { user_id, email_id, vehicle_number, vehicle_id } = req.body;
+        const { user_id, email_id, vehicle_number } = req.body;
+
         // Validate input
         if (
-            !user_id || !email_id || !vehicle_number || !vehicle_id ||
+            !user_id || !email_id || !vehicle_number ||
             !Number.isInteger(user_id) || typeof email_id !== 'string' || email_id.trim() === '' ||
-            typeof vehicle_number !== 'string' || vehicle_number.trim() === '' ||
-            !Number.isInteger(vehicle_id)
+            typeof vehicle_number !== 'string' || vehicle_number.trim() === ''
         ) {
             return res.status(400).json({
                 error: true,
-                message: 'Invalid input: user_id and vehicle_id must be integers, email_id and vehicle_number must be non-empty strings.',
+                message: 'Invalid input: user_id must be an integer, email_id and vehicle_number must be non-empty strings.',
             });
         }
-
 
         if (!db) {
             return res.status(500).json({
@@ -570,10 +567,11 @@ const SaveVehiclesOfUser = async (req, res) => {
                 message: 'Database connection failed. Please try again later.',
             });
         }
+
         const usersCollection = db.collection('users');
 
         // Find the user with both user_id and email_id
-        const user = await usersCollection.findOne({ user_id: user_id, email_id });
+        const user = await usersCollection.findOne({ user_id, email_id });
 
         if (!user) {
             return res.status(404).json({
@@ -584,20 +582,15 @@ const SaveVehiclesOfUser = async (req, res) => {
 
         let updatedVehicles = user.vehicles || [];
 
-        // Check if vehicle already exists
-        const index = updatedVehicles.findIndex(v => v.vehicle_id === vehicle_id);
+        // Find the last vehicle_id and increment
+        let nextVehicleId = updatedVehicles.length > 0 ? Math.max(...updatedVehicles.map(v => v.vehicle_id)) + 1 : 1;
 
-        if (index === -1) {
-            // If vehicle does not exist, add it to the array
-            updatedVehicles.push({ vehicle_number, vehicle_id });
-        } else {
-            // If vehicle exists, update vehicle_number
-            updatedVehicles[index].vehicle_number = vehicle_number;
-        }
+        // Add the new vehicle
+        updatedVehicles.push({ vehicle_id: nextVehicleId, vehicle_number });
 
         // Update the user's vehicles array
         const updateResult = await usersCollection.updateOne(
-            { user_id: user_id, email_id },
+            { user_id, email_id },
             { $set: { vehicles: updatedVehicles } }
         );
 
@@ -609,10 +602,10 @@ const SaveVehiclesOfUser = async (req, res) => {
             });
         }
 
-        logger.loggerSuccess(`Vehicle updated successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Vehicle added successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
-            message: 'Vehicle updated successfully',
+            message: 'Vehicle added successfully',
             updatedVehicles,
         });
 
@@ -624,6 +617,83 @@ const SaveVehiclesOfUser = async (req, res) => {
         });
     }
 };
+const RemoveVehicleOfUser = async (req, res) => {
+    try {
+        const { user_id, email_id, vehicle_id } = req.body;
+
+        // Validate input
+        if (
+            !user_id || !email_id || !vehicle_id ||
+            !Number.isInteger(user_id) || typeof email_id !== 'string' || email_id.trim() === '' ||
+            !Number.isInteger(vehicle_id)
+        ) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: user_id and vehicle_id must be integers, email_id must be a non-empty string.',
+            });
+        }
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
+
+        const usersCollection = db.collection('users');
+
+        // Find the user
+        const user = await usersCollection.findOne({ user_id, email_id });
+
+        if (!user) {
+            return res.status(404).json({
+                error: true,
+                message: 'User not found.',
+            });
+        }
+
+        let updatedVehicles = user.vehicles || [];
+
+        // Filter out the vehicle to remove
+        const newVehicles = updatedVehicles.filter(v => v.vehicle_id !== vehicle_id);
+
+        if (updatedVehicles.length === newVehicles.length) {
+            return res.status(404).json({
+                error: true,
+                message: 'Vehicle not found.',
+            });
+        }
+
+        // Update the user's vehicles array
+        const updateResult = await usersCollection.updateOne(
+            { user_id, email_id },
+            { $set: { vehicles: newVehicles } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.loggerWarn(`Failed to remove vehicle ${vehicle_id} for user ${user_id} with email ${email_id}.`);
+            return res.status(500).json({
+                error: true,
+                message: 'Failed to remove vehicle.',
+            });
+        }
+
+        logger.loggerSuccess(`Vehicle ${vehicle_id} removed successfully for user ${user_id} with email ${email_id}.`);
+        return res.status(200).json({
+            error: false,
+            message: 'Vehicle removed successfully',
+            updatedVehicles: newVehicles,
+        });
+
+    } catch (error) {
+        logger.loggerError(`RemoveVehicleOfUser - ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+        });
+    }
+};
+
 // Fetch the Saved Vehicles of User
 const fetchSavedVehiclesOfUser = async (req, res) => {
     try {
@@ -922,6 +992,7 @@ module.exports = {
     fetchSavedVehiclesOfUser,
     // VEHCILE
     savevehicleModel,
+    RemoveVehicleOfUser,
     getAllvehicleModels,
     // STATIONS
     SaveStations,
