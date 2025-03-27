@@ -23,13 +23,17 @@ requiredEnvVars.forEach((envVar) => {
     }
 });
 
+// Define ports from environment
+const HTTP_PORT = process.env.HTTP_PORT || 3000;
+const WS_PORT = process.env.WS_PORT || 8050;
+const WS_PORT_CLIENT = process.env.WS_PORT_CLIENT || 7050;
+
+// Initialize Express app
 const app = express();
 
 // Initialize WebSocket servers
 const webSocketServer = http.createServer();
 const clientWebSocketServer = http.createServer();
-
-initializeWebSocket(webSocketServer, clientWebSocketServer);
 
 // Middleware
 app.use(cors({ origin: '*' }));
@@ -80,7 +84,7 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: true, message: 'Something went wrong!' });
 });
 
-// Start Servers
+// Start Servers Function
 const startServer = (server, port, name) => {
     server.listen(port, () => {
         loggerDebug(`${name} listening on port ${port}`);  // Logs in blue (debug level)
@@ -89,14 +93,16 @@ const startServer = (server, port, name) => {
     });
 };
 
-const HTTP_PORT = process.env.HTTP_PORT || 3000;
-const WS_PORT = process.env.WS_PORT || 8050;
-const WS_PORT_CLIENT = process.env.WS_PORT_CLIENT || 7050;
-
+// Create HTTP Server
 const httpServer = http.createServer(app);
+
+// Start Servers
 startServer(httpServer, HTTP_PORT, 'HTTP Server');
 startServer(webSocketServer, WS_PORT, 'WebSocket Server');
 startServer(clientWebSocketServer, WS_PORT_CLIENT, 'Client WebSocket Server');
+
+// Now initialize WebSockets after servers are listening
+initializeWebSocket(webSocketServer, clientWebSocketServer);
 
 // WebSocket Connection Logging
 const logWebSocketConnection = (server, name, port) => {
@@ -123,4 +129,4 @@ const shutdown = () => {
 };
 
 process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown); 
+process.on('SIGTERM', shutdown);

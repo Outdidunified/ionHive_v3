@@ -16,6 +16,8 @@ const ansiRed = '\x1B[31m';
 const ansiBlue = '\x1B[34m';
 const ansiYellow = '\x1B[33m';
 const ansiOrange = '\x1B[38;5;214m'; // Orange ANSI color
+const ansiCyan = '\x1B[36m'; // Cyan for Ping Pong logs
+
 
 // Define custom log levels
 const customLevels = {
@@ -25,6 +27,8 @@ const customLevels = {
         info: 2,
         success: 3,  // Custom level for success messages
         debug: 4,     // Custom debug level
+        pingpong: 5,  // Custom level for WebSocket ping/pong logs
+
     },
     colors: {
         error: 'red',
@@ -32,6 +36,8 @@ const customLevels = {
         info: 'orange', // Change info color to orange
         success: 'green', // Change success color to green
         debug: 'blue',
+        pingpong: 'cyan',
+
     },
 };
 
@@ -56,6 +62,9 @@ const consoleFormat = winston.format.printf(({ level, message, timestamp }) => {
         case 'debug':
             colorizedMessage = `${ansiBlue}${message}${ansiReset}`;
             break;
+        case 'pingpong':
+            colorizedMessage = `${ansiCyan}${message}${ansiReset}`;
+            break;
     }
 
     return `${timestamp} [${level.toUpperCase()}]: ${colorizedMessage}`;
@@ -69,7 +78,7 @@ const fileFormat = winston.format.printf(({ level, message, timestamp }) => {
 // Create Winston logger with console and file transports
 const logger = winston.createLogger({
     levels: customLevels.levels,
-    level: 'debug',  // Allow debug-level logging
+    level: 'pingpong',  // Allow debug-level logging
     format: winston.format.timestamp({ format: 'DD/MM/YYYY HH:mm:ss' }), // Ensures timestamps are available
     transports: [
         new winston.transports.Console({
@@ -97,5 +106,6 @@ const loggerError = (message) => logger.error(message);
 const loggerWarn = (message) => logger.warn(message);
 const loggerSuccess = (message) => logger.log('success', message);
 const loggerDebug = (message) => logger.log('debug', message);
+const loggerPingPong = (message) => logger.log('pingpong', message);
 
-module.exports = { loggerInfo, loggerError, loggerWarn, loggerSuccess, loggerDebug };
+module.exports = { loggerInfo, loggerError, loggerWarn, loggerSuccess, loggerDebug, loggerPingPong };

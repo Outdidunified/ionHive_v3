@@ -1,19 +1,23 @@
 const WebSocket = require('ws');
+
+// ✅ Ensure this is correct
+const { Server } = WebSocket;
+
 const websocketHandler = require('./websocketHandler');
-const { wsConnections, ClientConnections, clients, OCPPResponseMap, meterValuesMap, sessionFlags, charging_states, startedChargingSet, chargingSessionID, chargerStartTime, chargerStopTime } = require('../data/MapModules');
+const { wsConnections, clientConnections, clients, OCPPResponseMap, meterValuesMap, sessionFlags, chargingStates, startedChargingSet, chargingSessionID, chargerStartTime, chargerStopTime } = require('../data/MapModules');
 
-// initialize websocket connection
 const initializeWebSocket = (server, ClientWebSocketServer) => {
-    const wss = new WebSocket.Server({ server, maxListeners: 1000, perMessageDeflate: true });
-    const ClientWss = new WebSocket.Server({ server: ClientWebSocketServer });
+    // ✅ Use `new Server()` instead of `new WebSocket.Server()`
+    const wss = new Server({ server, maxListeners: 1000, perMessageDeflate: true });
+    const ClientWss = new Server({ server: ClientWebSocketServer });
 
-    websocketHandler.handleWebSocketConnection(WebSocket, wss, ClientWss, wsConnections, ClientConnections, clients, OCPPResponseMap, meterValuesMap, sessionFlags, charging_states, startedChargingSet, chargingSessionID, chargerStartTime, chargerStopTime);
+    websocketHandler.handleWebSocketConnection(WebSocket, wss, ClientWss, wsConnections, clientConnections, clients, OCPPResponseMap, meterValuesMap, sessionFlags, chargingStates, startedChargingSet, chargingSessionID, chargerStartTime, chargerStopTime);
 };
 
 module.exports = {
     initializeWebSocket,
     wsConnections,
-    ClientConnections,
+    clientConnections,
     clients,
     OCPPResponseMap,
     meterValuesMap

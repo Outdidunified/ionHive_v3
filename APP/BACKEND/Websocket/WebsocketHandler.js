@@ -1,12 +1,32 @@
+require('dotenv').config();
 const logger = require('../utils/logger');
 const validateHeaders = require('./validation/validateHeaders');
 const dbService = require('./services/dbService');
-const validation = require("../middlewares/validation/indexValidation");
-const frameHandler = require("./frameHandlers/indexFrame");
-//TODO - Completed Boot and heartbeat 
-const handleWebSocketConnection = (WebSocket, wss, ClientWss, wsConnections, ClientConnections, clients) => {
+const frameHandler = require("./constant");
+
+const HEARTBEAT_INTERVAL = process.env.HEARTBEAT_INTERVAL ? parseInt(process.env.HEARTBEAT_INTERVAL, 10) : 30000;
+const TIMEOUT_THRESHOLD = process.env.TIMEOUT_THRESHOLD ? parseInt(process.env.TIMEOUT_THRESHOLD, 10) : 60000;
+
+const handleWebSocketConnection = (
+    WebSocket,
+    wss,
+    ClientWss,
+    wsConnections,
+    ClientConnections,
+    clients,
+    OCPPResponseMap,
+    meterValuesMap,
+    sessionFlags,
+    charging_states,
+    startedChargingSet,
+    chargingSessionID,
+    chargerStartTime,
+    chargerStopTime
+) => {
     wss.on('connection', async (ws, req) => {
         ws.isAlive = true;
+        ws.lastHeartbeat = Date.now(); // Store last heartbeat timestamp
+
         ws.socket?.setNoDelay(true);
 
         const uniqueIdentifier = await validateHeaders.getUniqueIdentifierFromRequest(req, ws);
@@ -14,10 +34,11 @@ const handleWebSocketConnection = (WebSocket, wss, ClientWss, wsConnections, Cli
             logger.loggerWarn('WebSocket connection established from browser');
             return;
         }
+
         const previousResults = new Map();
         const currentVal = new Map();
-
         const clientIpAddress = req.connection.remoteAddress;
+
         wsConnections.set(uniqueIdentifier, ws);
         ClientConnections.add(ws);
         clients.set(ws, uniqueIdentifier);
@@ -30,18 +51,101 @@ const handleWebSocketConnection = (WebSocket, wss, ClientWss, wsConnections, Cli
             logger.loggerError(`Error updating charger details for ${uniqueIdentifier}: ${error.message}`);
         }
 
+        // Heartbeat Monitoring
+        // Heartbeat Monitoring: Only send ping if the connection is not active
+        const heartbeatCheck = setInterval(() => {
+            const timeSinceLastHeartbeat = Date.now() - ws.lastHeartbeat;
+
+            if (timeSinceLastHeartbeat > TIMEOUT_THRESHOLD) {
+                logger.loggerWarn(`No response from ${uniqueIdentifier}, closing connection...`);
+                ws.terminate();
+                wsConnections.delete(uniqueIdentifier);
+            } else if (timeSinceLastHeartbeat > HEARTBEAT_INTERVAL) {
+                logger.loggerPingPong(`Sending ping to ${uniqueIdentifier}`);
+                ws.ping();
+            }
+        }, HEARTBEAT_INTERVAL);
+
         // Handle messages
-        ws.on('message', (message) => handleIncomingMessage(uniqueIdentifier, message, ws, WebSocket, ClientWss, currentVal, previousResults));
+        ws.on('message', (message) =>
+            handleIncomingMessage(
+                uniqueIdentifier,
+                message,
+                ws,
+                WebSocket,
+                ClientWss,
+                currentVal,
+                previousResults,
+                wsConnections,
+                ClientConnections,
+                clients,
+                OCPPResponseMap,
+                meterValuesMap,
+                sessionFlags,
+                charging_states,
+                startedChargingSet,
+                chargingSessionID,
+                chargerStartTime,
+                chargerStopTime,
+                clientIpAddress
+            )
+        );
+
+        // Handle pong response (for ping-pong mechanism)
+        ws.on('pong', () => {
+            logger.loggerPingPong(`Received pong from ${uniqueIdentifier}`);
+            ws.lastHeartbeat = Date.now();
+            ws.isAlive = true;
+        });
 
         // Handle errors
-        ws.on('error', (error) => handleWebSocketError(uniqueIdentifier, error, ws));
+        ws.on('error', (error) => handleWebSocketError(uniqueIdentifier, error, ws, clientIpAddress));
 
         // Handle close
-        ws.on('close', (code, reason) => handleWebSocketClose(uniqueIdentifier, code, reason, ws, ClientConnections));
+        ws.on('close', (code, reason) => {
+            clearInterval(heartbeatCheck);
+            const closeReason = reason.toString() || 'No reason provided';
+
+            const closeCodes = {
+                1000: 'Normal Closure',
+                1001: 'Going Away',
+                1002: 'Protocol Error',
+                1003: 'Unsupported Data',
+                1006: 'Abnormal Closure (No Close Frame)',
+                1007: 'Invalid Frame Payload Data',
+                1008: 'Policy Violation',
+                1009: 'Message Too Big',
+                1010: 'Mandatory Extension Missing',
+                1011: 'Internal Server Error',
+            };
+
+            const codeDescription = closeCodes[code] || 'Unknown Close Code';
+            handleWebSocketClose(uniqueIdentifier, code, reason, ws, ClientConnections, clientIpAddress, codeDescription);
+        });
     });
 };
 
-const handleIncomingMessage = async (uniqueIdentifier, message, ws, WebSocket, ClientWss, currentVal, previousResults) => {
+const handleIncomingMessage = async (
+    uniqueIdentifier,
+    message,
+    ws,
+    WebSocket,
+    ClientWss,
+    currentVal,
+    previousResults,
+    wsConnections,
+    ClientConnections,
+    clients,
+    OCPPResponseMap,
+    meterValuesMap,
+    sessionFlags,
+    charging_states,
+    startedChargingSet,
+    chargingSessionID,
+    chargerStartTime,
+    chargerStopTime,
+    clientIpAddress
+) => {
     try {
         const requestData = JSON.parse(message);
         logger.loggerDebug(`Received message from ${uniqueIdentifier}: ${message}`);
@@ -54,30 +158,30 @@ const handleIncomingMessage = async (uniqueIdentifier, message, ws, WebSocket, C
         const requestId = requestData[1];
         const requestName = requestData[2];
         const requestPayload = requestData[3];
-        const connectorId = requestPayload?.connectorId;
 
         let response = [3, requestId, {}];
         let errors = [];
 
         switch (requestName) {
+            case "DataTransfer":
+                errors = frameHandler.handleDataTransfer(requestPayload, requestId);
+                break;
+
+            case "FirmwareStatusNotification":
+                errors = frameHandler.handleFirmwareStatusNotification(requestPayload, requestId);
+                break;
+
             case "BootNotification":
                 response = await frameHandler.handleBootNotification(uniqueIdentifier, requestPayload, requestId);
                 break;
 
             case "Heartbeat":
-                response = await frameHandler.handleHeartbeat(uniqueIdentifier, requestId, currentVal, previousResults);
+                ws.lastHeartbeat = Date.now(); // Update last heartbeat timestamp
+                response = await frameHandler.handleHeartbeat(uniqueIdentifier, requestPayload, requestId, currentVal, previousResults);
                 break;
 
             case "StatusNotification":
-                response = await frameHandler.handleStatusNotification(uniqueIdentifier, requestId, currentVal, previousResults);
-                break;
-
-            case "DataTransfer":
-                errors = validation.validateDataTransfer(requestPayload);
-                break;
-
-            case "FirmwareStatusNotification":
-                errors = validation.validateFirmwareStatusNotification(requestPayload);
+                response = await frameHandler.handleStatusNotification(uniqueIdentifier, requestPayload, requestId, sessionFlags, startedChargingSet, charging_states, chargingSessionID, chargerStartTime, chargerStopTime, meterValuesMap, clientIpAddress);
                 break;
         }
 
@@ -114,9 +218,13 @@ const handleWebSocketError = (uniqueIdentifier, error, ws) => {
         ws.close(1002, 'Invalid frame received');
     }
 };
+const handleWebSocketClose = (uniqueIdentifier, code, reason, ws, ClientConnections, clientIpAddress, codeDescription) => {
+    const closeReason = reason?.toString() || "No reason provided"; // Ensure reason is a string
 
-const handleWebSocketClose = (uniqueIdentifier, code, reason, ws, ClientConnections) => {
-    logger.loggerWarn(`WebSocket closed (${uniqueIdentifier}): Code ${code}, Reason: ${reason}`);
+    logger.loggerWarn(
+        `WebSocket closed for Client: ${uniqueIdentifier} | IP: ${clientIpAddress} | Code: ${code} (${codeDescription}) | Reason: ${closeReason}`
+    );
+
     ClientConnections.delete(ws);
 };
 

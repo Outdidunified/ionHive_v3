@@ -1,12 +1,16 @@
 const dbService = require("../services/dbService");
 const logger = require('../../utils/logger');
-const { validateBootNotification } = require("../../middlewares/validation/indexValidation");
+const { framevalidation } = require("../validation/framevalidation");
+
+const validateBootNotification = (data) => {
+    return framevalidation(data, "BootNotification.json");
+};
 
 const handleBootNotification = async (uniqueIdentifier, requestPayload, requestId) => {
     let response = [3, requestId, {}];
-    const errors = validateBootNotification(requestPayload);
+    const validationResult = validateBootNotification(requestPayload);
 
-    if (errors.length === 0) {
+    if (!validationResult.error) {
         const updateData = {
             vendor: requestPayload.chargePointVendor,
             model: requestPayload.chargePointModel,
@@ -25,8 +29,8 @@ const handleBootNotification = async (uniqueIdentifier, requestPayload, requestI
             response.push({ status: "Rejected" });
         }
     } else {
-        logger.loggerError(`Validation failed for BootNotification: ${errors.join(", ")}`);
-        response.push({ status: "Rejected", errors });
+        logger.loggerError(`Validation failed for BootNotification: ${JSON.stringify(validationResult.details)}`);
+        response.push({ status: "Rejected", errors: validationResult.details });
     }
 
     return response;

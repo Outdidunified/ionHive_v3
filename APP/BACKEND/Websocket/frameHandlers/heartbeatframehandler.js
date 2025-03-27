@@ -1,8 +1,19 @@
 const dbService = require("../services/dbService");
 const logger = require('../../utils/logger');
+const { framevalidation } = require("../validation/framevalidation");
 
+const validateHeartbeat = (data) => {
+    return framevalidation(data, "Heartbeat.json");
+};
 
-const handleHeartbeat = async (uniqueIdentifier, requestId, currentVal, previousResults) => {
+const handleHeartbeat = async (uniqueIdentifier, requestPayload, requestId, currentVal, previousResults) => {
+    const validationResult = validateHeartbeat(requestPayload);
+
+    if (validationResult.error) {
+        logger.loggerError(`Validation failed for Heartbeat: ${JSON.stringify(validationResult.details)}`);
+        return [3, requestId, { status: "Rejected", errors: validationResult.details }];
+    }
+
     const formattedDate = new Date().toISOString();
     let response = [3, requestId, { currentTime: formattedDate }];
 
@@ -12,8 +23,8 @@ const handleHeartbeat = async (uniqueIdentifier, requestId, currentVal, previous
 
         if (currentVal.get(uniqueIdentifier) === true) {
             if (previousResults.get(uniqueIdentifier) === false) {
-                console.log(`ChargerID - ${uniqueIdentifier} terminated and trying to reconnect!`);
-                return { terminate: true }; // Signal to terminate the WebSocket
+                logger.loggerWarn(`ChargerID - ${uniqueIdentifier} terminated and trying to reconnect!`);
+                return { terminate: true }; // Signal WebSocket termination
             }
         }
 
