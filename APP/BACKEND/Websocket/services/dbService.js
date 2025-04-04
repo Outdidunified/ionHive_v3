@@ -274,6 +274,249 @@ const NullTagIDInStatus = async (charger_id, connector_id) => {
     } catch (error) {
         logger.loggerError(`Error updating Charger ID ${charger_id} with null tag ID: ${error.message}`);
     }
+};
+const checkAuthorization = async (charger_id, idTag) => {
+    try {
+        if (!db) {
+            logger.loggerError('Database connection failed.');
+        }
+        const chargerDetailsCollection = db.collection('charger_details');
+        const tagIdCollection = db.collection('tag_id');
+        const userCollection = db.collection('users');
+        let connectorId = null;
+        let tagIdDetails;
+        let expiryDate;
+        let currentDate = new Date();
+        let userDetails;
+
+        expiryDate = new Date();
+        expiryDate.setDate(currentDate.getDate() + 1); // Add one day to the expiry date
+
+        // Fetch charger details, including the chargePointModel
+        const chargerDetails = await chargerDetailsCollection.findOne({ charger_id });
+        if (!chargerDetails || !chargerDetails.model) {
+            return { status: "Invalid" };
+        }
+
+        if (chargerDetails.status === false) {
+            return { status: "Blocked", expiryDate: expiryDate.toISOString() };
+        }
+
+        // Dynamically determine the number of connectors based on the chargePointModel
+        // const connectors = chargerDetails.model.split('- ')[1];
+        // const totalConnectors = Math.ceil(connectors.length / 2);
+        const totalConnectors = chargerDetails.gun_connector + chargerDetails.socket_count;
+
+        // Dynamically create the projection fields based on the number of connectors
+        let projection = { charger_id: 1 };
+        for (let i = 1; i <= totalConnectors; i++) {
+            projection[`current_or_active_user_for_connector_${i}`] = 1;
+            projection[`tag_id_for_connector_${i}`] = 1;
+            projection[`tag_id_for_connector_${i}_in_use`] = 1;
+        }
+
+        // Fetch charger details with dynamically generated projection
+        const chargerDetailsWithConnectors = await chargerDetailsCollection.findOne(
+            { charger_id },
+            { projection }
+        );
+        if (!chargerDetailsWithConnectors) {
+            return { status: "Invalid" };
+        }
+
+        let currentUserActive = [];
+        // Identify the connector associated with the provided tag_id
+        for (let i = 1; i <= totalConnectors; i++) {
+            const currentUserValue = chargerDetailsWithConnectors[`current_or_active_user_for_connector_${i}`];
+            const tagIDInUse = chargerDetailsWithConnectors[`tag_id_for_connector_${i}_in_use`];
+
+            if (currentUserValue !== null && tagIDInUse === false) {
+                // Fetch the current active user for this connector
+                currentUserActive.push(currentUserValue);
+            }
+            if (chargerDetailsWithConnectors[`tag_id_for_connector_${i}`] === idTag) {
+                connectorId = i;
+                break;
+            }
+        }
+
+        // Check if the tag_id_for_connector_{id} does not match the provided idTag
+        for (let i = 1; i <= totalConnectors; i++) {
+            if (i !== connectorId && chargerDetailsWithConnectors[`tag_id_for_connector_${i}`] === idTag) {
+                return { status: "ConcurrentTx", connectorId };
+            }
+        }
+
+        if (connectorId) {
+            return { status: "Accepted", expiryDate: expiryDate.toISOString(), connectorId };
+        } else {
+            // Fetch tag_id details from the separate collection
+            tagIdDetails = await tagIdCollection.findOne({ tag_id: idTag, status: true });
+
+            if (!tagIdDetails) {
+                logger.loggerError('Tag Id is not found or Deactivated !');
+                tagIdDetails = { status: false };
+            } else if (tagIdDetails) {
+                if (tagIdDetails.tag_id_assigned === true) {
+                    // Fetch wallet balance to check min balance
+                    userDetails = await userCollection.findOne({ tag_id: tagIdDetails.id });
+
+                    if (currentUserActive.length > 0 && !currentUserActive.includes(userDetails.username)) {
+                        return { status: "Invalid", expiryDate: expiryDate.toISOString(), connectorId };
+                    } else {
+                        // Check wallet balance
+                        if (userDetails.wallet_bal !== undefined && !isNaN(userDetails.wallet_bal) && userDetails.wallet_bal >= 100) {
+                            // Check if the assigned association matches
+                            if (chargerDetails.assigned_association_id === tagIdDetails.association_id) {
+                                expiryDate = new Date(tagIdDetails.tag_id_expiry_date);
+                            } else {
+                                // Check if the charger is public
+                                if (chargerDetails.charger_accessibility === 1) {
+                                    expiryDate = new Date(tagIdDetails.tag_id_expiry_date);
+                                } else {
+                                    logger.loggerError(`Charger ID - ${charger_id} Access Denied - This charger is private!`);
+                                    tagIdDetails = { status: false };
+                                }
+                            }
+                        } else {
+                            logger.loggerError('Wallet balance is below 100, please recharge to start the charger!');
+                            tagIdDetails = { status: false };
+                        }
+                    }
+                } else {
+                    logger.loggerError('Tag ID is not assigned, please assign to start the charger!');
+                    tagIdDetails = { status: false };
+                }
+
+            }
+        }
+
+        // Check various conditions based on the tag_id details
+        if (tagIdDetails.status === false) {
+            return { status: "Blocked", expiryDate: expiryDate.toISOString(), connectorId };
+        } else if (expiryDate <= currentDate) {
+            return { status: "Expired", expiryDate: expiryDate.toISOString(), connectorId };
+        } else {
+            return { status: "Accepted", expiryDate: expiryDate.toISOString(), connectorId };
+        }
+
+    } catch (error) {
+        logger.loggerError(`Error checking tag_id for charger_id ${charger_id}:`, error);
+        return { status: "Error" };
+    }
+};
+const updateChargerTransaction = async (charger_id, updateFields) => {
+    try {
+        if (!db) {
+            logger.loggerError('Database connection failed.');
+            return { status: "Error", message: "Database connection is unavailable" };
+        }
+
+        const chargerDetailsCollection = db.collection('charger_details');
+
+        // Perform the update operation
+        const result = await chargerDetailsCollection.findOneAndUpdate(
+            { charger_id: charger_id },
+            { $set: updateFields },
+            { returnDocument: 'after' }
+        );
+
+        if (!result.value) {
+            logger.loggerError(`No charger found with charger_id: ${charger_id}`);
+            return { status: "Error", message: "No charger found" };
+        }
+
+        logger.loggerInfo(`Updated charger transaction for charger_id: ${charger_id}`);
+        return { status: "Success", updatedData: result.value };
+
+    } catch (error) {
+        logger.loggerError(`Error updating charger transaction for charger_id ${charger_id}: ${error.message}`);
+        return { status: "Error", message: error.message };
+    }
+};
+const getUserEmail = async (chargerID, connectorId, TagID) => {
+    try {
+        if (!db) {
+            logger.loggerError('Database connection failed.');
+            return null;
+        }
+
+        const evDetailsCollection = db.collection('charger_details');
+        const chargerDetails = await evDetailsCollection.findOne({ charger_id: chargerID });
+
+        if (!chargerDetails) {
+            logger.loggerError(`getUsermail - Charger ID ${chargerID} not found in the database`);
+            return null;
+        }
+
+        const userField = `current_or_active_user_for_connector_${connectorId}`;
+        let usermail = chargerDetails[userField] || null;
+
+        // If starting via NFC card, retrieve usermail from tag_id and update the field
+        if (TagID) {
+            if (!usermail) {
+                const userCollection = db.collection('users');
+                const tagIdCollection = db.collection('tag_id');
+
+                const tagData = await tagIdCollection.findOne({ tag_id: TagID });
+
+                if (!tagData) {
+                    logger.loggerError(`Tag ID ${TagID} not found in the database`);
+                } else {
+                    const userData = await userCollection.findOne({ tag_id: tagData.id });
+
+                    if (userData) {
+                        const updateResult = await evDetailsCollection.updateOne(
+                            { charger_id: chargerID },
+                            { $set: { [userField]: userData.email_id } }
+                        );
+
+                        if (updateResult.matchedCount === 0) {
+                            logger.loggerError(`getUsermail - Failed to update usermail for charger ${chargerID}`);
+                        } else if (updateResult.modifiedCount === 0) {
+                            logger.loggerInfo(`getUsermail - No change in usermail for charger ${chargerID}`);
+                        } else {
+                            logger.loggerInfo(`getUsermail - usermail updated successfully for charger ${chargerID}`);
+                            usermail = userData.email_id;
+                        }
+                    } else {
+                        logger.loggerError(`User with Tag ID ${TagID} not found in the database`);
+                    }
+                }
+            }
+        } else {
+            logger.loggerInfo(`getUsermail - TagID is null. Likely a remote start/stop`);
+        }
+
+        return usermail;
+    } catch (error) {
+        logger.loggerError(`Error getting usermail for charger ${chargerID}: ${error.message}`);
+        return null;
+    }
+};
+const getAutostop = async (useremsil) => {
+    try {
+        if (!db) {
+            logger.loggerError('Database connection failed.');
+            return null;
+        }
+        const UserDetails = await db.collection('users').findOne({ email_id: useremsil });
+
+        const time_val = UserDetails.autostop_time;
+        const isTimeChecked = UserDetails.autostop_time_is_checked;
+        const unit_val = UserDetails.autostop_unit;
+        const isUnitChecked = UserDetails.autostop_unit_is_checked;
+        const price_val = UserDetails.autostop_price;
+        const isPriceChecked = UserDetails.autostop_price_is_checked;
+        const wallet_balance = parseFloat(UserDetails.wallet_bal).toFixed(3);
+
+
+        return { 'time_value': time_val, 'isTimeChecked': isTimeChecked, 'unit_value': unit_val, 'isUnitChecked': isUnitChecked, 'price_value': price_val, 'isPriceChecked': isPriceChecked, 'wallet_balance': wallet_balance };
+
+    } catch (error) {
+        logger.loggerError(`getAutostop - Error retrieving autostop details for user ${useremsil}: ${error.message}`);
+        return false;
+    }
 }
 
 
@@ -288,5 +531,9 @@ module.exports = {
     SaveChargerStatus,
     updateCurrentOrActiveUserToNull,
     deleteMeterValues,
-    NullTagIDInStatus
+    NullTagIDInStatus,
+    checkAuthorization,
+    updateChargerTransaction,
+    getUserEmail,
+    getAutostop
 };

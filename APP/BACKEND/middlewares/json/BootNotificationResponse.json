@@ -5,7 +5,7 @@
     "type": "object",
     "properties": {
         "status": {
-             "type": "string",
+            "type": "string",
             "additionalProperties": false,
             "enum": [
                 "Accepted",

@@ -445,7 +445,7 @@ const getTransactionDetails = async (req, res) => {
             .filter(session => session.StopTimestamp !== null)
             .map(session => ({
                 status: 'Deducted',
-                amount: session.price,
+                amount: parseFloat(session.price), // Ensure amount is a double
                 time: session.stop_time
             }))
             .filter(txn => !days || new Date(txn.time) >= new Date(dateFilter.time.$gte));
@@ -453,10 +453,11 @@ const getTransactionDetails = async (req, res) => {
         const creditedTransactions = paymentDetails
             .map(payment => ({
                 status: 'Credited',
-                amount: payment.recharge_amount,
+                amount: parseFloat(payment.recharge_amount), // Ensure amount is a double
                 time: payment.recharged_date
             }))
             .filter(txn => !days || new Date(txn.time) >= new Date(dateFilter.time.$gte));
+
         // Apply Status Filter
         let filteredTransactions = [...creditedTransactions, ...deductedTransactions];
 

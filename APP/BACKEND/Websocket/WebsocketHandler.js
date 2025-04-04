@@ -111,7 +111,7 @@ const handleWebSocketConnection = (
                 1001: 'Going Away',
                 1002: 'Protocol Error',
                 1003: 'Unsupported Data',
-                1006: 'Abnormal Closure (No Close Frame)',
+                1006: 'Abnormal Closure (No Close Frame) recived',
                 1007: 'Invalid Frame Payload Data',
                 1008: 'Policy Violation',
                 1009: 'Message Too Big',
@@ -176,13 +176,25 @@ const handleIncomingMessage = async (
                 break;
 
             case "Heartbeat":
-                ws.lastHeartbeat = Date.now(); // Update last heartbeat timestamp
-                response = await frameHandler.handleHeartbeat(uniqueIdentifier, requestPayload, requestId, currentVal, previousResults);
+                response = await frameHandler.handleHeartbeat(uniqueIdentifier, requestPayload, requestId, currentVal, previousResults, ws);
                 break;
 
             case "StatusNotification":
                 response = await frameHandler.handleStatusNotification(uniqueIdentifier, requestPayload, requestId, sessionFlags, startedChargingSet, charging_states, chargingSessionID, chargerStartTime, chargerStopTime, meterValuesMap, clientIpAddress);
                 break;
+
+            case "Authorize":
+                response = await frameHandler.handleAuthorize(uniqueIdentifier, requestPayload, requestId);
+                break;
+
+            case "StartTransaction":
+                response = await frameHandler.handleStartTransaction(uniqueIdentifier, requestPayload, requestId, wsConnections);
+                break;
+
+            case "MeterValues": //TODO - 
+                response = await frameHandler.handleMeterValues(uniqueIdentifier, requestPayload, requestId, wsConnections);
+                break;
+
         }
 
         if (errors.length > 0) {
@@ -218,14 +230,15 @@ const handleWebSocketError = (uniqueIdentifier, error, ws) => {
         ws.close(1002, 'Invalid frame received');
     }
 };
+
 const handleWebSocketClose = (uniqueIdentifier, code, reason, ws, ClientConnections, clientIpAddress, codeDescription) => {
     const closeReason = reason?.toString() || "No reason provided"; // Ensure reason is a string
 
     logger.loggerWarn(
-        `WebSocket closed for Client: ${uniqueIdentifier} | IP: ${clientIpAddress} | Code: ${code} (${codeDescription}) | Reason: ${closeReason}`
+        `WebSocket closed for Client: ${uniqueIdentifier} | IP: ${clientIpAddress} | Code: ${code} | Reason: ${reason || codeDescription}`
     );
 
     ClientConnections.delete(ws);
 };
 
-module.exports = { handleWebSocketConnection };
+module.exports = { handleWebSocketConnection, broadcastMessage };

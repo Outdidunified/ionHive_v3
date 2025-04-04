@@ -3,7 +3,7 @@ const WebSocket = require('ws');
 // ✅ Ensure this is correct
 const { Server } = WebSocket;
 
-const websocketHandler = require('./websocketHandler');
+const websocketHandler = require('./WebsocketHandler');
 const { wsConnections, clientConnections, clients, OCPPResponseMap, meterValuesMap, sessionFlags, chargingStates, startedChargingSet, chargingSessionID, chargerStartTime, chargerStopTime } = require('../data/MapModules');
 
 const initializeWebSocket = (server, ClientWebSocketServer) => {

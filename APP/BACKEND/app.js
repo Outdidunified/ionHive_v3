@@ -25,8 +25,8 @@ requiredEnvVars.forEach((envVar) => {
 
 // Define ports from environment
 const HTTP_PORT = process.env.HTTP_PORT || 3000;
-const WS_PORT = process.env.WS_PORT || 8050;
-const WS_PORT_CLIENT = process.env.WS_PORT_CLIENT || 7050;
+const WS_PORT = process.env.WS_PORT || 7003;
+const WS_PORT_CLIENT = process.env.WS_PORT_CLIENT || 7004;
 
 // Initialize Express app
 const app = express();
