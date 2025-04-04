@@ -6,6 +6,7 @@ const initializeDB = async () => {
     if (!db) {
         db = await db_conn.connectToDatabase();
     }
+    return db;
 };
 initializeDB(); // Initialize the DB connection once
 
@@ -72,7 +73,7 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error fetching total session data for email_id=${req.body?.email_id}: ${error.message}`, { error });
+        logger.loggerError(`Error fetching total session data for email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -124,14 +125,14 @@ const saveChargingSessionHistoryFilter = async (req, res) => {
         );
 
         if (updateResult.modifiedCount === 0) {
-            logger.warn(`Failed to update Charging SessionHistory Filter for user ${user_id} with email ${email_id}.`);
+            logger.loggerWarn(`Failed to update Charging SessionHistory Filter for user ${user_id} with email ${email_id}.`);
             return res.status(500).json({
                 error: true,
                 message: 'Failed to update Charging SessionHistory Filter .',
             });
         }
 
-        logger.info(`Charging SessionHistory  filter updated successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Charging SessionHistory  filter updated successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
             message: 'Charging SessionHistory  filter updated successfully',
@@ -139,7 +140,7 @@ const saveChargingSessionHistoryFilter = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error in updatedChargingSessionHistoryFilter - ${error.message}`);
+        logger.loggerError(`Error in updatedChargingSessionHistoryFilter - ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -176,9 +177,11 @@ const fetchChargingSessionHistoryFilter = async (req, res) => {
             return res.status(200).json({ success: true, message: 'No Charging SessionHistory filter found.', filter: {} });
         }
 
+        logger.loggerSuccess(`Charging SessionHistory  filter fetched successfully for user ${user_id} `);
         return res.status(200).json({ success: true, message: 'Charging SessionHistory filter retrieved successfully.', filter: user.ChargingSessionHistoryFilter });
 
     } catch (error) {
+        logger.loggerError(`Error in fetchChargingSessionHistoryFilter - ${error.message}`);
         return res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
     }
 };
@@ -239,6 +242,7 @@ const fetchChargingSessionDetails = async (req, res) => {
             });
         }
 
+        logger.loggerSuccess(`Charge session retrieved successfully for email_id=${req.body?.email_id}`)
         return res.status(200).json({
             success: true,
             message: 'Charging session details retrieved successfully.',
@@ -246,7 +250,7 @@ const fetchChargingSessionDetails = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error fetching charging session details for email_id=${req.body?.email_id}: ${error.message}`, { error });
+        logger.loggerError(`Error fetching charging session details for email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
             success: false,
             message: 'Internal Server Error',
@@ -284,11 +288,11 @@ const DownloadChargingSessionDetails = async (req, res) => {
             .toArray();
 
         if (!sessions || sessions.length === 0) {
-            logger.info(` No charging session records found for email_id: ${email_id}`);
+            logger.loggerInfo(` No charging session records found for email_id: ${email_id}`);
             return res.status(404).json({ message: 'No charging session records found!' });
         }
 
-        logger.info(`Found ${sessions.length} session(s), generating PDF...`);
+        logger.loggerInfo(`Found ${sessions.length} session(s), generating PDF...`);
         let totalUnits = 0;
         let totalPrice = 0;
 
@@ -386,10 +390,10 @@ const DownloadChargingSessionDetails = async (req, res) => {
             rowY += rowHeight;
         });
 
-        logger.info(`PDF generated successfully for ${email_id}, sending response...`);
+        logger.loggerSuccess(`PDF generated successfully for ${email_id}, sending response...`);
         doc.end();
     } catch (error) {
-        logger.error('Error generating charging session PDF:', error);
+        logger.loggerError('Error generating charging session PDF:', error);
         if (!res.headersSent) {
             return res.status(500).json({ message: 'Internal Server Error' });
         }

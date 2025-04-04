@@ -11,6 +11,7 @@ const initializeDB = async () => {
     if (!db) {
         db = await db_conn.connectToDatabase();
     }
+    return db;
 };
 initializeDB(); // Initialize the DB connection once
 
@@ -48,7 +49,7 @@ const FetchWalletBalance = async (req, res) => {
             });
         }
 
-        logger.info(`Wallet balance fetched successfully for user_id=${user_id}, email_id=${email_id}`);
+        logger.loggerSuccess(`Wallet balance fetched successfully for user_id=${user_id}, email_id=${email_id}`);
 
         return res.status(200).json({
             error: false,
@@ -57,7 +58,7 @@ const FetchWalletBalance = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error fetching wallet balance for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
+        logger.loggerError(`Error fetching wallet balance for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",
@@ -115,11 +116,11 @@ const createOrder = async (req, res) => {
         };
 
         const response = await razorpay.orders.create(options);
-        logger.info(`Order created successfully for user_id=${user?.user_id}, email=${user?.email_id}`);
+        logger.loggerSuccess(`Order created successfully for user_id=${user?.user_id}, email=${user?.email_id}`);
 
         res.status(200).json({ success: true, order: response });
     } catch (error) {
-        logger.error(`Error creating order: ${error.message}`);
+        logger.loggerError(`Error creating order: ${error.message}`);
         res.status(500).json({
             error: true,
             message: "Internal Server Error",
@@ -207,15 +208,15 @@ const savePaymentDetails = async (req, res) => {
         // **Send email only after DB operations are successful**
         try {
             await emailer.sendPaymentEmail(user.email_id, RechargeAmt, transactionId, date_time, paymentMethod);
-            logger.info(`Wallet updated and email sent successfully for user_id=${user.user_id}, email=${user.email_id}`);
+            logger.loggerSuccess(`Wallet updated and email sent successfully for user_id=${user.user_id}, email=${user.email_id}`);
             return res.status(200).json({ error: false, message: "Payment saved successfully. Email sent." });
         } catch (emailError) {
-            logger.error(`Payment saved, but email failed: ${emailError.message}`);
+            logger.loggerWarn(`Payment saved, but email failed: ${emailError.message}`);
             return res.status(200).json({ error: false, message: "Payment saved, but email failed." });
         }
 
     } catch (error) {
-        logger.error(`Error saving payment details: ${error.message}`);
+        logger.loggerError(`Error saving payment details: ${error.message}`);
         return res.status(500).json({ error: true, message: "Internal Server Error", error: error.message });
     }
 };
@@ -279,14 +280,14 @@ const saveTransactionFilter = async (req, res) => {
         );
 
         if (updateResult.modifiedCount === 0) {
-            logger.warn(`Failed to update transaction filter for user ${user_id} with email ${email_id}.`);
+            logger.loggerWarn(`Failed to update transaction filter for user ${user_id} with email ${email_id}.`);
             return res.status(500).json({
                 error: true,
                 message: 'Failed to update transaction filter.',
             });
         }
 
-        logger.info(`Transaction filter updated successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Transaction filter updated successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
             message: 'Transaction filter updated successfully',
@@ -294,7 +295,7 @@ const saveTransactionFilter = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error in updateTransactionFilter - ${error.message}`);
+        logger.loggerError(`Error in updateTransactionFilter - ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -331,9 +332,11 @@ const fetchTransactionFilter = async (req, res) => {
             return res.status(200).json({ error: false, message: 'No transaction filter found.', filter: {} });
         }
 
+        logger.loggerSuccess(`Transaction filter retrieved successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({ error: false, message: 'Transaction filter retrieved successfully.', filter: user.transactionFilter });
 
     } catch (error) {
+        logger.loggerError(`Error in fetchTransactionFilter - ${error.message}`);
         return res.status(500).json({ error: true, message: 'Internal Server Error', error: error.message });
     }
 };
@@ -376,21 +379,21 @@ const clearTransactionFilter = async (req, res) => {
         );
 
         if (updateResult.modifiedCount === 0) {
-            logger.warn(`Failed to clear transaction filter for user ${user_id} with email ${email_id}.`);
+            logger.loggerWarn(`Failed to clear transaction filter for user ${user_id} with email ${email_id}.`);
             return res.status(500).json({
                 error: true,
                 message: 'Failed to clear transaction filter.',
             });
         }
 
-        logger.info(`Transaction filter cleared successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Transaction filter cleared successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
             message: 'Transaction filter cleared successfully',
         });
 
     } catch (error) {
-        logger.error(`Error in clearTransactionFilter - ${error.message}`);
+        logger.loggerError(`Error in clearTransactionFilter - ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -442,7 +445,7 @@ const getTransactionDetails = async (req, res) => {
             .filter(session => session.StopTimestamp !== null)
             .map(session => ({
                 status: 'Deducted',
-                amount: session.price,
+                amount: parseFloat(session.price), // Ensure amount is a double
                 time: session.stop_time
             }))
             .filter(txn => !days || new Date(txn.time) >= new Date(dateFilter.time.$gte));
@@ -450,10 +453,11 @@ const getTransactionDetails = async (req, res) => {
         const creditedTransactions = paymentDetails
             .map(payment => ({
                 status: 'Credited',
-                amount: payment.recharge_amount,
+                amount: parseFloat(payment.recharge_amount), // Ensure amount is a double
                 time: payment.recharged_date
             }))
             .filter(txn => !days || new Date(txn.time) >= new Date(dateFilter.time.$gte));
+
         // Apply Status Filter
         let filteredTransactions = [...creditedTransactions, ...deductedTransactions];
 
@@ -468,11 +472,11 @@ const getTransactionDetails = async (req, res) => {
         // Sort by Date (Descending)
         filteredTransactions.sort((a, b) => new Date(b.time) - new Date(a.time));
 
-        logger.info(`Returning ${filteredTransactions.length} transactions for user ${user_id} with email ${email_id}`);
+        logger.loggerSuccess(`Returning ${filteredTransactions.length} transactions for user ${user_id} with email ${email_id}`);
         return res.status(200).json({ error: false, data: filteredTransactions });
 
     } catch (error) {
-        logger.error(`Error in getTransactionDetails for user ${user_id} with email: ${email_id} - ${error.message}`);
+        logger.loggerError(`Error in getTransactionDetails for user ${user_id} with email: ${email_id} - ${error.message}`);
         return res.status(500).json({ error: true, message: 'Internal Server Error' });
     }
 };

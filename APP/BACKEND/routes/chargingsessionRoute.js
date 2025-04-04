@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const Controller = require("../controllers/chargingsessionController");
+const Controller = require("../controllers/chargingsessioncontroller");
 const authUser = require("../middlewares/authenticated");
 
-// MANAGE LAST STATUS //TODO - 1
+
+// MANAGE LAST STATUS 
+router.post('/fetchLastStatus', authUser.isAuthenticated, Controller.fetchLastStatus);
 
 
 // MANAGE START STOP  //TODO - 2
