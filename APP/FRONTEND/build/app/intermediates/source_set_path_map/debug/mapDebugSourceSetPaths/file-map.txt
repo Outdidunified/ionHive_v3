@@ -53,5 +53,6 @@ com.outdidev.ev_app-debug-51 /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRON
 com.outdidev.ev_app-debug-52 /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/permission_handler_android/intermediates/packaged_res/debug/packageDebugResources
 com.outdidev.ev_app-debug-53 /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/packaged_res/debug/packageDebugResources
 com.outdidev.ev_app-debug-54 /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/packaged_res/debug/packageDebugResources
-com.outdidev.ev_app-debug-55 /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/url_launcher_android/intermediates/packaged_res/debug/packageDebugResources
-com.outdidev.ev_app-debug-56 /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/webview_flutter_android/intermediates/packaged_res/debug/packageDebugResources
+com.outdidev.ev_app-debug-55 /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sqflite_android/intermediates/packaged_res/debug/packageDebugResources
+com.outdidev.ev_app-debug-56 /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/url_launcher_android/intermediates/packaged_res/debug/packageDebugResources
+com.outdidev.ev_app-debug-57 /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/webview_flutter_android/intermediates/packaged_res/debug/packageDebugResources

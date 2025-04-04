@@ -1,6 +1,6 @@
 -- Merging decision tree log ---
 application
-INJECTED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:23:5-69:19
+INJECTED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:27:5-73:19
 INJECTED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/debug/AndroidManifest.xml
 MERGED from [:url_launcher_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/url_launcher_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:7:5-12:19
 MERGED from [:url_launcher_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/url_launcher_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:7:5-12:19
@@ -33,8 +33,8 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/appl
 	android:name
 		INJECTED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml
 manifest
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:1:1-99:12
-MERGED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:1:1-99:12
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:1:1-103:12
+MERGED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:1:1-103:12
 INJECTED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/debug/AndroidManifest.xml:1:1-7:12
 INJECTED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/debug/AndroidManifest.xml:1:1-7:12
 INJECTED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/debug/AndroidManifest.xml:1:1-7:12
@@ -47,6 +47,7 @@ MERGED from [:path_provider_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/
 MERGED from [:permission_handler_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/permission_handler_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-7:12
 MERGED from [:shared_preferences_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-7:12
 MERGED from [:sign_in_with_apple] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-7:12
+MERGED from [:sqflite_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sqflite_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-7:12
 MERGED from [:url_launcher_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/url_launcher_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-14:12
 MERGED from [:webview_flutter_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/webview_flutter_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.preference:preference:1.2.1] /Users/apple/.gradle/caches/8.10.2/transforms/1c50824d24768c33903bba232d8dddf0/transformed/preference-1.2.1/AndroidManifest.xml:17:1-24:12
@@ -147,70 +148,74 @@ uses-permission#android.permission.BLUETOOTH_ADMIN
 ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:13:5-74
 	android:name
 		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:13:22-71
+uses-permission#android.permission.POST_NOTIFICATIONS
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:16:5-76
+	android:name
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:16:22-74
 uses-permission#android.permission.BLUETOOTH_SCAN
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:16:5-73
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:20:5-73
 	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:16:22-70
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:20:22-70
 uses-permission#android.permission.BLUETOOTH_CONNECT
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:17:5-76
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:21:5-76
 	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:17:22-73
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:21:22-73
 uses-permission#android.permission.BLUETOOTH_ADVERTISE
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:18:5-78
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:22:5-78
 	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:18:22-75
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:22:22-75
 uses-permission#android.permission.CALL_PHONE
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:19:5-68
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:23:5-68
 	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:19:22-66
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:23:22-66
 queries
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:71:5-98:15
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:75:5-102:15
 intent#action:name:android.intent.action.PROCESS_TEXT+data:mimeType:text/plain
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:72:9-75:18
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:76:9-79:18
 action#android.intent.action.PROCESS_TEXT
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:73:13-72
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:77:13-72
 	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:73:21-70
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:77:21-70
 data
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:74:13-50
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:78:13-50
 	android:mimeType
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:74:19-48
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:78:19-48
 intent#action:name:android.bluetooth.adapter.action.REQUEST_ENABLE
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:77:9-79:18
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:81:9-83:18
 action#android.bluetooth.adapter.action.REQUEST_ENABLE
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:78:13-86
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:82:13-86
 	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:78:21-83
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:82:21-83
 intent#action:name:android.intent.action.BLUETOOTH_ADMIN
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:80:9-82:18
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:84:9-86:18
 action#android.intent.action.BLUETOOTH_ADMIN
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:81:13-76
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:85:13-76
 	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:81:21-73
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:85:21-73
 intent#action:name:android.intent.action.BLUETOOTH
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:83:9-85:18
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:87:9-89:18
 action#android.intent.action.BLUETOOTH
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:84:13-70
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:88:13-70
 	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:84:21-67
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:88:21-67
 intent#action:name:android.intent.action.VIEW+data:scheme:https
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:86:9-89:18
-action#android.intent.action.VIEW
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:87:13-65
-	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:87:21-62
-intent#action:name:android.intent.action.DIAL+data:scheme:tel
 ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:90:9-93:18
-action#android.intent.action.DIAL
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:91:13-64
+action#android.intent.action.VIEW
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:91:13-65
 	android:name
 		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:91:21-62
-intent#action:name:android.intent.action.SENDTO+data:scheme:mailto
+intent#action:name:android.intent.action.DIAL+data:scheme:tel
 ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:94:9-97:18
-action#android.intent.action.SENDTO
-ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:95:13-66
+action#android.intent.action.DIAL
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:95:13-64
 	android:name
-		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:95:21-64
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:95:21-62
+intent#action:name:android.intent.action.SENDTO+data:scheme:mailto
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:98:9-101:18
+action#android.intent.action.SENDTO
+ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:99:13-66
+	android:name
+		ADDED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/main/AndroidManifest.xml:99:21-64
 uses-sdk
 INJECTED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/debug/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app/src/debug/AndroidManifest.xml
@@ -233,6 +238,8 @@ MERGED from [:shared_preferences_android] /Users/apple/Desktop/ionHive_p3/ionHiv
 MERGED from [:shared_preferences_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/shared_preferences_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
 MERGED from [:sign_in_with_apple] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
 MERGED from [:sign_in_with_apple] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
+MERGED from [:sqflite_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sqflite_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
+MERGED from [:sqflite_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sqflite_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
 MERGED from [:url_launcher_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/url_launcher_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
 MERGED from [:url_launcher_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/url_launcher_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44
 MERGED from [:webview_flutter_android] /Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/webview_flutter_android/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:5:5-44

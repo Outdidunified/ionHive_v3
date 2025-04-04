@@ -1,1 +1,0 @@
-dev.lenhart.flutter_blue_classic

@@ -17,7 +17,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Bluetooth Permissions -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- Required for Bluetooth on Android 12 and higher -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- Notification permission -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Required for Bluetooth on Android 12 and higher -->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
