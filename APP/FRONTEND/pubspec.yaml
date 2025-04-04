@@ -31,6 +31,12 @@ dependencies:
   flutter_swiper_null_safety: ^1.0.2
   url_launcher: ^6.3.1  # Replace with the latest version
   font_awesome_flutter: ^10.8.0
+  intl: ^0.18.0  # Use the latest version
+  shimmer: ^3.0.0  # Ensure the latest version
+  fui_kit: ^2.0.2
+  cached_network_image: ^3.3.1
+
+
 
 dev_dependencies:
   flutter_test:

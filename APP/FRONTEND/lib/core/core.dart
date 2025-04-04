@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 
 class iOnHiveCore {
   // Define base URLs for each environment
-  static const String prodBaseUrl = 'http://192.168.1.23:3003';
-  static const String devBaseUrl = 'http://192.168.1.23:3003';
-  static const String testingBaseUrl = 'http://192.168.1.23:3003';
+  static const String prodBaseUrl = 'http://192.168.1.71:3003';
+  static const String devBaseUrl = 'http://192.168.1.71:3003';
+  static const String testingBaseUrl = 'http://192.168.1.71:3003';
 
   // Dynamically select the base URL based on the environment
   static final String baseUrl = _getBaseUrl();

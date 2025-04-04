@@ -9,13 +9,14 @@ class AppTheme {
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white, // Clean white background
     appBarTheme: AppBarTheme(
-      color: Colors.green[700], // AppBar color
-      iconTheme: const IconThemeData(color: Colors.white), // AppBar icon color
+      color: Colors.white, // AppBar background color
+      iconTheme: const IconThemeData(color: Colors.black), // AppBar icon color (black in light mode)
       titleTextStyle: const TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: Colors.black, // AppBar text color (black in light mode)
       ),
+      elevation: 0, // Flat AppBar design
     ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(
@@ -61,13 +62,14 @@ class AppTheme {
     brightness: Brightness.dark,
     scaffoldBackgroundColor: const Color(0xFF121212), // Dark background
     appBarTheme: AppBarTheme(
-      color: Colors.green[900], // AppBar color
-      iconTheme: const IconThemeData(color: Colors.white),
+      color: Colors.black, // AppBar background color
+      iconTheme: const IconThemeData(color: Colors.white), // AppBar icon color (white in dark mode)
       titleTextStyle: const TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: Colors.white, // AppBar text color (white in dark mode)
       ),
+      elevation: 0, // Flat AppBar design
     ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(

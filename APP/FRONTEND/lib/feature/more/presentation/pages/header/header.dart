@@ -2,18 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/header/presentation/controllers/controller.dart';
+import 'package:ionhive/utils/widgets/button/custom_button.dart';
+import 'package:ionhive/utils/widgets/input_field/phonenumber_inputfield.dart';
+import 'package:ionhive/utils/widgets/input_field/username_inputfield.dart';
 
 class HeaderCard extends StatelessWidget {
   final ThemeData theme;
-  HeaderCard({super.key, required this.theme});
+  final int userId;
+  final String username;
+  final String emailId;
+  final String token;
+  HeaderCard({super.key, required this.theme, required this.userId, required this.username, required this.emailId, required this.token});
 
   final sessionController = Get.find<SessionController>();
   final controller = Get.put(HeaderController());
+
+
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
+
+    // Fetch wallet balance when the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchwalletbalance();
+    });
+    // Fetch wallet balance when the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchtotalsession();
+    });
+
 
     return Stack(
       alignment: Alignment.topCenter,
@@ -88,7 +107,7 @@ class HeaderCard extends StatelessWidget {
                     right: 0,
                     child: GestureDetector(
                       onTap: () {
-                        // showEditProfileDialog(context);
+                        showEditProfileDialog(context);
                       },
                       child: CircleAvatar(
                         backgroundColor: theme.colorScheme.primary,
@@ -138,13 +157,19 @@ class HeaderCard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(child: _buildStatItem("Rs.1,250", "Wallet Balance")),
+                    Expanded(child: Obx(() => _buildStatItem(
+                      controller.walletBalance.value, // Use fetched wallet balance
+                      "Wallet Balance",
+                    )),),
                     Container(
                       height: screenHeight * 0.05, // 5% of screen height
                       width: screenWidth * 0.003, // 0.3% of screen width
                       color: Colors.grey.shade300,
                     ),
-                    Expanded(child: _buildStatItem("239", "Total Sessions")),
+                    Expanded(child: Obx(() => _buildStatItem(
+                      controller.totalsession.value, // Use fetched wallet balance
+                      "Total Session",
+                    )),),
                     Container(
                       height: screenHeight * 0.05, // 5% of screen height
                       width: screenWidth * 0.003, // 0.3% of screen width
@@ -202,4 +227,76 @@ class HeaderCard extends StatelessWidget {
       ],
     );
   }
+
+
 }
+
+void showEditProfileDialog(BuildContext context) {
+  final controller = Get.find<HeaderController>();
+
+  // Fetch user details first
+  controller.fetchprofile().then((_) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Slide Indicator
+              Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              const Text(
+                "Complete your profile",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+
+              // Username Input Field (Shows fetched value or empty)
+              UsernameInputField(
+                controller: controller.usernameController,
+              ),
+              const SizedBox(height: 12),
+
+              // Phone Number Input Field (Shows fetched value or empty)
+              AdvancedPhoneNumberInput(
+                controller: controller.phoneNumberController,
+                onChanged: (phone) {},
+                onCountryChanged: (countryCode) {},
+              ),
+              const SizedBox(height: 16),
+
+              // Save Button
+              CustomButton(
+                text: "Save",
+                onPressed: () {
+                  controller.updateProfile();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  });
+}
+
+

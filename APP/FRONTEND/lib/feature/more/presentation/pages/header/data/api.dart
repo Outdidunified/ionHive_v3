@@ -38,9 +38,58 @@ class HeaderAPICalls {
     );
   }
 
-  Future<Map<String, dynamic>> completeProfile(String username, int user_id,
-      String email, int phone_number, String authToken) async {
+  Future<Map<String, dynamic>> completeProfile(
+      String username,
+      int user_id,
+      String email,
+      int phone_number,
+      String authToken,
+      ) async {
     final url = HeaderUrl.CompleteProfile;
+
+    try {
+      print("Sending request to: $url");
+      print("Request body: ${jsonEncode({
+        "username": username,
+        "email_id": email,
+        "phone_number": phone_number,
+        "user_id": user_id,
+      })}");
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+          "username": username,
+          "email_id": email,
+          "phone_number": phone_number,
+          "user_id": user_id,
+        }),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException(408, 'Request timed out. Please try again.');
+        },
+      );
+
+      print("Response status code: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      return _handleResponse(response);
+    } on http.ClientException {
+      throw HttpException(503, 'Please check your internet connection.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchuserprofile( int user_id,
+      String email, String authToken) async {
+    final url = HeaderUrl.fetchprofile;
 
     try {
       final response = await http
@@ -51,15 +100,16 @@ class HeaderAPICalls {
           'Authorization': authToken,
         },
         body: jsonEncode({
-          "username": username,
+
           'email_id': email,
-          'phone_number': phone_number,
+
           'user_id': user_id
         }),
-      )
-          .timeout(const Duration(seconds: 10), onTimeout: () {
-        throw TimeoutException(408, 'Request timed out. Please try again.');
-      });
+      );
+      final data = jsonDecode(response.body);
+      print('fetching body : $data');
+      print(response.statusCode);
+
       return _handleResponse(response);
     } on http.ClientException {
       throw HttpException(503, 'Please check your internet connection.');
@@ -68,4 +118,70 @@ class HeaderAPICalls {
       throw HttpException(500, '$e');
     }
   }
+
+  Future<Map<String, dynamic>> fetchwalletblanace( int user_id,
+      String email, String authToken) async {
+    final url = HeaderUrl.fetchwalletbalance;
+
+    try {
+      final response = await http
+          .post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+
+          'email_id': email,
+
+          'user_id': user_id
+        }),
+      );
+      final data = jsonDecode(response.body);
+      print('fetching body : $data');
+      print(response.statusCode);
+
+      return _handleResponse(response);
+    } on http.ClientException {
+      throw HttpException(503, 'Please check your internet connection.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchtotalsessions( int user_id,
+      String email, String authToken) async {
+    final url = HeaderUrl.fetchtotalsessions;
+
+    try {
+      final response = await http
+          .post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+
+          'email_id': email,
+
+          'user_id': user_id
+        }),
+      );
+      final data = jsonDecode(response.body);
+      print('fetching body : $data');
+      print(response.statusCode);
+
+      return _handleResponse(response);
+    } on http.ClientException {
+      throw HttpException(503, 'Please check your internet connection.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+
 }

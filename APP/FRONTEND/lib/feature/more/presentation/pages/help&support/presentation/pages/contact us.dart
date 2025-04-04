@@ -43,11 +43,11 @@ class ContactUs extends StatelessWidget {
             Row(
               children: [
                 _buildContactCard(
-                  theme, Icons.call, 'Call us', 'Mon-Sat • 9.30-6.30', _makeCall, screenWidth,
+                  theme, Icons.call, 'Call us', 'Mon-Sat • 9.30am-6.30pm', _makeCall, screenWidth,
                 ),
                 SizedBox(width: screenWidth * 0.03),
                 _buildContactCard(
-                  theme, Icons.email, 'Email us', 'Mon-Sat • 9.30-6.30', _sendEmail, screenWidth,
+                  theme, Icons.email, 'Email us', 'Mon-Sat • 9.30am-6.30pm', _sendEmail, screenWidth,
                 ),
               ],
             ),
@@ -61,7 +61,7 @@ class ContactUs extends StatelessWidget {
             SizedBox(height: screenHeight * 0.02),
 
             _buildSocialCard(theme, 'LinkedIn', '286 Followers • 11 Posts', FontAwesomeIcons.linkedin, () => _launchURL(linkedInUrl)),
-            _buildSocialCard(theme, 'WhatsApp', 'Available Mon-Sat • 9.30-6.30', FontAwesomeIcons.whatsapp, () => _launchWhatsApp(phoneNumber)),
+            _buildSocialCard(theme, 'WhatsApp', 'Available Mon-Sat • 9.30am-6.30pm', FontAwesomeIcons.whatsapp, () => _launchWhatsApp(phoneNumber)),
           ],
         ),
       ),

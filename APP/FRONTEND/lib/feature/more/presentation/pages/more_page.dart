@@ -3,11 +3,18 @@ import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/feature/auth/presentation/pages/login_page.dart';
 import 'package:ionhive/feature/landing_page_controller.dart';
+import 'package:ionhive/feature/more/presentation/controllers/more_controllers.dart';
 import 'package:ionhive/feature/more/presentation/pages/account/presentation/pages/account_privacy_page.dart';
 import 'package:ionhive/feature/more/presentation/pages/banner_image/banner_image.dart';
 import 'package:ionhive/feature/more/presentation/pages/header/header.dart';
 import 'package:ionhive/feature/more/presentation/pages/help&support/presentation/pages/contact%20us.dart';
+import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/rfidpage.dart';
+import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/vehicle.dart';
+import 'package:ionhive/feature/more/presentation/pages/transactions/presentation/pages/paymenthistory.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:fui_kit/fui_kit.dart';
+
 
 class MoreePage extends StatelessWidget {
   final sessionController = Get.find<SessionController>();
@@ -31,17 +38,45 @@ class MoreePage extends StatelessWidget {
     Get.offAll(() => LoginPage());
   }
 
+  void _launchURL() async {
+    const url = 'https://www.ionhive.in/';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else { void _launchURL() async {
+      const url = 'https://www.ionhive.in/';
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
+    }
+      throw 'Could not launch $url';
+    }
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final MoreController moreController = Get.put(MoreController());
+
+    final isLoggedIn = sessionController.isLoggedIn.value;
+    final userId = sessionController.userId.value;
+    final username = sessionController.username.value;
+    final emailId = sessionController.emailId.value;
+    final token = sessionController.token.value;
+
+
     return Scaffold(
 
       body: Column(
 
         children: [
-          HeaderCard(theme: theme),
+          HeaderCard(theme: theme,  userId: userId,
+            username: username,
+            emailId: emailId,
+            token: token,),
 
           SizedBox(height: 10,),
           Expanded(
@@ -57,8 +92,22 @@ class MoreePage extends StatelessWidget {
                 _buildSectionTitle('Manage '),
 
 
-                _buildMenuOption('RFID', Icons.rss_feed, theme), // RFID typically represented by a wireless signal icon
-                _buildMenuOption('Vehicle', Icons.directions_car, theme), // Vehicle should use a car-related icon
+                _buildMenuOption('RFID', Icons.rss_feed, theme, onTap: () {
+                  Get.to(() => RfidPage(
+                    userId: userId,
+                    username: username,
+                    emailId: emailId,
+                    token: token,
+                  ));
+                },), // RFID typically represented by a wireless signal icon
+                _buildMenuOption('Vehicle', Icons.directions_car, theme, onTap: () {
+                  Get.to(() => VehiclePage(
+                    userId: userId,
+                    username: username,
+                    emailId: emailId,
+                    token: token,
+                  ));
+                },), // Vehicle should use a car-related icon
                 _buildMenuOption('Saved Device', Icons.devices, theme),
             
 
@@ -70,13 +119,29 @@ class MoreePage extends StatelessWidget {
                 // _buildMenuOption('Captitative Stations', Icons.ev_station, theme), // EV station icon for captitative stations
             
                 _buildSectionTitle('Transactions'),
-                _buildMenuOption('Payment History', Icons.payment, theme),
+                _buildMenuOption('Payment History', Icons.payment, theme, onTap: () {
+                  Get.to(() => PaymentHistoryPage(
+                    userId: userId,
+                    username: username,
+                    emailId: emailId,
+                    token: token,
+                  ));
+                },),
                 SizedBox(height: 16),
                 _buildSectionTitle('Shop'),
-                _buildMenuOption('Order a Device', Icons.shopping_cart, theme),
+                _buildMenuOption('Order a Device', Icons.shopping_cart, theme, onTap: _launchURL),
+
                 SizedBox(height: 16),
+
                 _buildSectionTitle('App'),
-                _buildSwitchTile('Notification', true, theme, subtitle: 'Manage and Stay updated with app alerts and messages. '),
+                Obx(() => SwitchListTile(
+                  title: Text("Notification"),
+                  subtitle: Text("Manage and stay updated with app alerts.",style: TextStyle(color: Colors.black38),),
+                  value: moreController.isNotificationEnabled.value,
+                  onChanged: (value) {
+                    moreController.toggleNotification(value);
+                  },
+                )),
 
                 SizedBox(height: 16),
                 _buildSectionTitle('Help & Support'),
@@ -124,10 +189,13 @@ class MoreePage extends StatelessWidget {
 
 
 
+// ✅ Section Title Function (No Changes)
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
-      child: Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[600])),
+      child: Text(title,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[600])
+      ),
     );
   }
 
@@ -182,15 +250,17 @@ class MoreePage extends StatelessWidget {
   }
 
 
-  Widget _buildSwitchTile(String title, bool value, ThemeData theme, {String? subtitle}) {
+  Widget _buildSwitchTile(String title, bool value, ThemeData theme,
+      {String? subtitle, required Function(bool) onChanged}) {
     return SwitchListTile(
-      title: Text(title, style: TextStyle(fontSize: 16)),
-      subtitle: subtitle != null ? Text(subtitle, style: TextStyle(fontSize: 14, color: Colors.grey)) : null,
+      title: Text(title, style: theme.textTheme.bodyLarge),
+      subtitle: subtitle != null ? Text(subtitle, style: theme.textTheme.bodySmall) : null,
       value: value,
-      onChanged: (bool newValue) {},
-      activeColor: theme.primaryColor,
+      onChanged: (bool newValue) => onChanged(newValue),
+      activeColor: theme.colorScheme.primary,
     );
   }
+
 
   Widget _buildFooter(String version) {
     return Align(
