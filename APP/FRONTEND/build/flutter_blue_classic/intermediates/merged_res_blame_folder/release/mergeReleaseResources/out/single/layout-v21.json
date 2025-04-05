@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "dev.lenhart.flutter_blue_classic-release-25:/layout-v21/notification_action.xml",
+        "source": "dev.lenhart.flutter_blue_classic-core-1.13.1-0:/layout-v21/notification_action.xml"
+    },
+    {
+        "merged": "dev.lenhart.flutter_blue_classic-release-25:/layout-v21/notification_template_icon_group.xml",
+        "source": "dev.lenhart.flutter_blue_classic-core-1.13.1-0:/layout-v21/notification_template_icon_group.xml"
+    },
+    {
+        "merged": "dev.lenhart.flutter_blue_classic-release-25:/layout-v21/notification_template_custom_big.xml",
+        "source": "dev.lenhart.flutter_blue_classic-core-1.13.1-0:/layout-v21/notification_template_custom_big.xml"
+    },
+    {
+        "merged": "dev.lenhart.flutter_blue_classic-release-25:/layout-v21/notification_action_tombstone.xml",
+        "source": "dev.lenhart.flutter_blue_classic-core-1.13.1-0:/layout-v21/notification_action_tombstone.xml"
+    }
+]

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/domain/models/vehicle_model.dart';
@@ -11,6 +12,10 @@ class VehicleController extends GetxController {
   var vehicleModels = <VehicleModelData>[].obs; // ✅ Fix: Match the actual data type
   var isLoading = false.obs;
   var errorMessage = ''.obs;
+  var selectedCompany = "All".obs;
+  final searchController = TextEditingController();
+  var searchTerm = ''.obs;
+
 
 
   @override
@@ -92,6 +97,14 @@ class VehicleController extends GetxController {
     }
   }
 
+  void selectCompany(String company) {
+    selectedCompany.value = company;
+  }
+
+  void setSearchTerm(String term) {
+    searchTerm.value = term.toLowerCase();
+  }
+
   /// Removes a vehicle
   Future<bool> removeVehicle(String vehicleNumber) async {
     try {
@@ -117,5 +130,11 @@ class VehicleController extends GetxController {
       print("Error removing vehicle: $e");
       return false;
     }
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 }

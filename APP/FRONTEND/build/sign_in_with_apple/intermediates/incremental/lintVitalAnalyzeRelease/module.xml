@@ -1,0 +1,26 @@
+<lint-module
+    format="1"
+    dir="/Users/apple/.pub-cache/hosted/pub.dev/sign_in_with_apple-6.1.4/android"
+    name=":sign_in_with_apple"
+    type="LIBRARY"
+    maven="com.aboutyou.dart_packages.sign_in_with_apple:sign_in_with_apple:1.0-SNAPSHOT"
+    agpVersion="8.7.0"
+    buildFolder="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/sign_in_with_apple"
+    bootClassPath="/Users/apple/Library/Android/sdk/platforms/android-34/android.jar:/Users/apple/Library/Android/sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="1.8"
+    compileTarget="android-34"
+    neverShrinking="true">
+  <lintOptions
+      disable="InvalidPackage"
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true">
+    <severities>
+      <severity
+        id="InvalidPackage"
+        severity="IGNORE" />
+    </severities>
+  </lintOptions>
+  <variant name="release"/>
+</lint-module>
