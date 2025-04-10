@@ -4,6 +4,7 @@ class AppTheme {
   // Light Theme
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
+    fontFamily: 'CustomFont', // ✅ Apply your custom font globally
     primaryColor: Colors.green,
     primaryColorDark: Colors.green[800],
     primarySwatch: Colors.green,
@@ -21,12 +22,17 @@ class AppTheme {
       surfaceTintColor: Colors.transparent,
     ),
     textTheme: const TextTheme(
-      displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
-      displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
-      displaySmall: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-      headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+      displayLarge: TextStyle(
+          fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
+      displayMedium: TextStyle(
+          fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
+      displaySmall: TextStyle(
+          fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+      headlineMedium: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
       headlineSmall: TextStyle(fontSize: 18, color: Colors.black87),
-      titleLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
+      titleLarge: TextStyle(
+          fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
       bodyLarge: TextStyle(fontSize: 14, color: Colors.black54),
       bodyMedium: TextStyle(fontSize: 12, color: Colors.black45),
     ),
@@ -59,6 +65,7 @@ class AppTheme {
   // Dark Theme
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
+    fontFamily: 'CustomFont', // ✅ Apply your custom font globally
     primaryColor: Colors.green,
     primaryColorDark: Colors.green[800],
     primarySwatch: Colors.green,
@@ -76,12 +83,17 @@ class AppTheme {
       surfaceTintColor: Colors.transparent,
     ),
     textTheme: const TextTheme(
-      displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
-      displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-      displaySmall: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-      headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+      displayLarge: TextStyle(
+          fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+      displayMedium: TextStyle(
+          fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+      displaySmall: TextStyle(
+          fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+      headlineMedium: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
       headlineSmall: TextStyle(fontSize: 18, color: Colors.white70),
-      titleLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white70),
+      titleLarge: TextStyle(
+          fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white70),
       bodyLarge: TextStyle(fontSize: 14, color: Colors.white60),
       bodyMedium: TextStyle(fontSize: 12, color: Colors.white60),
     ),

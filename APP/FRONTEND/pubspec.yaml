@@ -1,12 +1,11 @@
 name: ionhive
 description: "Ion Hive - Your ultimate companion for finding, charging, and managing EV stations effortlessly."
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
   sdk: ">=3.6.0 <=3.7.0"
-
 
 dependencies:
   flutter:
@@ -29,14 +28,12 @@ dependencies:
   intl_phone_field: ^3.2.0
   google_fonts: ^6.2.1
   flutter_swiper_null_safety: ^1.0.2
-  url_launcher: ^6.3.1  # Replace with the latest version
+  url_launcher: ^6.3.1 # Replace with the latest version
   font_awesome_flutter: ^10.8.0
-  intl: ^0.18.0  # Use the latest version
-  shimmer: ^3.0.0  # Ensure the latest version
+  intl: ^0.18.0 # Use the latest version
+  shimmer: ^3.0.0 # Ensure the latest version
   fui_kit: ^2.0.2
   cached_network_image: ^3.3.1
-
-
 
 dev_dependencies:
   flutter_test:
@@ -45,14 +42,20 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: CustomFont
+      fonts:
+        - asset: assets/fonts/Poppins/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins/Poppins-Bold.ttf
+          weight: 700
 
   assets:
     - assets/ionHive_logo's/ionHive.png
     - assets/Image/
 
 flutter_native_splash:
-  color: "#000000" 
-  image: assets/ionHive_logo's/ionHive.png 
+  color: "#000000"
+  image: assets/ionHive_logo's/ionHive.png
   android: true
   ios: true
   web: true
