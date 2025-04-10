@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:ionhive/core/core.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart';
-import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/addvehicle.dart';
+import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/AddVehicle/presentation/pages/addvehicle.dart';
+
+import '../../../../../../../../../../utils/theme/themes.dart';
 
 class VehiclePage extends StatelessWidget {
   final int userId;
@@ -39,16 +42,14 @@ class VehiclePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           "Manage Vehicle",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black, // Hardcode to black
+          style: theme.appBarTheme.titleTextStyle?.copyWith(
             fontSize: screenWidth * 0.05, // 20 on a 400-width screen
           ),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: Colors.black, // Hardcode to black
+            color: theme.appBarTheme.iconTheme?.color,
             size: screenWidth * 0.06, // 24 on a 400-width screen
           ),
           onPressed: () => Navigator.pop(context),
@@ -59,7 +60,7 @@ class VehiclePage extends StatelessWidget {
             child: IconButton(
               icon: Icon(
                 Icons.help_outline,
-                color: theme.colorScheme.primary, // Should be green
+                color: theme.colorScheme.primary,
                 size: screenWidth * 0.06, // 24 on a 400-width screen
               ),
               onPressed: () {
@@ -68,7 +69,7 @@ class VehiclePage extends StatelessWidget {
             ),
           ),
         ],
-        backgroundColor: Colors.white, // Hardcode to white
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
       ),
       body: Column(
@@ -97,7 +98,7 @@ class VehiclePage extends StatelessWidget {
                           SizedBox(height: screenHeight * 0.015), // 10 on a 600-height screen
                           Text(
                             "Error: ${snapshot.error}",
-                            style: TextStyle(
+                            style: theme.textTheme.bodyLarge?.copyWith(
                               fontSize: screenWidth * 0.04, // 16 on a 400-width screen
                               color: theme.colorScheme.error,
                             ),
@@ -125,7 +126,7 @@ class VehiclePage extends StatelessWidget {
                             },
                             child: Text(
                               "Retry",
-                              style: TextStyle(
+                              style: theme.textTheme.bodyLarge?.copyWith(
                                 color: theme.colorScheme.onError,
                                 fontSize: screenWidth * 0.04, // 16 on a 400-width screen
                               ),
@@ -165,6 +166,7 @@ class VehiclePage extends StatelessWidget {
                             ),
                             elevation: 2,
                             margin: EdgeInsets.symmetric(vertical: screenWidth * 0.02), // 8 on a 400-width screen
+                            color: theme.cardColor,
                             child: Stack(
                               children: [
                                 Padding(
@@ -178,44 +180,41 @@ class VehiclePage extends StatelessWidget {
                                           children: [
                                             Text(
                                               details?['model'] ?? 'No Model',
-                                              style: TextStyle(
+                                              style: theme.textTheme.headlineMedium?.copyWith(
                                                 fontSize: screenWidth * 0.045, // 18 on a 400-width screen
-                                                color: theme.textTheme.headlineMedium?.color ?? Colors.black,
                                               ),
                                             ),
                                             SizedBox(height: screenHeight * 0.006), // 4 on a 600-height screen
                                             Row(
                                               children: [
-                                              // 4 on a 400-width screen
                                                 Text(
                                                   vehicle['vehicle_number'] ?? 'No Plate Number',
-                                                  style: TextStyle(
+                                                  style: theme.textTheme.bodyMedium?.copyWith(
                                                     fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey,
+                                                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                                                   ),
                                                 ),
                                               ],
                                             ),
-
                                             SizedBox(height: screenHeight * 0.012), // 8 on a 600-height screen
                                             Text(
                                               "Charger Type: ${details?['charger_type'] ?? 'Unknown'}",
-                                              style: TextStyle(
+                                              style: theme.textTheme.bodyMedium?.copyWith(
                                                 fontSize: screenWidth * 0.035, // 14 on a 400-width screen
-                                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey,
+                                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
                                       ClipRRect(
-                                        borderRadius: BorderRadius.circular(screenWidth * 0.02), // Rounded corners
+                                        borderRadius: BorderRadius.circular(screenWidth * 0.02),
                                         child: fullImageUrl.isNotEmpty
                                             ? CachedNetworkImage(
                                           imageUrl: fullImageUrl,
-                                          width: screenWidth * 0.4, // Increased width
-                                          height: screenWidth * 0.3, // Increased height
-                                          fit: BoxFit.contain, // Ensures the full image is visible without cropping
+                                          width: screenWidth * 0.4,
+                                          height: screenWidth * 0.3,
+                                          fit: BoxFit.contain,
                                           httpHeaders: {
                                             'Authorization': 'Bearer $token',
                                           },
@@ -241,18 +240,16 @@ class VehiclePage extends StatelessWidget {
                                           'assets/images/ss.png',
                                           width: screenWidth * 0.4,
                                           height: screenWidth * 0.3,
-                                          fit: BoxFit.contain, // Ensures the entire image fits inside the container
+                                          fit: BoxFit.contain,
                                         ),
                                       ),
-
                                     ],
                                   ),
                                 ),
                                 Positioned(
-                                  top: -screenWidth * 0.02, // Move slightly above the card (negative value to align with the tip)
-                                  right: -screenWidth * 0.02, // Move slightly outside the card (negative value to align with the tip)
+                                  top: -screenWidth * 0.02,
+                                  right: -screenWidth * 0.02,
                                   child: Container(
-
                                     child: IconButton(
                                       icon: Icon(
                                         Icons.remove_circle_outline,
@@ -267,16 +264,14 @@ class VehiclePage extends StatelessWidget {
                                             builder: (context) => AlertDialog(
                                               title: Text(
                                                 "Remove Vehicle",
-                                                style: TextStyle(
+                                                style: theme.textTheme.titleLarge?.copyWith(
                                                   fontSize: screenWidth * 0.045, // 18 on a 400-width screen
-                                                  color: theme.textTheme.titleLarge?.color,
                                                 ),
                                               ),
                                               content: Text(
                                                 "Are you sure you want to remove vehicle $vehicleNumber?",
-                                                style: TextStyle(
+                                                style: theme.textTheme.bodyMedium?.copyWith(
                                                   fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                  color: theme.textTheme.bodyMedium?.color,
                                                 ),
                                               ),
                                               actions: [
@@ -284,9 +279,8 @@ class VehiclePage extends StatelessWidget {
                                                   onPressed: () => Navigator.pop(context),
                                                   child: Text(
                                                     "Cancel",
-                                                    style: TextStyle(
+                                                    style: theme.textTheme.bodyMedium?.copyWith(
                                                       fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                      color: theme.textTheme.bodyMedium?.color,
                                                     ),
                                                   ),
                                                 ),
@@ -299,9 +293,8 @@ class VehiclePage extends StatelessWidget {
                                                           SnackBar(
                                                             content: Text(
                                                               "Vehicle removed successfully",
-                                                              style: TextStyle(
+                                                              style: theme.textTheme.bodyLarge?.copyWith(
                                                                 fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                                color: theme.colorScheme.onSurface,
                                                               ),
                                                             ),
                                                             backgroundColor: theme.colorScheme.primary,
@@ -312,9 +305,8 @@ class VehiclePage extends StatelessWidget {
                                                           SnackBar(
                                                             content: Text(
                                                               "Failed to remove vehicle",
-                                                              style: TextStyle(
+                                                              style: theme.textTheme.bodyLarge?.copyWith(
                                                                 fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                                color: theme.colorScheme.onError,
                                                               ),
                                                             ),
                                                             backgroundColor: theme.colorScheme.error,
@@ -325,7 +317,7 @@ class VehiclePage extends StatelessWidget {
                                                   },
                                                   child: Text(
                                                     "Remove",
-                                                    style: TextStyle(
+                                                    style: theme.textTheme.bodyMedium?.copyWith(
                                                       fontSize: screenWidth * 0.04, // 16 on a 400-width screen
                                                       color: theme.colorScheme.error,
                                                     ),
@@ -363,7 +355,6 @@ class VehiclePage extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // Convert RxList<VehicleModel> to List<Map<String, dynamic>>
                   final List<Map<String, dynamic>> vehicleList = controller.vehicles
                       .map<Map<String, dynamic>>((vehicle) => {
                     'vehicle_number': vehicle.vehicleNumber,
@@ -375,8 +366,7 @@ class VehiclePage extends StatelessWidget {
                   })
                       .toList();
 
-                  // Navigate to Addvehicle page and pass the converted vehicle data and user data
-                  Get.to(() =>  AddVehicle(), arguments: {
+                  Get.to(() => AddVehicle(), arguments: {
                     'vehicles': vehicleList,
                     'userId': userId,
                     'username': username,
@@ -386,7 +376,7 @@ class VehiclePage extends StatelessWidget {
                 },
                 child: Text(
                   "Add Vehicle",
-                  style: TextStyle(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     color: theme.colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: screenWidth * 0.04, // 16 on a 400-width screen
@@ -412,15 +402,15 @@ class VehiclePage extends StatelessWidget {
           Icon(
             Icons.directions_car,
             size: screenWidth * 0.2, // 80 on a 400-width screen
-            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey,
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
           ),
           SizedBox(height: screenHeight * 0.015), // 10 on a 600-height screen
           Text(
             "No vehicles saved",
-            style: TextStyle(
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontSize: screenWidth * 0.045, // 18 on a 400-width screen
               fontWeight: FontWeight.bold,
-              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey,
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
           ),
         ],
@@ -430,60 +420,75 @@ class VehiclePage extends StatelessWidget {
 
   Widget _buildShimmerLoading(BuildContext context) {
     final theme = Theme.of(context);
+    final shimmerColors = Theme.of(context).extension<ShimmerColors>()!;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    return ListView.builder(
-      itemCount: 3,
-      itemBuilder: (context, index) {
-        return Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(screenWidth * 0.03), // 12 on a 400-width screen
-          ),
-          elevation: 2,
-          margin: EdgeInsets.symmetric(vertical: screenWidth * 0.02), // 8 on a 400-width screen
-          child: Padding(
-            padding: EdgeInsets.all(screenWidth * 0.03), // 12 on a 400-width screen
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: screenWidth * 0.375, // 150 on a 400-width screen
-                        height: screenHeight * 0.03, // 18 on a 600-height screen
-                        color: theme.dividerColor.withOpacity(0.3),
-                      ),
-                      SizedBox(height: screenHeight * 0.006), // 4 on a 600-height screen
-                      Container(
-                        width: screenWidth * 0.25, // 100 on a 400-width screen
-                        height: screenHeight * 0.026, // 16 on a 600-height screen
-                        color: theme.dividerColor.withOpacity(0.3),
-                      ),
-                      SizedBox(height: screenHeight * 0.012), // 8 on a 600-height screen
-                      Container(
-                        width: screenWidth * 0.2, // 80 on a 400-width screen
-                        height: screenHeight * 0.023, // 14 on a 600-height screen
-                        color: theme.dividerColor.withOpacity(0.3),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: screenWidth * 0.25, // 100 on a 400-width screen
-                  height: screenHeight * 0.133, // 80 on a 600-height screen
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(screenWidth * 0.02), // 8 on a 400-width screen
-                    color: theme.dividerColor.withOpacity(0.3),
-                  ),
-                ),
-              ],
+    return Shimmer.fromColors(
+      baseColor: shimmerColors.baseColor,
+      highlightColor: shimmerColors.highlightColor,
+      child: ListView.builder(
+        itemCount: 3,
+        itemBuilder: (context, index) {
+          return Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(screenWidth * 0.03),
             ),
-          ),
-        );
-      },
+            elevation: 2,
+            margin: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
+            color: theme.cardColor,
+            child: Padding(
+              padding: EdgeInsets.all(screenWidth * 0.03),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: screenWidth * 0.375,
+                          height: screenHeight * 0.03,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.006),
+                        Container(
+                          width: screenWidth * 0.25,
+                          height: screenHeight * 0.026,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.012),
+                        Container(
+                          width: screenWidth * 0.2,
+                          height: screenHeight * 0.023,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: screenWidth * 0.25,
+                    height: screenHeight * 0.133,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                      color: theme.colorScheme.surface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

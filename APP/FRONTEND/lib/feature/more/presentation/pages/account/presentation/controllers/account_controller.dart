@@ -96,3 +96,8 @@ class AccountController extends GetxController {
     Get.offAll(() => LoginPage());
   }
 }
+
+@override
+void onClose() {
+  Get.closeAllSnackbars(); // Close all active snackbars
+}

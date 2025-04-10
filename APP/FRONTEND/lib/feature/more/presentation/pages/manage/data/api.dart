@@ -62,8 +62,11 @@ class Manageapicall{
       debugPrint('Parsed Response Data: $responseData');
 
       return responseData;
+     } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Errorhello: $e");
       return {"error": true, "message": "Unexpected error: ${e.toString()}"};
@@ -93,8 +96,11 @@ class Manageapicall{
       debugPrint('Parsed Response Data: $responseData');
 
       return responseData;
+     } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Errorhello: $e");
       return {"error": true, "message": "Unexpected error: ${e.toString()}"};

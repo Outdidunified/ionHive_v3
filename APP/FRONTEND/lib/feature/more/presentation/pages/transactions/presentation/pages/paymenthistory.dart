@@ -20,25 +20,27 @@ class PaymentHistoryPage extends StatelessWidget {
   }) {
     controller.fetchTransactionFilter();
     controller.fetchAllTransactions();
-
-
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Payment History",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back),
+          color: theme.iconTheme.color,
           onPressed: () => Navigator.pop(context),
         ),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -60,36 +62,32 @@ class PaymentHistoryPage extends StatelessWidget {
                     ],
                     onChanged: (value) {
                       if (value != null) {
-                        controller.selectedFilter.value = value; // Update filter
+                        controller.selectedFilter.value = value;
                       }
                     },
                   )),
-
-
                   ElevatedButton.icon(
                     onPressed: () {
-
                       showModalBottomSheet(
                         context: context,
-                        shape: RoundedRectangleBorder(
+                        shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                         ),
                         isScrollControlled: true,
-                        builder: (context) => _buildFilterModal(),
+                        builder: (context) => _buildFilterModal(context),
                       );
                     },
-                    icon: const Icon(Icons.filter_list_alt, color: Colors.black),
-                    label: const Text('Filters', style: TextStyle(color: Colors.black)),
+                    icon: Icon(Icons.filter_list_alt, color: theme.iconTheme.color),
+                    label: Text('Filters', style: theme.textTheme.bodyMedium),
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5),
-                        side: const BorderSide(color: Colors.grey, width: 0.5),
+                        side: BorderSide(color: Colors.grey.shade400, width: 0.5),
                       ),
-                      backgroundColor: Colors.white,
+                      backgroundColor: theme.cardColor,
                       elevation: 0,
                     ),
                   ),
-
                 ],
               ),
             ),
@@ -100,7 +98,9 @@ class PaymentHistoryPage extends StatelessWidget {
                   return _buildShimmerList();
                 }
                 if (controller.filteredTransactions.isEmpty) {
-                  return const Center(child: Text("No transactions found"));
+                  return Center(
+                    child: Text("No transactions found", style: theme.textTheme.bodyMedium),
+                  );
                 }
                 return ListView.builder(
                   padding: EdgeInsets.only(bottom: screenHeight * 0.02),
@@ -113,20 +113,20 @@ class PaymentHistoryPage extends StatelessWidget {
                       transaction['amount']?.toDouble() ?? 0.0,
                       transaction['type'] ?? '',
                       screenWidth,
+                      context,
                     );
                   },
                 );
               }),
-
             ),
-
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterModal() {
+  Widget _buildFilterModal(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
@@ -135,16 +135,14 @@ class PaymentHistoryPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("FILTER BY DAYS", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("FILTER BY DAYS", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               IconButton(
                 icon: const Icon(Icons.close),
-                onPressed: () => Get.back(), // Close the modal
+                onPressed: () => Get.back(),
               ),
             ],
           ),
           const Divider(),
-
-          // Filter Options (Example: Date Filter)
           Column(
             children: [
               _buildRadioButton("Yesterday", 1),
@@ -152,53 +150,42 @@ class PaymentHistoryPage extends StatelessWidget {
               _buildRadioButton("Last 30 days", 30),
             ],
           ),
-
           const SizedBox(height: 20),
-
-          // Buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton.icon(
-                onPressed: ()  {
+                onPressed: () {
                   controller.clearsavedfilter();
-                  Get.back(); // Close modal
+                  Get.back();
                 },
-                icon: const Icon(Icons.clear, color: Color(0xFF00008B)), // 🗑️ Clear icon
+                icon: const Icon(Icons.clear, color: Color(0xFF00008B)),
                 label: const Text(
                   "Clear Filters",
-                  style: TextStyle(
-                    color: Color(0xFF00008B),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: Color(0xFF00008B), fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 style: TextButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Rectangular with rounded edges
-                    side: const BorderSide(color: Color(0xFF00008B), width: 1.5), // Blue border
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(color: Color(0xFF00008B), width: 1.5),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Padding
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 ),
               ),
-
               ElevatedButton.icon(
                 onPressed: () {
                   controller.applyFilters();
-                  Get.back(); // Close modal
+                  Get.back();
                 },
-                icon: const Icon(Icons.check, color: Colors.white), // ✅ Icon added
+                icon: const Icon(Icons.check, color: Colors.white),
                 label: const Text("Apply", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00008B), // Dark blue
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Rectangular with slightly rounded corners
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Better padding
-                  elevation: 3, // Slight shadow effect
+                  backgroundColor: const Color(0xFF00008B),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  elevation: 3,
                 ),
               ),
-
             ],
           ),
         ],
@@ -206,7 +193,6 @@ class PaymentHistoryPage extends StatelessWidget {
     );
   }
 
-// Helper method to create radio buttons
   Widget _buildRadioButton(String label, int days) {
     return Obx(() => RadioListTile<int>(
       title: Text(label),
@@ -219,10 +205,6 @@ class PaymentHistoryPage extends StatelessWidget {
       },
     ));
   }
-
-
-
-
 
   Widget _buildShimmerList() {
     return ListView.builder(
@@ -244,10 +226,18 @@ class PaymentHistoryPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionItem(String date, String status, double amount, String type, double screenWidth) {
+  Widget _buildTransactionItem(
+      String date,
+      String status,
+      double amount,
+      String type,
+      double screenWidth,
+      BuildContext context,
+      ) {
+    final theme = Theme.of(context);
     bool isCredited = type.toUpperCase() == 'CREDITED';
-
     String formattedDate = date;
+
     try {
       final parsedDate = DateTime.parse(date);
       formattedDate = DateFormat('dd MMM yyyy').format(parsedDate);
@@ -260,10 +250,10 @@ class PaymentHistoryPage extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300, width: 0.2),
         borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        color: theme.cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: theme.shadowColor.withOpacity(0.1),
             spreadRadius: 2,
             blurRadius: 5,
             offset: const Offset(0, 3),
@@ -274,22 +264,14 @@ class PaymentHistoryPage extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: 0),
         leading: Icon(
           isCredited ? Icons.arrow_downward : Icons.arrow_upward,
-          color: isCredited ? Colors.indigo : Colors.red,
-          size: 24,
+          color: isCredited ? Colors.green : Colors.red,
         ),
-        title: Text(
-          formattedDate,
-          style: const TextStyle(
-            fontSize: 15,
-            color: Colors.black87,
-          ),
-        ),
+        title: Text(formattedDate, style: theme.textTheme.bodyMedium),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4.0),
           child: Text(
             '₹${amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: 13,
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: isCredited ? Colors.green : Colors.red,
             ),
@@ -298,32 +280,13 @@ class PaymentHistoryPage extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              type.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.black54,
-              ),
-            ),
+            Text(type.toUpperCase(), style: theme.textTheme.bodySmall),
             const SizedBox(width: 4),
-            Icon(
-              Icons.circle,
-              size: 8,
-              color: isCredited ? Colors.green : Colors.red,
-            ),
+            Icon(Icons.circle, size: 8, color: isCredited ? Colors.green : Colors.red),
             const SizedBox(width: 4),
-            const Text(
-              "SUCCESS",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.black54,
-              ),
-            ),
+            Text("SUCCESS", style: theme.textTheme.bodySmall),
           ],
         ),
-
       ),
     );
   }

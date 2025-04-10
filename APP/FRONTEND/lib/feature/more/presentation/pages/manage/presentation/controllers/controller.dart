@@ -34,11 +34,13 @@ class ManageController extends GetxController {
     }
   }
 
-  Future<void> Deactivaterfidc(String email, String token ,int userid,String tagid, bool status) async {
+  Future<void> Deactivaterfidc(
+      String email, String token, int userid, String tagid, bool status) async {
     try {
       isLoading.value = true;
 
-      final DeactivateRfid response = await repository.DeactivateRfidrep(email,token,userid,tagid,status);
+      final DeactivateRfid response = await repository.DeactivateRfidrep(
+          email, token, userid, tagid, status);
 
       if (response.error) {
         // Get.snackbar("Message", response.message);
@@ -62,3 +64,7 @@ class ManageController extends GetxController {
   }
 }
 
+@override
+void onClose() {
+  Get.closeAllSnackbars(); // Close all active snackbars
+}

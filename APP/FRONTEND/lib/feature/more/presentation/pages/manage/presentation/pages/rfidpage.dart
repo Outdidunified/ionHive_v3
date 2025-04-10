@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
-
 class RfidPage extends StatelessWidget {
   final int userId;
   final String username;
@@ -59,10 +58,6 @@ class RfidPage extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.05),
-
-
-
-
                   ],
                 ),
               ),
@@ -79,7 +74,7 @@ class RfidPage extends StatelessWidget {
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-                        backgroundColor: theme.primaryColor,
+                        backgroundColor: theme.colorScheme.primary,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: () async {
@@ -90,16 +85,20 @@ class RfidPage extends StatelessWidget {
                             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                           ),
                           builder: (context) {
-                            return RFIDBottomSheet(controller: controller,emailId:emailId,userId:userId,token:token);
+                            return RFIDBottomSheet(
+                              controller: controller,
+                              emailId: emailId,
+                              userId: userId,
+                              token: token,
+                            );
                           },
                         );
                       },
-
-                      icon: Icon(Icons.credit_card, color: Colors.white),
+                      icon: Icon(Icons.credit_card, color: theme.colorScheme.onPrimary),
                       label: Text(
                         "Manage your RFID card",
                         style: theme.textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
+                          color: theme.colorScheme.onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -111,17 +110,17 @@ class RfidPage extends StatelessWidget {
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-                        side: BorderSide(color: Colors.green, width: 1),
+                        side: BorderSide(color: theme.colorScheme.primary, width: 1),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(Icons.arrow_back, color: Colors.green),
+                      icon: Icon(Icons.arrow_back, color: theme.colorScheme.primary),
                       label: Text(
                         "Go Back",
                         style: theme.textTheme.labelLarge?.copyWith(
-                          color: Colors.green,
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -137,34 +136,34 @@ class RfidPage extends StatelessWidget {
   }
 }
 
-
-
-
-
-
 class RFIDBottomSheet extends StatelessWidget {
   final ManageController controller;
   final int userId;
   final String emailId;
   final String token;
 
-  const RFIDBottomSheet({Key? key, required this.controller, required this.userId, required this.emailId, required this.token}) : super(key: key);
+  const RFIDBottomSheet({
+    Key? key,
+    required this.controller,
+    required this.userId,
+    required this.emailId,
+    required this.token,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with title and close button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -173,17 +172,13 @@ class RFIDBottomSheet extends StatelessWidget {
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               IconButton(
-                icon: Icon(Icons.close, color: Colors.grey),
+                icon: Icon(Icons.close, color: theme.iconTheme.color?.withOpacity(0.6)),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
-
-          Divider(color: Colors.grey.shade400, thickness: 0.5),
-
-          SizedBox(height: 10),
-
-          // RFID Content (Handles loading, empty, and valid states)
+          Divider(color: theme.dividerColor, thickness: 0.5),
+          const SizedBox(height: 10),
           Obx(() {
             if (controller.isLoading.value) {
               return _buildShimmerEffect();
@@ -207,44 +202,45 @@ class RFIDBottomSheet extends StatelessWidget {
             return Column(
               children: [
                 _buildInfoCard("Tag Id : $rfid", theme),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(child: _buildInfoCard("Expiry Date:\n$expirydate", theme)),
-                    SizedBox(width: 10),
-                    Expanded(child: _buildStatusCard(statusText, isActive)),
+                    const SizedBox(width: 10),
+                    Expanded(child: _buildStatusCard(statusText, isActive, theme)),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  child:ElevatedButton(
+                  child: ElevatedButton(
                     onPressed: isActive
                         ? () async {
                       await controller.Deactivaterfidc(
-                        emailId, // Ensure you pass the correct email
-                        token, // Ensure you pass the correct token
-                        userId, // Ensure userId is passed correctly
-                        rfid, // Pass the tag_id (RFID)
-                        false, // Set status to false to deactivate
+                        emailId,
+                        token,
+                        userId,
+                        rfid,
+                        false,
                       );
-
-                      // Refresh UI after deactivation
                       await controller.fetchRFIDData(emailId, token);
                     }
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isActive ? Colors.red : Colors.grey,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      backgroundColor: isActive ? theme.colorScheme.error : theme.disabledColor,
+                      foregroundColor: theme.colorScheme.onError,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: Text("Block RFID", style: theme.textTheme.titleMedium?.copyWith(color: Colors.white)),
+                    child: Text(
+                      "Block RFID",
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onError,
+                      ),
+                    ),
                   ),
-
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
               ],
             );
           }),
@@ -253,29 +249,27 @@ class RFIDBottomSheet extends StatelessWidget {
     );
   }
 
-  /// Function to format date into IST and `dd/MM/yyyy hh:mm a`
   String formatToIST(String? dateString) {
     if (dateString == null || dateString.isEmpty || dateString == "N/A") {
       return "N/A";
     }
     try {
       DateTime utcTime = DateTime.parse(dateString).toUtc();
-      DateTime istTime = utcTime.add(Duration(hours: 5, minutes: 30));
+      DateTime istTime = utcTime.add(const Duration(hours: 5, minutes: 30));
       return DateFormat("dd/MM/yyyy hh:mm a").format(istTime);
     } catch (e) {
       return "Invalid Date";
     }
   }
 
-  /// Function to show a message card for errors or empty states
   Widget _buildMessageCard(String message, ThemeData theme) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: theme.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade400, width: 0.5),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Center(
         child: Text(
@@ -287,14 +281,13 @@ class RFIDBottomSheet extends StatelessWidget {
     );
   }
 
-  /// Function to create an information card
   Widget _buildInfoCard(String text, ThemeData theme) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        border: Border.all(color: Colors.grey.shade400, width: 0.5),
+        color: theme.colorScheme.surfaceVariant,
+        border: Border.all(color: theme.dividerColor),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
@@ -307,13 +300,12 @@ class RFIDBottomSheet extends StatelessWidget {
     );
   }
 
-  /// Function to create a status card with dot indicator
-  Widget _buildStatusCard(String statusText, bool isActive) {
+  Widget _buildStatusCard(String statusText, bool isActive, ThemeData theme) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        border: Border.all(color: Colors.grey.shade400, width: 0.5),
+        color: theme.colorScheme.surfaceVariant,
+        border: Border.all(color: theme.dividerColor),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
@@ -323,16 +315,16 @@ class RFIDBottomSheet extends StatelessWidget {
             Container(
               width: 10,
               height: 10,
-              margin: EdgeInsets.only(right: 6),
+              margin: const EdgeInsets.only(right: 6),
               decoration: BoxDecoration(
-                color: isActive ? Colors.green : Colors.red,
+                color: isActive ? Colors.green : theme.colorScheme.error,
                 shape: BoxShape.circle,
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(
               "Status:\n$statusText",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -341,7 +333,6 @@ class RFIDBottomSheet extends StatelessWidget {
     );
   }
 
-  /// Function to show shimmer loading effect
   Widget _buildShimmerEffect() {
     return Column(
       children: List.generate(4, (index) {
@@ -364,6 +355,3 @@ class RFIDBottomSheet extends StatelessWidget {
     );
   }
 }
-
-
-

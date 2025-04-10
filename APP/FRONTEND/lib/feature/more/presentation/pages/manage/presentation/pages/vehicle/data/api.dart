@@ -56,38 +56,17 @@ class VehicleApicalls {
       print(response.statusCode);
 
       return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
-    } catch (e) {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    }  catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');
     }
   }
 
-  Future<Map<String, dynamic>> fetchvehiclemodel(
-    String authToken) async {
-    final url = Vehicleurl.fetchvehiclemodel;
 
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': authToken,
-        },
-
-      );
-      final data = jsonDecode(response.body);
-      print('fetching body vehiclemodel : $data');
-      print(response.statusCode);
-
-      return _handleResponse(response);
-    } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
-    } catch (e) {
-      debugPrint("Error: $e");
-      throw HttpException(500, '$e');
-    }
-  }
 
 }

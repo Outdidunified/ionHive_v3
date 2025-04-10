@@ -7,15 +7,26 @@ class AccountAndPrivacyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Retrieve the theme data here
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(''),
+        title: const Text(
+          'Account & Privacy',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: colorScheme.primaryContainer,
+        elevation: 3,
+        iconTheme: IconThemeData(color: colorScheme.onPrimaryContainer),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -35,11 +46,14 @@ class AccountAndPrivacyPage extends StatelessWidget {
                 children: [
                   const TextSpan(
                     text:
-                        'This Privacy Policy describes how we collect, use, process, and disclose your information, including personal information, in conjunction with your access to and use of our website and mobile application, ',
+                    'This Privacy Policy describes how we collect, use, process, and disclose your information, including personal information, in conjunction with your access to and use of our website and mobile application, ',
                   ),
                   TextSpan(
-                    text: 'https://outdidunified.com/ ',
-                    style: const TextStyle(color: Colors.blue),
+                    text: 'https://outdidunified.com/',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: Colors.blueAccent,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ],
               ),
@@ -56,48 +70,54 @@ class AccountAndPrivacyPage extends StatelessWidget {
                 children: [
                   const TextSpan(
                     text:
-                        'If you have any questions or complaints about this Privacy Policy or Company\'s information handling practices, you may email us at ',
+                    'If you have any questions or complaints about this Privacy Policy or Company\'s information handling practices, you may email us at ',
                   ),
                   TextSpan(
                     text: 'info@outdidunified.com',
-                    style: const TextStyle(color: Colors.blue),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: Colors.blueAccent,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                   const TextSpan(text: '.'),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            _buildDeleteAccountButton(theme, onTap: () {}),
+            const SizedBox(height: 24),
+            _buildDeleteAccountButton(theme, colorScheme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDeleteAccountButton(ThemeData theme, {VoidCallback? onTap}) {
+  Widget _buildDeleteAccountButton(ThemeData theme, ColorScheme colorScheme) {
+    final isDark = theme.brightness == Brightness.dark;
+
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      color: theme.cardColor,
+      elevation: isDark ? 0 : 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      color: colorScheme.surfaceVariant,
+      shadowColor: Colors.black26,
       child: InkWell(
-        onTap: () {
-          Get.to(() => DeleteAccountPage());
-        },
-        borderRadius: BorderRadius.circular(15),
+        onTap: () => Get.to(() =>  DeleteAccountPage()),
+        borderRadius: BorderRadius.circular(16),
         splashColor: Colors.red.withOpacity(0.2),
         highlightColor: Colors.red.withOpacity(0.1),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20),
           child: Row(
             children: [
-              Icon(Icons.delete, color: Colors.red, size: 24), // Delete bin icon
-              const SizedBox(width: 12), // Space between icon and text
+              const Icon(Icons.delete_forever, color: Colors.red, size: 26),
+              const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   'Delete Account',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.red, // Red text color
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red,
                   ),
                 ),
               ),
@@ -107,6 +127,5 @@ class AccountAndPrivacyPage extends StatelessWidget {
         ),
       ),
     );
-
   }
 }

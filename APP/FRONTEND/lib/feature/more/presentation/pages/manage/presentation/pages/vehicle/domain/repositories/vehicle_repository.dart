@@ -13,16 +13,6 @@ class VehicleRepository{
     }
   }
 
-  Future<GetAllVehicleModel> fetchvehiclemodel(String authToken) async {
-    try {
-      final responseJson = await _api.fetchvehiclemodel(authToken);
-      print(' rep: $GetAllVehicleModel.fromJson(responseJson)');
-      return GetAllVehicleModel.fromJson(responseJson);
 
-    } catch (e) {
-      print("Repository error in fetchvehiclemodel: $e");
-      rethrow;
-    }
-  }
 
 }

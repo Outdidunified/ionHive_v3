@@ -9,18 +9,19 @@ class VehicleController extends GetxController {
   final sessionController = Get.find<SessionController>();
 
   var vehicles = <VehicleModel>[].obs; // Stores saved vehicles
-  var vehicleModels = <VehicleModelData>[].obs; // ✅ Fix: Match the actual data type
   var isLoading = false.obs;
   var errorMessage = ''.obs;
   var selectedCompany = "All".obs;
-  final searchController = TextEditingController();
+  late final TextEditingController searchController; // Use late to initialize in onInit
   var searchTerm = ''.obs;
+  var selectedModel = RxString(""); // Add this to track the selected model
 
 
 
   @override
   void onInit() {
     super.onInit();
+    searchController = TextEditingController(); // Reinitialize on each init
   }
 
   /// Fetches saved vehicles for the user
@@ -71,31 +72,7 @@ class VehicleController extends GetxController {
     }
   }
 
-  /// Fetches all available vehicle models
-  Future<void> fetchAllVehicleModel() async {
-    try {
-      isLoading(true);
-      errorMessage('');
 
-      final authToken = sessionController.token.value;
-      final response = await _vehicleRepository.fetchvehiclemodel(authToken);
-
-      // ✅ No 'error' or 'message' field in response, so just assign
-      vehicleModels.assignAll(response.vehicleModels);
-
-      print("Fetched Vehicle Models:");
-      for (var vehicle in response.vehicleModels) {
-        print(
-            "ID: ${vehicle.id}, Model: ${vehicle.model}, Company: ${vehicle.vehicleCompany}, Battery: ${vehicle.batterySizeKwh} kWh, Charger Type: ${vehicle.chargerType}"
-        );
-      }
-    } catch (e) {
-      errorMessage("Error fetching vehicle models: $e");
-      print("methods Exception: $e");
-    } finally {
-      isLoading(false);
-    }
-  }
 
   void selectCompany(String company) {
     selectedCompany.value = company;
@@ -103,6 +80,10 @@ class VehicleController extends GetxController {
 
   void setSearchTerm(String term) {
     searchTerm.value = term.toLowerCase();
+  }
+
+  void selectModel(String model) {
+    selectedModel.value = model; // Update selected model
   }
 
   /// Removes a vehicle
@@ -132,9 +113,20 @@ class VehicleController extends GetxController {
     }
   }
 
+  void disposeController() {
+    selectedCompany.value = "All";
+    searchTerm.value = '';
+    selectedModel.value = '';
+
+    // Dispose of the TextEditingController
+    searchController.dispose();
+
+    super.onClose(); // Call the parent onClose method
+  }
+
   @override
   void onClose() {
-    searchController.dispose();
-    super.onClose();
+    disposeController(); // Call the custom dispose function
+    // No additional logic needed here unless required
   }
 }

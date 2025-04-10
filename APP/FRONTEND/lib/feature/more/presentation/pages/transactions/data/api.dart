@@ -5,8 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:ionhive/feature/more/presentation/pages/transactions/data/url.dart';
 import 'package:ionhive/utils/exception/exception.dart'; // Exception thrown Handler
 
-
-class Transactionapicalls{
+class Transactionapicalls {
   String _getDefaultErrorMessage(int statusCode) {
     switch (statusCode) {
       case 400:
@@ -40,7 +39,7 @@ class Transactionapicalls{
   }
 
   Future<Map<String, dynamic>> Fetchalltransactions(
-      String email,  int userId, String authToken) async {
+      String email, int userId, String authToken) async {
     final url = Transactionurl.Fetchtransactions;
 
     try {
@@ -51,8 +50,7 @@ class Transactionapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode(
-            {'email_id': email,  'user_id': userId}),
+        body: jsonEncode({'email_id': email, 'user_id': userId}),
       )
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
@@ -60,11 +58,14 @@ class Transactionapicalls{
       final data = jsonDecode(response.body);
       print('transaction response :$data');
       return _handleResponse(response);
+     } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
-      throw HttpException(500, '$e');
+      throw HttpException(500, _getDefaultErrorMessage(500));
     }
   }
 
@@ -73,7 +74,8 @@ class Transactionapicalls{
     final url = Transactionurl.SaveTransactionfilter;
 
     try {
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +86,8 @@ class Transactionapicalls{
           'user_id': userId,
           'days': days,
         }),
-      ).timeout(
+      )
+          .timeout(
         const Duration(seconds: 10),
         onTimeout: () {
           throw TimeoutException(408, 'Request timed out. Please try again.');
@@ -97,18 +100,22 @@ class Transactionapicalls{
       if (response.statusCode == 200) {
         return data;
       } else {
-        throw HttpException(response.statusCode, data['message'] ?? 'Unknown error');
+        throw HttpException(
+            response.statusCode, data['message'] ?? 'Unknown error');
       }
+     } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
-      throw HttpException(500, '$e');
+      throw HttpException(500, _getDefaultErrorMessage(500));
     }
   }
 
   Future<Map<String, dynamic>> Fetchtransactionfilter(
-      String email,  int userId, String authToken) async {
+      String email, int userId, String authToken) async {
     final url = Transactionurl.Fetchtransactionfilter;
 
     try {
@@ -119,8 +126,7 @@ class Transactionapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode(
-            {'email_id': email,  'user_id': userId}),
+        body: jsonEncode({'email_id': email, 'user_id': userId}),
       )
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
@@ -128,16 +134,19 @@ class Transactionapicalls{
       final data = jsonDecode(response.body);
       print('transaction response :$data');
       return _handleResponse(response);
+     } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
-      throw HttpException(500, '$e');
+      throw HttpException(500, _getDefaultErrorMessage(500));
     }
   }
 
   Future<Map<String, dynamic>> Clearsavedfilter(
-      String email,  int userId, String authToken) async {
+      String email, int userId, String authToken) async {
     final url = Transactionurl.Clearsavedfilter;
 
     try {
@@ -148,8 +157,7 @@ class Transactionapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode(
-            {'email_id': email,  'user_id': userId}),
+        body: jsonEncode({'email_id': email, 'user_id': userId}),
       )
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
@@ -157,13 +165,14 @@ class Transactionapicalls{
       final data = jsonDecode(response.body);
       print('transaction response :$data');
       return _handleResponse(response);
+     } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
-      throw HttpException(500, '$e');
+      throw HttpException(500, _getDefaultErrorMessage(500));
     }
   }
-
-
 }

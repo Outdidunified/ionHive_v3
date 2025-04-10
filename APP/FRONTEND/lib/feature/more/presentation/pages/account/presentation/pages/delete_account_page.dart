@@ -10,12 +10,25 @@ class DeleteAccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Delete Account'),
+        title: const Text(
+          'Delete Account',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: theme.primaryColor,
+        backgroundColor: colorScheme.primaryContainer,
+        elevation: 3,
+        iconTheme: IconThemeData(color: colorScheme.onPrimaryContainer),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

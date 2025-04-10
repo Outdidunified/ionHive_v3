@@ -211,3 +211,8 @@ class TransactionController extends GetxController {
 
   /// Clear applied filters
 }
+
+@override
+void onClose() {
+  Get.closeAllSnackbars(); // Close all active snackbars
+}

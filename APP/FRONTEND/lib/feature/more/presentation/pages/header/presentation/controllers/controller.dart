@@ -40,7 +40,8 @@ class HeaderController extends GetxController {
 
     // Basic validation
     if (newUsername.isEmpty || phoneNumberText.isEmpty) {
-      Get.snackbar("Note", "Fields cannot be empty", backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar("Note", "Fields cannot be empty",
+          backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
@@ -49,15 +50,21 @@ class HeaderController extends GetxController {
     try {
       newPhoneNumber = int.parse(phoneNumberText);
     } catch (e) {
-      Get.snackbar("Note", "Invalid phone number", backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar("Note", "Invalid phone number",
+          backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
     isLoading.value = true;
     try {
-      print("Updating profile with: username=$newUsername, phoneNumber=$newPhoneNumber");
+      print(
+          "Updating profile with: username=$newUsername, phoneNumber=$newPhoneNumber");
       final authenticateResponse = await _headerRepository.CompleteProfile(
-        newUsername, userId, emailId, newPhoneNumber, authToken,
+        newUsername,
+        userId,
+        emailId,
+        newPhoneNumber,
+        authToken,
       );
 
       print("API Response: ${authenticateResponse.toJson()}");
@@ -67,15 +74,18 @@ class HeaderController extends GetxController {
         Get.back(); // Close modal
         phoneNumberController.clear();
         usernameController.clear();
-        Get.snackbar("Success", "Profile updated successfully", backgroundColor: Colors.green, colorText: Colors.white);
+        Get.snackbar("Success", "Profile updated successfully",
+            backgroundColor: Colors.green, colorText: Colors.white);
       } else {
         updateProfileValidationError.value = authenticateResponse.message;
-        Get.snackbar("Error", authenticateResponse.message, backgroundColor: Colors.red, colorText: Colors.white);
+        Get.snackbar("Error", authenticateResponse.message,
+            backgroundColor: Colors.red, colorText: Colors.white);
       }
     } catch (e) {
       updateProfileValidationError.value = e.toString();
       debugPrint("Error updating profile: $e");
-      Get.snackbar("Error", "$e", backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar("Error", "$e",
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
     }
@@ -90,16 +100,18 @@ class HeaderController extends GetxController {
     try {
       print("Fetching profile...");
       final fetchResponseModel =
-      await _headerRepository.fetchprofile(userId, emailId, authToken);
+          await _headerRepository.fetchprofile(userId, emailId, authToken);
 
       print("Fetch response: ${fetchResponseModel.toJson()}");
 
       if (fetchResponseModel.success) {
         if (fetchResponseModel.profile != null) {
-          profileData?.value = fetchResponseModel.profile!; // Store profile data
+          profileData?.value =
+              fetchResponseModel.profile!; // Store profile data
 
           // Update username if available and not null
-          usernameController.text = fetchResponseModel.profile!['username'] ?? '';
+          usernameController.text =
+              fetchResponseModel.profile!['username'] ?? '';
 
           // Update phone number if available and not null
           phoneNumberController.text =
@@ -107,7 +119,8 @@ class HeaderController extends GetxController {
 
           // Print fetched values for debugging
           print("Fetched Username: ${fetchResponseModel.profile!['username']}");
-          print("Fetched Phone Number: ${fetchResponseModel.profile!['phone_no']}");
+          print(
+              "Fetched Phone Number: ${fetchResponseModel.profile!['phone_no']}");
 
           // // Show fetched values in a snackbar
           // Get.snackbar(
@@ -169,7 +182,8 @@ class HeaderController extends GetxController {
     isLoading.value = true;
     try {
       print("Fetching wallet balance...");
-      final response = await _headerRepository.fetchwalletbalance(userId, emailId, authToken);
+      final response = await _headerRepository.fetchwalletbalance(
+          userId, emailId, authToken);
 
       print("Wallet balance response: $response");
 
@@ -223,7 +237,8 @@ class HeaderController extends GetxController {
     isLoading.value = true;
     try {
       print("Fetching wallet balance...");
-      final response = await _headerRepository.fetchtotalsessions(userId, emailId, authToken);
+      final response = await _headerRepository.fetchtotalsessions(
+          userId, emailId, authToken);
 
       print("Total session response: $response");
 
@@ -249,7 +264,7 @@ class HeaderController extends GetxController {
       debugPrint("Error fetching wallet balance: $e");
       Get.snackbar(
         "Error",
-        "Failed to fetch wallet balance: $e",
+        "Failed to fetch session history: $e",
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -258,13 +273,11 @@ class HeaderController extends GetxController {
     }
   }
 
-
-
-
   @override
   void onClose() {
     usernameController.dispose();
     phoneNumberController.dispose();
     super.onClose();
+    Get.closeAllSnackbars(); // Close all active snackbars
   }
 }
