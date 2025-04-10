@@ -6,10 +6,9 @@ const validateAuthorize = (data) => {
     return framevalidation(data, "Authorize.json"); // Ensure correct schema is used
 };
 
-const handleAuthorize = async (uniqueIdentifier, requestPayload, requestId) => {
-    const { broadcastMessage } = require("../WebsocketHandler");
-
-    let response = [3, requestId, {}];
+const handleAuthorize = async (uniqueIdentifier, requestPayload, requestId, wsConnections) => {
+    // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
+    let response = [3, requestId];
 
     // Validate request payload
     const validationResult = validateAuthorize(requestPayload);
@@ -38,8 +37,10 @@ const handleAuthorize = async (uniqueIdentifier, requestPayload, requestId) => {
                     timestamp: new Date().toISOString(),
                 },
             ];
-            broadcastMessage(uniqueIdentifier, authData);
-            logger.loggerSuccess("AuthData successfully broadcasted.");
+            // We'll handle broadcasting in the WebsocketHandler.js
+            logger.loggerSuccess("Authorization successful, ready for broadcast.");
+            // Return the authData as part of the response for broadcasting
+            response[3] = authData;
         }
     } catch (error) {
         logger.loggerError(`Error in handleAuthorize: ${error.message}`);

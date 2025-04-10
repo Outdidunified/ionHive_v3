@@ -5,6 +5,7 @@ const authUser = require("../middlewares/authenticated");
 
 // MANAGE SAVE STATION //TODO - 1
 // Fetch Saved Filter
+// save the fav station 
 
 
 // MANAGE CHARGER IN STATION  //TODO - 2
@@ -13,8 +14,8 @@ router.post('/fetchSpecificStationsChragerDetailsWithConnector', authUser.isAuth
 
 
 // MANAGE CHARGING SESSION FOR USER  //TODO - 3
-// FETCH ACTIVE CHARGING SESSION OF USER
-//
+// initiatale the charging session for user 
+
 
 
 

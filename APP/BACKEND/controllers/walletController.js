@@ -281,7 +281,7 @@ const saveTransactionFilter = async (req, res) => {
 
         if (updateResult.modifiedCount === 0) {
             logger.loggerWarn(`Failed to update transaction filter for user ${user_id} with email ${email_id}.`);
-            return res.status(500).json({
+            return res.status(401).json({
                 error: true,
                 message: 'Failed to update transaction filter.',
             });
@@ -298,7 +298,7 @@ const saveTransactionFilter = async (req, res) => {
         logger.loggerError(`Error in updateTransactionFilter - ${error.message}`);
         return res.status(500).json({
             error: true,
-            message: 'Internal Server Error',
+            message: 'Internal Server Error', error: error.message,
         });
     }
 };

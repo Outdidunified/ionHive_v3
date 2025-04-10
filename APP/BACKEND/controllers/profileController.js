@@ -924,7 +924,7 @@ const deleteAccount = async (req, res) => {
         if (!email_id || typeof email_id !== 'string' ||
             !user_id || !Number.isInteger(Number(user_id)) ||
             !reason || typeof reason !== 'string') {
-            return res.status(401).json({
+            return res.status(400).json({
                 error: true,
                 message: 'Invalid input: User ID must be an integer, and Email ID & reason must be strings. All fields are required.'
             });

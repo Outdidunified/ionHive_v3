@@ -4,6 +4,7 @@ const { handleStatusNotification } = require("./frameHandlers/StatusNotification
 const { handleAuthorize } = require("./frameHandlers/authorizeframehandler");
 const { handleStartTransaction } = require("./frameHandlers/starttransactionframehandler");
 const { handleMeterValues } = require("./frameHandlers/metervalueframehandler");
+const { handleStopTransaction } = require("./frameHandlers/stoptransactionframehandler");
 
 
 const { handleDataTransfer } = require("./frameHandlers/datatransferframehandler");
@@ -18,6 +19,7 @@ module.exports = {
     handleAuthorize,
     handleStartTransaction,
     handleMeterValues,
+    handleStopTransaction,
 
     handleDataTransfer,
     handleFirmwareStatusNotification,

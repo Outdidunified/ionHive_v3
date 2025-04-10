@@ -96,13 +96,31 @@ const startServer = (server, port, name) => {
 // Create HTTP Server
 const httpServer = http.createServer(app);
 
-// Start Servers
-startServer(httpServer, HTTP_PORT, 'HTTP Server');
-startServer(webSocketServer, WS_PORT, 'WebSocket Server');
-startServer(clientWebSocketServer, WS_PORT_CLIENT, 'Client WebSocket Server');
+// Import database connection
+const dbService = require('./Websocket/services/dbService');
 
-// Now initialize WebSockets after servers are listening
-initializeWebSocket(webSocketServer, clientWebSocketServer);
+// Start servers after database connection is established
+const startServers = async () => {
+    try {
+        // Ensure database connection is established - this is the only place we connect to the database
+        await dbService.connectToDatabase();
+
+        // Start servers
+        startServer(httpServer, HTTP_PORT, 'HTTP Server');
+        startServer(webSocketServer, WS_PORT, 'WebSocket Server');
+        startServer(clientWebSocketServer, WS_PORT_CLIENT, 'Client WebSocket Server');
+        loggerDebug('Establishing database connection before starting servers...');
+
+        // Initialize WebSockets after servers are listening
+        initializeWebSocket(webSocketServer, clientWebSocketServer);
+    } catch (error) {
+        loggerError(`Failed to start servers: ${error.message}`);
+        process.exit(1);
+    }
+};
+
+// Start the servers
+startServers();
 
 // WebSocket Connection Logging
 const logWebSocketConnection = (server, name, port) => {

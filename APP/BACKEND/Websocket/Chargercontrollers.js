@@ -1,5 +1,7 @@
 const db_conn = require('../config/db');
 const logger = require('../utils/logger');
+const { v4: uuidv4 } = require('uuid');
+const { wsConnections, uniqueKey } = require('../data/MapModules');
 let db;
 const connectToDatabase = async () => {
     if (!db) {
@@ -8,7 +10,6 @@ const connectToDatabase = async () => {
     return db;
 };
 connectToDatabase(); // Initialize the DB connection once
-const { uniqueKey } = require('../data/MapModules');
 
 
 const chargerStopCall = async (Chargerid, connectorId) => {

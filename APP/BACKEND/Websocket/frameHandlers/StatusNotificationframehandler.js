@@ -24,6 +24,7 @@ const handleStatusNotification = async (
     clientIpAddress
 ) => {
     const formattedDate = new Date().toISOString();
+    // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId, { currentTime: formattedDate }];
     let timeoutId;
     const db = await dbService.connectToDatabase();

@@ -7,7 +7,8 @@ const validateBootNotification = (data) => {
 };
 
 const handleBootNotification = async (uniqueIdentifier, requestPayload, requestId) => {
-    let response = [3, requestId, {}];
+    // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
+    let response = [3, requestId];
     const validationResult = validateBootNotification(requestPayload);
 
     if (!validationResult.error) {
@@ -22,15 +23,20 @@ const handleBootNotification = async (uniqueIdentifier, requestPayload, requestI
 
         if (updateResult) {
             logger.loggerSuccess(`ChargerID: ${uniqueIdentifier} - Updated charger details successfully`);
-            const status = await dbService.checkChargerTagId(uniqueIdentifier, requestPayload.connectorId);
-            response.push({ status, currentTime: new Date().toISOString(), interval: 15 });
+            // BootNotification doesn't include connectorId, so we'll use "Accepted" status directly
+            // Set the payload as the third element (OCPP 1.6 compliant)
+            response[2] = { status: "Accepted", currentTime: new Date().toISOString(), interval: 15 };
+
+            // If there's broadcast data to be added, add it as a fourth element
+            // This will be handled specially in the WebsocketHandler
+            response[3] = { broadcastData: true };
         } else {
             logger.loggerError(`ChargerID: ${uniqueIdentifier} - Failed to update charger details`);
-            response.push({ status: "Rejected" });
+            response[2] = { status: "Rejected" };
         }
     } else {
         logger.loggerError(`Validation failed for BootNotification: ${JSON.stringify(validationResult.details)}`);
-        response.push({ status: "Rejected", errors: validationResult.details });
+        response[2] = { status: "Rejected", errors: validationResult.details };
     }
 
     return response;

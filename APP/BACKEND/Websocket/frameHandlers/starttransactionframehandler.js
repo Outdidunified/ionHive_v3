@@ -1,7 +1,6 @@
 const dbService = require("../services/dbService");
 const logger = require("../../utils/logger");
 const { framevalidation } = require("../validation/framevalidation");
-const { broadcastMessage } = require("../WebsocketHandler");
 const Chargercontrollers = require("../Chargercontrollers");
 
 const validateStartTransaction = (data) => {
@@ -13,7 +12,8 @@ const generateRandomTransactionId = () => {
 };
 
 const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestId, wsConnections) => {
-    let response = [3, requestId, {}];
+    // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
+    let response = [3, requestId];
 
     // Validate request payload
     const validationResult = validateStartTransaction(requestPayload);
@@ -59,7 +59,7 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
 
         logger.loggerSuccess(`Transaction started for Charger: ${uniqueIdentifier}, Transaction ID: ${generatedTransactionId}`);
 
-        // Broadcast status notification
+        // Prepare status notification for broadcasting
         const authData = [
             2,
             requestId,
@@ -71,8 +71,9 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
                 timestamp: new Date().toISOString()
             }
         ];
-        broadcastMessage(uniqueIdentifier, authData);
-        logger.loggerSuccess("StatusNotification broadcasted.");
+        // Add broadcast data to response for WebsocketHandler to handle
+        response.push(authData);
+        logger.loggerSuccess("StatusNotification ready for broadcast.");
 
         // AutoStop logic
         const user = await dbService.getUserEmail(uniqueIdentifier, connectorId, idTag);

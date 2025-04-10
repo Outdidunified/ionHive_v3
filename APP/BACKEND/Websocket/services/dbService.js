@@ -2,18 +2,24 @@ const db_conn = require('../../config/db');
 const logger = require('../../utils/logger');
 let db;
 const connectToDatabase = async () => {
-    if (!db) {
-        db = await db_conn.connectToDatabase();
+    try {
+        if (!db) {
+            db = await db_conn.connectToDatabase();
+            // Don't log here, the message will come from db_conn.connectToDatabase()
+        }
+        return db;
+    } catch (error) {
+        logger.loggerError(`Failed to connect to database: ${error.message}`);
+        throw error;
     }
-    return db;
 };
-connectToDatabase(); // Initialize the DB connection once
+// Don't connect immediately, wait for explicit call
 
 
 const updateChargerIP = async (chargerId, ip) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
         await db.collection('charger_details').updateOne({ charger_id: chargerId }, { $set: { ip } });
         await db.collection('charger_status').updateOne({ charger_id: chargerId }, { $set: { client_ip: ip } });
@@ -23,21 +29,52 @@ const updateChargerIP = async (chargerId, ip) => {
         logger.loggerError(`Error updating charger IP: ${ip} or the Charger: ${chargerId} ${error.message}`);
     }
 };
-const updateChargerStatus = async (chargerId, clientIpAddress) => {
+/**
+ * Update charger status in the database
+ * 
+ * @param {string} chargerId - The charger ID
+ * @param {string} clientIpAddress - The client's IP address
+ * @param {string} [connectionStatus] - Optional connection status (Connected, Disconnected, Error, etc.)
+ * @returns {Promise<object>} - Success status and any error message
+ */
+const updateChargerStatus = async (chargerId, clientIpAddress, connectionStatus) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
 
         const query = { charger_id: chargerId };
-        const updateOperation = { $set: { ip: clientIpAddress } };
+        const updateOperation = {
+            $set: {
+                ip: clientIpAddress,
+                modified_date: new Date()
+            }
+        };
+
+        // Add connection status if provided
+        if (connectionStatus) {
+            updateOperation.$set.connection_status = connectionStatus;
+            updateOperation.$set.last_connection_time = new Date();
+        }
 
         // Update charger_details collection
         const chargerDetailsResult = await db.collection('charger_details').updateOne(query, updateOperation);
         logger.loggerInfo(`ChargerID: ${chargerId} - Matched ${chargerDetailsResult.matchedCount} document(s) and modified ${chargerDetailsResult.modifiedCount} document(s) in charger_details`);
 
         // Update charger_status collection
-        const chargerStatusResult = await db.collection('charger_status').updateOne(query, { $set: { client_ip: clientIpAddress } });
+        const statusUpdateOperation = {
+            $set: {
+                client_ip: clientIpAddress,
+                modified_date: new Date()
+            }
+        };
+
+        // Add connection status if provided
+        if (connectionStatus) {
+            statusUpdateOperation.$set.connection_status = connectionStatus;
+        }
+
+        const chargerStatusResult = await db.collection('charger_status').updateOne(query, statusUpdateOperation);
         logger.loggerInfo(`ChargerID: ${chargerId} - Matched ${chargerStatusResult.matchedCount} document(s) and modified ${chargerStatusResult.modifiedCount} document(s) in charger_status`);
 
         return { success: true };
@@ -46,10 +83,17 @@ const updateChargerStatus = async (chargerId, clientIpAddress) => {
         return { success: false, error: error.message };
     }
 };
+/**
+ * Update charger details in the database
+ * 
+ * @param {string} charger_id - The charger ID
+ * @param {object} updateData - The data to update
+ * @returns {Promise<boolean>} - True if successful (document found), false otherwise
+ */
 const updateChargerDetails = async (charger_id, updateData) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
         const collection = db.collection('charger_details');
 
@@ -58,16 +102,26 @@ const updateChargerDetails = async (charger_id, updateData) => {
             { $set: updateData }
         );
 
-        return result.modifiedCount > 0;
+        // Consider the operation successful if the document was found,
+        // even if no fields were actually modified (matchedCount > 0)
+        if (result.matchedCount > 0) {
+            if (result.modifiedCount === 0) {
+                logger.loggerInfo(`ChargerID: ${charger_id} - Document found but no changes were needed`);
+            }
+            return true;
+        } else {
+            logger.loggerWarn(`ChargerID: ${charger_id} - No document found to update`);
+            return false;
+        }
     } catch (error) {
-        logger.loggerError('Error updating charger details:', error);
+        logger.loggerError(`Error updating charger details for ${charger_id}: ${error.message}`);
         return false;
     }
 };
 const checkChargerTagId = async (charger_id, connector_id) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
         const collection = db.collection('charger_details');
 
@@ -90,7 +144,7 @@ const checkChargerTagId = async (charger_id, connector_id) => {
 const updateTime = async (charger_id, connectorId) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
         const evDetailsCollection = db.collection('charger_details');
         const chargerStatusCollection = db.collection('charger_status');
@@ -152,7 +206,7 @@ const updateTime = async (charger_id, connectorId) => {
 const checkChargerIdInDatabase = async (charger_id) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
         const collection = db.collection('charger_details');
         const charger = await collection.findOne({ charger_id });
@@ -166,7 +220,7 @@ const checkChargerIdInDatabase = async (charger_id) => {
 const SaveChargerStatus = async (chargerStatus, connectorId) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
         const collection = db.collection('charger_status');
         const ChargerStatus = JSON.parse(chargerStatus);
@@ -217,7 +271,7 @@ const SaveChargerStatus = async (chargerStatus, connectorId) => {
 const updateCurrentOrActiveUserToNull = async (uniqueIdentifier, connectorId) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
         const collection = db.collection('charger_details');
         const updateField = `current_or_active_user_for_connector_${connectorId}`;
@@ -243,7 +297,7 @@ const deleteMeterValues = async (key, meterValuesMap) => {
 const NullTagIDInStatus = async (charger_id, connector_id) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
         const chargerDetailsCollection = db.collection('charger_details');
 
@@ -278,7 +332,7 @@ const NullTagIDInStatus = async (charger_id, connector_id) => {
 const checkAuthorization = async (charger_id, idTag) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
+            db = await connectToDatabase();
         }
         const chargerDetailsCollection = db.collection('charger_details');
         const tagIdCollection = db.collection('tag_id');
@@ -408,8 +462,7 @@ const checkAuthorization = async (charger_id, idTag) => {
 const updateChargerTransaction = async (charger_id, updateFields) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
-            return { status: "Error", message: "Database connection is unavailable" };
+            db = await connectToDatabase();
         }
 
         const chargerDetailsCollection = db.collection('charger_details');
@@ -437,8 +490,7 @@ const updateChargerTransaction = async (charger_id, updateFields) => {
 const getUserEmail = async (chargerID, connectorId, TagID) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
-            return null;
+            db = await connectToDatabase();
         }
 
         const evDetailsCollection = db.collection('charger_details');
@@ -497,8 +549,7 @@ const getUserEmail = async (chargerID, connectorId, TagID) => {
 const getAutostop = async (useremsil) => {
     try {
         if (!db) {
-            logger.loggerError('Database connection failed.');
-            return null;
+            db = await connectToDatabase();
         }
         const UserDetails = await db.collection('users').findOne({ email_id: useremsil });
 
@@ -518,7 +569,123 @@ const getAutostop = async (useremsil) => {
         return false;
     }
 }
+const getPricePerUnit = async (uniqueIdentifier, connectorId) => {
+    try {
+        if (!db) {
+            db = await connectToDatabase();
+        }
 
+        const chargerDetailsCollection = db.collection('charger_details');
+        const charger = await chargerDetailsCollection.findOne({ charger_id: uniqueIdentifier });
+
+        if (!charger) {
+            logger.loggerWarn(`Charger ${uniqueIdentifier} not found`);
+            return 0;
+        }
+
+        // Get the price for the specific connector or default price
+        const priceField = `price_for_connector_${connectorId}`;
+        const price = charger[priceField] || charger.default_price || 0;
+
+        return parseFloat(price);
+    } catch (error) {
+        logger.loggerError(`Error in getPricePerUnit: ${error.message}`);
+        return 0;
+    }
+};
+const SaveChargerValue = async (chargerValue) => {
+    try {
+        if (!db) {
+            db = await connectToDatabase();
+        }
+
+        const collection = db.collection('charger_values');
+        const chargerValueObj = JSON.parse(chargerValue);
+
+        // Add timestamp if not present
+        if (!chargerValueObj.created_date) {
+            chargerValueObj.created_date = new Date();
+        }
+
+        const result = await collection.insertOne(chargerValueObj);
+
+        if (result.insertedId) {
+            logger.loggerInfo(`ChargerID ${chargerValueObj.charger_id}, ConnectorID ${chargerValueObj.connectorId}: Value successfully inserted.`);
+            return true;
+        } else {
+            logger.loggerError(`ChargerID ${chargerValueObj.charger_id}, ConnectorID ${chargerValueObj.connectorId}: Value not inserted.`);
+            return false;
+        }
+    } catch (error) {
+        logger.loggerError(`Error in SaveChargerValue: ${error.message}`);
+        return false;
+    }
+};
+// The updateChargerConnectionStatus functionality has been merged into the updateChargerStatus function
+
+const getConnectorId = async (uniqueIdentifier, transactionId) => {
+    try {
+        if (!db) {
+            db = await connectToDatabase();
+        }
+        const document = await db.collection('charger_details').findOne({ charger_id: uniqueIdentifier });
+
+        // Check if the document exists
+        if (!document) {
+            logger.loggerError(`Charger not found: ${uniqueIdentifier}`);
+            throw new Error('Charger not found');
+        }
+
+        // Find the key that matches the transactionId
+        const keyName = Object.keys(document).find(key => document[key] === transactionId);
+
+        if (!keyName) {
+            logger.loggerError(`Transaction not found: ${transactionId}`);
+            throw new Error('Transaction not found');
+        }
+
+        // Extract the last number from the key name
+        const lastNumber = keyName.match(/(\d+)$/);
+
+        if (!lastNumber) {
+            logger.loggerError(`No number found in the key name: ${keyName}`);
+            throw new Error('No number found in the key name');
+        }
+
+        return lastNumber[0]; // Return the last number as a string
+
+    } catch (error) {
+        logger.loggerError(`Get connector ID error in stop transaction: ${error}`);
+        throw error; // Re-throw the error for handling by the caller
+    }
+};
+const updateInUse = async (charger_id, idTag, connectorId) => {
+    try {
+        // Construct the dynamic field name for the specific connector
+        const connectorTagIdField = `tag_id_for_connector_${connectorId}`;
+        const connectorTagIdInUseField = `tag_id_for_connector_${connectorId}_in_use`;
+
+        // Create the update fields
+        const updateFields = {
+            [connectorTagIdField]: null,
+            [connectorTagIdInUseField]: false
+        };
+
+        // Use the dbService to update the charger transaction
+        const result = await updateChargerTransaction(charger_id, updateFields);
+
+        if (result.status === "Success") {
+            logger.loggerInfo(`Charger ID ${charger_id} successfully updated connector ${connectorId} status`);
+            return true;
+        } else {
+            logger.loggerError(`Failed to update connector status for Charger ID ${charger_id}: ${result.message}`);
+            return false;
+        }
+    } catch (error) {
+        logger.loggerError(`UpdateInUse error: ${error.message}`);
+        return false;
+    }
+};
 
 module.exports = {
     connectToDatabase,
@@ -529,11 +696,15 @@ module.exports = {
     checkChargerTagId,
     checkChargerIdInDatabase,
     SaveChargerStatus,
+    SaveChargerValue,
     updateCurrentOrActiveUserToNull,
     deleteMeterValues,
     NullTagIDInStatus,
     checkAuthorization,
     updateChargerTransaction,
     getUserEmail,
-    getAutostop
+    getAutostop,
+    getPricePerUnit,
+    getConnectorId,
+    updateInUse
 };

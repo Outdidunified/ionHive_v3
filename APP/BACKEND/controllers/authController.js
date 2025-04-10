@@ -39,7 +39,7 @@ const GenerateOTP = async (req, res) => {
                 res.status(200).json({ error: false, message: `OTP is sent to ${email_id}` });
             } else {
                 logger.loggerWarn(`Email is not to ${email_id}`);
-                res.status(400).json({ error: true, message: `Email is not to ${email_id}` });
+                res.status(400).json({ error: true, message: `Email is not sent to ${email_id}` });
             }
         } else {
             logger.loggerWarn(`OTP is not generated for ${email_id}`);
