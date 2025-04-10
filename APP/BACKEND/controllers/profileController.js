@@ -581,23 +581,41 @@ const SaveVehiclesOfUser = async (req, res) => {
             });
         }
 
+        // Check if the vehicle number already exists for any user
+        const vehicleNumberExists = await usersCollection.findOne({
+            'vehicles.vehicle_number': vehicle_number.trim()
+        });
+
+        // If vehicle number exists and belongs to another user, return error
+        if (vehicleNumberExists && vehicleNumberExists.user_id !== Number(user_id)) {
+            logger.loggerWarn(`Vehicle number ${vehicle_number} already exists for another user.`);
+            return res.status(409).json({
+                error: true,
+                message: 'Vehicle number already exists. Please use a different vehicle number.',
+            });
+        }
+
         let updatedVehicles = user.vehicles || [];
 
-        // Check if a vehicle with the same ID already exists
-        const existingVehicleIndex = updatedVehicles.findIndex(v => v.vehicle_id === Number(vehicle_id));
+        // Check if a vehicle with the same number already exists for this user
+        const sameVehicleNumberIndex = updatedVehicles.findIndex(v => v.vehicle_number === vehicle_number.trim());
 
-        if (existingVehicleIndex !== -1) {
-            // Update existing vehicle
-            updatedVehicles[existingVehicleIndex].vehicle_number = vehicle_number;
-            logger.loggerInfo(`Updating existing vehicle with ID ${vehicle_id} for user ${user_id}`);
-        } else {
-            // Add the new vehicle with the provided vehicle_id
-            updatedVehicles.push({
-                vehicle_id: Number(vehicle_id),
-                vehicle_number
+        // If the same vehicle number already exists for this user, return error
+        if (sameVehicleNumberIndex !== -1) {
+            logger.loggerWarn(`Vehicle number ${vehicle_number} already exists for user ${user_id}.`);
+            return res.status(409).json({
+                error: true,
+                message: 'This vehicle number is already registered in your account.',
             });
-            logger.loggerInfo(`Adding new vehicle with ID ${vehicle_id} for user ${user_id}`);
         }
+
+        // Always add as a new vehicle (append to the list)
+        updatedVehicles.push({
+            vehicle_id: Number(vehicle_id),
+            vehicle_number: vehicle_number.trim()
+        });
+
+        logger.loggerInfo(`Adding new vehicle with ID ${vehicle_id} and number ${vehicle_number} for user ${user_id}`);
 
         // Update the user's vehicles array
         const updateResult = await usersCollection.updateOne(
@@ -613,10 +631,10 @@ const SaveVehiclesOfUser = async (req, res) => {
             });
         }
 
-        logger.loggerSuccess(`Vehicle ${existingVehicleIndex !== -1 ? 'updated' : 'added'} successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Vehicle added successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
-            message: `Vehicle ${existingVehicleIndex !== -1 ? 'updated' : 'added'} successfully`,
+            message: 'Vehicle added successfully',
             updatedVehicles,
         });
 
@@ -630,17 +648,21 @@ const SaveVehiclesOfUser = async (req, res) => {
 };
 const RemoveVehicleOfUser = async (req, res) => {
     try {
-        const { user_id, email_id, vehicle_id } = req.body;
+        const { user_id, email_id, vehicle_number, vehicle_id } = req.body;
+        console.log(req.body);
 
         // Validate input
         if (
-            !user_id || !email_id || !vehicle_id ||
-            !Number.isInteger(user_id) || typeof email_id !== 'string' || email_id.trim() === '' ||
-            !Number.isInteger(vehicle_id)
+            !user_id || !email_id ||
+            (!vehicle_number && !vehicle_id) ||
+            !Number.isInteger(Number(user_id)) ||
+            typeof email_id !== 'string' || email_id.trim() === '' ||
+            (vehicle_number && typeof vehicle_number !== 'string') ||
+            (vehicle_id && !Number.isInteger(Number(vehicle_id)))
         ) {
             return res.status(400).json({
                 error: true,
-                message: 'Invalid input: user_id and vehicle_id must be integers, email_id must be a non-empty string.',
+                message: 'Invalid input: user_id must be an integer, email_id must be a non-empty string, and either vehicle_number (string) or vehicle_id (integer) must be provided.',
             });
         }
 
@@ -654,7 +676,7 @@ const RemoveVehicleOfUser = async (req, res) => {
         const usersCollection = db.collection('users');
 
         // Find the user
-        const user = await usersCollection.findOne({ user_id, email_id });
+        const user = await usersCollection.findOne({ user_id: Number(user_id), email_id });
 
         if (!user) {
             return res.status(404).json({
@@ -665,35 +687,63 @@ const RemoveVehicleOfUser = async (req, res) => {
 
         let updatedVehicles = user.vehicles || [];
 
-        // Filter out the vehicle to remove
-        const newVehicles = updatedVehicles.filter(v => v.vehicle_id !== vehicle_id);
+        // Find the index of the specific vehicle to remove
+        let vehicleIndex = -1;
 
-        if (updatedVehicles.length === newVehicles.length) {
+        if (vehicle_number && vehicle_id) {
+            // If both are provided, find the exact match
+            vehicleIndex = updatedVehicles.findIndex(v =>
+                v.vehicle_number === vehicle_number.trim() &&
+                v.vehicle_id === Number(vehicle_id)
+            );
+        } else if (vehicle_number) {
+            // Find by vehicle number only
+            vehicleIndex = updatedVehicles.findIndex(v => v.vehicle_number === vehicle_number.trim());
+        } else if (vehicle_id) {
+            // Find by vehicle ID only
+            vehicleIndex = updatedVehicles.findIndex(v => v.vehicle_id === Number(vehicle_id));
+        }
+
+        // Check if the vehicle was found
+        if (vehicleIndex === -1) {
             return res.status(404).json({
                 error: true,
-                message: 'Vehicle not found.',
+                message: vehicle_number
+                    ? 'Vehicle with this number not found in your account.'
+                    : 'Vehicle with this ID not found in your account.',
             });
         }
 
+        // Remove only the specific vehicle at the found index
+        const removedVehicle = updatedVehicles[vehicleIndex];
+        updatedVehicles.splice(vehicleIndex, 1);
+
         // Update the user's vehicles array
         const updateResult = await usersCollection.updateOne(
-            { user_id, email_id },
-            { $set: { vehicles: newVehicles } }
+            { user_id: Number(user_id), email_id },
+            { $set: { vehicles: updatedVehicles } }
         );
 
         if (updateResult.modifiedCount === 0) {
-            logger.loggerWarn(`Failed to remove vehicle ${vehicle_id} for user ${user_id} with email ${email_id}.`);
+            const identifier = removedVehicle.vehicle_number
+                ? `number ${removedVehicle.vehicle_number}`
+                : `ID ${removedVehicle.vehicle_id}`;
+            logger.loggerWarn(`Failed to remove vehicle with ${identifier} for user ${user_id} with email ${email_id}.`);
             return res.status(500).json({
                 error: true,
                 message: 'Failed to remove vehicle.',
             });
         }
 
-        logger.loggerSuccess(`Vehicle ${vehicle_id} removed successfully for user ${user_id} with email ${email_id}.`);
+        const identifier = removedVehicle.vehicle_number
+            ? `number ${removedVehicle.vehicle_number}`
+            : `ID ${removedVehicle.vehicle_id}`;
+        logger.loggerSuccess(`Vehicle with ${identifier} removed successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
             message: 'Vehicle removed successfully',
-            updatedVehicles: newVehicles,
+            updatedVehicles: updatedVehicles,
+            removedVehicle: removedVehicle
         });
 
     } catch (error) {
