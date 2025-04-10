@@ -69,7 +69,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
-const routes = ['auth', 'profile', 'session', 'wallet', 'map', 'chargingstation'];
+const routes = ['auth', 'profile', 'session', 'wallet', 'map', 'chargingstation', 'chargingsession'];
 routes.forEach(route => app.use(`/${route}`, require(`./routes/${route}Route`)));
 
 // Handle 404 - Not Found

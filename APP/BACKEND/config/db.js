@@ -1,8 +1,8 @@
 const { MongoClient } = require('mongodb');
 const logger = require('../utils/logger');
 
-const url = 'mongodb+srv://outdid:outdid@cluster0.t16a63a.mongodb.net/';
-const dbName = 'EV_PHASE_III'; //For Co-production
+const url = process.env.MONGODB_URI || 'mongodb+srv://outdid:outdid@cluster0.t16a63a.mongodb.net/';
+const dbName = process.env.MONGODB_DB_NAME || 'EV_PHASE_III'; //For Co-production
 
 let client;
 

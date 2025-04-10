@@ -547,17 +547,18 @@ const getAllvehicleModels = async (req, res) => {
 // Save Vehicles of User
 const SaveVehiclesOfUser = async (req, res) => {
     try {
-        const { user_id, email_id, vehicle_number } = req.body;
+        const { user_id, email_id, vehicle_number, vehicle_id } = req.body;
 
         // Validate input
         if (
-            !user_id || !email_id || !vehicle_number ||
-            !Number.isInteger(user_id) || typeof email_id !== 'string' || email_id.trim() === '' ||
-            typeof vehicle_number !== 'string' || vehicle_number.trim() === ''
+            !user_id || !email_id || !vehicle_number || !vehicle_id ||
+            !Number.isInteger(Number(user_id)) || typeof email_id !== 'string' || email_id.trim() === '' ||
+            typeof vehicle_number !== 'string' || vehicle_number.trim() === '' ||
+            !Number.isInteger(Number(vehicle_id))
         ) {
             return res.status(400).json({
                 error: true,
-                message: 'Invalid input: user_id must be an integer, email_id and vehicle_number must be non-empty strings.',
+                message: 'Invalid input: user_id and vehicle_id must be integers, email_id and vehicle_number must be non-empty strings.',
             });
         }
 
@@ -571,7 +572,7 @@ const SaveVehiclesOfUser = async (req, res) => {
         const usersCollection = db.collection('users');
 
         // Find the user with both user_id and email_id
-        const user = await usersCollection.findOne({ user_id, email_id });
+        const user = await usersCollection.findOne({ user_id: Number(user_id), email_id });
 
         if (!user) {
             return res.status(404).json({
@@ -582,15 +583,25 @@ const SaveVehiclesOfUser = async (req, res) => {
 
         let updatedVehicles = user.vehicles || [];
 
-        // Find the last vehicle_id and increment
-        let nextVehicleId = updatedVehicles.length > 0 ? Math.max(...updatedVehicles.map(v => v.vehicle_id)) + 1 : 1;
+        // Check if a vehicle with the same ID already exists
+        const existingVehicleIndex = updatedVehicles.findIndex(v => v.vehicle_id === Number(vehicle_id));
 
-        // Add the new vehicle
-        updatedVehicles.push({ vehicle_id: nextVehicleId, vehicle_number });
+        if (existingVehicleIndex !== -1) {
+            // Update existing vehicle
+            updatedVehicles[existingVehicleIndex].vehicle_number = vehicle_number;
+            logger.loggerInfo(`Updating existing vehicle with ID ${vehicle_id} for user ${user_id}`);
+        } else {
+            // Add the new vehicle with the provided vehicle_id
+            updatedVehicles.push({
+                vehicle_id: Number(vehicle_id),
+                vehicle_number
+            });
+            logger.loggerInfo(`Adding new vehicle with ID ${vehicle_id} for user ${user_id}`);
+        }
 
         // Update the user's vehicles array
         const updateResult = await usersCollection.updateOne(
-            { user_id, email_id },
+            { user_id: Number(user_id), email_id },
             { $set: { vehicles: updatedVehicles } }
         );
 
@@ -602,10 +613,10 @@ const SaveVehiclesOfUser = async (req, res) => {
             });
         }
 
-        logger.loggerSuccess(`Vehicle added successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Vehicle ${existingVehicleIndex !== -1 ? 'updated' : 'added'} successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
-            message: 'Vehicle added successfully',
+            message: `Vehicle ${existingVehicleIndex !== -1 ? 'updated' : 'added'} successfully`,
             updatedVehicles,
         });
 

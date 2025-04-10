@@ -24,8 +24,8 @@ const GenerateOTP = async (req, res) => {
     try {
         // Check if email is missing
         if (!email_id) {
-            logger.loggerWarn(`${email_id} - Email ID is Empty !`);
-            res.status(401).json({ error: true, message: 'Email ID is Empty. Please try again later !' });
+            logger.loggerWarn(`Email ID is Empty !`);
+            return res.status(401).json({ error: true, message: 'Email ID is Empty. Please try again later !' });
         }
 
         let otp = await generateOTP();
@@ -58,7 +58,7 @@ const authOTP = async (req, res) => {
     try {
 
         if (!email_id || !otp) {
-            res.status(401).json({ error: true, message: 'Email ID / OTP is missing. Please try again later !' });
+            return res.status(401).json({ error: true, message: 'Email ID / OTP is missing. Please try again later !' });
         }
 
         if (otpStore.has(email_id)) {
