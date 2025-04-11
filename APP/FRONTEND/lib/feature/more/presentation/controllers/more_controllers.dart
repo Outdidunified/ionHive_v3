@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class MoreController extends GetxController {
   var isNotificationEnabled = false.obs;
@@ -33,21 +34,14 @@ class MoreController extends GetxController {
     } else {
       Get.closeAllSnackbars();
       // ✅ Show Snackbar Confirmation before disabling
-      Get.snackbar(
-        "Disable Notifications?",
-        "Are you sure you want to turn off notifications?",
-        snackPosition: SnackPosition.BOTTOM,
-        duration: Duration(seconds: 4),
-        colorText: Colors.white,
-        backgroundColor: Colors.black54, // ✅ Set grey background
-        mainButton: TextButton(
-          onPressed: () async {
-            // ✅ Open App Settings
-            await openAppSettings();
-          },
-          child: Text("Open Settings", style: TextStyle(color: Colors.blue)),
-        ),
+      CustomSnackbar.showInfo(
+        message: "Are you sure you want to turn off notifications?",
       );
+
+      // Open settings after a short delay
+      Future.delayed(Duration(milliseconds: 500), () async {
+        await openAppSettings();
+      });
 
       // Keep switch enabled until user manually disables notifications in settings
       isNotificationEnabled.value = true;

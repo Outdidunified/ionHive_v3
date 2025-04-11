@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/AddVehicle/domain/repositories/addvehicle_repository.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 import '../../domain/model/addvehicle_model.dart';
 
@@ -153,15 +154,7 @@ class AddvehicleControllers extends GetxController {
         Get.back();
 
         // Show success message
-        Get.snackbar(
-          'Success',
-          'Vehicle added successfully!',
-          backgroundColor: Colors.green.withOpacity(0.7),
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(12),
-          borderRadius: 8,
-          duration: const Duration(seconds: 2),
-        );
+        CustomSnackbar.showSuccess(message: 'Vehicle added successfully');
 
         // Refresh the vehicle models list
         fetchAllVehicleModel();
@@ -174,26 +167,11 @@ class AddvehicleControllers extends GetxController {
           }
         });
       } else {
-        Get.snackbar(
-          'Error',
-          response.message,
-          backgroundColor: Colors.red.withOpacity(0.7),
-          colorText: Colors.white,
-          margin: const EdgeInsets.all(12),
-          borderRadius: 8,
-          duration: const Duration(seconds: 3),
-        );
+        CustomSnackbar.showError(message: response.message);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to submit vehicle: ${e.toString()}',
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(12),
-        borderRadius: 8,
-        duration: const Duration(seconds: 3),
-      );
+      CustomSnackbar.showError(
+          message: 'Failed to submit vehicle: ${e.toString()}');
     } finally {
       isLoading(false);
     }

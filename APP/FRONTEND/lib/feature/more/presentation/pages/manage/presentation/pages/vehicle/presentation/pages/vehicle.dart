@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:ionhive/core/core.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/AddVehicle/presentation/pages/addvehicle.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 import '../../../../../../../../../../utils/theme/themes.dart';
 
@@ -110,7 +111,7 @@ class _VehiclePageState extends State<VehiclePage> {
                               height: screenHeight *
                                   0.015), // 10 on a 600-height screen
                           Text(
-                            "Error: ${snapshot.error}",
+                            "Note:  ${snapshot.error}",
                             style: theme.textTheme.bodyLarge?.copyWith(
                               fontSize: screenWidth *
                                   0.04, // 16 on a 400-width screen
@@ -406,17 +407,11 @@ class _VehiclePageState extends State<VehiclePage> {
                                                         }
                                                       }
 
-                                                      // Show success message using the stored scaffold messenger
-                                                      scaffoldMessenger
-                                                          .showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                              "Vehicle removed successfully"),
-                                                          backgroundColor:
-                                                              Colors.green,
-                                                          duration: Duration(
-                                                              seconds: 2),
-                                                        ),
+                                                      // Show success message using our custom snackbar
+                                                      CustomSnackbar
+                                                          .showSuccess(
+                                                        message:
+                                                            "Vehicle removed successfully",
                                                       );
 
                                                       // Force rebuild with a key change to ensure FutureBuilder rebuilds
@@ -429,34 +424,20 @@ class _VehiclePageState extends State<VehiclePage> {
                                                         });
                                                       }
                                                     } else {
-                                                      // Show error message
-                                                      scaffoldMessenger
-                                                          .showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(result[
-                                                                  'message'] ??
-                                                              "Failed to remove vehicle"),
-                                                          backgroundColor:
-                                                              Colors.red,
-                                                          duration: Duration(
-                                                              seconds: 3),
-                                                        ),
+                                                      // Show error message using our custom snackbar
+                                                      CustomSnackbar.showError(
+                                                        message: result[
+                                                                'message'] ??
+                                                            "Failed to remove vehicle",
                                                       );
                                                     }
                                                   } catch (e) {
                                                     print(
-                                                        "Error removing vehicle: $e");
-                                                    // Show error message for exceptions
-                                                    scaffoldMessenger
-                                                        .showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                            "Error removing vehicle: $e"),
-                                                        backgroundColor:
-                                                            Colors.red,
-                                                        duration: Duration(
-                                                            seconds: 3),
-                                                      ),
+                                                        "issue with removing vehicle: $e");
+                                                    // Show error message for exceptions using our custom snackbar
+                                                    CustomSnackbar.showError(
+                                                      message:
+                                                          "issue with removing vehicle: $e",
                                                     );
                                                   } finally {
                                                     // Reset loading state

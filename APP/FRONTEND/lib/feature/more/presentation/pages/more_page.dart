@@ -8,6 +8,7 @@ import 'package:ionhive/feature/more/presentation/pages/account/presentation/pag
 import 'package:ionhive/feature/more/presentation/pages/banner_image/banner_image.dart';
 import 'package:ionhive/feature/more/presentation/pages/header/header.dart';
 import 'package:ionhive/feature/more/presentation/pages/help&support/presentation/pages/contact%20us.dart';
+import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/Saved_Device/presentation/pages/saved_device.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/rfidpage.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/vehicle.dart';
 import 'package:ionhive/feature/more/presentation/pages/transactions/presentation/pages/paymenthistory.dart';
@@ -108,7 +109,14 @@ class MoreePage extends StatelessWidget {
                     token: token,
                   ));
                 },), // Vehicle should use a car-related icon
-                _buildMenuOption('Saved Device', Icons.devices, theme),
+                _buildMenuOption('Saved Device', Icons.devices, theme, onTap: () {
+                  Get.to(() => SavedDevicepage(
+                    userId: userId,
+                    username: username,
+                    emailId: emailId,
+                    token: token,
+                  ));
+                },),
             
 
 

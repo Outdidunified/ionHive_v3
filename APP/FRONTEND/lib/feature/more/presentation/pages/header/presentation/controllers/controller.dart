@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/header/domain/repositories/header_repository.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class HeaderController extends GetxController {
   final HeaderRepository _headerRepository = HeaderRepository();
@@ -40,8 +41,7 @@ class HeaderController extends GetxController {
 
     // Basic validation
     if (newUsername.isEmpty || phoneNumberText.isEmpty) {
-      Get.snackbar("Note", "Fields cannot be empty",
-          backgroundColor: Colors.red, colorText: Colors.white);
+      CustomSnackbar.showError(message: "Fields cannot be empty");
       return;
     }
 
@@ -50,8 +50,7 @@ class HeaderController extends GetxController {
     try {
       newPhoneNumber = int.parse(phoneNumberText);
     } catch (e) {
-      Get.snackbar("Note", "Invalid phone number",
-          backgroundColor: Colors.red, colorText: Colors.white);
+      CustomSnackbar.showError(message: "Invalid phone number");
       return;
     }
 
@@ -74,18 +73,15 @@ class HeaderController extends GetxController {
         Get.back(); // Close modal
         phoneNumberController.clear();
         usernameController.clear();
-        Get.snackbar("Success", "Profile updated successfully",
-            backgroundColor: Colors.green, colorText: Colors.white);
+        CustomSnackbar.showSuccess(message: "Profile updated successfully");
       } else {
         updateProfileValidationError.value = authenticateResponse.message;
-        Get.snackbar("Error", authenticateResponse.message,
-            backgroundColor: Colors.red, colorText: Colors.white);
+        CustomSnackbar.showError(message: authenticateResponse.message);
       }
     } catch (e) {
       updateProfileValidationError.value = e.toString();
       debugPrint("Error updating profile: $e");
-      Get.snackbar("Error", "$e",
-          backgroundColor: Colors.red, colorText: Colors.white);
+      CustomSnackbar.showError(message: "$e");
     } finally {
       isLoading.value = false;
     }
@@ -133,31 +129,16 @@ class HeaderController extends GetxController {
           // );
         } else {
           print("Profile data is null");
-          Get.snackbar(
-            "Error",
-            "Profile data is null",
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
+          CustomSnackbar.showError(message: "Profile data is null");
         }
       } else {
         print("Fetch failed: ${fetchResponseModel.message}");
-        Get.snackbar(
-          "Error",
-          fetchResponseModel.message,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomSnackbar.showError(message: fetchResponseModel.message);
       }
     } catch (e, stackTrace) {
       print("Error fetching profile: $e");
       print("Stack trace: $stackTrace");
-      Get.snackbar(
-        "Error",
-        "Failed to fetch profile: $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomSnackbar.showError(message: "Failed to fetch profile: $e");
     } finally {
       isLoading.value = false;
     }
@@ -169,12 +150,7 @@ class HeaderController extends GetxController {
     final emailId = sessionController.emailId.value;
 
     if (emailId.isEmpty || authToken.isEmpty || userId == 0) {
-      Get.snackbar(
-        "Error",
-        "User details are incomplete",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomSnackbar.showError(message: "User details are incomplete");
       isLoading.value = false;
       return;
     }
@@ -198,21 +174,11 @@ class HeaderController extends GetxController {
         //   colorText: Colors.white,
         // );
       } else {
-        Get.snackbar(
-          "Error",
-          response.message ?? "Unknown error",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomSnackbar.showError(message: response.message ?? "Unknown error");
       }
     } catch (e) {
       debugPrint("Error fetching wallet balance: $e");
-      Get.snackbar(
-        "Error",
-        "Failed to fetch wallet balance: $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomSnackbar.showError(message: "Failed to fetch wallet balance: $e");
     } finally {
       isLoading.value = false;
     }
@@ -224,12 +190,7 @@ class HeaderController extends GetxController {
     final emailId = sessionController.emailId.value;
 
     if (emailId.isEmpty || authToken.isEmpty || userId == 0) {
-      Get.snackbar(
-        "Error",
-        "User details are incomplete",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomSnackbar.showError(message: "User details are incomplete");
       isLoading.value = false;
       return;
     }
@@ -253,21 +214,11 @@ class HeaderController extends GetxController {
         //   colorText: Colors.white,
         // );
       } else {
-        Get.snackbar(
-          "Error",
-          response.message ?? "Unknown error",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        CustomSnackbar.showError(message: response.message ?? "Unknown error");
       }
     } catch (e) {
       debugPrint("Error fetching wallet balance: $e");
-      Get.snackbar(
-        "Error",
-        "Failed to fetch session history: $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      CustomSnackbar.showError(message: "Failed to fetch session history: $e");
     } finally {
       isLoading.value = false;
     }

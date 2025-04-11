@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/domain/manage_model.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/domain/manage_repository.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class ManageController extends GetxController {
   final Managerepository repository = Managerepository();
@@ -28,7 +29,8 @@ class ManageController extends GetxController {
       // Store the response
       rfidData.value = response;
     } catch (e) {
-      Get.snackbar("Error", "An unexpected error occurred: ${e.toString()}");
+      CustomSnackbar.showError(
+          message: "An unexpected error occurred: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }
@@ -56,7 +58,8 @@ class ManageController extends GetxController {
 
       // Store the response
     } catch (e) {
-      Get.snackbar("Error", "An unexpected error occurred: ${e.toString()}");
+      CustomSnackbar.showError(
+          message: "An unexpected error occurred: ${e.toString()}");
       // print("An unexpected error occurred: ${e.toString()}");
     } finally {
       isLoading.value = false;

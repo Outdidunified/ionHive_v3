@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/transactions/domain/repositories/transaction_repository.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class TransactionController extends GetxController {
   final RxList<Map<String, dynamic>> transactions =
@@ -53,24 +54,13 @@ class TransactionController extends GetxController {
         }).toList());
       } else {
         errorMessage.value = "Failed to fetch transactions.";
-        Get.snackbar(
-          "Error",
-          errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
+        CustomSnackbar.showError(message: errorMessage.value);
       }
     } catch (e) {
       errorMessage.value = "Failed to fetch transactions. Please try again.";
       print("Error fetching transactions: $e");
 
-      Get.snackbar(
-        "Error",
-        errorMessage.value,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+      CustomSnackbar.showError(message: errorMessage.value);
     } finally {
       isLoading.value = false;
     }

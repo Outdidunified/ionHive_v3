@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/utils/widgets/dropdowns/select_reason_dropdown.dart';
 import 'package:ionhive/feature/more/presentation/pages/account/presentation/controllers/account_controller.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   DeleteAccountPage({super.key});
@@ -62,8 +63,8 @@ class DeleteAccountPage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 if (controller.selectedReason.value.isEmpty) {
-                  Get.snackbar("Note", "Please select a reason to proceed.",
-                      snackPosition: SnackPosition.BOTTOM);
+                  CustomSnackbar.showWarning(
+                      message: "Please select a reason to proceed.");
                 } else {
                   controller.deleteAccount();
                 }
