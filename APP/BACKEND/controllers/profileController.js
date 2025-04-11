@@ -348,7 +348,6 @@ const fetchSavedDevices = async (req, res) => {
     try {
         const { user_id, email_id } = req.body;
 
-
         // Validate request parameters
         if (!user_id || isNaN(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
@@ -356,7 +355,6 @@ const fetchSavedDevices = async (req, res) => {
                 message: 'Invalid input: user_id must be a valid number and email_id must be a non-empty string',
             });
         }
-
 
         if (!db) {
             return res.status(500).json({
@@ -368,6 +366,7 @@ const fetchSavedDevices = async (req, res) => {
         const chargerDetailsCollection = db.collection('charger_details');
         const chargerStatusCollection = db.collection('charger_status');
         const financeDetailsCollection = db.collection('finance_details');
+        const socketGunConfigCollection = db.collection('socket_gun_config');
 
         // Find user and retrieve favorite chargers
         const user = await usersCollection.findOne(
@@ -388,18 +387,45 @@ const fetchSavedDevices = async (req, res) => {
             .filter(item => typeof item === "object" && item.charger_id)
             .map(item => String(item.charger_id));
 
-
         // Fetch charger details
         const favChargers = await chargerDetailsCollection.find({
             charger_id: { $in: favChargerIds },
             status: true
+        }).project({
+            _id: 0,
+            charger_id: 1,
+            model: 1,
+            type: 1,
+            vendor: 1,
+            charger_model: 1,
+            charger_type: 1,
+            gun_connector: 1,
+            max_current: 1,
+            max_power: 1,
+            socket_count: 1,
+            lat: 1,
+            long: 1,
+            finance_id: 1,
+            status: 1,
+            address: 1,
+            landmark: 1
         }).toArray();
 
-        // Fetch detailed charger info
+        // Fetch socket & gun configurations
+        const socketGunConfigs = await socketGunConfigCollection.find(
+            { charger_id: { $in: favChargerIds } }
+        ).toArray();
+
+        // Fetch charger statuses for all connectors
+        const chargerStatuses = await chargerStatusCollection.find(
+            { charger_id: { $in: favChargerIds } }
+        ).toArray();
+
+        // Process charger details with finance info and connectors
         const detailedFavChargers = await Promise.all(favChargers.map(async (charger) => {
             const chargerId = charger.charger_id;
-            const status = await chargerStatusCollection.findOne({ charger_id: chargerId });
 
+            // Get finance details and calculate unit price
             let unitPrice = null;
             if (charger.finance_id) {
                 const financeRecord = await financeDetailsCollection.findOne({ finance_id: charger.finance_id });
@@ -419,7 +445,37 @@ const fetchSavedDevices = async (req, res) => {
                 }
             }
 
-            return { ...charger, status: status || null, unit_price: unitPrice };
+            // Get socket/gun configuration
+            const config = socketGunConfigs.find(cfg => cfg.charger_id === chargerId) || {};
+
+            // Extract all connector types dynamically
+            const connectors = [];
+            if (config) {
+                const connectorKeys = Object.keys(config).filter(key => /^connector_\d+_type$/.test(key));
+
+                for (const key of connectorKeys) {
+                    const connectorIndex = key.match(/\d+/)[0];
+
+                    // Find matching status from charger_status collection
+                    const matchingStatus = chargerStatuses.find(
+                        status => status.charger_id === chargerId && status.connector_id === parseInt(connectorIndex)
+                    );
+
+                    connectors.push({
+                        connector_id: parseInt(connectorIndex),
+                        connector_type: config[key] || null,
+                        connector_type_name: config[`connector_${connectorIndex}_type_name`] || null,
+                        charger_status: matchingStatus ? matchingStatus.charger_status : " - "
+                    });
+                }
+            }
+
+            // Return charger with all details
+            return {
+                ...charger,
+                unit_price: unitPrice,
+                connectors: connectors
+            };
         }));
 
         logger.loggerSuccess('Successfully fetched favorite chargers', { user_id, count: detailedFavChargers.length });
@@ -430,6 +486,7 @@ const fetchSavedDevices = async (req, res) => {
             favChargers: user.favChargers,
             favChargersDetails: detailedFavChargers
         });
+
 
     } catch (error) {
         logger.loggerError('Error fetching favorite chargers', { error: error.message });

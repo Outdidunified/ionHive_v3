@@ -61,7 +61,7 @@ const updateChargerStatus = async (chargerId, clientIpAddress, connectionStatus)
         const chargerDetailsResult = await db.collection('charger_details').updateOne(query, updateOperation);
         logger.loggerInfo(`ChargerID: ${chargerId} - Matched ${chargerDetailsResult.matchedCount} document(s) and modified ${chargerDetailsResult.modifiedCount} document(s) in charger_details`);
 
-        // Update charger_status collection
+        // Update charger_status collection for ALL connectors
         const statusUpdateOperation = {
             $set: {
                 client_ip: clientIpAddress,
@@ -72,9 +72,11 @@ const updateChargerStatus = async (chargerId, clientIpAddress, connectionStatus)
         // Add connection status if provided
         if (connectionStatus) {
             statusUpdateOperation.$set.connection_status = connectionStatus;
+            statusUpdateOperation.$set.last_connection_time = new Date();
         }
 
-        const chargerStatusResult = await db.collection('charger_status').updateOne(query, statusUpdateOperation);
+        // Use updateMany to update all connector entries for this charger
+        const chargerStatusResult = await db.collection('charger_status').updateMany(query, statusUpdateOperation);
         logger.loggerInfo(`ChargerID: ${chargerId} - Matched ${chargerStatusResult.matchedCount} document(s) and modified ${chargerStatusResult.modifiedCount} document(s) in charger_status`);
 
         return { success: true };
