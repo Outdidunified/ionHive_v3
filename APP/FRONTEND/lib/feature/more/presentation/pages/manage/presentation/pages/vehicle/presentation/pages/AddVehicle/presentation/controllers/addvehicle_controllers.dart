@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
+import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/AddVehicle/domain/repositories/addvehicle_repository.dart';
 
 import '../../domain/model/addvehicle_model.dart';
@@ -8,7 +10,7 @@ import '../../domain/model/addvehicle_model.dart';
 class AddvehicleControllers extends GetxController {
   final AddVehicleRepository _vehicleRepository = AddVehicleRepository();
   final sessionController = Get.find<SessionController>();
-
+  final vehicles = <Map<String, dynamic>>[].obs;
   var vehicleModels =
       <VehicleModelData>[].obs; // ✅ Fix: Match the actual data type
   var isLoading = false.obs;
@@ -22,6 +24,8 @@ class AddvehicleControllers extends GetxController {
   final vehicleNumberController = TextEditingController();
   final vehicleNumber = ''.obs;
   final isVehicleNumberValid = false.obs;
+  final selectedVehicleModel =
+      Rx<VehicleModelData?>(null); // Stores full model data
 
   @override
   void onInit() {
@@ -29,6 +33,15 @@ class AddvehicleControllers extends GetxController {
     fetchAllVehicleModel();
     searchController = TextEditingController();
     // Initialize vehicles if needed
+  }
+
+// In your controller
+  void setVehicles(List<Map<String, dynamic>> vehiclesList) {
+    if (vehiclesList == null || vehiclesList.isEmpty) {
+      vehicles.clear();
+    } else {
+      vehicles.value = vehiclesList;
+    }
   }
 
   /// Fetches all available vehicle models
@@ -64,8 +77,9 @@ class AddvehicleControllers extends GetxController {
     searchTerm.value = term.toLowerCase();
   }
 
-  void selectModel(String model) {
-    selectedModel.value = model; // Update selected model
+  void selectModel(VehicleModelData model) {
+    selectedModel.value = model.model; // Store model name
+    selectedVehicleModel.value = model; // Store full model data
   }
 
   void disposeController() {
@@ -96,22 +110,103 @@ class AddvehicleControllers extends GetxController {
     isVehicleNumberValid.value = isValidVehicleNumber(upperCaseVal);
   }
 
-  // Submit vehicle number
-  void submitVehicleNumber() {
-    if (isVehicleNumberValid.value) {
-      debugPrint("Submitting vehicle number: ${vehicleNumber.value}");
-      // Here you would typically:
-      // 1. Save the vehicle number with the selected model
-      // 2. Close the bottom sheet
-      // 3. Maybe refresh the vehicle list
-      Get.back(); // Close the bottom sheet
+  Future<void> submitVehicleNumber() async {
+    if (!isVehicleNumberValid.value || selectedVehicleModel.value == null)
+      return;
+
+    try {
+      isLoading(true);
+
+      final response = await _vehicleRepository.addVehicleRepo(
+        authToken: sessionController.token.value,
+        userId: sessionController.userId.value,
+        emailId: sessionController.emailId.value,
+        vehicleNumber: vehicleNumber.value,
+        vehicleId: selectedVehicleModel.value!.vehicleId,
+      );
+
+      if (!response.error) {
+        // Create the new vehicle object with all necessary details
+        final newVehicle = {
+          'vehicle_number': vehicleNumber.value,
+          'details': {
+            'model': selectedVehicleModel.value!.model,
+            'vehicle_company': selectedVehicleModel.value!.vehicleCompany,
+            'image_base64': selectedVehicleModel.value!.vehicleImage,
+            'battery_size_kwh': selectedVehicleModel.value!.batterySizeKwh,
+            'charger_type': selectedVehicleModel.value!.chargerType,
+            'range':
+                selectedVehicleModel.value!.type, // Using type as range for now
+          }
+        };
+
+        // Add the new vehicle to the vehicles list
+        vehicles.add(newVehicle);
+
+        // Reset the form
+        vehicleNumberController.clear();
+        vehicleNumber.value = '';
+        selectedModel.value = '';
+        selectedVehicleModel.value = null;
+
+        // Close the bottom sheet
+        Get.back();
+
+        // Show success message
+        Get.snackbar(
+          'Success',
+          'Vehicle added successfully!',
+          backgroundColor: Colors.green.withOpacity(0.7),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(12),
+          borderRadius: 8,
+          duration: const Duration(seconds: 2),
+        );
+
+        // Refresh the vehicle models list
+        fetchAllVehicleModel();
+
+        // Automatically navigate back to the vehicle page after a short delay
+        Future.delayed(const Duration(seconds: 2), () {
+          if (Get.isRegistered<VehicleController>()) {
+            final vehicleController = Get.find<VehicleController>();
+            vehicleController.refreshVehicles();
+          }
+        });
+      } else {
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: Colors.red.withOpacity(0.7),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(12),
+          borderRadius: 8,
+          duration: const Duration(seconds: 3),
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to submit vehicle: ${e.toString()}',
+        backgroundColor: Colors.red.withOpacity(0.7),
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(12),
+        borderRadius: 8,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      isLoading(false);
     }
   }
 
   @override
   void onClose() {
-    disposeController(); // Call the custom dispose function
+    selectedCompany.value = "All";
+    searchTerm.value = '';
+    selectedModel.value = '';
+    selectedVehicleModel.value = null;
+    searchController.dispose();
     vehicleNumberController.dispose();
-    // No additional logic needed here unless required
+    super.onClose();
   }
 }

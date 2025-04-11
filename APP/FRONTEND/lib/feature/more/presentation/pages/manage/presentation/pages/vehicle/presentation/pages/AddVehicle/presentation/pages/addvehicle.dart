@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/core.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/AddVehicle/presentation/controllers/addvehicle_controllers.dart';
 
 class AddVehicle extends StatelessWidget {
-  AddVehicle({super.key});
+  AddVehicle({super.key}) {
+    final arguments = Get.arguments as Map<String, dynamic>?;
+    final vehicleController = Get.put(AddvehicleControllers());
+    vehicleController.setVehicles(arguments?['vehicles'] ?? []);
+  }
 
   final AddvehicleControllers _vehicleController =
       Get.put(AddvehicleControllers());
+  final VehicleController fetchvehicleController = Get.put(VehicleController());
   final String baseUrl = iOnHiveCore.baseUrl;
 
   @override
@@ -26,9 +32,18 @@ class AddVehicle extends StatelessWidget {
         scrolledUnderElevation: 0, // Prevents elevation change when scrolling
         leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => {
-                  Get.back(),
-                }),
+            onPressed: () async {
+              // First navigate back
+              Get.back();
+
+              // Then refresh the vehicle list in the background
+              // This ensures the UI is updated with the latest data
+              await Future.delayed(Duration(milliseconds: 300));
+              if (Get.isRegistered<VehicleController>()) {
+                final controller = Get.find<VehicleController>();
+                controller.refreshVehicles();
+              }
+            }),
       ),
       body: Padding(
         padding: EdgeInsets.all(screenWidth * 0.04),
@@ -39,28 +54,19 @@ class AddVehicle extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "My Vehicles",
-                      style: theme.textTheme.headlineMedium,
-                    ),
-                    SizedBox(height: screenHeight * 0.015),
-                    if (vehicles.isNotEmpty)
-                      SizedBox(
-                        height: screenHeight * 0.13,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: vehicles.length,
-                          itemBuilder: (context, index) {
-                            final vehicle = vehicles[index];
-                            return VehicleCard(
-                              key: ValueKey(
-                                  'vehicle_${vehicle['vehicle_number']}'),
-                              vehicle: vehicle,
-                            );
-                          },
-                        ),
-                      ),
-                    SizedBox(height: screenHeight * 0.025),
+                    // Only show "My Vehicles" section if there are vehicles
+                    Obx(() => _vehicleController.vehicles.isNotEmpty
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("My Vehicles",
+                                  style: theme.textTheme.headlineMedium),
+                              SizedBox(height: screenHeight * 0.015),
+                              _buildVehiclesList(_vehicleController),
+                              SizedBox(height: screenHeight * 0.025),
+                            ],
+                          )
+                        : SizedBox.shrink()),
                     _buildCompanyTabs(),
                     SizedBox(height: screenHeight * 0.02),
                     _buildSearchBar(),
@@ -79,6 +85,27 @@ class AddVehicle extends StatelessWidget {
     );
   }
 
+  Widget _buildVehiclesList(AddvehicleControllers controller) {
+    return SizedBox(
+      height: MediaQuery.of(Get.context!).size.height * 0.13,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: controller.vehicles.length,
+        itemBuilder: (context, index) {
+          final vehicle = controller.vehicles[index];
+          return Container(
+            width: MediaQuery.of(context).size.width * 0.30, // Increased width
+
+            child: VehicleCard(
+              key: ValueKey('vehicle_${vehicle['vehicle_number']}'),
+              vehicle: vehicle,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildCompanyTabs() {
     return Obx(() {
       final companies = _vehicleController.vehicleModels
@@ -91,6 +118,9 @@ class AddVehicle extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
+            SizedBox(
+              width: 10,
+            ),
             // "All" tab
             _buildCompanyTab("All"),
             // Company tabs
@@ -193,8 +223,7 @@ class AddVehicle extends StatelessWidget {
               padding: EdgeInsets.symmetric(
                   vertical: MediaQuery.of(Get.context!).size.height * 0.01),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount:
-                    MediaQuery.of(Get.context!).size.width < 380 ? 2 : 2,
+                crossAxisCount: 2, // Simplified - same for all screen sizes
                 crossAxisSpacing: MediaQuery.of(Get.context!).size.width * 0.03,
                 mainAxisSpacing: MediaQuery.of(Get.context!).size.height * 0.02,
                 childAspectRatio: 1.2,
@@ -203,15 +232,13 @@ class AddVehicle extends StatelessWidget {
               itemBuilder: (context, index) {
                 final vehicleModel = searchFilteredModels[index];
                 return Obx(() => VehicleGridCard(
-                      // Wrap in Obx to ensure reactivity
-                      key: ValueKey(
-                          'grid_${vehicleModel.id}_${_vehicleController.searchTerm.value}'),
+                      key: ValueKey('grid_${vehicleModel.id}_$index'),
                       isSelected: _vehicleController.selectedModel.value ==
                           vehicleModel.model,
                       model: vehicleModel.model,
                       imageUrl: "$baseUrl${vehicleModel.vehicleImage}",
-                      onTap: () =>
-                          _vehicleController.selectModel(vehicleModel.model),
+                      onTap: () => _vehicleController
+                          .selectModel(vehicleModel), // Pass the full model
                     ));
               },
             );
@@ -277,7 +304,10 @@ class AddVehicle extends StatelessWidget {
                   height: 4,
                   width: 40,
                   decoration: BoxDecoration(
-                    color: Colors.grey[400],
+                    color: Theme.of(Get.context!)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -293,37 +323,63 @@ class AddVehicle extends StatelessWidget {
               TextField(
                 controller: _vehicleController.vehicleNumberController,
                 onChanged: _vehicleController.onVehicleNumberChanged,
-                style: TextStyle(color: Colors.grey[800]),
+                style: Theme.of(Get.context!).textTheme.bodyLarge,
                 maxLength: 10,
                 decoration: InputDecoration(
+                  labelText: 'Vehicle Number',
+                  labelStyle: Theme.of(Get.context!).textTheme.bodyMedium,
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: Theme.of(Get.context!).colorScheme.surface,
                   counterText: "",
                   hintText: "e.g. TN09UG7777",
-                  hintStyle: TextStyle(color: Colors.grey[500]),
+                  hintStyle:
+                      Theme.of(Get.context!).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(Get.context!)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.5),
+                          ),
                   contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                   border: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Colors.grey.shade300, width: 1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                        color: Theme.of(Get.context!).dividerColor, width: 2.0),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Colors.grey.shade300, width: 1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                        color: Theme.of(Get.context!).dividerColor, width: 2.0),
                   ),
                   focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide(
-                        color: Theme.of(Get.context!).primaryColor, width: 1),
-                    borderRadius: BorderRadius.circular(8),
+                        color: Theme.of(Get.context!).primaryColor, width: 2.0),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                        color: Theme.of(Get.context!).colorScheme.error,
+                        width: 2.0),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                        color: Theme.of(Get.context!).colorScheme.error,
+                        width: 2.0),
                   ),
                 ),
               ),
               SizedBox(height: 5),
               Text(
                 'Enter your ${_vehicleController.selectedModel.value} registration number',
-                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                style: Theme.of(Get.context!).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(Get.context!)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6),
+                      fontSize: 13,
+                    ),
               ),
               if (!_vehicleController.isVehicleNumberValid.value &&
                   _vehicleController.vehicleNumber.value.isNotEmpty)
@@ -331,7 +387,11 @@ class AddVehicle extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
                     'Invalid format. Use format: TN09UG7777',
-                    style: TextStyle(color: Colors.red, fontSize: 12),
+                    style: TextStyle(
+                      color: Theme.of(Get.context!).colorScheme.error,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               SizedBox(height: 20),
@@ -345,21 +405,31 @@ class AddVehicle extends StatelessWidget {
                     backgroundColor:
                         _vehicleController.isVehicleNumberValid.value
                             ? Theme.of(Get.context!).primaryColor
-                            : Colors.grey.shade300,
-                    foregroundColor: Colors.white,
+                            : Theme.of(Get.context!).colorScheme.surfaceVariant,
+                    foregroundColor: _vehicleController
+                            .isVehicleNumberValid.value
+                        ? Colors.white
+                        : Theme.of(Get.context!).colorScheme.onSurfaceVariant,
                     padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(16),
                     ),
+                    elevation: 0,
                   ),
                   child: Text(
                     "Submit",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: _vehicleController.isVehicleNumberValid.value
-                          ? Colors.white
-                          : Colors.grey[500],
-                    ),
+                    style: Theme.of(Get.context!)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: _vehicleController.isVehicleNumberValid.value
+                              ? Colors.white
+                              : Theme.of(Get.context!)
+                                  .colorScheme
+                                  .onSurfaceVariant
+                                  .withOpacity(0.7),
+                        ),
                   ),
                 ),
               ),
@@ -368,7 +438,13 @@ class AddVehicle extends StatelessWidget {
                 child: Text(
                   "Just once! Register your vehicle now, and we'll remember it for you.",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: Theme.of(Get.context!).textTheme.bodyLarge?.copyWith(
+                        fontSize: 12,
+                        color: Theme.of(Get.context!)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6),
+                      ),
                 ),
               ),
               SizedBox(height: 20),
@@ -383,6 +459,44 @@ class VehicleCard extends StatelessWidget {
   final String baseUrl = iOnHiveCore.baseUrl;
 
   VehicleCard({super.key, required this.vehicle});
+
+  // Helper method to get the vehicle image with proper error handling
+  Widget _getVehicleImage(Map<String, dynamic> vehicle, String baseUrl) {
+    // Check if the image is in the details structure or directly in the vehicle map
+    final String? imagePath = vehicle['details'] != null
+        ? vehicle['details']['image_base64']
+        : vehicle['image_base64'];
+
+    if (imagePath == null || imagePath.isEmpty) {
+      return const Icon(Icons.car_repair, size: 32);
+    }
+
+    return CachedNetworkImage(
+      imageUrl: "$baseUrl$imagePath",
+      fit: BoxFit.cover,
+      placeholder: (context, url) => const Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+      errorWidget: (context, error, stackTrace) {
+        print("Error loading image: $error");
+        return const Icon(Icons.car_repair, size: 32);
+      },
+    );
+  }
+
+  // Helper method to get the vehicle model name
+  String _getVehicleModel(Map<String, dynamic> vehicle) {
+    // Check if the model is in the details structure or directly in the vehicle map
+    final String? model = vehicle['details'] != null
+        ? vehicle['details']['model']
+        : vehicle['model'];
+
+    return model ?? 'Unknown Model';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -405,19 +519,12 @@ class VehicleCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 color: theme.colorScheme.surfaceVariant,
               ),
-              child: vehicle['image_base64'] != null
-                  ? Image.network(
-                      "$baseUrl${vehicle['image_base64']}",
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.car_repair, size: 32),
-                    )
-                  : const Icon(Icons.car_repair, size: 32),
+              child: _getVehicleImage(vehicle, baseUrl),
             ),
             SizedBox(height: screenWidth * 0.01),
             // Vehicle Model
             CustomEllipsisText(
-              text: vehicle['model'] ?? 'Unknown Model',
+              text: _getVehicleModel(vehicle),
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurface,

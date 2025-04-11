@@ -1,7 +1,6 @@
 class VehicleModel {
   final String id;
   final String name;
-  final String plateNumber;
   final String? imageUrl;
   final String? model;
   final String? vehicleNumber;
@@ -13,7 +12,6 @@ class VehicleModel {
   VehicleModel({
     required this.id,
     required this.name,
-    required this.plateNumber,
     this.imageUrl,
     this.model,
     this.vehicleNumber,
@@ -29,7 +27,6 @@ class VehicleModel {
     return VehicleModel(
       id: json['vehicle_id']?.toString() ?? '',
       name: details['model'] ?? '',
-      plateNumber: json['vehicle_number'] ?? '',
       imageUrl: details['vehicle_image'],
       model: details['model'],
       vehicleNumber: json['vehicle_number'],
@@ -66,7 +63,22 @@ class FetchSavedVehicle {
   }
 }
 
+class Removevehicleresponse {
+  final bool error;
+  final String message;
 
+  Removevehicleresponse({
+    required this.error,
+    required this.message,
+  });
+
+  factory Removevehicleresponse.fromJson(Map<String, dynamic> json) {
+    return Removevehicleresponse(
+      error: json['error'] as bool,
+      message: json['message'] as String,
+    );
+  }
+}
 
 
 

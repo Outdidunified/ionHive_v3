@@ -54,3 +54,20 @@ class GetAllVehicleModel {
     );
   }
 }
+
+class AddVehicleResponse {
+  final bool error;
+  final String message;
+
+  AddVehicleResponse({
+    required this.error,
+    required this.message,
+  });
+
+  factory AddVehicleResponse.fromJson(Map<String, dynamic> json) {
+    return AddVehicleResponse(
+      error: json['error'] as bool,
+      message: json['message'] as String,
+    );
+  }
+}

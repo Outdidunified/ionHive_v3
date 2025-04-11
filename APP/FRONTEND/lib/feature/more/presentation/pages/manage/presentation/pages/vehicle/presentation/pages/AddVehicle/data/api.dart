@@ -69,4 +69,43 @@ class AddVehicleApicalls {
     }
   }
 
+  Future<Map<String, dynamic>> addVehicleNumber({
+    required String authToken,
+    required int userId,
+    required String emailId,
+    required String vehicleNumber,
+    required int vehicleId,
+  }) async {
+    final url = AddVehicleurl.addvehiclenumber;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+          'user_id': userId,
+          'email_id': emailId,
+          'vehicle_number': vehicleNumber,
+          'vehicle_id': vehicleId,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      debugPrint('Add vehicle response: $data');
+      debugPrint('Status code: ${response.statusCode}');
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. Please check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, 'Internal server error: $e');
+    }
+  }
 }

@@ -8,7 +8,7 @@ import 'package:ionhive/feature/more/presentation/pages/manage/presentation/page
 
 import '../../../../../../../../../../utils/theme/themes.dart';
 
-class VehiclePage extends StatelessWidget {
+class VehiclePage extends StatefulWidget {
   final int userId;
   final String username;
   final String emailId;
@@ -23,6 +23,13 @@ class VehiclePage extends StatelessWidget {
   });
 
   @override
+  State<VehiclePage> createState() => _VehiclePageState();
+}
+
+class _VehiclePageState extends State<VehiclePage> {
+  // Key for FutureBuilder to force refresh
+  int _futureBuilderKey = DateTime.now().millisecondsSinceEpoch;
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -35,7 +42,8 @@ class VehiclePage extends StatelessWidget {
     final VehicleController controller = Get.put(VehicleController());
 
     print("AppBar background color: ${theme.appBarTheme.backgroundColor}");
-    print("AppBar title text color: ${theme.appBarTheme.titleTextStyle?.color}");
+    print(
+        "AppBar title text color: ${theme.appBarTheme.titleTextStyle?.color}");
     print("AppBar icon color: ${theme.appBarTheme.iconTheme?.color}");
 
     return Scaffold(
@@ -56,7 +64,8 @@ class VehiclePage extends StatelessWidget {
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.all(screenWidth * 0.02), // 8 on a 400-width screen
+            padding:
+                EdgeInsets.all(screenWidth * 0.02), // 8 on a 400-width screen
             child: IconButton(
               icon: Icon(
                 Icons.help_outline,
@@ -81,6 +90,7 @@ class VehiclePage extends StatelessWidget {
                 vertical: screenWidth * 0.02, // 8 on a 400-width screen
               ),
               child: FutureBuilder<List<Map<String, dynamic>>>(
+                key: ValueKey('vehicle_list_$_futureBuilderKey'),
                 future: controller.fetchSavedVehicles(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -92,34 +102,42 @@ class VehiclePage extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.error_outline,
-                            size: screenWidth * 0.15, // 60 on a 400-width screen
+                            size:
+                                screenWidth * 0.15, // 60 on a 400-width screen
                             color: theme.colorScheme.error,
                           ),
-                          SizedBox(height: screenHeight * 0.015), // 10 on a 600-height screen
+                          SizedBox(
+                              height: screenHeight *
+                                  0.015), // 10 on a 600-height screen
                           Text(
                             "Error: ${snapshot.error}",
                             style: theme.textTheme.bodyLarge?.copyWith(
-                              fontSize: screenWidth * 0.04, // 16 on a 400-width screen
+                              fontSize: screenWidth *
+                                  0.04, // 16 on a 400-width screen
                               color: theme.colorScheme.error,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          SizedBox(height: screenHeight * 0.015), // 10 on a 600-height screen
+                          SizedBox(
+                              height: screenHeight *
+                                  0.015), // 10 on a 600-height screen
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: theme.colorScheme.error,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(screenWidth * 0.02), // 8 on a 400-width screen
+                                borderRadius: BorderRadius.circular(
+                                    screenWidth *
+                                        0.02), // 8 on a 400-width screen
                               ),
                             ),
                             onPressed: () {
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                   builder: (context) => VehiclePage(
-                                    userId: userId,
-                                    username: username,
-                                    emailId: emailId,
-                                    token: token,
+                                    userId: widget.userId,
+                                    username: widget.username,
+                                    emailId: widget.emailId,
+                                    token: widget.token,
                                   ),
                                 ),
                               );
@@ -128,7 +146,8 @@ class VehiclePage extends StatelessWidget {
                               "Retry",
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 color: theme.colorScheme.onError,
-                                fontSize: screenWidth * 0.04, // 16 on a 400-width screen
+                                fontSize: screenWidth *
+                                    0.04, // 16 on a 400-width screen
                               ),
                             ),
                           ),
@@ -136,206 +155,343 @@ class VehiclePage extends StatelessWidget {
                       ),
                     );
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    // Don't clear the controller's vehicles list during build
+                    // Instead, schedule it for after the build is complete
+                    Future.microtask(() {
+                      controller.vehicles.clear();
+                    });
                     return _buildNoVehiclesUI(context);
                   } else {
-                    return Obx(
-                          () => ListView.builder(
-                        itemCount: controller.vehicles.length,
-                        itemBuilder: (context, index) {
-                          final vehicle = snapshot.data![index];
-                          final details = vehicle['details'] as Map<String, dynamic>?;
+                    // Use a local variable to avoid potential race conditions
+                    final vehicleData = snapshot.data!;
 
-                          // Construct the full image URL
-                          final imagePath = details?['image_base64']?.trim() ?? '';
-                          final normalizedImagePath = imagePath.replaceAll(r'\', '/').trim();
-                          final cleanBaseUrl = baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
-                          final cleanImagePath = normalizedImagePath.replaceAll(RegExp(r'^/+'), '');
-                          final fullImageUrl = imagePath.isNotEmpty
-                              ? "$cleanBaseUrl/$cleanImagePath"
-                              : '';
-                          print("Base URL: $baseUrl");
-                          print("Clean Base URL: $cleanBaseUrl");
-                          print("Image Path: $imagePath");
-                          print("Normalized Image Path: $normalizedImagePath");
-                          print("Clean Image Path: $cleanImagePath");
-                          print("Full Image URL: $fullImageUrl");
+                    // Trigger a refresh in the background to keep the controller updated
+                    Future.microtask(() => controller.refreshVehicles());
 
-                          return Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(screenWidth * 0.03), // 12 on a 400-width screen
-                            ),
-                            elevation: 2,
-                            margin: EdgeInsets.symmetric(vertical: screenWidth * 0.02), // 8 on a 400-width screen
-                            color: theme.cardColor,
-                            child: Stack(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(screenWidth * 0.03), // 12 on a 400-width screen
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              details?['model'] ?? 'No Model',
-                                              style: theme.textTheme.headlineMedium?.copyWith(
-                                                fontSize: screenWidth * 0.045, // 18 on a 400-width screen
-                                              ),
-                                            ),
-                                            SizedBox(height: screenHeight * 0.006), // 4 on a 600-height screen
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  vehicle['vehicle_number'] ?? 'No Plate Number',
-                                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                                    fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(height: screenHeight * 0.012), // 8 on a 600-height screen
-                                            Text(
-                                              "Charger Type: ${details?['charger_type'] ?? 'Unknown'}",
-                                              style: theme.textTheme.bodyMedium?.copyWith(
-                                                fontSize: screenWidth * 0.035, // 14 on a 400-width screen
-                                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(screenWidth * 0.02),
-                                        child: fullImageUrl.isNotEmpty
-                                            ? CachedNetworkImage(
-                                          imageUrl: fullImageUrl,
-                                          width: screenWidth * 0.4,
-                                          height: screenWidth * 0.3,
-                                          fit: BoxFit.contain,
-                                          httpHeaders: {
-                                            'Authorization': 'Bearer $token',
-                                          },
-                                          placeholder: (context, url) => Container(
-                                            color: theme.dividerColor.withOpacity(0.1),
-                                            width: screenWidth * 0.4,
-                                            height: screenWidth * 0.3,
-                                            child: const Center(
-                                              child: CircularProgressIndicator(),
+                    return ListView.builder(
+                      itemCount: vehicleData.length,
+                      itemBuilder: (context, index) {
+                        // Make sure we don't go out of bounds
+                        if (index >= vehicleData.length) {
+                          return SizedBox.shrink();
+                        }
+
+                        final vehicle = vehicleData[index];
+                        final details =
+                            vehicle['details'] as Map<String, dynamic>?;
+
+                        // Construct the full image URL
+                        final imagePath =
+                            details?['image_base64']?.trim() ?? '';
+                        final normalizedImagePath =
+                            imagePath.replaceAll(r'\', '/').trim();
+                        final cleanBaseUrl =
+                            baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+                        final cleanImagePath =
+                            normalizedImagePath.replaceAll(RegExp(r'^/+'), '');
+                        final fullImageUrl = imagePath.isNotEmpty
+                            ? "$cleanBaseUrl/$cleanImagePath"
+                            : '';
+                        print("Base URL: $baseUrl");
+                        print("Clean Base URL: $cleanBaseUrl");
+                        print("Image Path: $imagePath");
+                        print("Normalized Image Path: $normalizedImagePath");
+                        print("Clean Image Path: $cleanImagePath");
+                        print("Full Image URL: $fullImageUrl");
+
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                screenWidth * 0.03), // 12 on a 400-width screen
+                          ),
+                          elevation: 2,
+                          margin: EdgeInsets.symmetric(
+                              vertical: screenWidth *
+                                  0.02), // 8 on a 400-width screen
+                          color: theme.cardColor,
+                          child: Stack(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(screenWidth *
+                                    0.03), // 12 on a 400-width screen
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            details?['model'] ?? 'No Model',
+                                            style: theme
+                                                .textTheme.headlineMedium
+                                                ?.copyWith(
+                                              fontSize: screenWidth *
+                                                  0.045, // 18 on a 400-width screen
                                             ),
                                           ),
-                                          errorWidget: (context, url, error) {
-                                            print("Image load error for URL: $url, Error: $error");
-                                            return Image.asset(
-                                              "assets/images/noimage2.png",
+                                          SizedBox(
+                                              height: screenHeight *
+                                                  0.006), // 4 on a 600-height screen
+                                          Row(
+                                            children: [
+                                              Text(
+                                                vehicle['vehicle_number'] ??
+                                                    'No Plate Number',
+                                                style: theme
+                                                    .textTheme.bodyMedium
+                                                    ?.copyWith(
+                                                  fontSize: screenWidth *
+                                                      0.04, // 16 on a 400-width screen
+                                                  color: theme.textTheme
+                                                      .bodyMedium?.color
+                                                      ?.withOpacity(0.6),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(
+                                              height: screenHeight *
+                                                  0.012), // 8 on a 600-height screen
+                                          Text(
+                                            "Charger Type: ${details?['charger_type'] ?? 'Unknown'}",
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                              fontSize: screenWidth *
+                                                  0.035, // 14 on a 400-width screen
+                                              color: theme
+                                                  .textTheme.bodyMedium?.color
+                                                  ?.withOpacity(0.6),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(
+                                          screenWidth * 0.02),
+                                      child: fullImageUrl.isNotEmpty
+                                          ? CachedNetworkImage(
+                                              imageUrl: fullImageUrl,
                                               width: screenWidth * 0.4,
                                               height: screenWidth * 0.3,
                                               fit: BoxFit.contain,
-                                            );
-                                          },
-                                        )
-                                            : Image.asset(
-                                          'assets/images/ss.png',
-                                          width: screenWidth * 0.4,
-                                          height: screenWidth * 0.3,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Positioned(
-                                  top: -screenWidth * 0.02,
-                                  right: -screenWidth * 0.02,
-                                  child: Container(
-                                    child: IconButton(
-                                      icon: Icon(
-                                        Icons.remove_circle_outline,
-                                        color: theme.colorScheme.error,
-                                        size: screenWidth * 0.05, // 24 on a 400-width screen
-                                      ),
-                                      onPressed: () {
-                                        final vehicleNumber = vehicle['vehicle_number'] ?? '';
-                                        if (vehicleNumber.isNotEmpty) {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                              title: Text(
-                                                "Remove Vehicle",
-                                                style: theme.textTheme.titleLarge?.copyWith(
-                                                  fontSize: screenWidth * 0.045, // 18 on a 400-width screen
+                                              httpHeaders: {
+                                                'Authorization':
+                                                    'Bearer ${widget.token}',
+                                              },
+                                              placeholder: (context, url) =>
+                                                  Container(
+                                                color: theme.dividerColor
+                                                    .withOpacity(0.1),
+                                                width: screenWidth * 0.4,
+                                                height: screenWidth * 0.3,
+                                                child: const Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
                                                 ),
                                               ),
-                                              content: Text(
-                                                "Are you sure you want to remove vehicle $vehicleNumber?",
-                                                style: theme.textTheme.bodyMedium?.copyWith(
-                                                  fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                ),
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(context),
-                                                  child: Text(
-                                                    "Cancel",
-                                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                                      fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                    ),
-                                                  ),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                    controller.removeVehicle(vehicleNumber).then((success) {
-                                                      if (success) {
-                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                          SnackBar(
-                                                            content: Text(
-                                                              "Vehicle removed successfully",
-                                                              style: theme.textTheme.bodyLarge?.copyWith(
-                                                                fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                              ),
-                                                            ),
-                                                            backgroundColor: theme.colorScheme.primary,
-                                                          ),
-                                                        );
-                                                      } else {
-                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                          SnackBar(
-                                                            content: Text(
-                                                              "Failed to remove vehicle",
-                                                              style: theme.textTheme.bodyLarge?.copyWith(
-                                                                fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                              ),
-                                                            ),
-                                                            backgroundColor: theme.colorScheme.error,
-                                                          ),
-                                                        );
-                                                      }
-                                                    });
-                                                  },
-                                                  child: Text(
-                                                    "Remove",
-                                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                                      fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                                                      color: theme.colorScheme.error,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
+                                              errorWidget:
+                                                  (context, url, error) {
+                                                print(
+                                                    "Image load error for URL: $url, Error: $error");
+                                                return Image.asset(
+                                                  "assets/images/noimage2.png",
+                                                  width: screenWidth * 0.4,
+                                                  height: screenWidth * 0.3,
+                                                  fit: BoxFit.contain,
+                                                );
+                                              },
+                                            )
+                                          : Image.asset(
+                                              'assets/images/ss.png',
+                                              width: screenWidth * 0.4,
+                                              height: screenWidth * 0.3,
+                                              fit: BoxFit.contain,
                                             ),
-                                          );
-                                        }
-                                      },
                                     ),
+                                  ],
+                                ),
+                              ),
+                              Positioned(
+                                top: -screenWidth * 0.02,
+                                right: -screenWidth * 0.02,
+                                child: Container(
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.remove_circle_outline,
+                                      color: theme.colorScheme.error,
+                                      size: screenWidth *
+                                          0.05, // 24 on a 400-width screen
+                                    ),
+                                    onPressed: () {
+                                      final vehicleNumber =
+                                          vehicle['vehicle_number'] ?? '';
+                                      if (vehicleNumber.isNotEmpty) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: Text(
+                                              "Remove Vehicle",
+                                              style: theme.textTheme.titleLarge
+                                                  ?.copyWith(
+                                                fontSize: screenWidth *
+                                                    0.045, // 18 on a 400-width screen
+                                              ),
+                                            ),
+                                            content: Text(
+                                              "Are you sure you want to remove vehicle $vehicleNumber?",
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                fontSize: screenWidth *
+                                                    0.04, // 16 on a 400-width screen
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: Text(
+                                                  "Cancel",
+                                                  style: theme
+                                                      .textTheme.bodyMedium
+                                                      ?.copyWith(
+                                                    fontSize: screenWidth *
+                                                        0.04, // 16 on a 400-width screen
+                                                  ),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: () async {
+                                                  // Store the scaffold messenger and context before closing the dialog
+                                                  final scaffoldMessenger =
+                                                      ScaffoldMessenger.of(
+                                                          context);
+
+                                                  // Close the confirmation dialog
+                                                  Navigator.pop(context);
+
+                                                  // Use a simpler approach with a boolean flag for loading state
+                                                  setState(() {
+                                                    controller.isLoading.value =
+                                                        true;
+                                                  });
+
+                                                  try {
+                                                    // Remove the vehicle
+                                                    final result =
+                                                        await controller
+                                                            .removeVehicle(
+                                                                vehicleNumber);
+
+                                                    // Process the result
+                                                    if (result['success']) {
+                                                      // Remove the vehicle from the snapshot data
+                                                      if (snapshot.data !=
+                                                          null) {
+                                                        snapshot.data!
+                                                            .removeWhere((v) =>
+                                                                v['vehicle_number'] ==
+                                                                vehicleNumber);
+
+                                                        // Check if all vehicles are removed
+                                                        if (snapshot
+                                                            .data!.isEmpty) {
+                                                          // Schedule clearing the controller's vehicles list after the build
+                                                          Future.microtask(() {
+                                                            controller.vehicles
+                                                                .clear();
+                                                          });
+                                                        }
+                                                      }
+
+                                                      // Show success message using the stored scaffold messenger
+                                                      scaffoldMessenger
+                                                          .showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                              "Vehicle removed successfully"),
+                                                          backgroundColor:
+                                                              Colors.green,
+                                                          duration: Duration(
+                                                              seconds: 2),
+                                                        ),
+                                                      );
+
+                                                      // Force rebuild with a key change to ensure FutureBuilder rebuilds
+                                                      if (mounted) {
+                                                        setState(() {
+                                                          // Update the key to force FutureBuilder to rebuild
+                                                          _futureBuilderKey =
+                                                              DateTime.now()
+                                                                  .millisecondsSinceEpoch;
+                                                        });
+                                                      }
+                                                    } else {
+                                                      // Show error message
+                                                      scaffoldMessenger
+                                                          .showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(result[
+                                                                  'message'] ??
+                                                              "Failed to remove vehicle"),
+                                                          backgroundColor:
+                                                              Colors.red,
+                                                          duration: Duration(
+                                                              seconds: 3),
+                                                        ),
+                                                      );
+                                                    }
+                                                  } catch (e) {
+                                                    print(
+                                                        "Error removing vehicle: $e");
+                                                    // Show error message for exceptions
+                                                    scaffoldMessenger
+                                                        .showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                            "Error removing vehicle: $e"),
+                                                        backgroundColor:
+                                                            Colors.red,
+                                                        duration: Duration(
+                                                            seconds: 3),
+                                                      ),
+                                                    );
+                                                  } finally {
+                                                    // Reset loading state
+                                                    if (mounted) {
+                                                      setState(() {
+                                                        controller.isLoading
+                                                            .value = false;
+                                                      });
+                                                    }
+                                                  }
+                                                },
+                                                child: Text(
+                                                  "Remove",
+                                                  style: theme
+                                                      .textTheme.bodyMedium
+                                                      ?.copyWith(
+                                                    fontSize: screenWidth *
+                                                        0.04, // 16 on a 400-width screen
+                                                    color:
+                                                        theme.colorScheme.error,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }
+                                    },
                                   ),
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   }
                 },
@@ -343,46 +499,98 @@ class VehiclePage extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(screenWidth * 0.05), // 20 on a 400-width screen
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02), // 12 on a 600-height screen
-                  backgroundColor: theme.colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(screenWidth * 0.03), // 12 on a 400-width screen
-                  ),
-                ),
-                onPressed: () {
-                  final List<Map<String, dynamic>> vehicleList = controller.vehicles
-                      .map<Map<String, dynamic>>((vehicle) => {
-                    'vehicle_number': vehicle.vehicleNumber,
-                    'model': vehicle.model,
-                    'range': vehicle.range,
-                    'battery_size_kwh': vehicle.batterySizeKwh,
-                    'charger_type': vehicle.chargerType,
-                    'image_base64': vehicle.imageUrl,
-                  })
-                      .toList();
+            padding: EdgeInsets.all(screenWidth * 0.05),
+            child: Column(
+              children: [
+                Obx(() {
+                  final isMaxReached = controller.vehicles.length >= 5;
+                  return SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding:
+                            EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+                        backgroundColor: isMaxReached
+                            ? theme.colorScheme.surface
+                            : theme.colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(screenWidth * 0.03),
+                        ),
+                      ),
+                      onPressed: isMaxReached
+                          ? null
+                          : () {
+                              final List<Map<String, dynamic>> vehicleList =
+                                  controller.vehicles
+                                      .map<Map<String, dynamic>>((vehicle) => {
+                                            'vehicle_number':
+                                                vehicle.vehicleNumber,
+                                            'model': vehicle.model,
+                                            'range': vehicle.range,
+                                            'battery_size_kwh':
+                                                vehicle.batterySizeKwh,
+                                            'charger_type': vehicle.chargerType,
+                                            'image_base64': vehicle.imageUrl,
+                                          })
+                                      .toList();
 
-                  Get.to(() => AddVehicle(), arguments: {
-                    'vehicles': vehicleList,
-                    'userId': userId,
-                    'username': username,
-                    'emailId': emailId,
-                    'token': token,
-                  });
-                },
-                child: Text(
-                  "Add Vehicle",
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: screenWidth * 0.04, // 16 on a 400-width screen
-                  ),
-                ),
-              ),
+                              Get.to(() => AddVehicle(), arguments: {
+                                'vehicles': vehicleList,
+                                'userId': widget.userId,
+                                'username': widget.username,
+                                'emailId': widget.emailId,
+                                'token': widget.token,
+                              });
+                            },
+                      child: Text(
+                        "Add Vehicle",
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: isMaxReached
+                              ? theme.textTheme.bodyLarge?.color
+                              : theme.colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenWidth * 0.04,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+                Obx(() {
+                  final isMaxReached = controller.vehicles.length >= 5;
+                  return isMaxReached
+                      ? Padding(
+                          padding: EdgeInsets.only(top: screenHeight * 0.01),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.grey, // Grey color for the icon
+                                size:
+                                    screenWidth * 0.04, // Adjust size as needed
+                              ),
+                              SizedBox(
+                                  width: screenWidth *
+                                      0.01), // Small gap between icon and text
+                              Expanded(
+                                child: Text(
+                                  "Maximum 5 vehicles can be added by a user",
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color:
+                                        Colors.grey, // Grey color for the text
+                                    fontSize: screenWidth * 0.035,
+                                  ),
+                                  textAlign:
+                                      TextAlign.left, // Left-aligned text
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink();
+                }),
+              ],
             ),
           ),
         ],
@@ -412,6 +620,21 @@ class VehiclePage extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
+          ),
+          SizedBox(height: screenHeight * 0.01),
+          Text(
+            "Add a vehicle to get started",
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontSize: screenWidth * 0.035, // 14 on a 400-width screen
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: screenHeight * 0.03),
+          Icon(
+            Icons.arrow_downward,
+            size: screenWidth * 0.08,
+            color: theme.colorScheme.primary.withOpacity(0.7),
           ),
         ],
       ),

@@ -47,7 +47,7 @@ flutter:
       fonts:
         - asset: assets/fonts/Poppins/Poppins-Regular.ttf
         - asset: assets/fonts/Poppins/Poppins-Bold.ttf
-          weight: 700
+          weight: 600
 
   assets:
     - assets/ionHive_logo's/ionHive.png

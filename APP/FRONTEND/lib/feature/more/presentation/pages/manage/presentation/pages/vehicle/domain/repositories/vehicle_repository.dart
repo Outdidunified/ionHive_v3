@@ -13,6 +13,15 @@ class VehicleRepository{
     }
   }
 
+  Future<Removevehicleresponse> removevehiclerep(int user_id, String email, String authToken,int vehicle_id,String vehicleNumber) async {
+    try {
+      final responseJson = await _api.removovevehicle(user_id, email, authToken,vehicle_id,vehicleNumber);
+      return Removevehicleresponse.fromJson(responseJson);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
 
 }

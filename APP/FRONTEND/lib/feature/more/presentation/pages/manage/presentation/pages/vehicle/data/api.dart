@@ -61,12 +61,54 @@ class VehicleApicalls {
     } on http.ClientException {
       throw HttpException(503,
           'Unable to reach the server. \nPlease check your connection or try again later.');
-    }  catch (e) {
+    } catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');
     }
   }
 
+  Future<Map<String, dynamic>> removovevehicle(
+      int user_id, String email, String authToken, int vehicle_id,String vehicleNumber) async {
+    final url = Vehicleurl.removevehicle;
 
+    try {
+      debugPrint("Removing vehicle API call - URL: $url");
+      debugPrint(
+          "Params: user_id=$user_id, email=$email, vehicle_id=$vehicle_id,vehicle_number=$vehicleNumber");
 
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode(
+            {'email_id': email, 'user_id': user_id, 'vehicle_id': vehicle_id,'vehicle_number':vehicleNumber}),
+      );
+
+      final data = jsonDecode(response.body);
+      debugPrint('Remove vehicle response: $data');
+      debugPrint('Status code: ${response.statusCode}');
+
+      // Check if the response contains an error message even with status 200
+      if (response.statusCode == 200 && data['error'] == true) {
+        throw HttpException(400, data['message'] ?? 'Failed to remove vehicle');
+      }
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      debugPrint("Timeout exception while removing vehicle");
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException catch (e) {
+      debugPrint("Client exception while removing vehicle: $e");
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } on FormatException catch (e) {
+      debugPrint("Format exception while removing vehicle: $e");
+      throw HttpException(500, 'Invalid response format from server');
+    } catch (e) {
+      debugPrint("Error removing vehicle: $e");
+      throw HttpException(500, 'An unexpected error occurred: $e');
+    }
+  }
 }
