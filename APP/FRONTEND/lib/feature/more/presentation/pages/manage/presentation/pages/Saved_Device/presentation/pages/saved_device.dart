@@ -304,7 +304,7 @@ class DeviceCard extends StatelessWidget {
                       )
                 else if (type.toLowerCase() == 'socket')
                   Image.asset(
-                      'assets/icons/charger_socket1.png', // Replace with your actual asset filename
+                      'assets/icons/wall-socket.png', // Replace with your actual asset filename
                       width: 22, // Match the size of the previous Icon (24)
                       height: 22,
                       color: Color(
