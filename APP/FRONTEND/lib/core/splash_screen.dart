@@ -12,9 +12,10 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   final SessionController sessionController = Get.find<SessionController>();
-  bool _hasNavigated = false;  // Add this flag
+  bool _hasNavigated = false; // Add this flag
 
   @override
   void initState() {
@@ -25,12 +26,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       _hasNavigated = true;
       if (isLoggedIn) {
         debugPrint("Navigating to LandingPage");
-        Get.offAll(() => LandingPage(), transition: Transition.rightToLeft,duration: Duration(milliseconds: 600));
+        Get.offAll(() => LandingPage(),
+            transition: Transition.rightToLeft,
+            duration: Duration(milliseconds: 600));
       } else {
         debugPrint("Navigating to LoginPage");
-        Get.offAll(() => GetStartedPage(), transition: Transition.rightToLeft,duration: Duration(milliseconds: 600));
+        Get.offAll(() => GetStartedPage(),
+            transition: Transition.rightToLeft,
+            duration: Duration(milliseconds: 600));
       }
-
     });
 
     Future.delayed(const Duration(seconds: 2), () {
@@ -64,10 +68,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 builder: (context, double scale, child) {
                   return Transform.scale(
                     scale: scale,
-                    child: Icon(
-                      Icons.electric_car,
-                      size: screenWidth * 0.25, // Responsive size
-                      color: Colors.black,
+                    child: Image.asset(
+                      'assets/icons/charging-vehicle.png',
+                      width: screenWidth * 0.25, // Responsive size
+                      height: screenWidth * 0.25, // Maintain aspect ratio
+                      color: Colors.black, // Apply color if needed
                     ),
                   );
                 },
@@ -92,9 +97,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           child: Text(
                             letter,
                             style: GoogleFonts.orbitron(
-                              fontSize: screenWidth * 0.08, // Responsive text size
+                              fontSize:
+                                  screenWidth * 0.08, // Responsive text size
                               fontWeight: FontWeight.bold,
-                              color: letter == "H" ? Colors.greenAccent : Colors.white,
+                              color: letter == "H"
+                                  ? Colors.greenAccent
+                                  : Colors.white,
                               letterSpacing: screenWidth * 0.005,
                             ),
                           ),
@@ -109,6 +117,5 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         ),
       ),
     );
-
   }
 }

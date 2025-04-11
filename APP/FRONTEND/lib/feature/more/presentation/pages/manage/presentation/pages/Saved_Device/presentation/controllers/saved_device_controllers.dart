@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/Saved_Device/domain/repository/saved_device_repoistory.dart';
@@ -8,38 +8,52 @@ class SavedDeviceControllers extends GetxController {
   final sessionController = Get.find<SessionController>();
 
   final RxBool isLoading = false.obs;
-
-  // Store fetched profile data
-  RxMap<String, dynamic>? saveddevicedata = RxMap();
+  final RxList<Map<String, dynamic>> savedDevices = <Map<String, dynamic>>[].obs;
+  final RxString errorMessage = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-
-    fetchsaveddevice(); // Fetch profile data on init
+    fetchSavedDevices();
   }
 
-  Future<void> fetchsaveddevice() async {
+  Future<void> fetchSavedDevices() async {
     final authToken = sessionController.token.value;
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
 
     isLoading.value = true;
-    try {
-      print("Fetching profile...");
-      final fetchResponseModel =
-          await _savedDeviceRepoistory.fetchprofile(userId, emailId, authToken);
+    errorMessage.value = '';
 
-      print("Fetch response: ${fetchResponseModel.toJson()}");
-    } catch (e, stackTrace) {
-      print("Error fetching profile: $e");
-      print("Stack trace: $stackTrace");
-      Get.snackbar(
-        "Error",
-        "Failed to fetch profile: $e",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+    try {
+      final response = await _savedDeviceRepoistory.fetchprofile(userId, emailId, authToken);
+      print("fetching saved device body : $response"); // Debug the full response
+
+      if (response.success && response.saveddevice != null) {
+        // Process favChargersDetails into savedDevices
+        final chargerDetails = response.saveddevice as List<dynamic>? ?? [];
+        savedDevices.assignAll(chargerDetails.map((charger) {
+          final connectors = (charger['connectors'] as List<dynamic>?)?.take(2).toList() ?? [];
+          return {
+            'charger_id': charger['charger_id'],
+            'model': charger['model'],
+            'type': charger['charger_type'],
+            'vendor': charger['vendor'],
+            'address': charger['address'],
+            'landmark': charger['landmark'],
+            'unit_price': charger['unit_price'],
+            'connectors': connectors,
+            'last_used': '10/04/2025', // Placeholder; replace with actual data if available
+            'max_power': '${charger['max_power']}W', // Example formatting
+          };
+        }).toList());
+        print("Processed savedDevices: $savedDevices"); // Debug the processed data
+      } else {
+        errorMessage.value = response.message ?? 'Failed to fetch devices';
+      }
+    } catch (e) {
+      errorMessage.value = "Failed to fetch devices: ${e.toString()}";
+      debugPrint("Error fetching devices: $e");
     } finally {
       isLoading.value = false;
     }
@@ -48,6 +62,6 @@ class SavedDeviceControllers extends GetxController {
   @override
   void onClose() {
     super.onClose();
-    Get.closeAllSnackbars(); // Close all active snackbars
+    Get.closeAllSnackbars();
   }
 }
