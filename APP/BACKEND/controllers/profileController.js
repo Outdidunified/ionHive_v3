@@ -649,7 +649,6 @@ const SaveVehiclesOfUser = async (req, res) => {
 const RemoveVehicleOfUser = async (req, res) => {
     try {
         const { user_id, email_id, vehicle_number, vehicle_id } = req.body;
-        console.log(req.body);
 
         // Validate input
         if (
