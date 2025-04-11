@@ -35,21 +35,29 @@ void main() async {
   Get.put(SessionController()); // Ensure it is available globally
   Get.put(ConnectivityController());
 
-
-
-
   runApp(const IonHive());
 }
 
+// Custom navigation observer to close snackbars on page changes
+class SnackbarCloseObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    Get.closeAllSnackbars();
+    super.didPush(route, previousRoute);
+  }
 
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    Get.closeAllSnackbars();
+    super.didPop(route, previousRoute);
+  }
+}
 
 class IonHive extends StatelessWidget {
   const IonHive({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-
     return GetMaterialApp(
       title: 'ionHive',
       debugShowCheckedModeBanner: false,
@@ -57,16 +65,17 @@ class IonHive extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       initialRoute: '/',
+      navigatorObservers: [
+        SnackbarCloseObserver()
+      ], // Add observer to close snackbars on navigation
       getPages: [
         GetPage(name: '/', page: () => SplashScreen()),
         GetPage(name: '/landing', page: () => LandingPage()),
         GetPage(name: '/login', page: () => LoginPage()), // Must be defined
         GetPage(name: '/start', page: () => GetStartedPage()),
-        GetPage(name: '/noInternet', page: () => NoInternetScreen()), // Add route
+        GetPage(
+            name: '/noInternet', page: () => NoInternetScreen()), // Add route
       ],
     );
-
   }
 }
-
-

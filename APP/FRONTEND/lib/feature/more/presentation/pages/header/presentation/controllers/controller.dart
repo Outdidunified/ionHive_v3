@@ -24,8 +24,7 @@ class HeaderController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchwalletbalance(); // Fetch wallet balance on init
-    fetchtotalsession();
+    fetchHeaderData(); // Fetch all header data at once
 
     // fetchprofile(); // Fetch profile data on init
   }
@@ -197,7 +196,7 @@ class HeaderController extends GetxController {
 
     isLoading.value = true;
     try {
-      print("Fetching wallet balance...");
+      print("Fetching total sessions...");
       final response = await _headerRepository.fetchtotalsessions(
           userId, emailId, authToken);
 
@@ -222,6 +221,74 @@ class HeaderController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// Fetch all header data in a single method to avoid multiple snackbars
+  Future<void> fetchHeaderData() async {
+    final authToken = sessionController.token.value;
+    final userId = sessionController.userId.value;
+    final emailId = sessionController.emailId.value;
+
+    if (emailId.isEmpty || authToken.isEmpty || userId == 0) {
+      CustomSnackbar.showError(message: "User details are incomplete");
+      return;
+    }
+
+    isLoading.value = true;
+
+    // Close any existing snackbars before starting new requests
+    Get.closeAllSnackbars();
+
+    // Track errors for each API call
+    List<String> errors = [];
+
+    // Fetch wallet balance
+    try {
+      print("Fetching wallet balance...");
+      final walletResponse = await _headerRepository.fetchwalletbalance(
+          userId, emailId, authToken);
+
+      if (!walletResponse.error) {
+        final balance = walletResponse.walletBalance ?? '0';
+        walletBalance.value = 'Rs.$balance';
+        print("Wallet Balance updated: ${walletBalance.value}");
+      } else {
+        errors.add("Wallet: ${walletResponse.message ?? 'Unknown error'}");
+      }
+    } catch (e) {
+      debugPrint("Error fetching wallet balance: $e");
+      errors.add("Wallet: ${e.toString()}");
+    }
+
+    // Fetch total sessions
+    try {
+      print("Fetching total sessions...");
+      final sessionResponse = await _headerRepository.fetchtotalsessions(
+          userId, emailId, authToken);
+
+      if (!sessionResponse.error) {
+        final totalSesion = sessionResponse.totalSessions ?? '0';
+        totalsession.value = '$totalSesion';
+        print("Total Sessions updated: ${totalsession.value}");
+      } else {
+        errors.add("Sessions: ${sessionResponse.message ?? 'Unknown error'}");
+      }
+    } catch (e) {
+      debugPrint("Error fetching total sessions: $e");
+      errors.add("Sessions: ${e.toString()}");
+    }
+
+    // Show a single error message if there were any errors
+    if (errors.isNotEmpty) {
+      // Combine error messages if there are multiple
+      String errorMessage = errors.length > 1
+          ? "Failed to fetch some data: ${errors.join(', ')}"
+          : "Failed to fetch data: ${errors.first}";
+
+      CustomSnackbar.showError(message: errorMessage);
+    }
+
+    isLoading.value = false;
   }
 
   @override

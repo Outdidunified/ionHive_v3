@@ -12,27 +12,26 @@ class HeaderCard extends StatelessWidget {
   final String username;
   final String emailId;
   final String token;
-  HeaderCard({super.key, required this.theme, required this.userId, required this.username, required this.emailId, required this.token});
+  HeaderCard(
+      {super.key,
+      required this.theme,
+      required this.userId,
+      required this.username,
+      required this.emailId,
+      required this.token});
 
   final sessionController = Get.find<SessionController>();
   final controller = Get.put(HeaderController());
-
-
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    // Fetch wallet balance when the widget is built
+    // Fetch data when the widget is built (only once)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchwalletbalance();
+      controller.fetchHeaderData();
     });
-    // Fetch wallet balance when the widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchtotalsession();
-    });
-
 
     return Stack(
       alignment: Alignment.topCenter,
@@ -157,19 +156,25 @@ class HeaderCard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(child: Obx(() => _buildStatItem(
-                      controller.walletBalance.value, // Use fetched wallet balance
-                      "Wallet Balance",
-                    )),),
+                    Expanded(
+                      child: Obx(() => _buildStatItem(
+                            controller.walletBalance
+                                .value, // Use fetched wallet balance
+                            "Wallet Balance",
+                          )),
+                    ),
                     Container(
                       height: screenHeight * 0.05, // 5% of screen height
                       width: screenWidth * 0.003, // 0.3% of screen width
                       color: Colors.grey.shade300,
                     ),
-                    Expanded(child: Obx(() => _buildStatItem(
-                      controller.totalsession.value, // Use fetched wallet balance
-                      "Total Session",
-                    )),),
+                    Expanded(
+                      child: Obx(() => _buildStatItem(
+                            controller.totalsession
+                                .value, // Use fetched wallet balance
+                            "Total Session",
+                          )),
+                    ),
                     Container(
                       height: screenHeight * 0.05, // 5% of screen height
                       width: screenWidth * 0.003, // 0.3% of screen width
@@ -227,8 +232,6 @@ class HeaderCard extends StatelessWidget {
       ],
     );
   }
-
-
 }
 
 void showEditProfileDialog(BuildContext context) {
@@ -298,5 +301,3 @@ void showEditProfileDialog(BuildContext context) {
     );
   });
 }
-
-
