@@ -11,6 +11,7 @@ import 'package:ionhive/feature/more/presentation/pages/help&support/presentatio
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/Saved_Device/presentation/pages/saved_device.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/rfidpage.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/vehicle.dart';
+import 'package:ionhive/feature/more/presentation/pages/saved_stations/presentation/pages/saved_stations_pages.dart';
 import 'package:ionhive/feature/more/presentation/pages/transactions/presentation/pages/paymenthistory.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -148,6 +149,14 @@ class MoreePage extends StatelessWidget {
                         .primaryColor, // Optional: Match the icon color if needed
                   ),
                   theme,
+                  onTap: () {
+                    Get.to(() => SavedStationsPages(
+                      userId: userId,
+                      username: username,
+                      emailId: emailId,
+                      token: token,
+                    ));
+                  },
                 ),
                 // _buildMenuOption('Captitative Stations', Icons.ev_station, theme), // Commented out as per original code
                 _buildSectionTitle('Transactions'),
