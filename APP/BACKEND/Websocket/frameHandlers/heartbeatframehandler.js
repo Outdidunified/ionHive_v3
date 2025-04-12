@@ -13,14 +13,21 @@ const handleHeartbeat = async (uniqueIdentifier, requestPayload, requestId, curr
         logger.loggerError(`Validation failed for Heartbeat: ${JSON.stringify(validationResult.details)}`);
         return [3, requestId, { status: "Rejected", errors: validationResult.details }];
     }
+
+    // Update the last heartbeat timestamp
     ws.lastHeartbeat = Date.now();
+    ws.isAlive = true;
+
     const formattedDate = new Date().toISOString();
     let response = [3, requestId, { currentTime: formattedDate }];
 
     try {
         const result = await dbService.updateTime(uniqueIdentifier, undefined);
+
+        // Store the current result
         currentVal.set(uniqueIdentifier, result);
 
+        // Check for reconnection attempts
         if (currentVal.get(uniqueIdentifier) === true) {
             if (previousResults.get(uniqueIdentifier) === false) {
                 logger.loggerWarn(`ChargerID - ${uniqueIdentifier} terminated and trying to reconnect!`);
@@ -28,6 +35,7 @@ const handleHeartbeat = async (uniqueIdentifier, requestPayload, requestId, curr
             }
         }
 
+        // Store the previous result for next comparison
         previousResults.set(uniqueIdentifier, result);
     } catch (error) {
         logger.loggerError(`Error handling Heartbeat for ChargerID ${uniqueIdentifier}: ${error.message}`);

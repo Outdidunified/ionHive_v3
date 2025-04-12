@@ -79,6 +79,16 @@ const handleWebSocketConnection = (
 
             // Set a new timeout
             ws.pingTimeout = setTimeout(() => {
+                // Check if we've received a heartbeat message recently
+                const timeSinceLastHeartbeat = Date.now() - ws.lastHeartbeat;
+
+                // If we've received a heartbeat message recently, don't send a ping
+                if (timeSinceLastHeartbeat < HEARTBEAT_INTERVAL * 0.8) {
+                    logger.loggerInfo(`Skipping ping to ${uniqueIdentifier} - recent heartbeat received ${timeSinceLastHeartbeat}ms ago`);
+                    schedulePing(); // Reschedule the ping
+                    return;
+                }
+
                 // If we haven't received a message in HEARTBEAT_INTERVAL, send a ping
                 logger.loggerPingPong(`Sending ping to ${uniqueIdentifier}`);
 
@@ -97,11 +107,16 @@ const handleWebSocketConnection = (
                     } else {
                         logger.loggerWarn(`Cannot send ping to ${uniqueIdentifier}: Connection not open (state: ${ws.readyState})`);
                         clearTimeout(ws.pongTimeout);
-                        wsConnections.delete(uniqueIdentifier);
 
-                        // Only terminate if the connection is still connecting or closing
-                        if (ws.readyState !== WebSocket.CLOSED) {
+                        // Try to reconnect if the connection is closed
+                        if (ws.readyState === WebSocket.CLOSED) {
+                            logger.loggerInfo(`Attempting to reconnect to ${uniqueIdentifier}...`);
+                            // Remove from connections map but don't terminate
+                            wsConnections.delete(uniqueIdentifier);
+                        } else if (ws.readyState !== WebSocket.CLOSED) {
+                            // Only terminate if the connection is still connecting or closing
                             ws.terminate();
+                            wsConnections.delete(uniqueIdentifier);
                         }
                     }
                 } catch (error) {

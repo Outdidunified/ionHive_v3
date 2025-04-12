@@ -899,19 +899,18 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
 
 // STATIONS //TODO  -  implement this after map module
 // SAVE STATIONS
-// Save Stations
+// Save, Remove and Fetch Stations
 const SaveStations = async (req, res) => {
     try {
-        const { user_id, email_id, LatLong, address, landmark, status } = req.body;
+        const { user_id, email_id, station_id, status } = req.body;
 
         // Validate request body
-        if (!user_id || !email_id || !LatLong || !address || !status === undefined) {
+        if (!user_id || !email_id || !station_id || status === undefined) {
             return res.status(400).json({
                 error: true,
-                message: 'Missing required fields: user_id, email_id, LatLong, address, or status',
+                message: 'Missing required fields: user_id, email_id, station_id, or status',
             });
         }
-
 
         if (!db) {
             return res.status(500).json({
@@ -919,7 +918,9 @@ const SaveStations = async (req, res) => {
                 message: 'Database connection failed. Please try again later.',
             });
         }
+
         const usersCollection = db.collection('users');
+        const stationsCollection = db.collection('charging_stations');
 
         // Find user by user_id and email_id
         const user = await usersCollection.findOne({ user_id, email_id });
@@ -931,25 +932,47 @@ const SaveStations = async (req, res) => {
             });
         }
 
+        // Find the station in the database
+        const station = await stationsCollection.findOne({ station_id: Number(station_id) });
+
+        if (!station) {
+            return res.status(404).json({
+                error: true,
+                message: 'Station not found',
+            });
+        }
+
+        // Initialize favorite stations array if it doesn't exist
         let updatedFavStations = user.favStations || [];
 
         // Check if station already exists in favStations
-        const index = updatedFavStations.findIndex(station => station.LatLong === LatLong);
+        const index = updatedFavStations.findIndex(favStation =>
+            favStation.station_id === station_id ||
+            (favStation.station_id === Number(station_id))
+        );
 
         if (index !== -1) {
             if (status === false) {
                 // Remove station if status is false
-                logger.loggerSuccess(`Removing favorite station for user ${user_id} at ${LatLong}`);
+                logger.loggerSuccess(`Removing favorite station ${station_id} for user ${user_id}`);
                 updatedFavStations.splice(index, 1);
             } else {
                 // Update status if station exists
-                logger.loggerSuccess(`Updating favorite station status for user ${user_id} at ${LatLong}`);
+                logger.loggerSuccess(`Updating favorite station ${station_id} status for user ${user_id}`);
                 updatedFavStations[index].status = status;
             }
         } else if (status === true) {
             // Add new station if it does not exist
-            logger.loggerSuccess(`Adding new favorite station for user ${user_id} at ${LatLong}`);
-            updatedFavStations.push({ LatLong, address, landmark, status });
+            logger.loggerSuccess(`Adding new favorite station ${station_id} for user ${user_id}`);
+
+            // Only save station_id and location_id with status
+            const stationToSave = {
+                station_id: station.station_id,
+                location_id: station.location_id,
+                status: true
+            };
+
+            updatedFavStations.push(stationToSave);
         }
 
         // Update the user's favorite stations array
@@ -957,6 +980,15 @@ const SaveStations = async (req, res) => {
             { user_id, email_id },
             { $set: { favStations: updatedFavStations } }
         );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.loggerWarn(`No changes made to favorite stations for user ${user_id}`);
+            return res.status(200).json({
+                error: false,
+                message: 'No changes made to favorite stations',
+                updatedFavStations,
+            });
+        }
 
         logger.loggerSuccess(`Favorite stations updated successfully for user ${user_id}`);
 
@@ -967,7 +999,7 @@ const SaveStations = async (req, res) => {
         });
 
     } catch (error) {
-        logger.loggerError(`Error updating favorite station for user_id=${req.body.user_id}, email_id=${req.body.email_id}: ${error.message}`, error);
+        logger.loggerError(`Error updating favorite station for user_id=${req.body.user_id}, email_id=${req.body.email_id}: ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -988,15 +1020,15 @@ const fetchSavedStations = async (req, res) => {
             });
         }
 
-
         if (!db) {
             return res.status(500).json({
                 error: true,
                 message: 'Database connection failed. Please try again later.',
             });
         }
-        const usersCollection = db.collection("users");
 
+        const usersCollection = db.collection("users");
+        const stationsCollection = db.collection("charging_stations");
 
         // Find user and retrieve favorite stations
         const user = await usersCollection.findOne(
@@ -1011,16 +1043,77 @@ const fetchSavedStations = async (req, res) => {
             });
         }
 
+        // If no favorite stations, return empty array
+        if (!user.favStations || user.favStations.length === 0) {
+            logger.loggerInfo(`No favorite stations found for user: ${user_id}`);
+            return res.status(200).json({
+                error: false,
+                message: "No favorite stations found",
+                favStations: [],
+            });
+        }
+
+        // Get the complete station data for each favorite station
+        const completeStationDetails = await Promise.all(
+            user.favStations.map(async (favStation) => {
+                try {
+                    if (!favStation || typeof favStation !== 'object') {
+                        logger.loggerWarn(`Invalid favorite station data for user ${user_id}`);
+                        return null;
+                    }
+
+                    // Convert station_id to number if it's not already
+                    const stationId = typeof favStation.station_id === 'number'
+                        ? favStation.station_id
+                        : Number(favStation.station_id);
+
+                    // Fetch complete station details from the database
+                    const stationData = await stationsCollection.findOne(
+                        { station_id: stationId },
+                        { projection: { _id: 0 } }
+                    );
+
+                    // If station no longer exists in the database
+                    if (!stationData) {
+                        logger.loggerWarn(`Station ${stationId} not found in database, using minimal saved data`);
+                        return {
+                            station_id: stationId,
+                            location_id: favStation.location_id,
+                            status: favStation.status,
+                            missing_data: true
+                        };
+                    }
+
+                    // Return complete station data with favorite status
+                    return {
+                        ...stationData,
+                        status: favStation.status // Keep the favorite status
+                    };
+                } catch (error) {
+                    logger.loggerError(`Error fetching data for station ${favStation.station_id}: ${error.message}`);
+                    return {
+                        station_id: favStation.station_id,
+                        location_id: favStation.location_id,
+                        status: favStation.status,
+                        error: true
+                    };
+                }
+            })
+        );
+
+        // Filter out any null values
+        const filteredStationDetails = completeStationDetails.filter(station => station !== null);
+
         logger.loggerSuccess(`Favorite stations retrieved successfully for user: ${user_id}`);
 
         return res.status(200).json({
             error: false,
             message: "Favorite stations retrieved successfully",
-            favStations: user.favStations || [],
+            favStations: filteredStationDetails,
         });
 
     } catch (error) {
-        logger.loggerError(`Error fetching favorite stations for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
+        logger.loggerError(`Error fetching favorite stations for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`);
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",
@@ -1030,6 +1123,99 @@ const fetchSavedStations = async (req, res) => {
 };
 
 
+
+// Remove Station
+const RemoveStation = async (req, res) => {
+    try {
+        const { user_id, email_id, station_id } = req.body;
+
+        // Validate request body
+        if (!user_id || !email_id || !station_id) {
+            return res.status(400).json({
+                error: true,
+                message: 'Missing required fields: user_id, email_id, or station_id',
+            });
+        }
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
+
+        const usersCollection = db.collection('users');
+
+        // Find user by user_id and email_id
+        const user = await usersCollection.findOne({ user_id, email_id });
+
+        if (!user) {
+            return res.status(404).json({
+                error: true,
+                message: 'User not found',
+            });
+        }
+
+        // Check if user has any favorite stations
+        if (!user.favStations || user.favStations.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: 'No favorite stations found for this user',
+            });
+        }
+
+        // Convert station_id to number for consistent comparison
+        const stationIdNum = typeof station_id === 'number' ? station_id : Number(station_id);
+
+        // Find the station in the user's favorites
+        const index = user.favStations.findIndex(station =>
+            typeof station === 'object' &&
+            (station.station_id === station_id || station.station_id === stationIdNum)
+        );
+
+        if (index === -1) {
+            return res.status(404).json({
+                error: true,
+                message: 'Station not found in user favorites',
+            });
+        }
+
+        // Remove the station from favorites
+        const updatedFavStations = [...user.favStations];
+        updatedFavStations.splice(index, 1);
+
+        // Update the user's favorite stations array
+        const updateResult = await usersCollection.updateOne(
+            { user_id, email_id },
+            { $set: { favStations: updatedFavStations } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.loggerWarn(`No changes made to favorite stations for user ${user_id}`);
+            return res.status(200).json({
+                error: false,
+                message: 'No changes made to favorite stations',
+                updatedFavStations,
+            });
+        }
+
+        logger.loggerSuccess(`Station ${station_id} removed from favorites for user ${user_id}`);
+
+        return res.status(200).json({
+            error: false,
+            message: 'Station removed from favorites successfully',
+            updatedFavStations,
+        });
+
+    } catch (error) {
+        logger.loggerError(`Error removing station for user_id=${req.body.user_id}, email_id=${req.body.email_id}: ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+            error: error.message,
+        });
+    }
+};
 
 // ACCOUNT
 // deleteAccount
@@ -1114,6 +1300,7 @@ module.exports = {
     // STATIONS
     SaveStations,
     fetchSavedStations,
+    RemoveStation,
     // ACCOUNT
     deleteAccount
 };

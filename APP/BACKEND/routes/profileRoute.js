@@ -57,7 +57,7 @@ router.post('/DeactivateRFID', authUser.isAuthenticated, Controller.DeactivateRF
 // DEVICES
 router.post('/fetchSavedDevices', authUser.isAuthenticated, Controller.fetchSavedDevices); // Route to Fetch Saved Devices
 router.post('/SaveDevices', authUser.isAuthenticated, Controller.SaveDevices); // Route to save Devices
-// VEHICLE //TODO -  want to update the insertion in DB  
+// VEHICLE 
 //  - vehicle model details with images
 router.post("/addvehicleModel", authUser.isAuthenticated, upload.single("vehicle_image"), Controller.savevehicleModel); // Adding vehicle model and details
 router.get("/getAllvehicleModels", authUser.isAuthenticated, Controller.getAllvehicleModels); // fetching all vehicle models and details
@@ -67,14 +67,15 @@ router.post('/RemoveVehiclesOfUser', authUser.isAuthenticated, Controller.Remove
 router.post('/fetchSavedVehiclesOfUser', authUser.isAuthenticated, Controller.fetchSavedVehiclesOfUser); // Fetch the vehicle of the paticular user
 
 
-// MANAGE CHARGING STATIONS  //TODO  -  implement this after map module
+// MANAGE CHARGING STATIONS 
 // SAVED CHARGING STATIONS
 router.post('/fetchSavedStations', authUser.isAuthenticated, Controller.fetchSavedStations); // Route to Fetch Saved Stations
 router.post('/SaveStations', authUser.isAuthenticated, Controller.SaveStations); // Route to save Stations
+router.post('/RemoveStation', authUser.isAuthenticated, Controller.RemoveStation); // Route to remove a station from favorites
 // CAPITATIVE CHARGING STATIONS  //TODO - V3.1
 
 
-// CHARGING HISTORY //TODO - want to add filter option 
+// CHARGING HISTORY 
 // Route to fetch payment history
 router.post("/fetchChargingSessionDetails", authUser.isAuthenticated, SessionController.fetchChargingSessionDetails); // Route to fetch charging session details
 
