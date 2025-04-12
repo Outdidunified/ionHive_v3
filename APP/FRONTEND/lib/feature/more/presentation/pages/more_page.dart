@@ -151,11 +151,11 @@ class MoreePage extends StatelessWidget {
                   theme,
                   onTap: () {
                     Get.to(() => SavedStationsPages(
-                      userId: userId,
-                      username: username,
-                      emailId: emailId,
-                      token: token,
-                    ));
+                          userId: userId,
+                          username: username,
+                          emailId: emailId,
+                          token: token,
+                        ));
                   },
                 ),
                 // _buildMenuOption('Captitative Stations', Icons.ev_station, theme), // Commented out as per original code
@@ -197,14 +197,27 @@ class MoreePage extends StatelessWidget {
                 _buildSectionTitle('App'),
                 Obx(() => SwitchListTile(
                       title: const Text("Notification"),
-                      subtitle: const Text(
-                        "Manage and stay updated with app alerts.",
-                        style: TextStyle(color: Colors.black38),
+                      subtitle: Text(
+                        moreController.isNotificationAvailable.value
+                            ? "Manage and stay updated with app alerts."
+                            : "Notifications are disabled in app settings.",
+                        style: TextStyle(
+                          color: moreController.isNotificationAvailable.value
+                              ? Colors.black38
+                              : Colors.red[300],
+                        ),
                       ),
                       value: moreController.isNotificationEnabled.value,
-                      onChanged: (value) {
-                        moreController.toggleNotification(value);
-                      },
+                      onChanged: moreController.isNotificationAvailable.value
+                          ? (value) {
+                              moreController.toggleNotification(value);
+                            }
+                          : null, // Disable the switch if notifications are not available
+                      activeColor: theme.primaryColor,
+                      inactiveTrackColor:
+                          moreController.isNotificationAvailable.value
+                              ? null
+                              : Colors.grey[300],
                     )),
                 const SizedBox(height: 16),
                 _buildSectionTitle('Help & Support'),
@@ -244,7 +257,8 @@ class MoreePage extends StatelessWidget {
                     'assets/icons/logout.png', // Replace with your actual asset filename
                     width: 24, // Match the size of the previous Icon (24)
                     height: 24,
-                    color: Colors.red, // Optional: Match the icon color if needed
+                    color:
+                        Colors.red, // Optional: Match the icon color if needed
                   ),
                   theme,
                   iconColor: Colors.red,
