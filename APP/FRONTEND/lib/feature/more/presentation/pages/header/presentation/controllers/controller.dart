@@ -132,12 +132,12 @@ class HeaderController extends GetxController {
         }
       } else {
         print("Fetch failed: ${fetchResponseModel.message}");
-        CustomSnackbar.showError(message: fetchResponseModel.message);
+        // CustomSnackbar.showError(message: fetchResponseModel.message);
       }
     } catch (e, stackTrace) {
       print("Error fetching profile: $e");
       print("Stack trace: $stackTrace");
-      CustomSnackbar.showError(message: "Failed to fetch profile: $e");
+      // CustomSnackbar.showError(message: "Failed to fetch profile: $e");
     } finally {
       isLoading.value = false;
     }
@@ -166,18 +166,14 @@ class HeaderController extends GetxController {
         final balance = response.walletBalance ?? '0';
         walletBalance.value = 'Rs.$balance'; // Update reactive variable
         print("Wallet Balance: $walletBalance");
-        // Get.snackbar(
-        //   "Success",
-        //   "Wallet balance fetched successfully: $walletBalance",
-        //   backgroundColor: Colors.green,
-        //   colorText: Colors.white,
-        // );
+
       } else {
-        CustomSnackbar.showError(message: response.message ?? "Unknown error");
+        debugPrint(response.message );
+        // CustomSnackbar.showError(message: response.message ?? "Unknown error");
       }
     } catch (e) {
       debugPrint("Error fetching wallet balance: $e");
-      CustomSnackbar.showError(message: "Failed to fetch wallet balance: $e");
+      // CustomSnackbar.showError(message: "Failed to fetch wallet balance: $e");
     } finally {
       isLoading.value = false;
     }
@@ -206,18 +202,15 @@ class HeaderController extends GetxController {
         final totalSesion = response.totalSessions ?? '0';
         totalsession.value = '$totalSesion'; // Update reactive variable
         print(" totalsession: $totalsession");
-        // Get.snackbar(
-        //   "Success",
-        //   "Wallet balance fetched successfully: $walletBalance",
-        //   backgroundColor: Colors.green,
-        //   colorText: Colors.white,
-        // );
+
       } else {
-        CustomSnackbar.showError(message: response.message ?? "Unknown error");
+        debugPrint(response.message);
+
+        // CustomSnackbar.showError(message: response.message ?? "Unknown error");
       }
     } catch (e) {
       debugPrint("Error fetching wallet balance: $e");
-      CustomSnackbar.showError(message: "Failed to fetch session history: $e");
+      // CustomSnackbar.showError(message: "Failed to fetch session history: $e");
     } finally {
       isLoading.value = false;
     }
@@ -285,7 +278,7 @@ class HeaderController extends GetxController {
           ? "Failed to fetch some data: ${errors.join(', ')}"
           : "Failed to fetch data: ${errors.first}";
 
-      CustomSnackbar.showError(message: errorMessage);
+      // CustomSnackbar.showError(message: errorMessage);
     }
 
     isLoading.value = false;

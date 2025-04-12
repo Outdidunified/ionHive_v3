@@ -19,7 +19,7 @@ class AccountController extends GetxController {
     "The app is buggy and really slow",
     "Switching to another competitor",
     "Bad charging experience",
-    "Something Else"
+    "Other" // Changed from "Something Else" to "Other" to match our implementation
   ];
   final RxBool isLoading = false.obs;
   Rx<String?> validationError = Rx<String?>(null);
@@ -27,15 +27,28 @@ class AccountController extends GetxController {
   // Observable for selected reason
   var selectedReason = ''.obs;
 
+  // Observable for other reason text when "Other" is selected
+  var otherReason = ''.obs;
+
   // Logic for deleting account with confirmation
   Future<void> deleteAccount() async {
     final email = sessionController.emailId.value;
     final userId = sessionController.userId.value;
     final authToken = sessionController.token.value;
-    final reason = selectedReason.value;
-    if (reason.isEmpty) {
+
+    // Get the reason - if "Other" is selected, use the otherReason text
+    String finalReason;
+    if (selectedReason.value.isEmpty) {
       CustomSnackbar.showWarning(message: "Please select a reason to proceed.");
       return;
+    } else if (selectedReason.value == "Other") {
+      if (otherReason.value.isEmpty) {
+        CustomSnackbar.showWarning(message: "Please specify your reason.");
+        return;
+      }
+      finalReason = "Other: ${otherReason.value}";
+    } else {
+      finalReason = selectedReason.value;
     }
 
     // Show confirmation dialog instead of snackbar
@@ -55,7 +68,7 @@ class AccountController extends GetxController {
               try {
                 final deleteAccountResponse =
                     await _accountRepository.DeleteAccount(
-                        email, reason, userId, authToken);
+                        email, finalReason, userId, authToken);
 
                 if (!deleteAccountResponse.error) {
                   CustomSnackbar.showSuccess(

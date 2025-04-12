@@ -19,27 +19,55 @@ class Footer extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: currentIndex, // Highlight the selected tab
-        onTap: onTabChanged, // Callback when a tab is clicked
+        currentIndex: currentIndex,
+        onTap: onTabChanged,
         selectedItemColor: theme.primaryColor,
         unselectedItemColor: theme.iconTheme.color,
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Image.asset(
+              currentIndex == 0
+                  ? 'assets/icons/home.png'  // Active icon
+                  : 'assets/icons/home_n.png', // Inactive icon
+            width: 22,
+              height: 22,
+              color: currentIndex == 0 ? theme.primaryColor : theme.iconTheme.color,
+            ),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet_outlined),
+            icon: Image.asset(
+              currentIndex == 1
+                  ? 'assets/icons/walleta.png'  // Active icon
+                  : 'assets/icons/wallet.png', // Inactive icon
+            width: 22,
+              height: 22,
+              color: currentIndex == 1 ? theme.primaryColor : theme.iconTheme.color,
+            ),
             label: 'Wallet',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.map_outlined),
-            label: 'Trip',
+            icon: Image.asset(
+              currentIndex == 2
+                  ? 'assets/icons/history.png'  // Active icon
+                  : 'assets/icons/historyn.png', // Inactive icon
+            width: 22,
+              height: 22,
+              color: currentIndex == 2 ? theme.primaryColor : theme.iconTheme.color,
+            ),
+            label: 'History',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.more_horiz_sharp),
+            icon: Image.asset(
+              currentIndex == 3
+                  ? 'assets/icons/more.png'  // Active icon
+                  : 'assets/icons/application.png', // Inactive icon
+            width: 22,
+              height: 22,
+              color: currentIndex == 3 ? theme.primaryColor : theme.iconTheme.color,
+            ),
             label: 'More',
           ),
         ],
