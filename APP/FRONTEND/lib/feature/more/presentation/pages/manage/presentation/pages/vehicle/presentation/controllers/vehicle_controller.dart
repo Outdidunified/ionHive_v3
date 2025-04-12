@@ -7,6 +7,7 @@ import 'package:ionhive/feature/more/presentation/pages/manage/presentation/page
 class VehicleController extends GetxController {
   final VehicleRepository _vehicleRepository = VehicleRepository();
   final sessionController = Get.find<SessionController>();
+  var hasError = false.obs; // New error state
 
   var vehicles = <VehicleModel>[].obs; // Stores saved vehicles
   var isLoading = false.obs;
@@ -28,6 +29,7 @@ class VehicleController extends GetxController {
     try {
       isLoading(true);
       errorMessage('');
+      hasError.value = false; // Reset error state
 
       final authToken = sessionController.token.value;
       final userId = sessionController.userId.value;
@@ -68,6 +70,7 @@ class VehicleController extends GetxController {
       return vehicleList;
     } catch (e) {
       errorMessage("Error fetching vehicles: $e");
+      hasError.value = true; // Set error state on failure
       print("Exception: $e");
       throw Exception("Error fetching vehicles: $e");
     } finally {

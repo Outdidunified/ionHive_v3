@@ -8,7 +8,8 @@ class SavedDeviceControllers extends GetxController {
   final sessionController = Get.find<SessionController>();
 
   final RxBool isLoading = false.obs;
-  final RxList<Map<String, dynamic>> savedDevices = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> savedDevices =
+      <Map<String, dynamic>>[].obs;
   final RxString errorMessage = ''.obs;
 
   @override
@@ -26,28 +27,44 @@ class SavedDeviceControllers extends GetxController {
     errorMessage.value = '';
 
     try {
-      final response = await _savedDeviceRepoistory.fetchprofile(userId, emailId, authToken);
-      print("fetching saved device body : $response"); // Debug the full response
+      final response =
+          await _savedDeviceRepoistory.fetchprofile(userId, emailId, authToken);
+      print(
+          "fetching saved device body : $response"); // Debug the full response
 
-      if (response.success && response.saveddevice != null) {
-        // Process favChargersDetails into savedDevices
-        final chargerDetails = response.saveddevice as List<dynamic>? ?? [];
-        savedDevices.assignAll(chargerDetails.map((charger) {
-          final connectors = (charger['connectors'] as List<dynamic>?)?.take(2).toList() ?? [];
-          return {
-            'charger_id': charger['charger_id'],
-            'model': charger['model'],
-            'type': charger['charger_type'],
-            'vendor': charger['vendor'],
-            'address': charger['address'],
-            'landmark': charger['landmark'],
-            'unit_price': charger['unit_price'],
-            'connectors': connectors,
-            'last_used': '10/04/2025', // Placeholder; replace with actual data if available
-            'max_power': '${charger['max_power']}W', // Example formatting
-          };
-        }).toList());
-        print("Processed savedDevices: $savedDevices"); // Debug the processed data
+      if (response.success) {
+        if (response.saveddevice != null) {
+          // Process favChargersDetails into savedDevices
+          final chargerDetails = response.saveddevice as List<dynamic>? ?? [];
+          if (chargerDetails.isNotEmpty) {
+            savedDevices.assignAll(chargerDetails.map((charger) {
+              final connectors =
+                  (charger['connectors'] as List<dynamic>?)?.take(2).toList() ??
+                      [];
+              return {
+                'charger_id': charger['charger_id'],
+                'model': charger['model'],
+                'type': charger['charger_type'],
+                'vendor': charger['vendor'],
+                'address': charger['address'],
+                'landmark': charger['landmark'],
+                'unit_price': charger['unit_price'],
+                'connectors': connectors,
+                'last_used':
+                    '10/04/2025', // Placeholder; replace with actual data if available
+                'max_power': '${charger['max_power']}W', // Example formatting
+              };
+            }).toList());
+            print(
+                "Processed savedDevices: $savedDevices"); // Debug the processed data
+          } else {
+            // Empty list is a valid response, not an error
+            savedDevices.clear();
+          }
+        } else {
+          // Empty list is a valid response, not an error
+          savedDevices.clear();
+        }
       } else {
         errorMessage.value = response.message ?? 'Failed to fetch devices';
       }

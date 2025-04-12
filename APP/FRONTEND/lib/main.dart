@@ -11,7 +11,9 @@ import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/utils/theme/themes.dart'; // App theme
 import 'package:ionhive/core/controllers/connectivity_controller.dart'; // Add the ConnectivityController
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Add this import for controlling orientation
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart'; // Add this import for controlling orientation
 
 void main() async {
   WidgetsFlutterBinding
@@ -31,9 +33,11 @@ void main() async {
     ),
   );
 
+
   Get.put(LandingPageController());
   Get.put(SessionController()); // Ensure it is available globally
   Get.put(ConnectivityController());
+  Get.put(VehicleController());
 
   runApp(const IonHive());
 }

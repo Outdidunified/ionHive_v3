@@ -32,19 +32,77 @@ class SavedDevicepage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           } else if (controller.errorMessage.value.isNotEmpty) {
             return Center(
-              child: Text(
-                controller.errorMessage.value,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.error,
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'ERROR',
+                  style: TextStyle(fontSize: 50),
                 ),
-                textAlign: TextAlign.center,
-              ),
-            );
+                SizedBox(
+                  height: 5,
+                ),
+                Image.asset(
+                  'assets/icons/error-history.png', // Error state image
+                  width: 200,
+                  height: 200,
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.grey,
+                      size: 14,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      "Couldn't reach server",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ));
           } else if (controller.savedDevices.isEmpty) {
             return Center(
-              child: Text(
-                'No saved devices found',
-                style: theme.textTheme.bodyLarge,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min, // Ensures the Row takes only the space it needs
+                    crossAxisAlignment: CrossAxisAlignment.center, // Aligns icon and text vertically
+                    children: [
+                      Icon(
+                        Icons.info_outline, // Info icon
+                        color: Colors.grey, // Matches the text color theme
+                        size: 16, // Slightly smaller than the text for balance
+                      ),
+                      SizedBox(width: 4), // Small gap between icon and text
+                      Text(
+                        "No saved devices found",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Image.asset(
+                    'assets/icons/no-history-found1.png', // Empty state image
+                    width: 200,
+                    height: 200,
+                  ),
+
+
+                ],
               ),
             );
           } else {
@@ -81,7 +139,7 @@ class DeviceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(
           color: Colors.grey,
-          width: 0.2,
+          width: 0.6,
         ),
       ),
       elevation: 2,
@@ -310,7 +368,7 @@ class DeviceCard extends StatelessWidget {
                       color: Color(
                           0xFF0A1F44) // Optional: Match the icon color if needed
                       ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
