@@ -70,87 +70,101 @@ class SavedStationsPages extends StatelessWidget {
     required String chargerType,
     required bool isBookmarked,
   }) {
-    return Stack(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          margin: const EdgeInsets.only(top: 10, bottom: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 4,
-                offset: Offset(0, 2),
-              )
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+    return Builder(builder: (context) {
+      // Get responsive text styles
+      final titleStyle = TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: MediaQuery.of(context).size.width * 0.035,
+      );
+
+      final subtitleStyle = TextStyle(
+        fontSize: MediaQuery.of(context).size.width * 0.032,
+        color: Colors.grey,
+      );
+
+      final statusStyle = TextStyle(
+        fontSize: MediaQuery.of(context).size.width * 0.032,
+        color: isAvailable ? Colors.green : Colors.red,
+        fontWeight: FontWeight.bold,
+      );
+
+      final chargerTypeStyle = TextStyle(
+        fontSize: MediaQuery.of(context).size.width * 0.03,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      );
+
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
+            margin: const EdgeInsets.only(top: 10, bottom: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                )
+              ],
+            ),
+            clipBehavior: Clip.none,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: titleStyle,
                       ),
                     ),
-                  ),
-                  Icon(
-                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                    color: Colors.blueGrey,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey,
+                    Icon(
+                      isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                      color: Colors.blueGrey,
+                      size: MediaQuery.of(context).size.width * 0.055,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Text(
-                    isAvailable ? 'Available ✅' : 'Unavailable ❌',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isAvailable ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.bold,
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: subtitleStyle,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      isAvailable ? 'Available ✅' : 'Unavailable ❌',
+                      style: statusStyle,
                     ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      chargerType,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ),
-                  )
-                ],
-              ),
-            ],
+                      child: Text(
+                        chargerType,
+                        style: chargerTypeStyle,
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        if (isPublic)
-          const CornerTag(label: 'Public'), // Label only, no icon
-      ],
-    );
+          if (isPublic) const CornerTag(label: 'Public'),
+        ],
+      );
+    });
   }
 }
 
@@ -164,24 +178,32 @@ class CornerTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Positioned(
-      top: 0,
-      right: 0,
-      child: CustomPaint(
-        painter: TabBorderPainter(),
-        child: ClipPath(
-          clipper: TabClipper(),
-          child: Container(
-            width: 60,
-            height: 28,
-            color: Colors.white,
+      top: 10, // Match the top margin of the container
+      right: -screenWidth * 0.05, // Extend outside the container
+      child: SizedBox(
+        width: screenWidth * 0.2,
+        height: screenWidth * 0.07,
+        child: CustomPaint(
+          painter: RibbonPainter(
+            color: const Color(0xFF00C853),
+            labelWidth: screenWidth * 0.15,
+          ),
+          child: Align(
             alignment: Alignment.center,
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF00C853), // Green
-                fontWeight: FontWeight.w600,
+            child: Padding(
+              padding: EdgeInsets.only(
+                  left: screenWidth * 0.02, bottom: screenWidth * 0.01),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.03,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -190,21 +212,37 @@ class CornerTag extends StatelessWidget {
     );
   }
 }
-class TabBorderPainter extends CustomPainter {
+
+class RibbonPainter extends CustomPainter {
+  final Color color;
+  final double labelWidth;
+
+  RibbonPainter({
+    required this.color,
+    required this.labelWidth,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
-    const double curveHeight = 10;
-    final Paint paint = Paint()
-      ..color = Colors.grey // Green border
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
 
-    final Path path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width - curveHeight, 0);
-    path.quadraticBezierTo(size.width, 0, size.width, curveHeight);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
+    final path = Path();
+
+    // Starting from top-right corner
+    path.moveTo(size.width, 0);
+
+    // Draw the right edge (partial)
+    path.lineTo(size.width, size.height * 0.5);
+
+    // Draw the slanted edge going down and left (outside the container)
+    path.lineTo(size.width - labelWidth, size.height);
+
+    // Draw the left edge going up
+    path.lineTo(size.width - labelWidth, 0);
+
+    // Close the path
     path.close();
 
     canvas.drawPath(path, paint);
@@ -213,23 +251,3 @@ class TabBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
-
-class TabClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    const double curveHeight = 10;
-
-    Path path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width - curveHeight, 0);
-    path.quadraticBezierTo(size.width, 0, size.width, curveHeight);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
