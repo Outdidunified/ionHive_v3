@@ -219,43 +219,47 @@ class AccountAndPrivacyPage extends StatelessWidget {
   Widget _buildDeleteAccountButton(ThemeData theme, ColorScheme colorScheme) {
     final isDark = theme.brightness == Brightness.dark;
 
-    return Card(
-      elevation: isDark ? 0 : 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(
-          color: Colors.grey,
-          width: 0.2,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0), // <-- Bottom margin added here
+      child: Card(
+        elevation: isDark ? 0 : 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(
+            color: Colors.grey,
+            width: 0.2,
+          ),
         ),
-      ),
-      color: colorScheme.surfaceVariant,
-      shadowColor: Colors.black26,
-      child: InkWell(
-        onTap: () => Get.to(() => DeleteAccountPage()),
-        borderRadius: BorderRadius.circular(16),
-        splashColor: Colors.red.withOpacity(0.2),
-        highlightColor: Colors.red.withOpacity(0.1),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20),
-          child: Row(
-            children: [
-              const Icon(Icons.delete_forever, color: Colors.red, size: 26),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  'Delete Account',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.red,
+        color: colorScheme.surfaceVariant,
+        shadowColor: Colors.black26,
+        child: InkWell(
+          onTap: () => Get.to(() => DeleteAccountPage()),
+          borderRadius: BorderRadius.circular(16),
+          splashColor: Colors.red.withOpacity(0.2),
+          highlightColor: Colors.red.withOpacity(0.1),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20),
+            child: Row(
+              children: [
+                const Icon(Icons.delete_forever, color: Colors.red, size: 26),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'Delete Account',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red,
+                    ),
                   ),
                 ),
-              ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-            ],
+                const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
 
 }

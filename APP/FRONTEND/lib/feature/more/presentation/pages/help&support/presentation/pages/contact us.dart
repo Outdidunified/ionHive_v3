@@ -36,10 +36,17 @@ class ContactUs extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: theme.cardColor,
                   border: Border.all(
-                    color: Colors.grey,
-                    width: 3,
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 0.5,
                   ),
-
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.shadowColor.withOpacity(0.1),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Padding(
                   padding: EdgeInsets.all(screenWidth * 0.05),
@@ -50,7 +57,7 @@ class ContactUs extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: screenHeight * 0.02),
+            SizedBox(height: screenHeight * 0.03),
             Text(
               'Get in Touch',
               style: theme.textTheme.headlineSmall
@@ -90,13 +97,13 @@ class ContactUs extends StatelessWidget {
 
             // Social Media Section
             Text(
-              'Follow Us On',
+              'Follow Us',
               style: theme.textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.w500),
             ),
             SizedBox(height: screenHeight * 0.02),
 
-            _buildSocialCard(theme, 'LinkedIn', '286 Followers • 11 Posts',
+            _buildSocialCard(theme, 'LinkedIn', 'Available Mon-Sat • 9.30am-6.30pm',
                 FontAwesomeIcons.linkedin, () => _launchURL(linkedInUrl)),
             _buildSocialCard(
                 theme,

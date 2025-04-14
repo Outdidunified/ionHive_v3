@@ -38,19 +38,21 @@ class HeaderController extends GetxController {
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
 
-    // Basic validation
-    if (newUsername.isEmpty || phoneNumberText.isEmpty) {
-      CustomSnackbar.showError(message: "Fields cannot be empty");
+    // Basic validation - only username is required
+    if (newUsername.isEmpty) {
+      CustomSnackbar.showError(message: "Username cannot be empty");
       return;
     }
 
-    // Convert phone number safely
+    // Convert phone number safely if provided, otherwise set to null
     int? newPhoneNumber;
-    try {
-      newPhoneNumber = int.parse(phoneNumberText);
-    } catch (e) {
-      CustomSnackbar.showError(message: "Invalid phone number");
-      return;
+    if (phoneNumberText.isNotEmpty) {
+      try {
+        newPhoneNumber = int.parse(phoneNumberText);
+      } catch (e) {
+        CustomSnackbar.showError(message: "Invalid phone number");
+        return;
+      }
     }
 
     isLoading.value = true;
@@ -166,9 +168,8 @@ class HeaderController extends GetxController {
         final balance = response.walletBalance ?? '0';
         walletBalance.value = 'Rs.$balance'; // Update reactive variable
         print("Wallet Balance: $walletBalance");
-
       } else {
-        debugPrint(response.message );
+        debugPrint(response.message);
         // CustomSnackbar.showError(message: response.message ?? "Unknown error");
       }
     } catch (e) {
@@ -202,7 +203,6 @@ class HeaderController extends GetxController {
         final totalSesion = response.totalSessions ?? '0';
         totalsession.value = '$totalSesion'; // Update reactive variable
         print(" totalsession: $totalsession");
-
       } else {
         debugPrint(response.message);
 

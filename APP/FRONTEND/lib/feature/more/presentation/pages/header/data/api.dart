@@ -42,19 +42,26 @@ class HeaderAPICalls {
     String username,
     int user_id,
     String email,
-    int phone_number,
+    int? phone_number,
     String authToken,
   ) async {
     final url = HeaderUrl.CompleteProfile;
 
     try {
+      // Create request body based on whether phone_number is provided
+      Map<String, dynamic> requestBody = {
+        "username": username,
+        "email_id": email,
+        "user_id": user_id,
+      };
+
+      // Only add phone_number to the request if it's not null
+      if (phone_number != null) {
+        requestBody["phone_number"] = phone_number;
+      }
+
       print("Sending request to: $url");
-      print("Request body: ${jsonEncode({
-            "username": username,
-            "email_id": email,
-            "phone_number": phone_number,
-            "user_id": user_id,
-          })}");
+      print("Request body: ${jsonEncode(requestBody)}");
 
       final response = await http
           .post(
@@ -63,12 +70,7 @@ class HeaderAPICalls {
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({
-          "username": username,
-          "email_id": email,
-          "phone_number": phone_number,
-          "user_id": user_id,
-        }),
+        body: jsonEncode(requestBody),
       )
           .timeout(
         const Duration(seconds: 10),
@@ -81,12 +83,12 @@ class HeaderAPICalls {
       print("Response body: ${response.body}");
 
       return _handleResponse(response);
-   } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,
           'Unable to reach the server. \nPlease check your connection or try again later.');
-    }  catch (e) {
+    } catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');
     }
@@ -110,12 +112,12 @@ class HeaderAPICalls {
       print(response.statusCode);
 
       return _handleResponse(response);
-   } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,
           'Unable to reach the server. \nPlease check your connection or try again later.');
-    }  catch (e) {
+    } catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');
     }
@@ -139,12 +141,12 @@ class HeaderAPICalls {
       print(response.statusCode);
 
       return _handleResponse(response);
-   } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,
           'Unable to reach the server. \nPlease check your connection or try again later.');
-    }  catch (e) {
+    } catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');
     }
@@ -168,12 +170,12 @@ class HeaderAPICalls {
       print(response.statusCode);
 
       return _handleResponse(response);
-   } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,
           'Unable to reach the server. \nPlease check your connection or try again later.');
-    }  catch (e) {
+    } catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');
     }

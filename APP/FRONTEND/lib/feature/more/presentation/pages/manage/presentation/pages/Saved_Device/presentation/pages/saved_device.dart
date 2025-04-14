@@ -290,20 +290,22 @@ class DeviceCard extends StatelessWidget {
   }
 
   Widget _buildConnectorCard(
-    BuildContext context, {
-    required String title,
-    required String status,
-    required String type,
-    required String power,
-    required double width,
-  }) {
+      BuildContext context, {
+        required String title,
+        required String status,
+        required String type,
+        required String power,
+        required double width,
+      }) {
     final theme = Theme.of(context);
+    final bool isDarkTheme = theme.brightness == Brightness.dark;
+
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(
-          color: Colors.grey,
+        side: BorderSide(
+          color: theme.dividerColor, // Use theme divider color for consistency
           width: 0.2,
         ),
       ),
@@ -354,20 +356,18 @@ class DeviceCard extends StatelessWidget {
               children: [
                 if (type.toLowerCase() == 'gun')
                   Image.asset(
-                      'assets/icons/charger_gun1.png', // Replace with your actual asset filename
-                      width: 22, // Match the size of the previous Icon (24)
-                      height: 22,
-                      color: Color(0xFF0A1F44) // A strong navy blue
-                      // Optional: Match the icon color if needed
-                      )
+                    'assets/icons/charger_gun1.png',
+                    width: 22,
+                    height: 22,
+                    color: isDarkTheme ? Colors.white : const Color(0xFF0A1F44),
+                  )
                 else if (type.toLowerCase() == 'socket')
                   Image.asset(
-                      'assets/icons/wall-socket.png', // Replace with your actual asset filename
-                      width: 22, // Match the size of the previous Icon (24)
-                      height: 22,
-                      color: Color(
-                          0xFF0A1F44) // Optional: Match the icon color if needed
-                      ),
+                    'assets/icons/wall-socket.png',
+                    width: 22,
+                    height: 22,
+                    color: isDarkTheme ? Colors.white : const Color(0xFF0A1F44),
+                  ),
                 const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,13 +375,14 @@ class DeviceCard extends StatelessWidget {
                   children: [
                     Text(
                       type,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(fontSize: width * 0.03),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontSize: width * 0.03,
+                      ),
                     ),
                     Text(
                       power,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), // Use theme color
                         fontSize: width * 0.028,
                       ),
                     ),

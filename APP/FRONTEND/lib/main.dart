@@ -33,7 +33,6 @@ void main() async {
     ),
   );
 
-
   Get.put(LandingPageController());
   Get.put(SessionController()); // Ensure it is available globally
   Get.put(ConnectivityController());

@@ -71,7 +71,11 @@ class AuthController extends GetxController {
       final otpResponse = await _authRepository.GetOTP(email);
 
       if (!otpResponse.error) {
-        // Check the 'error' field
+        // Clear OTP field before navigating to OTP page
+        otpController.clear();
+        otpValidationError.value = null;
+
+        // Navigate to OTP page
         Get.to(() => OtpPage(email: email));
       } else {
         debugPrint("Error: ${otpResponse.message}}");
@@ -103,8 +107,12 @@ class AuthController extends GetxController {
       final otpResponse = await _authRepository.GetOTP(email);
 
       if (!otpResponse.error) {
-        // Check the 'error' field
-        Get.to(() => OtpPage(email: email));
+        // Clear OTP field before navigating to OTP page
+        otpController.clear();
+        otpValidationError.value = null;
+
+        // Show success message
+        CustomSnackbar.showSuccess(message: "OTP sent successfully");
       } else {
         validationError.value = otpResponse.message; // Show error message
       }

@@ -5,6 +5,7 @@ import 'package:ionhive/feature/more/presentation/pages/header/presentation/cont
 import 'package:ionhive/utils/widgets/button/custom_button.dart';
 import 'package:ionhive/utils/widgets/input_field/phonenumber_inputfield.dart';
 import 'package:ionhive/utils/widgets/input_field/username_inputfield.dart';
+import 'package:ionhive/utils/responsive/responsive.dart';
 
 class HeaderCard extends StatelessWidget {
   final ThemeData theme;
@@ -25,13 +26,30 @@ class HeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = context.screenWidth;
+    final double screenHeight = context.screenHeight;
+    final bool isSmallScreen = screenWidth < 375; // iPhone 8 and smaller
 
     // Fetch data when the widget is built (only once)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchHeaderData();
     });
+
+    // Calculate responsive dimensions
+    final double gradientHeight =
+        isSmallScreen ? context.rHeight(200) : context.rHeight(220);
+
+    final double whiteBackgroundHeight =
+        isSmallScreen ? context.rHeight(160) : context.rHeight(140);
+
+    final double profileTopPosition =
+        isSmallScreen ? context.rHeight(55) : context.rHeight(65);
+
+    final double avatarRadius =
+        isSmallScreen ? context.rWidth(32) : context.rWidth(40);
+
+    final double editIconRadius =
+        isSmallScreen ? context.rWidth(13) : context.rWidth(15);
 
     return Stack(
       alignment: Alignment.topCenter,
@@ -39,7 +57,7 @@ class HeaderCard extends StatelessWidget {
         // Gradient Background from Theme
         Container(
           width: double.infinity,
-          height: screenHeight * 0.33, // 32% of screen height
+          height: gradientHeight,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -57,12 +75,12 @@ class HeaderCard extends StatelessWidget {
           bottom: 0,
           child: Container(
             width: screenWidth,
-            height: screenHeight * 0.24, // 23% of screen height
+            height: whiteBackgroundHeight,
             decoration: BoxDecoration(
               color: theme.colorScheme.background, // Theme background
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(40),
-                topRight: Radius.circular(40),
+                topLeft: Radius.circular(context.rRadius(40)),
+                topRight: Radius.circular(context.rRadius(40)),
               ),
             ),
           ),
@@ -70,8 +88,9 @@ class HeaderCard extends StatelessWidget {
 
         // Profile Image & User Details
         Positioned(
-          top: screenHeight * 0.10, // 10% of screen height
+          top: profileTopPosition,
           child: Column(
+            mainAxisSize: MainAxisSize.min, // Use minimum space
             children: [
               Stack(
                 children: [
@@ -81,18 +100,19 @@ class HeaderCard extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: theme.primaryColor, // Border color from theme
-                        width: 3.0,
+                        width: context.rWidth(2.5),
                       ),
                     ),
                     child: CircleAvatar(
-                      radius: screenWidth * 0.10, // 10% of screen width
+                      radius: avatarRadius,
                       backgroundColor: Colors.transparent,
                       child: Obx(() {
                         String email = sessionController.emailId.value;
                         return Text(
                           email.isNotEmpty ? email[0].toUpperCase() : '?',
                           style: theme.textTheme.headlineMedium?.copyWith(
-                            fontSize: screenWidth * 0.08, // 8% of screen width
+                            fontSize:
+                                context.rFontSize(isSmallScreen ? 26 : 28),
                             fontWeight: FontWeight.bold,
                           ),
                         );
@@ -110,10 +130,10 @@ class HeaderCard extends StatelessWidget {
                       },
                       child: CircleAvatar(
                         backgroundColor: theme.colorScheme.primary,
-                        radius: screenWidth * 0.035, // 3.5% of screen width
+                        radius: editIconRadius,
                         child: Icon(
                           Icons.edit,
-                          size: screenWidth * 0.03, // 3% of screen width
+                          size: context.rIconSize(isSmallScreen ? 10 : 12),
                           color: theme.colorScheme.onPrimary,
                         ),
                       ),
@@ -122,7 +142,7 @@ class HeaderCard extends StatelessWidget {
                 ],
               ),
 
-              SizedBox(height: screenHeight * 0.01), // 1% of screen height
+              SizedBox(height: context.rHeight(6)),
 
               // User Name
               Obx(() {
@@ -130,8 +150,9 @@ class HeaderCard extends StatelessWidget {
                   sessionController.username.value.isNotEmpty
                       ? sessionController.username.value
                       : "Complete your profile",
-                  style: theme.textTheme.headlineSmall?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    fontSize: context.rFontSize(isSmallScreen ? 16 : 18),
                   ),
                 );
               }),
@@ -142,45 +163,57 @@ class HeaderCard extends StatelessWidget {
                   sessionController.emailId.value.isNotEmpty
                       ? sessionController.emailId.value
                       : "Complete your profile",
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    fontSize: context.rFontSize(isSmallScreen ? 12 : 14),
                   ),
                 );
               }),
 
-              SizedBox(height: screenHeight * 0.02), // 1% of screen height
+              SizedBox(height: context.rHeight(isSmallScreen ? 2 : 6)),
 
-              // Stats Row
+              // Stats Row - Optimized for small screens
               Container(
-                width: screenWidth, // Full screen width
+                width:
+                    screenWidth * 0.9, // 90% of screen width for better margins
+                margin: EdgeInsets.only(top: context.rHeight(4)),
+                padding: EdgeInsets.symmetric(
+                  vertical: context.rHeight(isSmallScreen ? 6 : 8),
+                  horizontal: context.rWidth(isSmallScreen ? 4 : 6),
+                ),
+
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Obx(() => _buildStatItem(
-                            controller.walletBalance
-                                .value, // Use fetched wallet balance
+                            controller.walletBalance.value,
                             "Wallet Balance",
+                            context,
+                            isSmallScreen,
                           )),
                     ),
                     Container(
-                      height: screenHeight * 0.05, // 5% of screen height
-                      width: screenWidth * 0.003, // 0.3% of screen width
+                      height: context.rHeight(isSmallScreen ? 25 : 30),
+                      width: context.rWidth(1),
                       color: Colors.grey.shade300,
                     ),
                     Expanded(
                       child: Obx(() => _buildStatItem(
-                            controller.totalsession
-                                .value, // Use fetched wallet balance
+                            controller.totalsession.value,
                             "Total Session",
+                            context,
+                            isSmallScreen,
                           )),
                     ),
                     Container(
-                      height: screenHeight * 0.05, // 5% of screen height
-                      width: screenWidth * 0.003, // 0.3% of screen width
+                      height: context.rHeight(isSmallScreen ? 25 : 30),
+                      width: context.rWidth(1),
                       color: Colors.grey.shade300,
                     ),
-                    Expanded(child: _buildStatItem("Active", "Status")),
+                    Expanded(
+                        child: _buildStatItem(
+                            "Active", "Status", context, isSmallScreen)),
                   ],
                 ),
               ),
@@ -191,43 +224,60 @@ class HeaderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
+  Widget _buildStatItem(
+      String value, String label, BuildContext context, bool isSmallScreen) {
+    // Calculate responsive font sizes
+    final double valueFontSize = isSmallScreen ? 14 : 16;
+    final double labelFontSize = isSmallScreen ? 10 : 12;
+    final double dotSize = isSmallScreen ? 8 : 10;
+    final double dotSpacing = isSmallScreen ? 4 : 6;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         if (label == "Status") // Conditionally add green dot for "Status"
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 10, // Width of the green dot
-                height: 10, // Height of the green dot
+                width: context.rWidth(dotSize),
+                height: context.rHeight(dotSize),
                 decoration: BoxDecoration(
                   color: Colors.green, // Green color for the dot
                   shape: BoxShape.circle, // Circular shape
                 ),
               ),
-              SizedBox(width: 8), // Spacing between the dot and text
+              SizedBox(width: context.rWidth(dotSpacing)),
               Text(
                 value,
-                style: theme.textTheme.headlineSmall?.copyWith(
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  fontSize: context.rFontSize(valueFontSize),
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           )
         else
           Text(
             value,
-            style: theme.textTheme.headlineSmall?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              fontSize: context.rFontSize(valueFontSize),
             ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
           ),
-        // 0.5% of screen height
+        SizedBox(height: context.rHeight(isSmallScreen ? 2 : 4)),
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface.withOpacity(0.6),
+            fontSize: context.rFontSize(labelFontSize),
           ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
@@ -236,64 +286,109 @@ class HeaderCard extends StatelessWidget {
 
 void showEditProfileDialog(BuildContext context) {
   final controller = Get.find<HeaderController>();
+  final theme = Theme.of(context);
+  final bool isSmallScreen = context.screenWidth < 375; // iPhone 8 and smaller
 
   // Fetch user details first
   controller.fetchprofile().then((_) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(context.rRadius(16)),
+        ),
       ),
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-            top: 16,
+            left: context.rWidth(16),
+            right: context.rWidth(16),
+            bottom:
+                MediaQuery.of(context).viewInsets.bottom + context.rHeight(16),
+            top: context.rHeight(16),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Slide Indicator
               Container(
-                width: 40,
-                height: 5,
+                width: context.rWidth(40),
+                height: context.rHeight(5),
                 decoration: BoxDecoration(
                   color: Colors.grey[400],
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(context.rRadius(12)),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: context.rHeight(8)),
 
-              const Text(
+              Text(
                 "Complete your profile",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: context.rFontSize(isSmallScreen ? 16 : 18),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: context.rHeight(4)),
+              Text(
+                "Username is required, phone number is optional",
+                style: TextStyle(
+                  fontSize: context.rFontSize(isSmallScreen ? 12 : 14),
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: context.rHeight(12)),
 
               // Username Input Field (Shows fetched value or empty)
               UsernameInputField(
                 controller: controller.usernameController,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: context.rHeight(12)),
 
-              // Phone Number Input Field (Shows fetched value or empty)
-              AdvancedPhoneNumberInput(
-                controller: controller.phoneNumberController,
-                onChanged: (phone) {},
-                onCountryChanged: (countryCode) {},
+              // Phone Number Input Field (Optional)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                        left: context.rWidth(4), bottom: context.rHeight(4)),
+                    child: Text(
+                      "Phone Number (Optional)",
+                      style: TextStyle(
+                        fontSize: context.rFontSize(isSmallScreen ? 12 : 14),
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                  ),
+                  AdvancedPhoneNumberInput(
+                    controller: controller.phoneNumberController,
+                    onChanged: (phone) {},
+                    onCountryChanged: (countryCode) {},
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: context.rHeight(16)),
 
               // Save Button
-              CustomButton(
-                text: "Save",
-                onPressed: () {
-                  controller.updateProfile();
-                },
-              ),
+              Obx(() => CustomButton(
+                    text: "Save",
+                    onPressed: () {
+                      controller.updateProfile();
+                    },
+                    isLoading: controller.isLoading.value,
+                    borderRadius: context.rRadius(8),
+                    textStyle: TextStyle(
+                      fontSize: context.rFontSize(isSmallScreen ? 14 : 16),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    boxShadow: BoxShadow(
+                      color: theme.primaryColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  )),
             ],
           ),
         );
