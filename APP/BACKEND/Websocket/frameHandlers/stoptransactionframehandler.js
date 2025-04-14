@@ -114,15 +114,22 @@ const handleStopTransaction = async (
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId];
 
-    // Validate request payload
-    const validationResult = validateStopTransaction(requestPayload);
-    if (validationResult.error) {
-        logger.loggerError(`StopTransaction validation failed: ${JSON.stringify(validationResult.details)}`);
-        response[2] = { idTagInfo: { status: "Invalid" } };
-        return response;
-    }
-
     try {
+        // Validate request payload
+        const validationResult = validateStopTransaction(requestPayload);
+        if (validationResult.error) {
+            logger.loggerError(`StopTransaction validation failed: ${JSON.stringify(validationResult.details)}`);
+            response[2] = { idTagInfo: { status: "Invalid" } };
+
+            // Add metadata for internal use
+            response.metadata = {
+                success: false,
+                error: "Validation failed",
+                details: validationResult.details
+            };
+
+            return response;
+        }
         // Get the idTag and transactionId from the request
         const { idTag, transactionId, timestamp, meterStop } = requestPayload;
 
@@ -133,6 +140,13 @@ const handleStopTransaction = async (
         } catch (error) {
             logger.loggerError(`Error getting connector ID: ${error.message}`);
             response[2] = { idTagInfo: { status: "Invalid" } };
+
+            // Add metadata for internal use
+            response.metadata = {
+                success: false,
+                error: `Error getting connector ID: ${error.message}`
+            };
+
             return response;
         }
 
@@ -272,13 +286,24 @@ const handleStopTransaction = async (
             }
         ];
 
-        // Add broadcast data to response for WebsocketHandler to handle
-        response.push(statusNotification);
+        // Add metadata with broadcast data for internal use
+        response.metadata = {
+            success: true,
+            broadcastData: true,
+            statusNotification: statusNotification
+        };
+
         logger.loggerSuccess("StatusNotification ready for broadcast.");
 
     } catch (error) {
         logger.loggerError(`Error in handleStopTransaction: ${error.message}`);
         response[2] = { idTagInfo: { status: "InternalError" } };
+
+        // Add metadata for internal use
+        response.metadata = {
+            success: false,
+            error: error.message
+        };
     }
 
     return response;

@@ -10,17 +10,23 @@ const validateMeterValues = (data) => {
 
 const handleMeterValues = async (uniqueIdentifier, requestPayload, requestId, wsConnections, meterValuesMap, sessionFlags, chargingSessionID, ClientWss) => {
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
-    let response = [3, requestId];
-
-    // Validate request payload
-    const validationResult = validateMeterValues(requestPayload);
-    if (!validationResult.isValid) {
-        logger.loggerError(`Metervalue validation failed: ${JSON.stringify(validationResult.errors)}`);
-        response[2] = { idTagInfo: { status: "Invalid" } };
-        return response;
-    }
+    let response = [3, requestId, {}];
 
     try {
+        // Validate request payload
+        const validationResult = validateMeterValues(requestPayload);
+        if (!validationResult.isValid) {
+            logger.loggerError(`Metervalue validation failed: ${JSON.stringify(validationResult.errors)}`);
+
+            // Add metadata for internal use
+            response.metadata = {
+                success: false,
+                error: "Validation failed",
+                details: validationResult.errors
+            };
+
+            return response;
+        }
         const connectorId = requestPayload.connectorId;
         const key = `${uniqueIdentifier}_${connectorId}`; // Create a composite key
         const UniqueChargingSessionId = chargingSessionID.get(key); // Use the current session ID
@@ -71,9 +77,18 @@ const handleMeterValues = async (uniqueIdentifier, requestPayload, requestId, ws
             meterValuesMap.set(key, meterValues);
         }
 
+        // Add metadata for successful processing
+        response.metadata = {
+            success: true
+        };
     } catch (error) {
         logger.loggerError(`Error in handleMeterValues: ${error.message}`);
-        response[2] = { idTagInfo: { status: "InternalError" } };
+
+        // Add metadata for internal use
+        response.metadata = {
+            success: false,
+            error: error.message
+        };
     }
 
     return response;

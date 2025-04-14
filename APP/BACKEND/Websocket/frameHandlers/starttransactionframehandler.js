@@ -15,15 +15,23 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId];
 
-    // Validate request payload
-    const validationResult = validateStartTransaction(requestPayload);
-    if (!validationResult.isValid) {
-        logger.loggerError(`StartTransaction validation failed: ${JSON.stringify(validationResult.errors)}`);
-        response[2] = { idTagInfo: { status: "Invalid" } };
-        return response;
-    }
-
     try {
+        // Validate request payload
+        const validationResult = validateStartTransaction(requestPayload);
+        if (!validationResult.isValid) {
+            logger.loggerError(`StartTransaction validation failed: ${JSON.stringify(validationResult.errors)}`);
+            response[2] = { idTagInfo: { status: "Invalid" } };
+
+            // Add metadata for internal use
+            response.metadata = {
+                success: false,
+                error: "Validation failed",
+                details: validationResult.errors
+            };
+
+            return response;
+        }
+
         const { idTag, connectorId, meterStart, timestamp } = requestPayload;
         const { status, expiryDate } = await dbService.checkAuthorization(uniqueIdentifier, idTag);
 
@@ -31,6 +39,14 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
 
         if (status !== "Accepted") {
             response[2] = { idTagInfo: { status } };
+
+            // Add metadata for internal use
+            response.metadata = {
+                success: false,
+                error: "Authorization failed",
+                status: status
+            };
+
             return response;
         }
 
@@ -71,8 +87,14 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
                 timestamp: new Date().toISOString()
             }
         ];
-        // Add broadcast data to response for WebsocketHandler to handle
-        response.push(authData);
+
+        // Add metadata with broadcast data for internal use
+        response.metadata = {
+            success: true,
+            broadcastData: true,
+            authData: authData
+        };
+
         logger.loggerSuccess("StatusNotification ready for broadcast.");
 
         // AutoStop logic
@@ -91,11 +113,24 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
                     logger.loggerError(`AutoStop: Error stopping charger.`);
                 }
             }, autoStopTimeInMs);
+
+            // Add autostop info to metadata
+            response.metadata.autoStop = {
+                enabled: true,
+                timeValue: autoStopConfig.time_value,
+                user: user
+            };
         }
 
     } catch (error) {
         logger.loggerError(`Error in handleStartTransaction: ${error.message}`);
         response[2] = { idTagInfo: { status: "InternalError" } };
+
+        // Add metadata for internal use
+        response.metadata = {
+            success: false,
+            error: error.message
+        };
     }
 
     return response;

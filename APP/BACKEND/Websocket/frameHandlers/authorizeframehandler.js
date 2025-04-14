@@ -10,15 +10,23 @@ const handleAuthorize = async (uniqueIdentifier, requestPayload, requestId, wsCo
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId];
 
-    // Validate request payload
-    const validationResult = validateAuthorize(requestPayload);
-    if (!validationResult.isValid) {
-        logger.loggerError(`Authorization validation failed: ${JSON.stringify(validationResult.errors)}`);
-        response[2] = { idTagInfo: { status: "Invalid" } };
-        return response;
-    }
-
     try {
+        // Validate request payload
+        const validationResult = validateAuthorize(requestPayload);
+        if (!validationResult.isValid) {
+            logger.loggerError(`Authorization validation failed: ${JSON.stringify(validationResult.errors)}`);
+            response[2] = { idTagInfo: { status: "Invalid" } };
+
+            // Add metadata for internal use
+            response.metadata = {
+                success: false,
+                error: "Validation failed",
+                details: validationResult.errors
+            };
+
+            return response;
+        }
+
         const idTag = requestPayload.idTag;
         const { status, expiryDate, connectorId } = await dbService.checkAuthorization(uniqueIdentifier, idTag);
         logger.loggerInfo(`Authorization status: ${status} for idTag: ${idTag}`);
@@ -37,14 +45,31 @@ const handleAuthorize = async (uniqueIdentifier, requestPayload, requestId, wsCo
                     timestamp: new Date().toISOString(),
                 },
             ];
-            // We'll handle broadcasting in the WebsocketHandler.js
+
+            // Add metadata for internal use with broadcast data
+            response.metadata = {
+                success: true,
+                broadcastData: true,
+                authData: authData
+            };
+
             logger.loggerSuccess("Authorization successful, ready for broadcast.");
-            // Return the authData as part of the response for broadcasting
-            response[3] = authData;
+        } else {
+            // Add metadata for internal use without broadcast data
+            response.metadata = {
+                success: true,
+                broadcastData: false
+            };
         }
     } catch (error) {
         logger.loggerError(`Error in handleAuthorize: ${error.message}`);
         response[2] = { idTagInfo: { status: "InternalError" } };
+
+        // Add metadata for internal use
+        response.metadata = {
+            success: false,
+            error: error.message
+        };
     }
 
     return response;

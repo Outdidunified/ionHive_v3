@@ -24,6 +24,93 @@ const handleWebSocketConnection = (
     chargerStartTime,
     chargerStopTime
 ) => {
+    // Handle client connections (mobile apps, web dashboards)
+    ClientWss.on('connection', async (client, req) => {
+        client.isAlive = true;
+
+        // Parse connection URL to extract user information
+        // Example URL: ws://server/client?userId=123&role=admin
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const userId = url.searchParams.get('userId');
+        const role = url.searchParams.get('role') || 'user';
+
+        if (!userId) {
+            logger.loggerWarn('Client connection attempt without userId');
+            client.close(1008, 'UserId is required');
+            return;
+        }
+
+        // Store client identity information
+        client.userId = userId;
+        client.role = role;
+        client.connectionTime = Date.now();
+
+        logger.loggerSuccess(`Client connected: User ${userId} (${role})`);
+
+        // Set up ping/pong for client connections
+        client.pingInterval = setInterval(() => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.ping();
+            } else {
+                clearInterval(client.pingInterval);
+            }
+        }, 30000);
+
+        // Handle client messages
+        client.on('message', (message) => {
+            try {
+                const data = JSON.parse(message);
+
+                // Handle client subscription requests
+                if (data.action === 'subscribe' && data.chargerId) {
+                    // Store subscription information
+                    if (!client.subscriptions) {
+                        client.subscriptions = new Set();
+                    }
+                    client.subscriptions.add(data.chargerId);
+                    logger.loggerInfo(`User ${userId} subscribed to charger ${data.chargerId}`);
+
+                    // Send confirmation
+                    client.send(JSON.stringify({
+                        type: 'subscription',
+                        status: 'success',
+                        chargerId: data.chargerId
+                    }));
+                }
+
+                // Handle client unsubscribe requests
+                if (data.action === 'unsubscribe' && data.chargerId) {
+                    if (client.subscriptions) {
+                        client.subscriptions.delete(data.chargerId);
+                        logger.loggerInfo(`User ${userId} unsubscribed from charger ${data.chargerId}`);
+                    }
+
+                    // Send confirmation
+                    client.send(JSON.stringify({
+                        type: 'subscription',
+                        status: 'removed',
+                        chargerId: data.chargerId
+                    }));
+                }
+            } catch (error) {
+                logger.loggerError(`Error processing client message: ${error.message}`);
+            }
+        });
+
+        // Handle client disconnection
+        client.on('close', () => {
+            logger.loggerInfo(`Client disconnected: User ${userId}`);
+            clearInterval(client.pingInterval);
+        });
+
+        // Send welcome message
+        client.send(JSON.stringify({
+            type: 'connection',
+            status: 'connected',
+            userId: userId,
+            timestamp: new Date().toISOString()
+        }));
+    });
     wss.on('connection', async (ws, req) => {
         ws.isAlive = true;
         ws.lastHeartbeat = Date.now(); // Store last heartbeat timestamp
@@ -432,12 +519,9 @@ const handleIncomingMessage = async (
         logger.loggerInfo(`Sending message to ${uniqueIdentifier}: ${responseStr}`);
         ws.send(responseStr);
 
-        // Handle broadcasting based on metadata or legacy broadcastData
-        if (broadcastData) {
+        // Only broadcast if specifically requested via metadata
+        if (broadcastData && metadata && metadata.broadcastData) {
             logger.loggerInfo(`Broadcasting specific data from ${uniqueIdentifier}`);
-            broadcastMessage(uniqueIdentifier, requestData, ws, ClientWss);
-        } else {
-            // Regular broadcast of the message to other clients
             broadcastMessage(uniqueIdentifier, requestData, ws, ClientWss);
         }
     } catch (error) {
@@ -450,6 +534,14 @@ const handleIncomingMessage = async (
     }
 };
 
+/**
+ * Broadcast a message to all connected clients
+ * 
+ * @param {string} DeviceID - The charger ID
+ * @param {object} message - The message to broadcast
+ * @param {WebSocket} sender - The sender WebSocket
+ * @param {WebSocketServer} ClientWss - The client WebSocket server
+ */
 const broadcastMessage = (DeviceID, message, sender, ClientWss) => {
     const jsonMessage = JSON.stringify({ DeviceID, message });
 
@@ -462,6 +554,111 @@ const broadcastMessage = (DeviceID, message, sender, ClientWss) => {
             });
         }
     });
+};
+
+/**
+ * Send a message to a specific client by user ID
+ * 
+ * @param {string} userId - The user ID to send the message to
+ * @param {string} DeviceID - The charger ID
+ * @param {object} message - The message to send
+ * @param {WebSocketServer} ClientWss - The client WebSocket server
+ * @returns {boolean} - Whether the message was sent successfully
+ */
+const sendToSpecificClient = (userId, DeviceID, message, ClientWss) => {
+    if (!userId || !ClientWss) {
+        logger.loggerError(`Cannot send message: Missing userId or ClientWss`);
+        return false;
+    }
+
+    const jsonMessage = JSON.stringify({
+        DeviceID,
+        message,
+        targetedMessage: true
+    });
+
+    let messageSent = false;
+
+    // Iterate through all clients to find the one with matching userId
+    ClientWss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN && client.userId === userId) {
+            client.send(jsonMessage, (error) => {
+                if (error) {
+                    logger.loggerError(`Error sending message to user ${userId}: ${error.message}`);
+                } else {
+                    logger.loggerInfo(`Message sent successfully to user ${userId}`);
+                    messageSent = true;
+                }
+            });
+        }
+    });
+
+    if (!messageSent) {
+        logger.loggerWarn(`User ${userId} not found or not connected`);
+    }
+
+    return messageSent;
+};
+
+/**
+ * Send a message to multiple specific clients by user IDs
+ * 
+ * @param {string[]} userIds - Array of user IDs to send the message to
+ * @param {string} DeviceID - The charger ID
+ * @param {object} message - The message to send
+ * @param {WebSocketServer} ClientWss - The client WebSocket server
+ * @returns {object} - Results of the send operation
+ */
+const sendToMultipleClients = (userIds, DeviceID, message, ClientWss) => {
+    if (!userIds || !Array.isArray(userIds) || !ClientWss) {
+        logger.loggerError(`Cannot send message: Invalid userIds or missing ClientWss`);
+        return { success: false, sent: 0, failed: 0 };
+    }
+
+    const jsonMessage = JSON.stringify({
+        DeviceID,
+        message,
+        targetedMessage: true
+    });
+
+    let sent = 0;
+    let failed = 0;
+    const results = { success: true, sent, failed, notFound: [] };
+
+    // Create a map of clients by userId for faster lookup
+    const clientsByUserId = new Map();
+    ClientWss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN && client.userId) {
+            clientsByUserId.set(client.userId, client);
+        }
+    });
+
+    // Send message to each specified user
+    userIds.forEach(userId => {
+        const client = clientsByUserId.get(userId);
+        if (client) {
+            try {
+                client.send(jsonMessage, (error) => {
+                    if (error) {
+                        logger.loggerError(`Error sending message to user ${userId}: ${error.message}`);
+                        failed++;
+                    } else {
+                        sent++;
+                    }
+                });
+            } catch (error) {
+                logger.loggerError(`Exception sending message to user ${userId}: ${error.message}`);
+                failed++;
+            }
+        } else {
+            results.notFound.push(userId);
+        }
+    });
+
+    results.sent = sent;
+    results.failed = failed;
+
+    return results;
 };
 
 /**
@@ -625,4 +822,54 @@ const broadcastDisconnectEvent = (uniqueIdentifier, status, reason) => {
     logger.loggerInfo(`Charger ${uniqueIdentifier} disconnected: ${status} - ${reason}`);
 };
 
-module.exports = { handleWebSocketConnection, broadcastMessage };
+/**
+ * Send notifications to clients based on their subscriptions
+ * 
+ * @param {string} chargerId - The charger ID that the notification is about
+ * @param {object} data - The notification data
+ * @param {WebSocketServer} ClientWss - The client WebSocket server
+ * @returns {object} - Results of the notification operation
+ */
+const sendSubscriptionNotifications = (chargerId, data, ClientWss) => {
+    if (!chargerId || !data || !ClientWss) {
+        logger.loggerError(`Cannot send subscription notifications: Missing parameters`);
+        return { success: false, sent: 0 };
+    }
+
+    const notificationMessage = {
+        type: 'notification',
+        chargerId: chargerId,
+        data: data,
+        timestamp: new Date().toISOString()
+    };
+
+    const jsonMessage = JSON.stringify(notificationMessage);
+    let sent = 0;
+
+    // Send to all clients who have subscribed to this charger
+    ClientWss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN &&
+            client.subscriptions &&
+            client.subscriptions.has(chargerId)) {
+
+            client.send(jsonMessage, (error) => {
+                if (error) {
+                    logger.loggerError(`Error sending notification to user ${client.userId}: ${error.message}`);
+                } else {
+                    sent++;
+                    logger.loggerInfo(`Notification sent to user ${client.userId} for charger ${chargerId}`);
+                }
+            });
+        }
+    });
+
+    return { success: true, sent };
+};
+
+module.exports = {
+    handleWebSocketConnection,
+    broadcastMessage,
+    sendToSpecificClient,
+    sendToMultipleClients,
+    sendSubscriptionNotifications
+};

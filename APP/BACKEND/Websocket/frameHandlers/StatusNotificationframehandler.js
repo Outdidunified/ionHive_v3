@@ -25,16 +25,26 @@ const handleStatusNotification = async (
 ) => {
     const formattedDate = new Date().toISOString();
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
-    let response = [3, requestId, { currentTime: formattedDate }];
+    let response = [3, requestId, {}];
     let timeoutId;
-    const db = await dbService.connectToDatabase();
+    let db;
 
     try {
+        db = await dbService.connectToDatabase();
+
         // Validate requestPayload
-        const validationErrors = validateStatusnotification(requestPayload);
-        if (validationErrors.length > 0) {
-            logger.loggerError(`Validation failed for StatusNotification: ${JSON.stringify(validationErrors)}`);
-            return [3, requestId, { status: "Rejected", errors: validationErrors }];
+        const validationResult = validateStatusnotification(requestPayload);
+        if (validationResult.error) {
+            logger.loggerError(`Validation failed for StatusNotification: ${JSON.stringify(validationResult.details)}`);
+
+            // Add metadata for internal use
+            response.metadata = {
+                success: false,
+                error: "Validation failed",
+                details: validationResult.details
+            };
+
+            return response;
         }
 
         const { connectorId, errorCode, status, timestamp, vendorErrorCode } = requestPayload;
@@ -45,7 +55,14 @@ const handleStatusNotification = async (
 
         if (!socketGunConfig) {
             logger.loggerError(`SocketGun Config not found for charger_id: ${uniqueIdentifier}`);
-            return [3, requestId, { status: "Error", message: "Charger config not found" }];
+
+            // Add metadata for internal use
+            response.metadata = {
+                success: false,
+                error: "Charger config not found"
+            };
+
+            return response;
         }
 
         const connectorTypeValue = socketGunConfig[`connector_${connectorId}_type`] || "Unknown";
@@ -107,9 +124,23 @@ const handleStatusNotification = async (
             startedChargingSet.delete(key);
         }
 
+
+        // Add metadata for successful processing
+        response.metadata = {
+            success: true,
+            broadcastData: true
+        };
     } catch (error) {
         logger.loggerError(`Error handling StatusNotification for ChargerID ${uniqueIdentifier}: ${error.message}`);
-        response = [3, requestId, { status: "Error", message: "Internal server error" }];
+
+        // Ensure we have a valid OCPP response even in case of error
+        response = [3, requestId, {}];
+
+        // Add metadata for internal use
+        response.metadata = {
+            success: false,
+            error: error.message
+        };
     }
 
     return response;

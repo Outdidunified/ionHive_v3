@@ -5,15 +5,47 @@ const validateDataTransfer = (data) => {
     return framevalidation(data, "DataTransfer.json");
 };
 const handleDataTransfer = async (requestPayload, requestId) => {
-    const validationResult = validateDataTransfer(requestPayload);
+    // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
+    let response = [3, requestId];
 
-    if (validationResult.error) {
-        logger.loggerError(`Validation failed for DataTransfer: ${JSON.stringify(validationResult.details)}`);
-        return [3, requestId, { status: "Rejected", errors: validationResult.details }];
+    try {
+        const validationResult = validateDataTransfer(requestPayload);
+
+        if (validationResult.error) {
+            logger.loggerError(`Validation failed for DataTransfer: ${JSON.stringify(validationResult.details)}`);
+            response[2] = { status: "Rejected" };
+
+            // Add metadata for internal use
+            response.metadata = {
+                success: false,
+                error: "Validation failed",
+                details: validationResult.details
+            };
+
+            return response;
+        }
+
+        // If valid, return success response
+        response[2] = { status: "Accepted" };
+
+        // Add metadata for internal use
+        response.metadata = {
+            success: true,
+            vendorId: requestPayload.vendorId,
+            messageId: requestPayload.messageId
+        };
+    } catch (error) {
+        logger.loggerError(`Error in handleDataTransfer: ${error.message}`);
+        response[2] = { status: "Rejected" };
+
+        // Add metadata for internal use
+        response.metadata = {
+            success: false,
+            error: error.message
+        };
     }
 
-    // If valid, return success response (or further processing)
-    return [3, requestId, { status: "Accepted" }];
+    return response;
 };
 
 module.exports = { handleDataTransfer };
