@@ -327,7 +327,138 @@ const getNearbyStations = async (req, res) => {
 };
 
 
+// MANAGE ACTIVE CHARGER'S OF SPECIFIC USER
+// Fetch active charging sessions of a user
+const fetchActiveChargersOfUser = async (req, res) => {
+    try {
+        const { email_id } = req.body;
 
+        if (!db) {
+            logger.loggerError('Database connection failed.');
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.'
+            });
+        }
+
+        const userDetailsCollection = db.collection('users');
+        const chargerDetailsCollection = db.collection('charger_details');
+        const chargerStatusCollection = db.collection('charger_status');
+        const financeDetailsCollection = db.collection('financeDetails');
+
+        // Fetch user details
+        const user = await userDetailsCollection.findOne({ email_id: email_id });
+        if (!user) {
+            logger.loggerWarn(`User not found with email: ${email_id}`);
+            return res.status(404).json({
+                error: true,
+                message: 'User not found'
+            });
+        }
+
+        // Fetch all chargers with active status
+        const allChargers = await chargerDetailsCollection.find({ status: true }).toArray();
+
+        // Filter chargers where the user is an active connector
+        const userActiveChargers = allChargers.filter(charger =>
+            Object.keys(charger).some(key =>
+                key.startsWith("current_or_active_user_for_connector_") && charger[key] === email_id
+            )
+        );
+
+        // If no active chargers are found, return an error response
+        if (userActiveChargers.length === 0) {
+            logger.loggerInfo(`No active charging found for user: ${email_id}`);
+            return res.status(200).json({
+                error: false,
+                message: 'No active charging found!',
+                data: []
+            });
+        }
+
+        // Fetch additional details for active chargers
+        const activeChargers = await Promise.all(userActiveChargers.flatMap(async (charger) => {
+            const chargerId = charger.charger_id;
+            const financeId = charger.finance_id;
+
+            // Find all connector IDs used by the user
+            const connectorIds = Object.keys(charger)
+                .filter(key => key.startsWith("current_or_active_user_for_connector_") && charger[key] === email_id)
+                .map(key => key.split("_").pop()); // Extract connector numbers
+
+            // Fetch charger status and prepare response for each connector ID
+            return Promise.all(connectorIds.map(async (connectorId) => {
+                // Fetch charger status
+                const status = await chargerStatusCollection.findOne({
+                    charger_id: chargerId,
+                    connector_id: parseInt(connectorId)
+                });
+
+                // Calculate unit price
+                let unitPrice = null;
+                if (financeId) {
+                    const financeRecord = await financeDetailsCollection.findOne({ finance_id: financeId });
+                    if (financeRecord) {
+                        const EB_fee = parseFloat(financeRecord.eb_charge) + parseFloat(financeRecord.margin);
+
+                        // List of additional charges (excluding GST)
+                        const additionalCharges = [
+                            parseFloat(financeRecord.parking_fee),     // Parking fee
+                            parseFloat(financeRecord.convenience_fee), // Convenience fee
+                            parseFloat(financeRecord.station_fee),     // Station fee
+                            parseFloat(financeRecord.processing_fee),  // Processing fee
+                            parseFloat(financeRecord.service_fee)      // Service fee
+                        ];
+
+                        // Calculate total additional charges (sum of all charges except GST)
+                        const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + (charge || 0), 0);
+
+                        // Calculate the base price (including additional charges per unit)
+                        const TotalEBPrice = (EB_fee + totalAdditionalCharges);
+
+                        // Apply GST on the total amount
+                        const gstPercentage = financeRecord.gst;
+                        const gstAmount = (TotalEBPrice * gstPercentage) / 100;
+
+                        // Final price after adding GST
+                        unitPrice = TotalEBPrice + gstAmount;
+                    }
+                }
+
+                return {
+                    charger_id: chargerId,
+                    connector_id: connectorId, // Include all connectors used by the user
+                    model: charger.model,
+                    type: charger.type,
+                    vendor: charger.vendor,
+                    lat: charger.lat,
+                    long: charger.long,
+                    address: charger.address,
+                    landmark: charger.landmark,
+                    unit_price: parseFloat(unitPrice || 0).toFixed(2),
+                    status: status || null
+                };
+            }));
+        }));
+
+        // Flatten the nested array
+        const flattenedChargers = activeChargers.flat();
+
+        logger.loggerSuccess(`Successfully fetched ${flattenedChargers.length} active chargers for user: ${email_id}`);
+        return res.status(200).json({
+            error: false,
+            message: 'Active chargers retrieved successfully',
+            data: flattenedChargers
+        });
+    } catch (error) {
+        logger.loggerError(`Error in fetchActiveChargersOfUser: ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+            error_details: error.message
+        });
+    }
+};
 
 module.exports = {
     // MANAGE GENERIC FILTER 
@@ -335,6 +466,8 @@ module.exports = {
     fetchSavedSearchFilter,
     // STATIONS
     getNearbyStations,
+    // MANAGE ACTIVE CHARGER'S OF SPECIFIC USER
+    fetchActiveChargersOfUser
 };
 
 

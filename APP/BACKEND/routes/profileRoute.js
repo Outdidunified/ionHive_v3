@@ -3,6 +3,7 @@ const router = express.Router();
 const Controller = require("../controllers/profileController");
 const WalletController = require("../controllers/walletController");
 const SessionController = require("../controllers/sessionController");
+const StationController = require("../controllers/chargingstationController");
 const authUser = require("../middlewares/authenticated");
 const path = require("path");
 const fs = require("fs");
@@ -69,9 +70,9 @@ router.post('/fetchSavedVehiclesOfUser', authUser.isAuthenticated, Controller.fe
 
 // MANAGE CHARGING STATIONS 
 // SAVED CHARGING STATIONS
-router.post('/fetchSavedStations', authUser.isAuthenticated, Controller.fetchSavedStations); // Route to Fetch Saved Stations
-router.post('/SaveStations', authUser.isAuthenticated, Controller.SaveStations); // Route to save Stations
-router.post('/RemoveStation', authUser.isAuthenticated, Controller.RemoveStation); // Route to remove a station from favorites
+router.post('/fetchSavedStations', authUser.isAuthenticated, StationController.fetchSavedStations); // Route to Fetch Saved Stations
+router.post('/SaveStations', authUser.isAuthenticated, StationController.SaveStations); // Route to save Stations
+router.post('/RemoveStation', authUser.isAuthenticated, StationController.RemoveStation); // Route to remove a station from favorites
 // CAPITATIVE CHARGING STATIONS  //TODO - V3.1
 
 

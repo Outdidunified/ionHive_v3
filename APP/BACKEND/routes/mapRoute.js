@@ -11,12 +11,12 @@ router.post('/SaveSearchFilter', authUser.isAuthenticated, Controller.SaveSearch
 router.post('/fetchSavedSearchFilter', authUser.isAuthenticated, Controller.fetchSavedSearchFilter);
 // clear saved filter
 
-// MANAGE ACTIVE CHARGER'S OF SPECIFIC USER  //TODO - 3
+// MANAGE ACTIVE CHARGER'S OF SPECIFIC USER 
 // FETCH ACTIVE CHARGING SESSION OF USER
-// router.post('/fetchActiveChargersOfUser', authUser.isAuthenticated, Controller.fetchActiveChargersOfUser);
+router.post('/fetchActiveChargersOfUser', authUser.isAuthenticated, Controller.fetchActiveChargersOfUser);
 
 
-// MANAGE STATION'S BASED ON CURRENT LOCATION OF THE USER  //TODO - 3
+// MANAGE STATION'S BASED ON CURRENT LOCATION OF THE USER 
 router.post('/fetchNearbyStations', authUser.isAuthenticated, Controller.getNearbyStations);// fetch station
 
 // Export the router

@@ -8,19 +8,25 @@ const authUser = require("../middlewares/authenticated");
 router.post('/fetchLastStatus', authUser.isAuthenticated, Controller.fetchLastStatus);
 
 
-// MANAGE START STOP  //TODO - 2
+// MANAGE START STOP
+router.post('/start', authUser.isAuthenticated, Controller.startCharger);
+router.post('/stop', authUser.isAuthenticated, Controller.stopCharger);
 
 
-// MANAGE AUTO STOP SETTINGS  //TODO - 3
+// MANAGE AUTO STOP SETTINGS
+router.post('/updateAutoStopSettings', authUser.isAuthenticated, Controller.updateAutoStopSettings);
 
 
-// MANAGE STARTTIME //TODO - 1
+// MANAGE STARTTIME 
+router.post('/fetchStartedAt', authUser.isAuthenticated, Controller.fetchStartedAt);
 
 
-// MANAGE CHARGING SESSION PRICE REPORT  //TODO - 2
+// MANAGE CHARGING SESSION PRICE REPORT
+router.post('/getUpdatedChargingDetails', authUser.isAuthenticated, Controller.getUpdatedChargingDetails);
 
 
-// MANAGE END CHARGING  //TODO - 3
+// MANAGE END CHARGING  
+router.post('/endChargingSession', authUser.isAuthenticated, Controller.endChargingSession);
 
 
 // Export the router
