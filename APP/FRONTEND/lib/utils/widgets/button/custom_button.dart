@@ -60,12 +60,13 @@ class CustomButton extends StatelessWidget {
                       size: 20.0, // You can adjust the size
                     )
                   : Text(
-                      text,
-                      style: textStyle.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold, // Make the text bold
-                      ),
-                    ),
+                text,
+                style: textStyle.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary, // Matches button text color
+                  fontSize: Theme.of(context).textTheme.titleLarge?.fontSize ?? 16, // Aligns with titleLarge (16px)
+                  fontWeight: FontWeight.bold, // Kept bold as per theme's titleLarge
+                ),
+              ),
             ),
           );
         },

@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-class EmailInput extends StatelessWidget {
+class AmountInput extends StatelessWidget {
   final TextEditingController controller;
-  final String hintText;
+  final String? hintText;
+  final String? labelText;
   final String? errorText;
   final void Function(String)? onChanged;
-  final bool readOnly;
+  final int maxDigits;
 
-  const EmailInput({
-    super.key,
+  const AmountInput({
     required this.controller,
-    this.hintText = 'Enter your email', // Default value for hintText
+    this.hintText,
+    this.labelText,
     this.errorText,
     this.onChanged,
-    this.readOnly = false,
+    this.maxDigits = 6, // Default to 6-digit limit
+    super.key,
   });
 
   @override
@@ -22,20 +25,23 @@ class EmailInput extends StatelessWidget {
 
     return TextField(
       controller: controller,
-      keyboardType: TextInputType.emailAddress,
       onChanged: onChanged,
-      readOnly: readOnly,
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(maxDigits),
+      ],
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: hintText ?? 'Enter Amount',
+        labelText: labelText ?? 'Amount',
+        errorText: errorText,
         hintStyle: theme.textTheme.bodyLarge?.copyWith(
           color: theme.hintColor,
         ),
-        labelText: 'Email',
         labelStyle: theme.textTheme.bodyLarge?.copyWith(
-          color: theme.colorScheme.onSecondary,
+          color: theme.colorScheme.onSurface,
           fontWeight: FontWeight.w300,
         ),
-        errorText: errorText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: theme.colorScheme.primary),
@@ -48,16 +54,10 @@ class EmailInput extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: theme.dividerColor),
         ),
-        suffixIcon: controller.text.isNotEmpty
-            ? IconButton(
-          icon: Icon(Icons.clear, color: theme.iconTheme.color),
-          onPressed: () => controller.clear(),
-        )
-            : null,
         filled: true,
         fillColor: theme.colorScheme.surface,
         contentPadding:
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       style: theme.textTheme.bodyLarge,
     );
