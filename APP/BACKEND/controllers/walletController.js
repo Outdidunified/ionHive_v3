@@ -30,14 +30,16 @@ const FetchWalletBalance = async (req, res) => {
         }
 
         // Connect to database
-
         if (!db) {
             return res.status(500).json({
                 error: true,
                 message: 'Database connection failed. Please try again later.',
             });
         }
+
         const usersCollection = db.collection("users");
+        const CharSessionCollection = db.collection('device_session_details');
+        const walletTransCollection = db.collection('paymentDetails');
 
         // Find user by user_id and email_id
         const user = await usersCollection.findOne({ user_id, email_id });
@@ -49,12 +51,108 @@ const FetchWalletBalance = async (req, res) => {
             });
         }
 
-        logger.loggerSuccess(`Wallet balance fetched successfully for user_id=${user_id}, email_id=${email_id}`);
+        // Calculate total credited amount (from payment details)
+        const creditedTransactions = await walletTransCollection.find({ email_id }).toArray();
+        const totalCredited = creditedTransactions.reduce((sum, payment) => {
+            return sum + (parseFloat(payment.recharge_amount) || 0);
+        }, 0);
+
+        // Get count of credited transactions
+        const creditedCount = creditedTransactions.length;
+
+        // Calculate total debited amount (from charging sessions)
+        const debitedTransactions = await CharSessionCollection.find({
+            email_id,
+            stop_time: { $ne: null }
+        }).toArray();
+
+        const totalDebited = debitedTransactions.reduce((sum, session) => {
+            return sum + (parseFloat(session.price) || 0);
+        }, 0);
+
+        // Get count of debited transactions
+        const debitedCount = debitedTransactions.length;
+
+        // Calculate Monthly Charging Goal
+        const currentDate = new Date();
+        const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+        const monthlyChargingSessions = await CharSessionCollection.find({
+            email_id,
+            stop_time: {
+                $ne: null,
+                $gte: firstDayOfMonth.toISOString(),
+                $lte: lastDayOfMonth.toISOString()
+            }
+        }).toArray();
+
+        // Calculate total energy consumed this month (in kWh)
+        const monthlyEnergyConsumed = monthlyChargingSessions.reduce((sum, session) => {
+            // Assuming energy_consumed is in kWh
+            return sum + (parseFloat(session.unit_consummed) || 0);
+        }, 0);
+
+        // Set a monthly goal of 100 kWh (this could be customized per user in the future)
+        const monthlyChargingGoal = 100; // kWh
+
+        // Calculate Energy Savings
+        // Assuming average grid electricity cost is Rs.8 per kWh and EV charging cost is Rs.6 per kWh
+        const gridElectricityCost = 8; // Rs. per kWh
+        const evChargingCost = 6; // Rs. per kWh
+
+        // Calculate total energy consumed all time (in kWh)
+        const totalEnergyConsumed = debitedTransactions.reduce((sum, session) => {
+            return sum + (parseFloat(session.unit_consummed) || 0);
+        }, 0);
+
+        // Calculate savings compared to grid electricity
+        const actualCost = totalEnergyConsumed * evChargingCost;
+        const gridCost = totalEnergyConsumed * gridElectricityCost;
+        const energySavings = gridCost - actualCost;
+        const potentialEnergySavings = 2000; // Rs. (target savings)
+
+        // Calculate Carbon Footprint Reduction
+        // Assuming grid electricity produces 0.82 kg CO₂ per kWh and EV charging produces 0.30 kg CO₂ per kWh
+        const gridCarbonFootprint = 0.82; // kg CO₂ per kWh
+        const evCarbonFootprint = 0.30; // kg CO₂ per kWh
+
+        // Calculate carbon footprint reduction
+        const carbonReduction = totalEnergyConsumed * (gridCarbonFootprint - evCarbonFootprint);
+        const potentialCarbonReduction = 100; // kg CO₂ (target reduction)
+
+        logger.loggerSuccess(`Wallet balance and metrics fetched successfully for user_id=${user_id}, email_id=${email_id}`);
 
         return res.status(200).json({
             error: false,
-            message: "Wallet balance retrieved successfully.",
-            data: { wallet_balance: user.wallet_bal || 0 },
+            message: "Wallet balance and metrics retrieved successfully.",
+            data: {
+                wallet_balance: user.wallet_bal || 0,
+                total_credited: parseFloat(totalCredited.toFixed(2)),
+                total_debited: parseFloat(totalDebited.toFixed(2)),
+                credited_count: creditedCount,
+                debited_count: debitedCount,
+                progress_metrics: {
+                    monthly_charging_goal: {
+                        current: parseFloat(monthlyEnergyConsumed.toFixed(2)),
+                        target: monthlyChargingGoal,
+                        unit: "kWh",
+                        percentage: parseFloat(((monthlyEnergyConsumed / monthlyChargingGoal) * 100).toFixed(1))
+                    },
+                    energy_savings: {
+                        current: parseFloat(energySavings.toFixed(2)),
+                        target: potentialEnergySavings,
+                        unit: "Rs.",
+                        percentage: parseFloat(((energySavings / potentialEnergySavings) * 100).toFixed(1))
+                    },
+                    carbon_footprint_reduction: {
+                        current: parseFloat(carbonReduction.toFixed(2)),
+                        target: potentialCarbonReduction,
+                        unit: "kg CO₂",
+                        percentage: parseFloat(((carbonReduction / potentialCarbonReduction) * 100).toFixed(1))
+                    }
+                }
+            },
         });
 
     } catch (error) {

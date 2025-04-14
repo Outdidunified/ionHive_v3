@@ -1,3 +1,4 @@
+const { Console } = require('winston/lib/winston/transports');
 const db_conn = require('../config/db');
 const logger = require('../utils/logger');
 const PDFDocument = require('pdfkit');
@@ -262,7 +263,8 @@ const fetchChargingSessionDetails = async (req, res) => {
 // DOWNLOAD CHARGING HISTORY 
 // download all user charging session details
 const DownloadChargingSessionDetails = async (req, res) => {
-    const { email_id, total_unit_consumed } = req.query;
+    const { email_id, total_unit_consumed } = req.body;
+
 
     try {
 
@@ -283,10 +285,9 @@ const DownloadChargingSessionDetails = async (req, res) => {
         }
         const Collection = db.collection('device_session_details');
 
-        const sessions = await Collection.find({ user: email_id, stop_time: { $ne: null } })
+        const sessions = await Collection.find({ email_id: email_id, stop_time: { $ne: null } })
             .sort({ stop_time: -1 })
             .toArray();
-
         if (!sessions || sessions.length === 0) {
             logger.loggerInfo(` No charging session records found for email_id: ${email_id}`);
             return res.status(404).json({ message: 'No charging session records found!' });
