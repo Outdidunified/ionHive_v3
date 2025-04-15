@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:ionhive/feature/session_history/data/urls.dart';
+import 'package:ionhive/feature/more/presentation/pages/header/data/urls.dart';
 import 'package:ionhive/utils/exception/exception.dart'; // Exception thrown Handler
 
-class Sessionhistoryapicalls {
+class WalletAPICalls {
   String _getDefaultErrorMessage(int statusCode) {
     switch (statusCode) {
       case 400:
@@ -38,9 +38,9 @@ class Sessionhistoryapicalls {
     );
   }
 
-  Future<Map<String, dynamic>> fetchtotalsessioncount(
+  Future<Map<String, dynamic>> fetchwalletblanace(
       int user_id, String email, String authToken) async {
-    final url = Sessionurl.fetchtotalsessions;
+    final url = HeaderUrl.fetchwalletbalance;
 
     try {
       final response = await http.post(
@@ -52,36 +52,7 @@ class Sessionhistoryapicalls {
         body: jsonEncode({'email_id': email, 'user_id': user_id}),
       );
       final data = jsonDecode(response.body);
-      print('fetching total sessions body : $data');
-      print(response.statusCode);
-
-      return _handleResponse(response);
-    } on TimeoutException {
-      throw HttpException(408, 'Request timed out. Please try again.');
-    } on http.ClientException {
-      throw HttpException(503,
-          'Unable to reach the server. \nPlease check your connection or try again later.');
-    } catch (e) {
-      debugPrint("Error: $e");
-      throw HttpException(500, '$e');
-    }
-  }
-
-  Future<Map<String, dynamic>> fetchSessionHistoryDetails(
-      int user_id, String email, String authToken) async {
-    final url = Sessionurl.fetchSessionHistoryDetails;
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': authToken,
-        },
-        body: jsonEncode({'email_id': email, 'user_id': user_id}),
-      );
-      final data = jsonDecode(response.body);
-      print('fetching session history details body: $data');
+      print('fetching body : $data');
       print(response.statusCode);
 
       return _handleResponse(response);

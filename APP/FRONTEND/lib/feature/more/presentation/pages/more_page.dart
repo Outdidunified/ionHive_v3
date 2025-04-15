@@ -15,6 +15,7 @@ import 'package:ionhive/feature/more/presentation/pages/saved_stations/presentat
 import 'package:ionhive/feature/more/presentation/pages/transactions/presentation/pages/paymenthistory.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:ionhive/feature/more/presentation/pages/theme/theme_settings_page.dart';
 import 'package:fui_kit/fui_kit.dart';
 
 class MoreePage extends StatelessWidget {
@@ -60,6 +61,7 @@ class MoreePage extends StatelessWidget {
     final token = sessionController.token.value;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       body: Column(
         children: [
           HeaderCard(
@@ -219,6 +221,15 @@ class MoreePage extends StatelessWidget {
                               ? null
                               : Colors.grey[300],
                     )),
+                _buildMenuOption(
+                  'Theme Settings',
+                  Icon(Icons.color_lens, color: theme.primaryColor),
+                  theme,
+                  onTap: () {
+                    Get.to(() => ThemeSettingsPage());
+                  },
+                ),
+
                 const SizedBox(height: 16),
                 _buildSectionTitle('Help & Support'),
                 _buildMenuOption(

@@ -20,10 +20,12 @@ class BannerImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       body: Column(
         children: [
           SizedBox(

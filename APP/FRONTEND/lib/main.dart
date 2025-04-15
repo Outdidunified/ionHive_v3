@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/View/NoInternetScreen.dart';
-import 'package:permission_handler/permission_handler.dart'; // Import permission handler
 import 'package:ionhive/core/controllers/session_controller.dart'; // Session Controller
 import 'package:ionhive/core/splash_screen.dart';
 import 'package:ionhive/feature/auth/presentation/pages/GettingStarted%20page.dart';
@@ -9,9 +8,9 @@ import 'package:ionhive/feature/auth/presentation/pages/login_page.dart'; // Log
 import 'package:ionhive/feature/landing_page.dart'; // Landing Page
 import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/utils/theme/themes.dart'; // App theme
+import 'package:ionhive/utils/theme/theme_controller.dart'; // Theme controller
 import 'package:ionhive/core/controllers/connectivity_controller.dart'; // Add the ConnectivityController
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart'; // Add this import for controlling orientation
 
@@ -37,6 +36,7 @@ void main() async {
   Get.put(SessionController()); // Ensure it is available globally
   Get.put(ConnectivityController());
   Get.put(VehicleController());
+  Get.put(ThemeController()); // Initialize theme controller
 
   runApp(const IonHive());
 }
@@ -61,12 +61,14 @@ class IonHive extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    final themeController = Get.find<ThemeController>();
+
+    return Obx(() => GetMaterialApp(
       title: 'ionHive',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeController.themeMode.value,
       initialRoute: '/',
       navigatorObservers: [
         SnackbarCloseObserver()
@@ -77,8 +79,9 @@ class IonHive extends StatelessWidget {
         GetPage(name: '/login', page: () => LoginPage()), // Must be defined
         GetPage(name: '/start', page: () => GetStartedPage()),
         GetPage(
-            name: '/noInternet', page: () => NoInternetScreen()), // Add route
+            name: '/noInternet',
+            page: () => NoInternetScreen()), // Add route
       ],
-    );
+    ));
   }
 }
