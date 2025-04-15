@@ -46,6 +46,48 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
+      name=":@@:flutter_plugin_android_lifecycle::release"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/2a392106c2ed98e9ff1b8b0a20d28d06/transformed/out/jars/classes.jar:/Users/apple/.gradle/caches/8.10.2/transforms/2a392106c2ed98e9ff1b8b0a20d28d06/transformed/out/jars/libs/R.jar"
+      resolved="io.flutter.plugins.flutter_plugin_android_lifecycle:flutter_plugin_android_lifecycle:1.0"
+      partialResultsDir="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/flutter_plugin_android_lifecycle/intermediates/lint_vital_partial_results/release/lintVitalAnalyzeRelease/out"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/2a392106c2ed98e9ff1b8b0a20d28d06/transformed/out"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name=":@@:geolocator_android::release"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/bfcde54bc90f60bba60b26fe961657ac/transformed/out/jars/classes.jar:/Users/apple/.gradle/caches/8.10.2/transforms/bfcde54bc90f60bba60b26fe961657ac/transformed/out/jars/libs/R.jar"
+      resolved="com.baseflow.geolocator:geolocator_android:1.0"
+      partialResultsDir="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/geolocator_android/intermediates/lint_vital_partial_results/release/lintVitalAnalyzeRelease/out"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/bfcde54bc90f60bba60b26fe961657ac/transformed/out"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name=":@@:google_maps_flutter_android::release"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/4dab602cb0a24470aed1867756ffb9e2/transformed/out/jars/classes.jar:/Users/apple/.gradle/caches/8.10.2/transforms/4dab602cb0a24470aed1867756ffb9e2/transformed/out/jars/libs/R.jar"
+      resolved="io.flutter.plugins.googlemaps:google_maps_flutter_android:1.0-SNAPSHOT"
+      partialResultsDir="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/google_maps_flutter_android/intermediates/lint_vital_partial_results/release/lintVitalAnalyzeRelease/out"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/4dab602cb0a24470aed1867756ffb9e2/transformed/out"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
       name=":@@:google_sign_in_android::release"
       jars="/Users/apple/.gradle/caches/8.10.2/transforms/c845195d1d4823801da7f34206bf905a/transformed/out/jars/classes.jar:/Users/apple/.gradle/caches/8.10.2/transforms/c845195d1d4823801da7f34206bf905a/transformed/out/jars/libs/R.jar"
       resolved="io.flutter.plugins.googlesignin:google_sign_in_android:1.0-SNAPSHOT"
@@ -492,6 +534,19 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
+      name="com.google.android.gms:play-services-location:21.2.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/25479bae2eef1ea769c0507650ab791f/transformed/jetified-play-services-location-21.2.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-location:21.2.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/25479bae2eef1ea769c0507650ab791f/transformed/jetified-play-services-location-21.2.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
       name="androidx.preference:preference:1.2.1@aar"
       jars="/Users/apple/.gradle/caches/8.10.2/transforms/1c50824d24768c33903bba232d8dddf0/transformed/preference-1.2.1/jars/classes.jar"
       resolved="androidx.preference:preference:1.2.1"
@@ -570,6 +625,19 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
+      name="com.google.android.gms:play-services-maps:18.2.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/6f3d9298b7d85c8c1cbd69673cc572e7/transformed/jetified-play-services-maps-18.2.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-maps:18.2.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/6f3d9298b7d85c8c1cbd69673cc572e7/transformed/jetified-play-services-maps-18.2.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
       name="com.google.android.gms:play-services-auth:21.0.0@aar"
       jars="/Users/apple/.gradle/caches/8.10.2/transforms/c80762cc24118e6db4261b6b725fa6da/transformed/jetified-play-services-auth-21.0.0/jars/classes.jar"
       resolved="com.google.android.gms:play-services-auth:21.0.0"
@@ -622,10 +690,10 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="com.google.android.gms:play-services-base:18.0.1@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/ac7577773d9c79fea90c9ec2ed7044eb/transformed/jetified-play-services-base-18.0.1/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-base:18.0.1"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/ac7577773d9c79fea90c9ec2ed7044eb/transformed/jetified-play-services-base-18.0.1"
+      name="com.google.android.gms:play-services-base:18.3.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/f3893cddc5d30121a611e2c423dc819f/transformed/jetified-play-services-base-18.3.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-base:18.3.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/f3893cddc5d30121a611e2c423dc819f/transformed/jetified-play-services-base-18.3.0"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
@@ -635,10 +703,10 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="com.google.android.gms:play-services-tasks:18.0.1@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/5fdde386fce0074b157f12e178e23104/transformed/jetified-play-services-tasks-18.0.1/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-tasks:18.0.1"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/5fdde386fce0074b157f12e178e23104/transformed/jetified-play-services-tasks-18.0.1"
+      name="com.google.android.gms:play-services-tasks:18.1.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/98f273f404dc078da7904024a0975de9/transformed/jetified-play-services-tasks-18.1.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-tasks:18.1.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/98f273f404dc078da7904024a0975de9/transformed/jetified-play-services-tasks-18.1.0"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
@@ -648,10 +716,10 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="com.google.android.gms:play-services-basement:18.2.0@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/96f406b62bcf2da0b0006dc1277b3ffa/transformed/jetified-play-services-basement-18.2.0/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-basement:18.2.0"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/96f406b62bcf2da0b0006dc1277b3ffa/transformed/jetified-play-services-basement-18.2.0"
+      name="com.google.android.gms:play-services-basement:18.3.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/e928e0cde5965c8b3fd6e6568a4f4ee8/transformed/jetified-play-services-basement-18.3.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-basement:18.3.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/e928e0cde5965c8b3fd6e6568a4f4ee8/transformed/jetified-play-services-basement-18.3.0"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
@@ -804,19 +872,6 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="androidx.savedstate:savedstate-ktx:1.2.1@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/47b75ac0a3450772d179664aaf164872/transformed/jetified-savedstate-ktx-1.2.1/jars/classes.jar"
-      resolved="androidx.savedstate:savedstate-ktx:1.2.1"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/47b75ac0a3450772d179664aaf164872/transformed/jetified-savedstate-ktx-1.2.1"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
       name="androidx.vectordrawable:vectordrawable-animated:1.1.0@aar"
       jars="/Users/apple/.gradle/caches/8.10.2/transforms/43b6531a6a88830c8b1bd25999634b0a/transformed/vectordrawable-animated-1.1.0/jars/classes.jar"
       resolved="androidx.vectordrawable:vectordrawable-animated:1.1.0"
@@ -869,10 +924,10 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="androidx.profileinstaller:profileinstaller:1.3.1@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/c0ac9d9fcfffb7b239c995a23e43f4c1/transformed/jetified-profileinstaller-1.3.1/jars/classes.jar"
-      resolved="androidx.profileinstaller:profileinstaller:1.3.1"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/c0ac9d9fcfffb7b239c995a23e43f4c1/transformed/jetified-profileinstaller-1.3.1"
+      name="androidx.savedstate:savedstate-ktx:1.2.1@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/47b75ac0a3450772d179664aaf164872/transformed/jetified-savedstate-ktx-1.2.1/jars/classes.jar"
+      resolved="androidx.savedstate:savedstate-ktx:1.2.1"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/47b75ac0a3450772d179664aaf164872/transformed/jetified-savedstate-ktx-1.2.1"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
@@ -937,9 +992,18 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="androidx.collection:collection-ktx:1.1.0@jar"
-      jars="/Users/apple/.gradle/caches/modules-2/files-2.1/androidx.collection/collection-ktx/1.1.0/f807b2f366f7b75142a67d2f3c10031065b5168/collection-ktx-1.1.0.jar"
-      resolved="androidx.collection:collection-ktx:1.1.0"/>
+      name="androidx.profileinstaller:profileinstaller:1.3.1@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/c0ac9d9fcfffb7b239c995a23e43f4c1/transformed/jetified-profileinstaller-1.3.1/jars/classes.jar"
+      resolved="androidx.profileinstaller:profileinstaller:1.3.1"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/c0ac9d9fcfffb7b239c995a23e43f4c1/transformed/jetified-profileinstaller-1.3.1"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
   <library
       name="androidx.interpolator:interpolator:1.0.0@aar"
       jars="/Users/apple/.gradle/caches/8.10.2/transforms/52b6107a7fe79a23d2765b0a08aa9970/transformed/interpolator-1.0.0/jars/classes.jar"
@@ -953,6 +1017,10 @@
       symbolFile="R.txt"
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
+  <library
+      name="androidx.collection:collection-ktx:1.1.0@jar"
+      jars="/Users/apple/.gradle/caches/modules-2/files-2.1/androidx.collection/collection-ktx/1.1.0/f807b2f366f7b75142a67d2f3c10031065b5168/collection-ktx-1.1.0.jar"
+      resolved="androidx.collection:collection-ktx:1.1.0"/>
   <library
       name="androidx.arch.core:core-runtime:2.2.0@aar"
       jars="/Users/apple/.gradle/caches/8.10.2/transforms/526d1bcdcc8e8b3b4c9c94c2e5340ad1/transformed/core-runtime-2.2.0/jars/classes.jar"
@@ -1047,6 +1115,19 @@
       name="com.squareup.okio:okio-jvm:3.4.0@jar"
       jars="/Users/apple/.gradle/caches/modules-2/files-2.1/com.squareup.okio/okio-jvm/3.4.0/4e8bd78a52ab935ce383d0092646922154295e54/okio-jvm-3.4.0.jar"
       resolved="com.squareup.okio:okio-jvm:3.4.0"/>
+  <library
+      name="com.google.maps.android:android-maps-utils:3.6.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/7c86875e7923ced5d845672375d51378/transformed/jetified-android-maps-utils-3.6.0/jars/classes.jar"
+      resolved="com.google.maps.android:android-maps-utils:3.6.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/7c86875e7923ced5d845672375d51378/transformed/jetified-android-maps-utils-3.6.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
   <library
       name="com.google.guava:listenablefuture:1.0@jar"
       jars="/Users/apple/.gradle/caches/modules-2/files-2.1/com.google.guava/listenablefuture/1.0/c949a840a6acbc5268d088e47b04177bf90b3cad/listenablefuture-1.0.jar"

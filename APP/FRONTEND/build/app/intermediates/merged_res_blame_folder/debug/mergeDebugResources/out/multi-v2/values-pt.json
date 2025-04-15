@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.outdidev.ev_app-mergeDebugResources-43:/values-pt/values-pt.xml",
+            "outputFile": "com.outdidev.ev_app-mergeDebugResources-45:/values-pt/values-pt.xml",
             "map": [
                 {
                     "source": "/Users/apple/.gradle/caches/8.10.2/transforms/5870f29bca51ebd23f00e720f39b68c5/transformed/browser-1.8.0/res/values-pt/values-pt.xml",

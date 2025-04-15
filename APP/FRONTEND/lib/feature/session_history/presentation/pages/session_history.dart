@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import 'package:ionhive/feature/session_history/presentation/controllers/session_history_controllers.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
 
 class SessionHistoryPage extends StatefulWidget {
   const SessionHistoryPage({super.key});
@@ -95,11 +96,8 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Obx(() {
-            if (controller.isLoading.value) {
-              return _buildContentLoading(context);
-            }
-
-            return RefreshIndicator(
+            // Create the content that will be shown with or without loading overlay
+            Widget content = RefreshIndicator(
               onRefresh: refreshData,
               color: theme.colorScheme.primary,
               child: ListView(
@@ -114,6 +112,19 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
                   _buildTransactionList(context),
                 ],
               ),
+            );
+
+            // If it's the first load, show the shimmer loading effect
+            if (controller.isLoading.value && controller.sessions.isEmpty) {
+              return _buildContentLoading(context);
+            }
+
+            // For subsequent loads, show the loading overlay on top of existing content
+            return LoadingOverlay(
+              isLoading:
+                  controller.isLoading.value && controller.sessions.isNotEmpty,
+              opacity: 0.5,
+              child: content,
             );
           }),
         ),

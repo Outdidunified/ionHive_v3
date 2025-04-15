@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ionhive/feature/auth/presentation/pages/login_page.dart';
 import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/feature/more/presentation/controllers/more_controllers.dart';
+import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
 import 'package:ionhive/feature/more/presentation/pages/account/presentation/pages/account_privacy_page.dart';
 import 'package:ionhive/feature/more/presentation/pages/banner_image/banner_image.dart';
 import 'package:ionhive/feature/more/presentation/pages/header/header.dart';
@@ -281,7 +282,7 @@ class MoreePage extends StatelessWidget {
                   future: _getAppVersion(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
+                      return const LoadingIndicator(size: 30.0);
                     }
                     if (snapshot.hasData) {
                       return _buildFooter(snapshot.data!);

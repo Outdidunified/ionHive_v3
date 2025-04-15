@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/Saved_Device/presentation/controllers/saved_device_controllers.dart';
+import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
 
 class SavedDevicepage extends StatelessWidget {
   final int userId;
@@ -29,7 +30,7 @@ class SavedDevicepage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Obx(() {
           if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
+            return const LoadingIndicator();
           } else if (controller.errorMessage.value.isNotEmpty) {
             return Center(
                 child: Column(
@@ -74,8 +75,10 @@ class SavedDevicepage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Row(
-                    mainAxisSize: MainAxisSize.min, // Ensures the Row takes only the space it needs
-                    crossAxisAlignment: CrossAxisAlignment.center, // Aligns icon and text vertically
+                    mainAxisSize: MainAxisSize
+                        .min, // Ensures the Row takes only the space it needs
+                    crossAxisAlignment: CrossAxisAlignment
+                        .center, // Aligns icon and text vertically
                     children: [
                       Icon(
                         Icons.info_outline, // Info icon
@@ -100,8 +103,6 @@ class SavedDevicepage extends StatelessWidget {
                     width: 200,
                     height: 200,
                   ),
-
-
                 ],
               ),
             );
@@ -290,13 +291,13 @@ class DeviceCard extends StatelessWidget {
   }
 
   Widget _buildConnectorCard(
-      BuildContext context, {
-        required String title,
-        required String status,
-        required String type,
-        required String power,
-        required double width,
-      }) {
+    BuildContext context, {
+    required String title,
+    required String status,
+    required String type,
+    required String power,
+    required double width,
+  }) {
     final theme = Theme.of(context);
     final bool isDarkTheme = theme.brightness == Brightness.dark;
 
@@ -382,7 +383,8 @@ class DeviceCard extends StatelessWidget {
                     Text(
                       power,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), // Use theme color
+                        color: theme.textTheme.bodyMedium?.color
+                            ?.withOpacity(0.6), // Use theme color
                         fontSize: width * 0.028,
                       ),
                     ),

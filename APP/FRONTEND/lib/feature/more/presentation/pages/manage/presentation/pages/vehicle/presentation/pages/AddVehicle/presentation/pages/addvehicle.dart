@@ -4,6 +4,7 @@ import 'package:ionhive/core/core.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/AddVehicle/presentation/controllers/addvehicle_controllers.dart';
+import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
 
 class AddVehicle extends StatelessWidget {
   AddVehicle({super.key}) {
@@ -190,7 +191,7 @@ class AddVehicle extends StatelessWidget {
   Widget _buildVehicleGrid() {
     return Obx(() {
       if (_vehicleController.isLoading.value) {
-        return Center(child: CircularProgressIndicator());
+        return const Center(child: LoadingIndicator());
       }
 
       final filteredModels = _vehicleController.selectedCompany.value == "All"
@@ -478,7 +479,7 @@ class VehicleCard extends StatelessWidget {
         child: SizedBox(
           width: 20,
           height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
+          child: LoadingIndicator(size: 20.0),
         ),
       ),
       errorWidget: (context, error, stackTrace) {
@@ -603,8 +604,8 @@ class VehicleGridCard extends StatelessWidget {
                 imageUrl: imageUrl,
                 fit: BoxFit.contain,
                 placeholder: (_, __) => Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
+                  child: LoadingIndicator(
+                    size: 25.0,
                     color: theme.colorScheme.primary,
                   ),
                 ),

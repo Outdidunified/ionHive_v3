@@ -5,6 +5,7 @@ import 'package:ionhive/core/controllers/session_controller.dart'; // Session Co
 import 'package:ionhive/core/splash_screen.dart';
 import 'package:ionhive/feature/auth/presentation/pages/GettingStarted%20page.dart';
 import 'package:ionhive/feature/auth/presentation/pages/login_page.dart'; // Login Page
+import 'package:ionhive/feature/home/presentation/controllers/home_controller.dart';
 import 'package:ionhive/feature/landing_page.dart'; // Landing Page
 import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/utils/theme/themes.dart'; // App theme
@@ -33,6 +34,7 @@ void main() async {
   );
 
   Get.put(LandingPageController());
+  Get.put(HomeController());
   Get.put(SessionController()); // Ensure it is available globally
   Get.put(ConnectivityController());
   Get.put(VehicleController());
@@ -64,24 +66,24 @@ class IonHive extends StatelessWidget {
     final themeController = Get.find<ThemeController>();
 
     return Obx(() => GetMaterialApp(
-      title: 'ionHive',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeController.themeMode.value,
-      initialRoute: '/',
-      navigatorObservers: [
-        SnackbarCloseObserver()
-      ], // Add observer to close snackbars on navigation
-      getPages: [
-        GetPage(name: '/', page: () => SplashScreen()),
-        GetPage(name: '/landing', page: () => LandingPage()),
-        GetPage(name: '/login', page: () => LoginPage()), // Must be defined
-        GetPage(name: '/start', page: () => GetStartedPage()),
-        GetPage(
-            name: '/noInternet',
-            page: () => NoInternetScreen()), // Add route
-      ],
-    ));
+          title: 'ionHive',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeController.themeMode.value,
+          initialRoute: '/',
+          navigatorObservers: [
+            SnackbarCloseObserver()
+          ], // Add observer to close snackbars on navigation
+          getPages: [
+            GetPage(name: '/', page: () => SplashScreen()),
+            GetPage(name: '/landing', page: () => LandingPage()),
+            GetPage(name: '/login', page: () => LoginPage()), // Must be defined
+            GetPage(name: '/start', page: () => GetStartedPage()),
+            GetPage(
+                name: '/noInternet',
+                page: () => NoInternetScreen()), // Add route
+          ],
+        ));
   }
 }

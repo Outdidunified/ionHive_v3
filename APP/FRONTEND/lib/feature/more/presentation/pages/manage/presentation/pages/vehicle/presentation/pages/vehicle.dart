@@ -7,6 +7,8 @@ import 'package:ionhive/feature/more/presentation/pages/manage/presentation/page
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/AddVehicle/presentation/pages/addvehicle.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:ionhive/utils/theme/themes.dart';
+import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
+import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
 
 class VehiclePage extends StatefulWidget {
   final int userId;
@@ -27,15 +29,13 @@ class VehiclePage extends StatefulWidget {
 }
 
 class _VehiclePageState extends State<VehiclePage> {
-  // Key for FutureBuilder to force refresh
   int _futureBuilderKey = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void initState() {
     super.initState();
-    // Ensure the controller is initialized and fetch starts
     final controller = Get.find<VehicleController>();
-    controller.fetchSavedVehicles(); // Trigger initial fetch
+    controller.fetchSavedVehicles();
   }
 
   @override
@@ -44,10 +44,7 @@ class _VehiclePageState extends State<VehiclePage> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    // Set the base URL from iOnHiveCore
     final String baseUrl = iOnHiveCore.baseUrl;
-
-    // Initialize the VehicleController
     final VehicleController controller = Get.find<VehicleController>();
 
     print("AppBar background color: ${theme.appBarTheme.backgroundColor}");
@@ -59,20 +56,20 @@ class _VehiclePageState extends State<VehiclePage> {
         title: Text(
           "Manage Vehicle",
           style: theme.appBarTheme.titleTextStyle?.copyWith(
-            fontSize: screenWidth * 0.05, // 20 on a 400-width screen
+            fontSize: screenWidth * 0.05,
           ),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
             color: theme.appBarTheme.iconTheme?.color,
-            size: screenWidth * 0.06, // 24 on a 400-width screen
+            size: screenWidth * 0.06,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.all(screenWidth * 0.03), // 8 on a 400-width screen
+            padding: EdgeInsets.all(screenWidth * 0.03),
             child: Image.asset(
               'assets/icons/Help2.png',
               width: 22,
@@ -89,14 +86,15 @@ class _VehiclePageState extends State<VehiclePage> {
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.04, // 16 on a 400-width screen
-                vertical: screenWidth * 0.02, // 8 on a 400-width screen
+                horizontal: screenWidth * 0.04,
+                vertical: screenWidth * 0.02,
               ),
               child: FutureBuilder<List<Map<String, dynamic>>>(
                 key: ValueKey('vehicle_list_$_futureBuilderKey'),
                 future: controller.fetchSavedVehicles(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+                  if (snapshot.connectionState == ConnectionState.waiting &&
+                      controller.vehicles.isEmpty) {
                     return _buildShimmerLoading(context);
                   } else if (snapshot.hasError || controller.hasError.value) {
                     return Center(
@@ -138,10 +136,9 @@ class _VehiclePageState extends State<VehiclePage> {
                     return _buildNoVehiclesUI(context);
                   } else {
                     final vehicleData = snapshot.data!;
-
                     Future.microtask(() => controller.refreshVehicles());
 
-                    return ListView.builder(
+                    Widget vehicleList = ListView.builder(
                       itemCount: vehicleData.length,
                       itemBuilder: (context, index) {
                         if (index >= vehicleData.length) {
@@ -154,7 +151,8 @@ class _VehiclePageState extends State<VehiclePage> {
                         final imagePath = details?['image_base64']?.trim() ?? '';
                         final normalizedImagePath =
                         imagePath.replaceAll(r'\', '/').trim();
-                        final cleanBaseUrl = baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+                        final cleanBaseUrl =
+                        baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
                         final cleanImagePath =
                         normalizedImagePath.replaceAll(RegExp(r'^/+'), '');
                         final fullImageUrl = imagePath.isNotEmpty
@@ -231,7 +229,7 @@ class _VehiclePageState extends State<VehiclePage> {
                                           width: screenWidth * 0.4,
                                           height: screenWidth * 0.3,
                                           child: const Center(
-                                            child: CircularProgressIndicator(),
+                                            child: LoadingIndicator(size: 30.0),
                                           ),
                                         ),
                                         errorWidget: (context, url, error) {
@@ -355,12 +353,18 @@ class _VehiclePageState extends State<VehiclePage> {
                         );
                       },
                     );
+
+                    return LoadingOverlay(
+                      isLoading: snapshot.connectionState == ConnectionState.waiting &&
+                          controller.vehicles.isNotEmpty,
+                      opacity: 0.5,
+                      child: vehicleList,
+                    );
                   }
                 },
               ),
             ),
           ),
-          // Conditionally render the button and message based on controller's error state
           Obx(() => controller.hasError.value
               ? const SizedBox.shrink()
               : Padding(

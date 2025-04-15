@@ -20,6 +20,7 @@ class LandingPage extends StatelessWidget {
       body: PageView(
         controller: controller.pageController,
         onPageChanged: controller.changePage,
+        physics: const NeverScrollableScrollPhysics(), // Disables swiping
         children: [
           const HomePage(),
           WalletPage(),
@@ -29,7 +30,9 @@ class LandingPage extends StatelessWidget {
       ),
       bottomNavigationBar: Obx(
             () => Footer(
-          onTabChanged: controller.changePage,
+          onTabChanged: (index) {
+            controller.changePage(index);
+          },
           currentIndex: controller.pageIndex.value,
         ),
       ),

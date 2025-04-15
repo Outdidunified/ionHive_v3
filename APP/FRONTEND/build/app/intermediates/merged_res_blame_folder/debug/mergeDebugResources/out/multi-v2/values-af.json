@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.outdidev.ev_app-mergeDebugResources-43:/values-af/values-af.xml",
+            "outputFile": "com.outdidev.ev_app-mergeDebugResources-45:/values-af/values-af.xml",
             "map": [
                 {
                     "source": "/Users/apple/.gradle/caches/8.10.2/transforms/57b17d0c05cb3a21e851f69d73a805eb/transformed/appcompat-1.1.0/res/values-af/values-af.xml",
@@ -18,6 +18,23 @@
                         "startOffsets": "105,213,309,415,500,603,721,798,875,966,1058,1153,1247,1347,1440,1535,1634,1729,1823,1903,2010,2115,2212,2320,2423,2525,2679,6504",
                         "endColumns": "107,95,105,84,102,117,76,76,90,91,94,93,99,92,94,98,94,93,79,106,104,96,107,102,101,153,97,79",
                         "endOffsets": "208,304,410,495,598,716,793,870,961,1053,1148,1242,1342,1435,1530,1629,1724,1818,1898,2005,2110,2207,2315,2418,2520,2674,2772,6579"
+                    }
+                },
+                {
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/e928e0cde5965c8b3fd6e6568a4f4ee8/transformed/jetified-play-services-basement-18.3.0/res/values-af/values.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "0",
+                        "startOffsets": "195",
+                        "endColumns": "138",
+                        "endOffsets": "333"
+                    },
+                    "to": {
+                        "startLines": "44",
+                        "startColumns": "4",
+                        "startOffsets": "4503",
+                        "endColumns": "142",
+                        "endOffsets": "4641"
                     }
                 },
                 {
@@ -55,24 +72,7 @@
                     }
                 },
                 {
-                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/1c50824d24768c33903bba232d8dddf0/transformed/preference-1.2.1/res/values-af/values-af.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8",
-                        "startColumns": "4,4,4,4,4,4,4",
-                        "startOffsets": "105,176,264,345,484,653,732",
-                        "endColumns": "70,87,80,138,168,78,76",
-                        "endOffsets": "171,259,340,479,648,727,804"
-                    },
-                    "to": {
-                        "startLines": "54,56,60,61,64,65,66",
-                        "startColumns": "4,4,4,4,4,4,4",
-                        "startOffsets": "5705,5881,6284,6365,6685,6854,6933",
-                        "endColumns": "70,87,80,138,168,78,76",
-                        "endOffsets": "5771,5964,6360,6499,6849,6928,7005"
-                    }
-                },
-                {
-                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/ac7577773d9c79fea90c9ec2ed7044eb/transformed/jetified-play-services-base-18.0.1/res/values-af/values.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/f3893cddc5d30121a611e2c423dc819f/transformed/jetified-play-services-base-18.3.0/res/values-af/values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
@@ -89,20 +89,20 @@
                     }
                 },
                 {
-                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/96f406b62bcf2da0b0006dc1277b3ffa/transformed/jetified-play-services-basement-18.2.0/res/values-af/values.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/1c50824d24768c33903bba232d8dddf0/transformed/preference-1.2.1/res/values-af/values-af.xml",
                     "from": {
-                        "startLines": "4",
-                        "startColumns": "0",
-                        "startOffsets": "195",
-                        "endColumns": "138",
-                        "endOffsets": "333"
+                        "startLines": "2,3,4,5,6,7,8",
+                        "startColumns": "4,4,4,4,4,4,4",
+                        "startOffsets": "105,176,264,345,484,653,732",
+                        "endColumns": "70,87,80,138,168,78,76",
+                        "endOffsets": "171,259,340,479,648,727,804"
                     },
                     "to": {
-                        "startLines": "44",
-                        "startColumns": "4",
-                        "startOffsets": "4503",
-                        "endColumns": "142",
-                        "endOffsets": "4641"
+                        "startLines": "54,56,60,61,64,65,66",
+                        "startColumns": "4,4,4,4,4,4,4",
+                        "startOffsets": "5705,5881,6284,6365,6685,6854,6933",
+                        "endColumns": "70,87,80,138,168,78,76",
+                        "endOffsets": "5771,5964,6360,6499,6849,6928,7005"
                     }
                 }
             ]

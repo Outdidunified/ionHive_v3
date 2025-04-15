@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ionhive/utils/widgets/dropdowns/select_reason_dropdown.dart';
 import 'package:ionhive/feature/more/presentation/pages/account/presentation/controllers/account_controller.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
+import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   DeleteAccountPage({super.key});
@@ -128,9 +129,9 @@ class DeleteAccountPage extends StatelessWidget {
                                 SizedBox(
                                   height: 30,
                                   width: 30,
-                                  child: CircularProgressIndicator(
+                                  child: LoadingIndicator(
                                     color: theme.colorScheme.primary,
-                                    strokeWidth: 3,
+                                    size: 30.0,
                                   ),
                                 ),
                                 const SizedBox(width: 20),

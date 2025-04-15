@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.outdidev.ev_app-mergeReleaseResources-43:/values-en-rIN/values-en-rIN.xml",
+            "outputFile": "com.outdidev.ev_app-mergeReleaseResources-45:/values-en-rIN/values-en-rIN.xml",
             "map": [
                 {
                     "source": "/Users/apple/.gradle/caches/8.10.2/transforms/5870f29bca51ebd23f00e720f39b68c5/transformed/browser-1.8.0/res/values-en-rIN/values-en-rIN.xml",

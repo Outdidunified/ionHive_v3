@@ -36,6 +36,9 @@ dependencies:
   cached_network_image: ^3.3.1
   provider: ^6.1.2
   flutter_dotenv: ^5.1.0
+  google_maps_flutter: ^2.2.3
+  geolocator: ^9.0.2
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +58,9 @@ flutter:
     - assets/ionHive_logo's/ionHive.png
     - assets/Image/
     - assets/icons/
+    - assets/images/
+    - assets/map/Map.json
+    - assets/map/DarkMap.json
 
 flutter_native_splash:
   color: "#000000"

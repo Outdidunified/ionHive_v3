@@ -45,12 +45,27 @@ ndkVersion = "27.0.12077973"
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
 
         debug {
-            signingConfig = signingConfigs.getByName("debug")  
+            signingConfig = signingConfigs.getByName("debug")
+            // Apply ProGuard rules to debug builds as well to suppress Flogger warnings
+            proguardFiles(
+                getDefaultProguardFile("proguard-android.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
+}
+
+dependencies {
+    // Add the androidx.startup dependency for initializing components
+    implementation("androidx.startup:startup-runtime:1.1.1")
 }
 
 flutter {

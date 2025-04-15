@@ -3,5 +3,5 @@
         "chargingpage"
     ],
     "cmake.sourceDirectory": "/Users/outdid/Desktop/Work/ionhive/linux",
-    "zencoder.enableRepoIndexing": true
+    "zencoder.enableRepoIndexing": false
 }
