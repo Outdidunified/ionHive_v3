@@ -1,4 +1,3 @@
-const { Console } = require('winston/lib/winston/transports');
 const db_conn = require('../config/db');
 const logger = require('../utils/logger');
 const PDFDocument = require('pdfkit');
@@ -230,11 +229,9 @@ const fetchChargingSessionDetails = async (req, res) => {
                 }
             };
         }
-        console.log(query);
 
         // Fetch filtered sessions in descending order by stop_time
         const result = await collection.find(query).sort({ stop_time: -1 }).toArray();
-        console.log(result);
 
         if (!result || result.length === 0) {
             return res.status(404).json({
