@@ -1,0 +1,19 @@
+<lint-module
+    format="1"
+    dir="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/android/app"
+    name=":app"
+    type="APP"
+    maven="android:app:unspecified"
+    agpVersion="8.7.0"
+    buildFolder="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/app"
+    bootClassPath="/Users/apple/Library/Android/sdk/platforms/android-35/android.jar:/Users/apple/Library/Android/sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="11"
+    compileTarget="android-35"
+    neverShrinking="true">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>
