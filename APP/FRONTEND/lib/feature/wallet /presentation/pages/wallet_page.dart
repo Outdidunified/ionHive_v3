@@ -66,7 +66,7 @@ class WalletPage extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: Text(
-            '$greeting!\n$username This your wallet',
+            'Hii $greeting!\n$username This your wallet',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
