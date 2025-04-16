@@ -45,20 +45,16 @@ ndkVersion = "27.0.12077973"
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            isMinifyEnabled = false  // Disable minification
+            isShrinkResources = false  // Disable resource shrinking
+            // No proguard files needed
         }
 
         debug {
             signingConfig = signingConfigs.getByName("debug")
-            // Apply ProGuard rules to debug builds as well to suppress Flogger warnings
-            proguardFiles(
-                getDefaultProguardFile("proguard-android.txt"),
-                "proguard-rules.pro"
-            )
+            isMinifyEnabled = false
+            isShrinkResources = false  // Disable resource shrinking
+            // No proguard files needed
         }
     }
 }

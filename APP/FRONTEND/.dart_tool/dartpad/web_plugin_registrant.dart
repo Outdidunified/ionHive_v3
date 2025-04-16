@@ -8,6 +8,7 @@
 
 import 'package:connectivity_plus/src/connectivity_plus_web.dart';
 import 'package:flutter_native_splash/flutter_native_splash_web.dart';
+import 'package:fluttertoast/fluttertoast_web.dart';
 import 'package:geolocator_web/geolocator_web.dart';
 import 'package:google_maps_flutter_web/google_maps_flutter_web.dart';
 import 'package:google_sign_in_web/google_sign_in_web.dart';
@@ -22,6 +23,7 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   final Registrar registrar = pluginRegistrar ?? webPluginRegistrar;
   ConnectivityPlusWebPlugin.registerWith(registrar);
   FlutterNativeSplashWeb.registerWith(registrar);
+  FluttertoastWebPlugin.registerWith(registrar);
   GeolocatorPlugin.registerWith(registrar);
   GoogleMapsPlugin.registerWith(registrar);
   GoogleSignInPlugin.registerWith(registrar);

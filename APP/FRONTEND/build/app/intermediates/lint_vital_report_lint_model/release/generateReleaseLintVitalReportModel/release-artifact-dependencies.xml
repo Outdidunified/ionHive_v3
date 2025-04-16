@@ -1,6 +1,6 @@
 <dependencies>
   <compile
-      roots="__local_aars__:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/app/intermediates/flutter/release/libs.jar:unspecified@jar,:@@:connectivity_plus::release,:@@:flutter_blue_classic::release,:@@:flutter_native_splash::release,:@@:flutter_plugin_android_lifecycle::release,:@@:geolocator_android::release,:@@:google_maps_flutter_android::release,:@@:google_sign_in_android::release,:@@:package_info_plus::release,:@@:path_provider_android::release,:@@:permission_handler_android::release,:@@:shared_preferences_android::release,:@@:sign_in_with_apple::release,:@@:sqflite_android::release,:@@:url_launcher_android::release,:@@:webview_flutter_android::release,org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22@jar,io.flutter:flutter_embedding_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,androidx.fragment:fragment:1.7.1@aar,androidx.activity:activity:1.8.1@aar,androidx.loader:loader:1.1.0@aar,androidx.lifecycle:lifecycle-viewmodel:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0@aar,androidx.core:core-ktx:1.13.1@aar,androidx.viewpager:viewpager:1.0.0@aar,androidx.customview:customview:1.1.0@aar,androidx.core:core:1.13.1@aar,androidx.core:core:1.13.1@aar,androidx.lifecycle:lifecycle-runtime:2.7.0@aar,androidx.lifecycle:lifecycle-process:2.7.0@aar,androidx.lifecycle:lifecycle-common-java8:2.7.0@jar,androidx.lifecycle:lifecycle-common:2.7.0@jar,androidx.window:window:1.2.0@aar,androidx.window:window-java:1.2.0@aar,androidx.annotation:annotation-experimental:1.4.1@aar,androidx.savedstate:savedstate:1.2.1@aar,androidx.arch.core:core-common:2.2.0@jar,androidx.versionedparcelable:versionedparcelable:1.1.1@aar,androidx.collection:collection:1.1.0@jar,androidx.annotation:annotation-jvm:1.9.1@jar,org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3@jar,org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3@jar,org.jetbrains.kotlin:kotlin-stdlib:1.9.24@jar,org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22@jar,io.flutter:armeabi_v7a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,io.flutter:arm64_v8a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,io.flutter:x86_64_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,org.jetbrains:annotations:23.0.0@jar,androidx.startup:startup-runtime:1.1.1@aar,androidx.tracing:tracing:1.2.0@aar,com.getkeepsafe.relinker:relinker:1.4.5@aar">
+      roots="__local_aars__:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/app/intermediates/flutter/release/libs.jar:unspecified@jar,:@@:connectivity_plus::release,:@@:flutter_blue_classic::release,:@@:flutter_native_splash::release,:@@:flutter_plugin_android_lifecycle::release,:@@:fluttertoast::release,:@@:geolocator_android::release,:@@:google_maps_flutter_android::release,:@@:google_sign_in_android::release,:@@:package_info_plus::release,:@@:path_provider_android::release,:@@:permission_handler_android::release,:@@:razorpay_flutter::release,:@@:shared_preferences_android::release,:@@:sign_in_with_apple::release,:@@:sqflite_android::release,:@@:url_launcher_android::release,:@@:webview_flutter_android::release,com.razorpay:checkout:1.6.41@aar,com.razorpay:standard-core:1.6.49@aar,org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22@jar,io.flutter:flutter_embedding_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,com.google.android.gms:play-services-auth:21.1.0@aar,com.google.android.gms:play-services-wallet:18.1.3@aar,com.google.android.gms:play-services-auth-api-phone:18.0.2@aar,com.google.android.gms:play-services-auth-base:18.0.10@aar,com.google.android.gms:play-services-fido:20.0.1@aar,com.google.android.gms:play-services-identity:17.0.0@aar,com.google.android.gms:play-services-maps:18.2.0@aar,com.google.android.gms:play-services-base:18.3.0@aar,com.google.android.gms:play-services-tasks:18.1.0@aar,com.google.android.gms:play-services-basement:18.3.0@aar,androidx.fragment:fragment:1.7.1@aar,androidx.fragment:fragment:1.7.1@aar,androidx.activity:activity:1.8.1@aar,androidx.loader:loader:1.1.0@aar,androidx.lifecycle:lifecycle-viewmodel:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0@aar,androidx.core:core-ktx:1.13.1@aar,androidx.viewpager:viewpager:1.0.0@aar,androidx.customview:customview:1.1.0@aar,androidx.core:core:1.13.1@aar,androidx.core:core:1.13.1@aar,androidx.lifecycle:lifecycle-runtime:2.7.0@aar,androidx.lifecycle:lifecycle-process:2.7.0@aar,androidx.lifecycle:lifecycle-common-java8:2.7.0@jar,androidx.lifecycle:lifecycle-common:2.7.0@jar,androidx.window:window:1.2.0@aar,androidx.window:window-java:1.2.0@aar,androidx.annotation:annotation-experimental:1.4.1@aar,androidx.savedstate:savedstate:1.2.1@aar,androidx.arch.core:core-common:2.2.0@jar,androidx.versionedparcelable:versionedparcelable:1.1.1@aar,androidx.collection:collection:1.1.0@jar,androidx.annotation:annotation-jvm:1.9.1@jar,org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3@jar,org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3@jar,org.jetbrains.kotlin:kotlin-stdlib:1.9.24@jar,org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22@jar,androidx.startup:startup-runtime:1.1.1@aar,io.flutter:armeabi_v7a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,io.flutter:arm64_v8a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,io.flutter:x86_64_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,org.jetbrains:annotations:23.0.0@jar,androidx.tracing:tracing:1.2.0@aar,com.getkeepsafe.relinker:relinker:1.4.5@aar">
     <dependency
         name="__local_aars__:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/app/intermediates/flutter/release/libs.jar:unspecified@jar"
         simpleName="__local_aars__:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/app/intermediates/flutter/release/libs.jar"/>
@@ -16,6 +16,9 @@
     <dependency
         name=":@@:flutter_plugin_android_lifecycle::release"
         simpleName="artifacts::flutter_plugin_android_lifecycle"/>
+    <dependency
+        name=":@@:fluttertoast::release"
+        simpleName="artifacts::fluttertoast"/>
     <dependency
         name=":@@:geolocator_android::release"
         simpleName="artifacts::geolocator_android"/>
@@ -35,6 +38,9 @@
         name=":@@:permission_handler_android::release"
         simpleName="artifacts::permission_handler_android"/>
     <dependency
+        name=":@@:razorpay_flutter::release"
+        simpleName="artifacts::razorpay_flutter"/>
+    <dependency
         name=":@@:shared_preferences_android::release"
         simpleName="artifacts::shared_preferences_android"/>
     <dependency
@@ -50,11 +56,47 @@
         name=":@@:webview_flutter_android::release"
         simpleName="artifacts::webview_flutter_android"/>
     <dependency
+        name="com.razorpay:checkout:1.6.41@aar"
+        simpleName="com.razorpay:checkout"/>
+    <dependency
+        name="com.razorpay:standard-core:1.6.49@aar"
+        simpleName="com.razorpay:standard-core"/>
+    <dependency
         name="org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22@jar"
         simpleName="org.jetbrains.kotlin:kotlin-stdlib-jdk7"/>
     <dependency
         name="io.flutter:flutter_embedding_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar"
         simpleName="io.flutter:flutter_embedding_release"/>
+    <dependency
+        name="com.google.android.gms:play-services-auth:21.1.0@aar"
+        simpleName="com.google.android.gms:play-services-auth"/>
+    <dependency
+        name="com.google.android.gms:play-services-wallet:18.1.3@aar"
+        simpleName="com.google.android.gms:play-services-wallet"/>
+    <dependency
+        name="com.google.android.gms:play-services-auth-api-phone:18.0.2@aar"
+        simpleName="com.google.android.gms:play-services-auth-api-phone"/>
+    <dependency
+        name="com.google.android.gms:play-services-auth-base:18.0.10@aar"
+        simpleName="com.google.android.gms:play-services-auth-base"/>
+    <dependency
+        name="com.google.android.gms:play-services-fido:20.0.1@aar"
+        simpleName="com.google.android.gms:play-services-fido"/>
+    <dependency
+        name="com.google.android.gms:play-services-identity:17.0.0@aar"
+        simpleName="com.google.android.gms:play-services-identity"/>
+    <dependency
+        name="com.google.android.gms:play-services-maps:18.2.0@aar"
+        simpleName="com.google.android.gms:play-services-maps"/>
+    <dependency
+        name="com.google.android.gms:play-services-base:18.3.0@aar"
+        simpleName="com.google.android.gms:play-services-base"/>
+    <dependency
+        name="com.google.android.gms:play-services-tasks:18.1.0@aar"
+        simpleName="com.google.android.gms:play-services-tasks"/>
+    <dependency
+        name="com.google.android.gms:play-services-basement:18.3.0@aar"
+        simpleName="com.google.android.gms:play-services-basement"/>
     <dependency
         name="androidx.fragment:fragment:1.7.1@aar"
         simpleName="androidx.fragment:fragment"/>
@@ -134,6 +176,9 @@
         name="org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22@jar"
         simpleName="org.jetbrains.kotlin:kotlin-stdlib-jdk8"/>
     <dependency
+        name="androidx.startup:startup-runtime:1.1.1@aar"
+        simpleName="androidx.startup:startup-runtime"/>
+    <dependency
         name="io.flutter:armeabi_v7a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar"
         simpleName="io.flutter:armeabi_v7a_release"/>
     <dependency
@@ -146,9 +191,6 @@
         name="org.jetbrains:annotations:23.0.0@jar"
         simpleName="org.jetbrains:annotations"/>
     <dependency
-        name="androidx.startup:startup-runtime:1.1.1@aar"
-        simpleName="androidx.startup:startup-runtime"/>
-    <dependency
         name="androidx.tracing:tracing:1.2.0@aar"
         simpleName="androidx.tracing:tracing"/>
     <dependency
@@ -156,7 +198,7 @@
         simpleName="com.getkeepsafe.relinker:relinker"/>
   </compile>
   <package
-      roots="__local_aars__:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/app/intermediates/flutter/release/libs.jar:unspecified@jar,:@@:connectivity_plus::release,:@@:flutter_blue_classic::release,:@@:flutter_native_splash::release,:@@:google_maps_flutter_android::release,:@@:flutter_plugin_android_lifecycle::release,:@@:geolocator_android::release,:@@:google_sign_in_android::release,:@@:package_info_plus::release,:@@:path_provider_android::release,:@@:permission_handler_android::release,:@@:shared_preferences_android::release,:@@:sign_in_with_apple::release,:@@:sqflite_android::release,:@@:url_launcher_android::release,:@@:webview_flutter_android::release,com.google.android.gms:play-services-location:21.2.0@aar,io.flutter:flutter_embedding_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,androidx.preference:preference:1.2.1@aar,androidx.browser:browser:1.8.0@aar,androidx.webkit:webkit:1.12.1@aar,androidx.recyclerview:recyclerview:1.0.0@aar,androidx.legacy:legacy-support-core-ui:1.0.0@aar,androidx.slidingpanelayout:slidingpanelayout:1.2.0@aar,androidx.slidingpanelayout:slidingpanelayout:1.2.0@aar,androidx.window:window:1.2.0@aar,androidx.window:window-java:1.2.0@aar,com.google.android.gms:play-services-maps:18.2.0@aar,com.google.android.gms:play-services-auth:21.0.0@aar,com.google.android.gms:play-services-auth-api-phone:18.0.2@aar,com.google.android.gms:play-services-auth-base:18.0.10@aar,com.google.android.gms:play-services-fido:20.0.1@aar,com.google.android.gms:play-services-base:18.3.0@aar,com.google.android.gms:play-services-tasks:18.1.0@aar,com.google.android.gms:play-services-basement:18.3.0@aar,androidx.appcompat:appcompat:1.1.0@aar,androidx.fragment:fragment-ktx:1.7.1@aar,androidx.fragment:fragment:1.7.1@aar,androidx.fragment:fragment:1.7.1@aar,androidx.legacy:legacy-support-core-utils:1.0.0@aar,androidx.loader:loader:1.1.0@aar,androidx.activity:activity-ktx:1.8.1@aar,androidx.activity:activity:1.8.1@aar,androidx.viewpager:viewpager:1.0.0@aar,androidx.appcompat:appcompat-resources:1.1.0@aar,androidx.drawerlayout:drawerlayout:1.0.0@aar,androidx.coordinatorlayout:coordinatorlayout:1.0.0@aar,androidx.customview:customview:1.1.0@aar,androidx.transition:transition:1.4.1@aar,androidx.lifecycle:lifecycle-runtime-ktx:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0@aar,androidx.core:core-ktx:1.13.1@aar,androidx.vectordrawable:vectordrawable-animated:1.1.0@aar,androidx.vectordrawable:vectordrawable:1.1.0@aar,androidx.swiperefreshlayout:swiperefreshlayout:1.0.0@aar,androidx.asynclayoutinflater:asynclayoutinflater:1.0.0@aar,androidx.core:core:1.13.1@aar,androidx.core:core:1.13.1@aar,androidx.lifecycle:lifecycle-runtime:2.7.0@aar,androidx.lifecycle:lifecycle-process:2.7.0@aar,androidx.lifecycle:lifecycle-common-java8:2.7.0@jar,androidx.savedstate:savedstate-ktx:1.2.1@aar,androidx.savedstate:savedstate:1.2.1@aar,androidx.lifecycle:lifecycle-common:2.7.0@jar,androidx.datastore:datastore-preferences-external-protobuf:1.1.3@jar,androidx.datastore:datastore-preferences-proto:1.1.3@jar,androidx.datastore:datastore-preferences-core-jvm:1.1.3@jar,androidx.datastore:datastore-core-okio-jvm:1.1.3@jar,androidx.datastore:datastore-core-android:1.1.3@aar,androidx.datastore:datastore-preferences-android:1.1.3@aar,androidx.datastore:datastore-android:1.1.3@aar,org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3@jar,org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3@jar,org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22@jar,androidx.profileinstaller:profileinstaller:1.3.1@aar,androidx.startup:startup-runtime:1.1.1@aar,androidx.tracing:tracing:1.2.0@aar,androidx.interpolator:interpolator:1.0.0@aar,androidx.versionedparcelable:versionedparcelable:1.1.1@aar,androidx.collection:collection-ktx:1.1.0@jar,androidx.collection:collection:1.1.0@jar,androidx.arch.core:core-runtime:2.2.0@aar,androidx.arch.core:core-common:2.2.0@jar,androidx.cursoradapter:cursoradapter:1.0.0@aar,androidx.concurrent:concurrent-futures:1.1.0@jar,androidx.window.extensions.core:core:1.0.0@aar,androidx.documentfile:documentfile:1.0.0@aar,androidx.localbroadcastmanager:localbroadcastmanager:1.0.0@aar,androidx.print:print:1.0.0@aar,androidx.annotation:annotation-jvm:1.9.1@jar,androidx.annotation:annotation-experimental:1.4.1@aar,org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.22@jar,org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.9.22@jar,org.jetbrains.kotlin:kotlin-stdlib:1.9.24@jar,com.squareup.okio:okio-jvm:3.4.0@jar,org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22@jar,io.flutter:armeabi_v7a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,io.flutter:arm64_v8a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,io.flutter:x86_64_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,com.google.maps.android:android-maps-utils:3.6.0@aar,com.getkeepsafe.relinker:relinker:1.4.5@aar,com.google.guava:listenablefuture:1.0@jar,org.jetbrains:annotations:23.0.0@jar">
+      roots="__local_aars__:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/app/intermediates/flutter/release/libs.jar:unspecified@jar,:@@:connectivity_plus::release,:@@:flutter_blue_classic::release,:@@:flutter_native_splash::release,:@@:google_maps_flutter_android::release,:@@:flutter_plugin_android_lifecycle::release,:@@:razorpay_flutter::release,:@@:fluttertoast::release,:@@:geolocator_android::release,:@@:google_sign_in_android::release,:@@:package_info_plus::release,:@@:path_provider_android::release,:@@:permission_handler_android::release,:@@:shared_preferences_android::release,:@@:sign_in_with_apple::release,:@@:sqflite_android::release,:@@:url_launcher_android::release,:@@:webview_flutter_android::release,com.google.android.gms:play-services-location:21.2.0@aar,io.flutter:flutter_embedding_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,androidx.preference:preference:1.2.1@aar,androidx.browser:browser:1.8.0@aar,androidx.webkit:webkit:1.12.1@aar,androidx.recyclerview:recyclerview:1.0.0@aar,androidx.legacy:legacy-support-core-ui:1.0.0@aar,androidx.slidingpanelayout:slidingpanelayout:1.2.0@aar,androidx.slidingpanelayout:slidingpanelayout:1.2.0@aar,androidx.window:window:1.2.0@aar,androidx.window:window-java:1.2.0@aar,com.razorpay:checkout:1.6.41@aar,com.razorpay:standard-core:1.6.49@aar,com.google.android.gms:play-services-wallet:18.1.3@aar,com.google.android.gms:play-services-maps:18.2.0@aar,com.google.android.gms:play-services-auth:21.1.0@aar,com.google.android.gms:play-services-auth-api-phone:18.0.2@aar,com.google.android.gms:play-services-auth-base:18.0.10@aar,com.google.android.gms:play-services-fido:20.0.1@aar,com.google.android.gms:play-services-identity:17.0.0@aar,com.google.android.gms:play-services-base:18.3.0@aar,com.google.android.gms:play-services-tasks:18.1.0@aar,com.google.android.gms:play-services-basement:18.3.0@aar,androidx.appcompat:appcompat:1.1.0@aar,androidx.fragment:fragment-ktx:1.7.1@aar,androidx.fragment:fragment:1.7.1@aar,androidx.fragment:fragment:1.7.1@aar,androidx.activity:activity-ktx:1.8.1@aar,androidx.activity:activity:1.8.1@aar,androidx.viewpager:viewpager:1.0.0@aar,androidx.legacy:legacy-support-core-utils:1.0.0@aar,androidx.loader:loader:1.1.0@aar,androidx.appcompat:appcompat-resources:1.1.0@aar,androidx.drawerlayout:drawerlayout:1.0.0@aar,androidx.coordinatorlayout:coordinatorlayout:1.0.0@aar,androidx.customview:customview:1.1.0@aar,androidx.transition:transition:1.4.1@aar,androidx.lifecycle:lifecycle-runtime-ktx:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core:2.7.0@aar,androidx.lifecycle:lifecycle-livedata-core:2.7.0@aar,androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0@aar,androidx.core:core-ktx:1.13.1@aar,androidx.vectordrawable:vectordrawable-animated:1.1.0@aar,androidx.vectordrawable:vectordrawable:1.1.0@aar,androidx.swiperefreshlayout:swiperefreshlayout:1.0.0@aar,androidx.asynclayoutinflater:asynclayoutinflater:1.0.0@aar,androidx.core:core:1.13.1@aar,androidx.core:core:1.13.1@aar,androidx.lifecycle:lifecycle-runtime:2.7.0@aar,androidx.lifecycle:lifecycle-process:2.7.0@aar,androidx.lifecycle:lifecycle-common-java8:2.7.0@jar,androidx.savedstate:savedstate-ktx:1.2.1@aar,androidx.savedstate:savedstate:1.2.1@aar,androidx.lifecycle:lifecycle-common:2.7.0@jar,androidx.datastore:datastore-preferences-external-protobuf:1.1.3@jar,androidx.datastore:datastore-preferences-proto:1.1.3@jar,androidx.datastore:datastore-preferences-core-jvm:1.1.3@jar,androidx.datastore:datastore-core-okio-jvm:1.1.3@jar,androidx.datastore:datastore-core-android:1.1.3@aar,androidx.datastore:datastore-preferences-android:1.1.3@aar,androidx.datastore:datastore-android:1.1.3@aar,org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3@jar,org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3@jar,org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22@jar,androidx.profileinstaller:profileinstaller:1.3.1@aar,androidx.startup:startup-runtime:1.1.1@aar,androidx.tracing:tracing:1.2.0@aar,androidx.interpolator:interpolator:1.0.0@aar,androidx.versionedparcelable:versionedparcelable:1.1.1@aar,androidx.collection:collection-ktx:1.1.0@jar,androidx.collection:collection:1.1.0@jar,androidx.arch.core:core-runtime:2.2.0@aar,androidx.arch.core:core-common:2.2.0@jar,androidx.cursoradapter:cursoradapter:1.0.0@aar,androidx.concurrent:concurrent-futures:1.1.0@jar,androidx.window.extensions.core:core:1.0.0@aar,androidx.documentfile:documentfile:1.0.0@aar,androidx.localbroadcastmanager:localbroadcastmanager:1.0.0@aar,androidx.print:print:1.0.0@aar,androidx.annotation:annotation-jvm:1.9.1@jar,androidx.annotation:annotation-experimental:1.4.1@aar,org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.22@jar,org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.9.22@jar,org.jetbrains.kotlin:kotlin-stdlib:1.9.24@jar,com.squareup.okio:okio-jvm:3.4.0@jar,org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22@jar,io.flutter:armeabi_v7a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,io.flutter:arm64_v8a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,io.flutter:x86_64_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar,com.google.maps.android:android-maps-utils:3.6.0@aar,com.getkeepsafe.relinker:relinker:1.4.5@aar,com.google.guava:listenablefuture:1.0@jar,org.jetbrains:annotations:23.0.0@jar">
     <dependency
         name="__local_aars__:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/app/intermediates/flutter/release/libs.jar:unspecified@jar"
         simpleName="__local_aars__:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/app/intermediates/flutter/release/libs.jar"/>
@@ -175,6 +217,12 @@
     <dependency
         name=":@@:flutter_plugin_android_lifecycle::release"
         simpleName="artifacts::flutter_plugin_android_lifecycle"/>
+    <dependency
+        name=":@@:razorpay_flutter::release"
+        simpleName="artifacts::razorpay_flutter"/>
+    <dependency
+        name=":@@:fluttertoast::release"
+        simpleName="artifacts::fluttertoast"/>
     <dependency
         name=":@@:geolocator_android::release"
         simpleName="artifacts::geolocator_android"/>
@@ -236,10 +284,19 @@
         name="androidx.window:window-java:1.2.0@aar"
         simpleName="androidx.window:window-java"/>
     <dependency
+        name="com.razorpay:checkout:1.6.41@aar"
+        simpleName="com.razorpay:checkout"/>
+    <dependency
+        name="com.razorpay:standard-core:1.6.49@aar"
+        simpleName="com.razorpay:standard-core"/>
+    <dependency
+        name="com.google.android.gms:play-services-wallet:18.1.3@aar"
+        simpleName="com.google.android.gms:play-services-wallet"/>
+    <dependency
         name="com.google.android.gms:play-services-maps:18.2.0@aar"
         simpleName="com.google.android.gms:play-services-maps"/>
     <dependency
-        name="com.google.android.gms:play-services-auth:21.0.0@aar"
+        name="com.google.android.gms:play-services-auth:21.1.0@aar"
         simpleName="com.google.android.gms:play-services-auth"/>
     <dependency
         name="com.google.android.gms:play-services-auth-api-phone:18.0.2@aar"
@@ -250,6 +307,9 @@
     <dependency
         name="com.google.android.gms:play-services-fido:20.0.1@aar"
         simpleName="com.google.android.gms:play-services-fido"/>
+    <dependency
+        name="com.google.android.gms:play-services-identity:17.0.0@aar"
+        simpleName="com.google.android.gms:play-services-identity"/>
     <dependency
         name="com.google.android.gms:play-services-base:18.3.0@aar"
         simpleName="com.google.android.gms:play-services-base"/>
@@ -269,12 +329,6 @@
         name="androidx.fragment:fragment:1.7.1@aar"
         simpleName="androidx.fragment:fragment"/>
     <dependency
-        name="androidx.legacy:legacy-support-core-utils:1.0.0@aar"
-        simpleName="androidx.legacy:legacy-support-core-utils"/>
-    <dependency
-        name="androidx.loader:loader:1.1.0@aar"
-        simpleName="androidx.loader:loader"/>
-    <dependency
         name="androidx.activity:activity-ktx:1.8.1@aar"
         simpleName="androidx.activity:activity-ktx"/>
     <dependency
@@ -283,6 +337,12 @@
     <dependency
         name="androidx.viewpager:viewpager:1.0.0@aar"
         simpleName="androidx.viewpager:viewpager"/>
+    <dependency
+        name="androidx.legacy:legacy-support-core-utils:1.0.0@aar"
+        simpleName="androidx.legacy:legacy-support-core-utils"/>
+    <dependency
+        name="androidx.loader:loader:1.1.0@aar"
+        simpleName="androidx.loader:loader"/>
     <dependency
         name="androidx.appcompat:appcompat-resources:1.1.0@aar"
         simpleName="androidx.appcompat:appcompat-resources"/>

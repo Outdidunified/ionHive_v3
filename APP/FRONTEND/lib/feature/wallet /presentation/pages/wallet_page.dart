@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/transactions/presentation/pages/paymenthistory.dart';
+import 'package:ionhive/feature/wallet /presentation/pages/add_credits.dart';
 
 import '../controller/wallet_controller.dart';
 
@@ -277,38 +278,59 @@ class WalletPage extends StatelessWidget {
   Widget _buildOptionCard(IconData icon, String title, String subtitle,
       Color color, ThemeData theme) {
     return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: theme.cardColor,
-              child: Icon(
-                icon,
-                size: 20,
-                color: theme.colorScheme.primary,
+      child: GestureDetector(
+        onTap: () {
+          // Handle navigation based on the option title
+          if (title == 'Add Credits') {
+            Get.to(() => AddCreditsPage());
+          } else if (title == 'Transaction') {
+            final userId = sessionController.userId.value;
+            final username = sessionController.username.value;
+            final emailId = sessionController.emailId.value;
+            final token = sessionController.token.value;
+
+            Get.to(() => PaymentHistoryPage(
+                  userId: userId,
+                  username: username,
+                  emailId: emailId,
+                  token: token,
+                ));
+          }
+          // Add more conditions for other options if needed
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: theme.cardColor,
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              subtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

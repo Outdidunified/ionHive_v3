@@ -25,14 +25,25 @@ class SessionHistoryControllers extends GetxController {
     super.onInit();
     // Initial data loading will be handled by the page
     // to ensure proper refresh when navigating back
+
+    // Listen for changes in the session controller's login status
+    ever(sessionController.isLoggedIn, (isLoggedIn) {
+      if (isLoggedIn) {
+        refreshAllData();
+      }
+    });
+
+    // Also check if already logged in
+    if (sessionController.isLoggedIn.value) {
+      refreshAllData();
+    }
   }
 
   @override
   void onReady() {
     super.onReady();
     // This ensures data is loaded when the controller is first created
-    fetchtotalsessions();
-    fetchallsessiondetails();
+    refreshAllData();
   }
 
   Future<void> fetchtotalsessions() async {
@@ -147,6 +158,7 @@ class SessionHistoryControllers extends GetxController {
 
   /// Refreshes all data at once
   Future<void> refreshAllData() async {
+    print("SessionHistoryControllers: refreshAllData called");
     isLoading.value = true;
     try {
       // Run both requests in parallel
@@ -154,6 +166,9 @@ class SessionHistoryControllers extends GetxController {
         fetchtotalsessions(),
         fetchallsessiondetails(),
       ]);
+      print("SessionHistoryControllers: refreshAllData completed");
+    } catch (e) {
+      print("SessionHistoryControllers: refreshAllData error: $e");
     } finally {
       isLoading.value = false;
     }

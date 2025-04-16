@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.outdidev.ev_app-mergeReleaseResources-45:/values-kn/values-kn.xml",
+            "outputFile": "com.outdidev.ev_app-mergeReleaseResources-47:/values-kn/values-kn.xml",
             "map": [
                 {
                     "source": "/Users/apple/.gradle/caches/8.10.2/transforms/06f1d28345e99554a5d9fca85b6b394d/transformed/core-1.13.1/res/values-kn/values-kn.xml",
@@ -103,6 +103,23 @@
                         "startOffsets": "5840,6024,6427,6504,6836,7005,7085",
                         "endColumns": "69,85,76,148,168,79,76",
                         "endOffsets": "5905,6105,6499,6648,7000,7080,7157"
+                    }
+                },
+                {
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/0cbe015a93f2b27c075cd3245260f016/transformed/jetified-play-services-wallet-18.1.3/res/values-kn/values.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "0",
+                        "startOffsets": "202",
+                        "endColumns": "75",
+                        "endOffsets": "277"
+                    },
+                    "to": {
+                        "startLines": "67",
+                        "startColumns": "4",
+                        "startOffsets": "7162",
+                        "endColumns": "79",
+                        "endOffsets": "7237"
                     }
                 }
             ]

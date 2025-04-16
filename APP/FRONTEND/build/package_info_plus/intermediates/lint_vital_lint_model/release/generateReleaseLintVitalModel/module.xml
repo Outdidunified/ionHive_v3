@@ -1,6 +1,6 @@
 <lint-module
     format="1"
-    dir="/Users/apple/.pub-cache/hosted/pub.dev/package_info_plus-7.0.0/android"
+    dir="/Users/apple/.pub-cache/hosted/pub.dev/package_info_plus-8.3.0/android"
     name=":package_info_plus"
     type="LIBRARY"
     maven="dev.fluttercommunity.plus.packageinfo:package_info_plus:1.0-SNAPSHOT"

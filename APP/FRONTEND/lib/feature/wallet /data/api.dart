@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:ionhive/feature/more/presentation/pages/header/data/urls.dart';
+import 'package:ionhive/feature/wallet%20/data/urls.dart';
+import 'package:ionhive/feature/wallet%20/domain/models/payment_request.dart';
 import 'package:ionhive/utils/exception/exception.dart'; // Exception thrown Handler
 
 class WalletAPICalls {
@@ -63,6 +64,64 @@ class WalletAPICalls {
           'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+  Future<Map<String, dynamic>> savePayment(
+      PaymentRequest paymentRequest, String authToken) async {
+    final url = HeaderUrl.savePayments;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode(paymentRequest.toJson()),
+      );
+
+      debugPrint('Save payment response: ${response.body}');
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error saving payment: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+  Future<Map<String, dynamic>> createOrder(
+      double amount, String currency, int userId, String authToken) async {
+    final url = HeaderUrl.createOrder;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+          'amount': amount,
+          'currency': currency,
+          'user_id': userId,
+        }),
+      );
+
+      debugPrint('Create order response: ${response.body}');
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error creating order: $e");
       throw HttpException(500, '$e');
     }
   }

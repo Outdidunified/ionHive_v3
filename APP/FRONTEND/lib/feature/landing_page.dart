@@ -24,12 +24,12 @@ class LandingPage extends StatelessWidget {
         children: [
           const HomePage(),
           WalletPage(),
-          const SessionHistoryPage(),
+          SessionHistoryPage(),
           MoreePage(),
         ],
       ),
       bottomNavigationBar: Obx(
-            () => Footer(
+        () => Footer(
           onTabChanged: (index) {
             controller.changePage(index);
           },
@@ -39,4 +39,3 @@ class LandingPage extends StatelessWidget {
     );
   }
 }
-

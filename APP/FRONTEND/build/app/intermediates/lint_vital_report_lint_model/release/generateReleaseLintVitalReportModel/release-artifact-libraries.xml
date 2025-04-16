@@ -16,6 +16,9 @@
       name=":@@:flutter_plugin_android_lifecycle::release"
       project=":flutter_plugin_android_lifecycle"/>
   <library
+      name=":@@:fluttertoast::release"
+      project=":fluttertoast"/>
+  <library
       name=":@@:geolocator_android::release"
       project=":geolocator_android"/>
   <library
@@ -34,6 +37,9 @@
       name=":@@:permission_handler_android::release"
       project=":permission_handler_android"/>
   <library
+      name=":@@:razorpay_flutter::release"
+      project=":razorpay_flutter"/>
+  <library
       name=":@@:shared_preferences_android::release"
       project=":shared_preferences_android"/>
   <library
@@ -49,6 +55,32 @@
       name=":@@:webview_flutter_android::release"
       project=":webview_flutter_android"/>
   <library
+      name="com.razorpay:checkout:1.6.41@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/641f1d1d5254b366e86cd87474cb2883/transformed/jetified-checkout-1.6.41/jars/classes.jar"
+      resolved="com.razorpay:checkout:1.6.41"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/641f1d1d5254b366e86cd87474cb2883/transformed/jetified-checkout-1.6.41"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.razorpay:standard-core:1.6.49@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/7f6d805acc61d6b6b3ed06da1c59755e/transformed/jetified-standard-core-1.6.49/jars/classes.jar"
+      resolved="com.razorpay:standard-core:1.6.49"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/7f6d805acc61d6b6b3ed06da1c59755e/transformed/jetified-standard-core-1.6.49"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
       name="org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22@jar"
       jars="/Users/apple/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.8.22/4dabb8248310d833bb6a8b516024a91fd3d275c/kotlin-stdlib-jdk7-1.8.22.jar"
       resolved="org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"/>
@@ -56,6 +88,136 @@
       name="io.flutter:flutter_embedding_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar"
       jars="/Users/apple/.gradle/caches/modules-2/files-2.1/io.flutter/flutter_embedding_release/1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5/f6c43158f9203a219312bd674ff9bb50413a0003/flutter_embedding_release-1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5.jar"
       resolved="io.flutter:flutter_embedding_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5"/>
+  <library
+      name="com.google.android.gms:play-services-auth:21.1.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/f4bc225f93a10a62fad260d51e2e1028/transformed/jetified-play-services-auth-21.1.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-auth:21.1.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/f4bc225f93a10a62fad260d51e2e1028/transformed/jetified-play-services-auth-21.1.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.google.android.gms:play-services-wallet:18.1.3@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/0cbe015a93f2b27c075cd3245260f016/transformed/jetified-play-services-wallet-18.1.3/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-wallet:18.1.3"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/0cbe015a93f2b27c075cd3245260f016/transformed/jetified-play-services-wallet-18.1.3"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.google.android.gms:play-services-auth-api-phone:18.0.2@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/edd3788a5836cee3be86ec3573fcadc2/transformed/jetified-play-services-auth-api-phone-18.0.2/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-auth-api-phone:18.0.2"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/edd3788a5836cee3be86ec3573fcadc2/transformed/jetified-play-services-auth-api-phone-18.0.2"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.google.android.gms:play-services-auth-base:18.0.10@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/f1c3ea546954b940ab30d4aba178f439/transformed/jetified-play-services-auth-base-18.0.10/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-auth-base:18.0.10"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/f1c3ea546954b940ab30d4aba178f439/transformed/jetified-play-services-auth-base-18.0.10"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.google.android.gms:play-services-fido:20.0.1@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/c94d41f2df82612d44025c47ca9a47e9/transformed/jetified-play-services-fido-20.0.1/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-fido:20.0.1"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/c94d41f2df82612d44025c47ca9a47e9/transformed/jetified-play-services-fido-20.0.1"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.google.android.gms:play-services-identity:17.0.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/5cfff198c991c94339b26b6e3611a587/transformed/jetified-play-services-identity-17.0.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-identity:17.0.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/5cfff198c991c94339b26b6e3611a587/transformed/jetified-play-services-identity-17.0.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.google.android.gms:play-services-maps:18.2.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/6f3d9298b7d85c8c1cbd69673cc572e7/transformed/jetified-play-services-maps-18.2.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-maps:18.2.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/6f3d9298b7d85c8c1cbd69673cc572e7/transformed/jetified-play-services-maps-18.2.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.google.android.gms:play-services-base:18.3.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/f3893cddc5d30121a611e2c423dc819f/transformed/jetified-play-services-base-18.3.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-base:18.3.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/f3893cddc5d30121a611e2c423dc819f/transformed/jetified-play-services-base-18.3.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.google.android.gms:play-services-tasks:18.1.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/98f273f404dc078da7904024a0975de9/transformed/jetified-play-services-tasks-18.1.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-tasks:18.1.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/98f273f404dc078da7904024a0975de9/transformed/jetified-play-services-tasks-18.1.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="com.google.android.gms:play-services-basement:18.3.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/e928e0cde5965c8b3fd6e6568a4f4ee8/transformed/jetified-play-services-basement-18.3.0/jars/classes.jar"
+      resolved="com.google.android.gms:play-services-basement:18.3.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/e928e0cde5965c8b3fd6e6568a4f4ee8/transformed/jetified-play-services-basement-18.3.0"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
   <library
       name="androidx.fragment:fragment:1.7.1@aar"
       jars="/Users/apple/.gradle/caches/8.10.2/transforms/422b9afa0cfcd6837b98f0303e7dc857/transformed/fragment-1.7.1/jars/classes.jar"
@@ -314,6 +476,19 @@
       jars="/Users/apple/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.8.22/b25c86d47d6b962b9cf0f8c3f320c8a10eea3dd1/kotlin-stdlib-jdk8-1.8.22.jar"
       resolved="org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"/>
   <library
+      name="androidx.startup:startup-runtime:1.1.1@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/1d97c5c807f011fe831c4f7a72e4654c/transformed/jetified-startup-runtime-1.1.1/jars/classes.jar"
+      resolved="androidx.startup:startup-runtime:1.1.1"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/1d97c5c807f011fe831c4f7a72e4654c/transformed/jetified-startup-runtime-1.1.1"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
       name="io.flutter:armeabi_v7a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5@jar"
       jars="/Users/apple/.gradle/caches/modules-2/files-2.1/io.flutter/armeabi_v7a_release/1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5/b04f61064f7dd1113039047e4f9a1514a8475cfc/armeabi_v7a_release-1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5.jar"
       resolved="io.flutter:armeabi_v7a_release:1.0.0-82bd5b7209295a5b7ff8cae0df96e7870171e3a5"/>
@@ -329,19 +504,6 @@
       name="org.jetbrains:annotations:23.0.0@jar"
       jars="/Users/apple/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/23.0.0/8cc20c07506ec18e0834947b84a864bfc094484e/annotations-23.0.0.jar"
       resolved="org.jetbrains:annotations:23.0.0"/>
-  <library
-      name="androidx.startup:startup-runtime:1.1.1@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/1d97c5c807f011fe831c4f7a72e4654c/transformed/jetified-startup-runtime-1.1.1/jars/classes.jar"
-      resolved="androidx.startup:startup-runtime:1.1.1"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/1d97c5c807f011fe831c4f7a72e4654c/transformed/jetified-startup-runtime-1.1.1"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
   <library
       name="androidx.tracing:tracing:1.2.0@aar"
       jars="/Users/apple/.gradle/caches/8.10.2/transforms/2bb8b2bc21b8b67a4d226e08a78da39a/transformed/jetified-tracing-1.2.0/jars/classes.jar"
@@ -460,110 +622,6 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="com.google.android.gms:play-services-maps:18.2.0@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/6f3d9298b7d85c8c1cbd69673cc572e7/transformed/jetified-play-services-maps-18.2.0/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-maps:18.2.0"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/6f3d9298b7d85c8c1cbd69673cc572e7/transformed/jetified-play-services-maps-18.2.0"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
-      name="com.google.android.gms:play-services-auth:21.0.0@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/c80762cc24118e6db4261b6b725fa6da/transformed/jetified-play-services-auth-21.0.0/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-auth:21.0.0"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/c80762cc24118e6db4261b6b725fa6da/transformed/jetified-play-services-auth-21.0.0"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
-      name="com.google.android.gms:play-services-auth-api-phone:18.0.2@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/edd3788a5836cee3be86ec3573fcadc2/transformed/jetified-play-services-auth-api-phone-18.0.2/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-auth-api-phone:18.0.2"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/edd3788a5836cee3be86ec3573fcadc2/transformed/jetified-play-services-auth-api-phone-18.0.2"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
-      name="com.google.android.gms:play-services-auth-base:18.0.10@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/f1c3ea546954b940ab30d4aba178f439/transformed/jetified-play-services-auth-base-18.0.10/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-auth-base:18.0.10"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/f1c3ea546954b940ab30d4aba178f439/transformed/jetified-play-services-auth-base-18.0.10"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
-      name="com.google.android.gms:play-services-fido:20.0.1@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/c94d41f2df82612d44025c47ca9a47e9/transformed/jetified-play-services-fido-20.0.1/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-fido:20.0.1"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/c94d41f2df82612d44025c47ca9a47e9/transformed/jetified-play-services-fido-20.0.1"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
-      name="com.google.android.gms:play-services-base:18.3.0@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/f3893cddc5d30121a611e2c423dc819f/transformed/jetified-play-services-base-18.3.0/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-base:18.3.0"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/f3893cddc5d30121a611e2c423dc819f/transformed/jetified-play-services-base-18.3.0"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
-      name="com.google.android.gms:play-services-tasks:18.1.0@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/98f273f404dc078da7904024a0975de9/transformed/jetified-play-services-tasks-18.1.0/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-tasks:18.1.0"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/98f273f404dc078da7904024a0975de9/transformed/jetified-play-services-tasks-18.1.0"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
-      name="com.google.android.gms:play-services-basement:18.3.0@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/e928e0cde5965c8b3fd6e6568a4f4ee8/transformed/jetified-play-services-basement-18.3.0/jars/classes.jar"
-      resolved="com.google.android.gms:play-services-basement:18.3.0"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/e928e0cde5965c8b3fd6e6568a4f4ee8/transformed/jetified-play-services-basement-18.3.0"
-      manifest="AndroidManifest.xml"
-      resFolder="res"
-      assetsFolder="assets"
-      lintJar="lint.jar"
-      publicResources="public.txt"
-      symbolFile="R.txt"
-      externalAnnotations="annotations.zip"
-      proguardRules="proguard.txt"/>
-  <library
       name="androidx.appcompat:appcompat:1.1.0@aar"
       jars="/Users/apple/.gradle/caches/8.10.2/transforms/57b17d0c05cb3a21e851f69d73a805eb/transformed/appcompat-1.1.0/jars/classes.jar"
       resolved="androidx.appcompat:appcompat:1.1.0"
@@ -590,10 +648,10 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="androidx.legacy:legacy-support-core-utils:1.0.0@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/b0785cf4c644738c9221581124d9efa3/transformed/legacy-support-core-utils-1.0.0/jars/classes.jar"
-      resolved="androidx.legacy:legacy-support-core-utils:1.0.0"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/b0785cf4c644738c9221581124d9efa3/transformed/legacy-support-core-utils-1.0.0"
+      name="androidx.activity:activity-ktx:1.8.1@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/e14f9f633f820f9ed644143439c38132/transformed/jetified-activity-ktx-1.8.1/jars/classes.jar"
+      resolved="androidx.activity:activity-ktx:1.8.1"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/e14f9f633f820f9ed644143439c38132/transformed/jetified-activity-ktx-1.8.1"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
@@ -603,10 +661,10 @@
       externalAnnotations="annotations.zip"
       proguardRules="proguard.txt"/>
   <library
-      name="androidx.activity:activity-ktx:1.8.1@aar"
-      jars="/Users/apple/.gradle/caches/8.10.2/transforms/e14f9f633f820f9ed644143439c38132/transformed/jetified-activity-ktx-1.8.1/jars/classes.jar"
-      resolved="androidx.activity:activity-ktx:1.8.1"
-      folder="/Users/apple/.gradle/caches/8.10.2/transforms/e14f9f633f820f9ed644143439c38132/transformed/jetified-activity-ktx-1.8.1"
+      name="androidx.legacy:legacy-support-core-utils:1.0.0@aar"
+      jars="/Users/apple/.gradle/caches/8.10.2/transforms/b0785cf4c644738c9221581124d9efa3/transformed/legacy-support-core-utils-1.0.0/jars/classes.jar"
+      resolved="androidx.legacy:legacy-support-core-utils:1.0.0"
+      folder="/Users/apple/.gradle/caches/8.10.2/transforms/b0785cf4c644738c9221581124d9efa3/transformed/legacy-support-core-utils-1.0.0"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"

@@ -8,6 +8,21 @@
     ]
   },
   {
+    "elementType": "labels",
+    "stylers": [
+      {"fontFamily": "CustomFont"},
+      {"fontWeight": "normal"}
+    ]
+  },
+  {
+    "elementType": "labels.text",
+    "stylers": [
+      {"fontFamily": "CustomFont"},
+      {"fontWeight": "normal"},
+      {"color": "#ffffff"}
+    ]
+  },
+  {
     "elementType": "labels.icon",
     "stylers": [
       {
@@ -68,38 +83,26 @@
   },
   {
     "featureType": "poi",
-    "elementType": "labels.text.fill",
+    "elementType": "labels.text",
     "stylers": [
-      {
-        "color": "#757575"
-      }
+      {"fontFamily": "CustomFont"},
+      {"fontWeight": "normal"}
     ]
   },
   {
-    "featureType": "poi.park",
-    "elementType": "geometry",
+    "featureType": "road",
+    "elementType": "labels.text",
     "stylers": [
-      {
-        "color": "#181818"
-      }
+      {"fontFamily": "CustomFont"},
+      {"fontWeight": "normal"}
     ]
   },
   {
-    "featureType": "poi.park",
-    "elementType": "labels.text.fill",
+    "featureType": "transit",
+    "elementType": "labels.text",
     "stylers": [
-      {
-        "color": "#616161"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#1b1b1b"
-      }
+      {"fontFamily": "CustomFont"},
+      {"fontWeight": "normal"}
     ]
   },
   {

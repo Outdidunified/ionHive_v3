@@ -8,7 +8,6 @@ import 'package:ionhive/feature/more/presentation/pages/manage/presentation/page
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:ionhive/utils/theme/themes.dart';
 import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
-import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
 
 class VehiclePage extends StatefulWidget {
   final int userId;
@@ -29,13 +28,15 @@ class VehiclePage extends StatefulWidget {
 }
 
 class _VehiclePageState extends State<VehiclePage> {
+  // Key for FutureBuilder to force refresh
   int _futureBuilderKey = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void initState() {
     super.initState();
+    // Ensure the controller is initialized and fetch starts
     final controller = Get.find<VehicleController>();
-    controller.fetchSavedVehicles();
+    controller.fetchSavedVehicles(); // Trigger initial fetch
   }
 
   @override
@@ -44,11 +45,15 @@ class _VehiclePageState extends State<VehiclePage> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
+    // Set the base URL from iOnHiveCore
     final String baseUrl = iOnHiveCore.baseUrl;
+
+    // Initialize the VehicleController
     final VehicleController controller = Get.find<VehicleController>();
 
     print("AppBar background color: ${theme.appBarTheme.backgroundColor}");
-    print("AppBar title text color: ${theme.appBarTheme.titleTextStyle?.color}");
+    print(
+        "AppBar title text color: ${theme.appBarTheme.titleTextStyle?.color}");
     print("AppBar icon color: ${theme.appBarTheme.iconTheme?.color}");
 
     return Scaffold(
@@ -56,20 +61,21 @@ class _VehiclePageState extends State<VehiclePage> {
         title: Text(
           "Manage Vehicle",
           style: theme.appBarTheme.titleTextStyle?.copyWith(
-            fontSize: screenWidth * 0.05,
+            fontSize: screenWidth * 0.05, // 20 on a 400-width screen
           ),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
             color: theme.appBarTheme.iconTheme?.color,
-            size: screenWidth * 0.06,
+            size: screenWidth * 0.06, // 24 on a 400-width screen
           ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.all(screenWidth * 0.03),
+            padding:
+                EdgeInsets.all(screenWidth * 0.03), // 8 on a 400-width screen
             child: Image.asset(
               'assets/icons/Help2.png',
               width: 22,
@@ -86,15 +92,14 @@ class _VehiclePageState extends State<VehiclePage> {
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.04,
-                vertical: screenWidth * 0.02,
+                horizontal: screenWidth * 0.04, // 16 on a 400-width screen
+                vertical: screenWidth * 0.02, // 8 on a 400-width screen
               ),
               child: FutureBuilder<List<Map<String, dynamic>>>(
                 key: ValueKey('vehicle_list_$_futureBuilderKey'),
                 future: controller.fetchSavedVehicles(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting &&
-                      controller.vehicles.isEmpty) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return _buildShimmerLoading(context);
                   } else if (snapshot.hasError || controller.hasError.value) {
                     return Center(
@@ -136,9 +141,10 @@ class _VehiclePageState extends State<VehiclePage> {
                     return _buildNoVehiclesUI(context);
                   } else {
                     final vehicleData = snapshot.data!;
+
                     Future.microtask(() => controller.refreshVehicles());
 
-                    Widget vehicleList = ListView.builder(
+                    return ListView.builder(
                       itemCount: vehicleData.length,
                       itemBuilder: (context, index) {
                         if (index >= vehicleData.length) {
@@ -146,15 +152,17 @@ class _VehiclePageState extends State<VehiclePage> {
                         }
 
                         final vehicle = vehicleData[index];
-                        final details = vehicle['details'] as Map<String, dynamic>?;
+                        final details =
+                            vehicle['details'] as Map<String, dynamic>?;
 
-                        final imagePath = details?['image_base64']?.trim() ?? '';
+                        final imagePath =
+                            details?['image_base64']?.trim() ?? '';
                         final normalizedImagePath =
-                        imagePath.replaceAll(r'\', '/').trim();
+                            imagePath.replaceAll(r'\', '/').trim();
                         final cleanBaseUrl =
-                        baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+                            baseUrl.trim().replaceAll(RegExp(r'/+$'), '');
                         final cleanImagePath =
-                        normalizedImagePath.replaceAll(RegExp(r'^/+'), '');
+                            normalizedImagePath.replaceAll(RegExp(r'^/+'), '');
                         final fullImageUrl = imagePath.isNotEmpty
                             ? "$cleanBaseUrl/$cleanImagePath"
                             : '';
@@ -168,10 +176,12 @@ class _VehiclePageState extends State<VehiclePage> {
 
                         return Card(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(screenWidth * 0.03),
+                            borderRadius:
+                                BorderRadius.circular(screenWidth * 0.03),
                           ),
                           elevation: 2,
-                          margin: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
+                          margin: EdgeInsets.symmetric(
+                              vertical: screenWidth * 0.02),
                           color: theme.cardColor,
                           child: Stack(
                             children: [
@@ -182,72 +192,92 @@ class _VehiclePageState extends State<VehiclePage> {
                                   children: [
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             details?['model'] ?? 'No Model',
-                                            style: theme.textTheme.headlineMedium?.copyWith(
+                                            style: theme
+                                                .textTheme.headlineMedium
+                                                ?.copyWith(
                                               fontSize: screenWidth * 0.045,
                                             ),
                                           ),
-                                          SizedBox(height: screenHeight * 0.006),
+                                          SizedBox(
+                                              height: screenHeight * 0.006),
                                           Row(
                                             children: [
                                               Text(
-                                                vehicle['vehicle_number'] ?? 'No Plate Number',
-                                                style: theme.textTheme.bodyMedium?.copyWith(
+                                                vehicle['vehicle_number'] ??
+                                                    'No Plate Number',
+                                                style: theme
+                                                    .textTheme.bodyMedium
+                                                    ?.copyWith(
                                                   fontSize: screenWidth * 0.04,
-                                                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                                                  color: theme.textTheme
+                                                      .bodyMedium?.color
+                                                      ?.withOpacity(0.6),
                                                 ),
                                               ),
                                             ],
                                           ),
-                                          SizedBox(height: screenHeight * 0.012),
+                                          SizedBox(
+                                              height: screenHeight * 0.012),
                                           Text(
                                             "Charger Type: ${details?['charger_type'] ?? 'Unknown'}",
-                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
                                               fontSize: screenWidth * 0.035,
-                                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                                              color: theme
+                                                  .textTheme.bodyMedium?.color
+                                                  ?.withOpacity(0.6),
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
                                     ClipRRect(
-                                      borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                                      borderRadius: BorderRadius.circular(
+                                          screenWidth * 0.02),
                                       child: fullImageUrl.isNotEmpty
                                           ? CachedNetworkImage(
-                                        imageUrl: fullImageUrl,
-                                        width: screenWidth * 0.4,
-                                        height: screenWidth * 0.3,
-                                        fit: BoxFit.contain,
-                                        httpHeaders: {
-                                          'Authorization': 'Bearer ${widget.token}',
-                                        },
-                                        placeholder: (context, url) => Container(
-                                          color: theme.dividerColor.withOpacity(0.1),
-                                          width: screenWidth * 0.4,
-                                          height: screenWidth * 0.3,
-                                          child: const Center(
-                                            child: LoadingIndicator(size: 30.0),
-                                          ),
-                                        ),
-                                        errorWidget: (context, url, error) {
-                                          print("Image load error for URL: $url, Error: $error");
-                                          return Image.asset(
-                                            "assets/images/noimage2.png",
-                                            width: screenWidth * 0.4,
-                                            height: screenWidth * 0.3,
-                                            fit: BoxFit.contain,
-                                          );
-                                        },
-                                      )
+                                              imageUrl: fullImageUrl,
+                                              width: screenWidth * 0.4,
+                                              height: screenWidth * 0.3,
+                                              fit: BoxFit.contain,
+                                              httpHeaders: {
+                                                'Authorization':
+                                                    'Bearer ${widget.token}',
+                                              },
+                                              placeholder: (context, url) =>
+                                                  Container(
+                                                color: theme.dividerColor
+                                                    .withOpacity(0.1),
+                                                width: screenWidth * 0.4,
+                                                height: screenWidth * 0.3,
+                                                child: const Center(
+                                                  child: LoadingIndicator(
+                                                      size: 30.0),
+                                                ),
+                                              ),
+                                              errorWidget:
+                                                  (context, url, error) {
+                                                print(
+                                                    "Image load error for URL: $url, Error: $error");
+                                                return Image.asset(
+                                                  "assets/images/noimage2.png",
+                                                  width: screenWidth * 0.4,
+                                                  height: screenWidth * 0.3,
+                                                  fit: BoxFit.contain,
+                                                );
+                                              },
+                                            )
                                           : Image.asset(
-                                        'assets/images/ss.png',
-                                        width: screenWidth * 0.4,
-                                        height: screenWidth * 0.3,
-                                        fit: BoxFit.contain,
-                                      ),
+                                              'assets/images/ss.png',
+                                              width: screenWidth * 0.4,
+                                              height: screenWidth * 0.3,
+                                              fit: BoxFit.contain,
+                                            ),
                                     ),
                                   ],
                                 ),
@@ -262,82 +292,110 @@ class _VehiclePageState extends State<VehiclePage> {
                                     size: screenWidth * 0.05,
                                   ),
                                   onPressed: () {
-                                    final vehicleNumber = vehicle['vehicle_number'] ?? '';
+                                    final vehicleNumber =
+                                        vehicle['vehicle_number'] ?? '';
                                     if (vehicleNumber.isNotEmpty) {
                                       showDialog(
                                         context: context,
                                         builder: (context) => AlertDialog(
                                           title: Text(
                                             "Remove Vehicle",
-                                            style: theme.textTheme.titleLarge?.copyWith(
+                                            style: theme.textTheme.titleLarge
+                                                ?.copyWith(
                                               fontSize: screenWidth * 0.045,
                                             ),
                                           ),
                                           content: Text(
                                             "Are you sure you want to remove vehicle $vehicleNumber?",
-                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
                                               fontSize: screenWidth * 0.04,
                                             ),
                                           ),
                                           actions: [
                                             TextButton(
-                                              onPressed: () => Navigator.pop(context),
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
                                               child: Text(
                                                 "Cancel",
-                                                style: theme.textTheme.bodyMedium?.copyWith(
+                                                style: theme
+                                                    .textTheme.bodyMedium
+                                                    ?.copyWith(
                                                   fontSize: screenWidth * 0.04,
                                                 ),
                                               ),
                                             ),
                                             TextButton(
                                               onPressed: () async {
-                                                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                                                final scaffoldMessenger =
+                                                    ScaffoldMessenger.of(
+                                                        context);
                                                 Navigator.pop(context);
                                                 setState(() {
-                                                  controller.isLoading.value = true;
+                                                  controller.isLoading.value =
+                                                      true;
                                                 });
                                                 try {
-                                                  final result = await controller.removeVehicle(vehicleNumber);
+                                                  final result =
+                                                      await controller
+                                                          .removeVehicle(
+                                                              vehicleNumber);
                                                   if (result['success']) {
                                                     if (snapshot.data != null) {
-                                                      snapshot.data!.removeWhere((v) => v['vehicle_number'] == vehicleNumber);
-                                                      if (snapshot.data!.isEmpty) {
+                                                      snapshot.data!
+                                                          .removeWhere((v) =>
+                                                              v['vehicle_number'] ==
+                                                              vehicleNumber);
+                                                      if (snapshot
+                                                          .data!.isEmpty) {
                                                         Future.microtask(() {
-                                                          controller.vehicles.clear();
+                                                          controller.vehicles
+                                                              .clear();
                                                         });
                                                       }
                                                     }
                                                     CustomSnackbar.showSuccess(
-                                                      message: "Vehicle removed successfully",
+                                                      message:
+                                                          "Vehicle removed successfully",
                                                     );
                                                     if (mounted) {
                                                       setState(() {
-                                                        _futureBuilderKey = DateTime.now().millisecondsSinceEpoch;
+                                                        _futureBuilderKey =
+                                                            DateTime.now()
+                                                                .millisecondsSinceEpoch;
                                                       });
                                                     }
                                                   } else {
                                                     CustomSnackbar.showError(
-                                                      message: result['message'] ?? "Failed to remove vehicle",
+                                                      message: result[
+                                                              'message'] ??
+                                                          "Failed to remove vehicle",
                                                     );
                                                   }
                                                 } catch (e) {
-                                                  print("issue with removing vehicle: $e");
+                                                  print(
+                                                      "issue with removing vehicle: $e");
                                                   CustomSnackbar.showError(
-                                                    message: "issue with removing vehicle: $e",
+                                                    message:
+                                                        "issue with removing vehicle: $e",
                                                   );
                                                 } finally {
                                                   if (mounted) {
                                                     setState(() {
-                                                      controller.isLoading.value = false;
+                                                      controller.isLoading
+                                                          .value = false;
                                                     });
                                                   }
                                                 }
                                               },
                                               child: Text(
                                                 "Remove",
-                                                style: theme.textTheme.bodyMedium?.copyWith(
+                                                style: theme
+                                                    .textTheme.bodyMedium
+                                                    ?.copyWith(
                                                   fontSize: screenWidth * 0.04,
-                                                  color: theme.colorScheme.error,
+                                                  color:
+                                                      theme.colorScheme.error,
                                                 ),
                                               ),
                                             ),
@@ -353,105 +411,110 @@ class _VehiclePageState extends State<VehiclePage> {
                         );
                       },
                     );
-
-                    return LoadingOverlay(
-                      isLoading: snapshot.connectionState == ConnectionState.waiting &&
-                          controller.vehicles.isNotEmpty,
-                      opacity: 0.5,
-                      child: vehicleList,
-                    );
                   }
                 },
               ),
             ),
           ),
+          // Conditionally render the button and message based on controller's error state
           Obx(() => controller.hasError.value
               ? const SizedBox.shrink()
               : Padding(
-            padding: EdgeInsets.all(screenWidth * 0.05),
-            child: Column(
-              children: [
-                Obx(() {
-                  final isMaxReached = controller.vehicles.length >= 5;
-                  return SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-                        backgroundColor: isMaxReached
-                            ? theme.colorScheme.surface
-                            : theme.colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(screenWidth * 0.03),
-                        ),
-                      ),
-                      onPressed: isMaxReached
-                          ? null
-                          : () {
-                        final List<Map<String, dynamic>> vehicleList = controller.vehicles
-                            .map<Map<String, dynamic>>((vehicle) => {
-                          'vehicle_number': vehicle.vehicleNumber,
-                          'model': vehicle.model,
-                          'range': vehicle.range,
-                          'battery_size_kwh': vehicle.batterySizeKwh,
-                          'charger_type': vehicle.chargerType,
-                          'image_base64': vehicle.imageUrl,
-                        })
-                            .toList();
-
-                        Get.to(() => AddVehicle(), arguments: {
-                          'vehicles': vehicleList,
-                          'userId': widget.userId,
-                          'username': widget.username,
-                          'emailId': widget.emailId,
-                          'token': widget.token,
-                        });
-                      },
-                      child: Text(
-                        "Add Vehicle",
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: isMaxReached
-                              ? theme.textTheme.bodyLarge?.color
-                              : theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: screenWidth * 0.04,
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-                Obx(() {
-                  final isMaxReached = controller.vehicles.length >= 5;
-                  return isMaxReached
-                      ? Padding(
-                    padding: EdgeInsets.only(top: screenHeight * 0.01),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: Colors.grey,
-                          size: screenWidth * 0.04,
-                        ),
-                        SizedBox(width: screenWidth * 0.01),
-                        Expanded(
-                          child: Text(
-                            "Maximum 5 vehicles can be added by a user",
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
-                              fontSize: screenWidth * 0.035,
+                  padding: EdgeInsets.all(screenWidth * 0.05),
+                  child: Column(
+                    children: [
+                      Obx(() {
+                        final isMaxReached = controller.vehicles.length >= 5;
+                        return SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: screenHeight * 0.02),
+                              backgroundColor: isMaxReached
+                                  ? theme.colorScheme.surface
+                                  : theme.colorScheme.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(screenWidth * 0.03),
+                              ),
                             ),
-                            textAlign: TextAlign.left,
+                            onPressed: isMaxReached
+                                ? null
+                                : () {
+                                    final List<Map<String, dynamic>>
+                                        vehicleList = controller.vehicles
+                                            .map<Map<String, dynamic>>(
+                                                (vehicle) => {
+                                                      'vehicle_number':
+                                                          vehicle.vehicleNumber,
+                                                      'model': vehicle.model,
+                                                      'range': vehicle.range,
+                                                      'battery_size_kwh':
+                                                          vehicle
+                                                              .batterySizeKwh,
+                                                      'charger_type':
+                                                          vehicle.chargerType,
+                                                      'image_base64':
+                                                          vehicle.imageUrl,
+                                                    })
+                                            .toList();
+
+                                    Get.to(() => AddVehicle(), arguments: {
+                                      'vehicles': vehicleList,
+                                      'userId': widget.userId,
+                                      'username': widget.username,
+                                      'emailId': widget.emailId,
+                                      'token': widget.token,
+                                    });
+                                  },
+                            child: Text(
+                              "Add Vehicle",
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: isMaxReached
+                                    ? theme.textTheme.bodyLarge?.color
+                                    : theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: screenWidth * 0.04,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                      : const SizedBox.shrink();
-                }),
-              ],
-            ),
-          )),
+                        );
+                      }),
+                      Obx(() {
+                        final isMaxReached = controller.vehicles.length >= 5;
+                        return isMaxReached
+                            ? Padding(
+                                padding:
+                                    EdgeInsets.only(top: screenHeight * 0.01),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: Colors.grey,
+                                      size: screenWidth * 0.04,
+                                    ),
+                                    SizedBox(width: screenWidth * 0.01),
+                                    Expanded(
+                                      child: Text(
+                                        "Maximum 5 vehicles can be added by a user",
+                                        style:
+                                            theme.textTheme.bodySmall?.copyWith(
+                                          color: Colors.grey,
+                                          fontSize: screenWidth * 0.035,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox.shrink();
+                      }),
+                    ],
+                  ),
+                )),
         ],
       ),
     );

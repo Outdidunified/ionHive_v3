@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.outdidev.ev_app-mergeReleaseResources-45:/values-watch-v20/values-watch-v20.xml",
+            "outputFile": "com.outdidev.ev_app-mergeReleaseResources-47:/values-watch-v20/values-watch-v20.xml",
             "map": [
                 {
                     "source": "/Users/apple/.gradle/caches/8.10.2/transforms/57b17d0c05cb3a21e851f69d73a805eb/transformed/appcompat-1.1.0/res/values-watch-v20/values-watch-v20.xml",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/c80762cc24118e6db4261b6b725fa6da/transformed/jetified-play-services-auth-21.0.0/res/values-watch-v20/values.xml",
+                    "source": "/Users/apple/.gradle/caches/8.10.2/transforms/f4bc225f93a10a62fad260d51e2e1028/transformed/jetified-play-services-auth-21.1.0/res/values-watch-v20/values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11",
                         "startColumns": "0,0,0,0,0,0,0,0",

@@ -43,8 +43,6 @@ class WalletController extends GetxController {
   }
 
   Future<void> fetchwalletbalance() async {
-    debugPrint('fetchwalletbalance called');
-
     final authToken = sessionController.token.value;
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;

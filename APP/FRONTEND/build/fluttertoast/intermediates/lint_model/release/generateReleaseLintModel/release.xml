@@ -1,0 +1,31 @@
+<variant
+    name="release"
+    package="io.github.ponnamkarthik.toast.fluttertoast"
+    minSdkVersion="19"
+    targetSdkVersion="33"
+    mergedManifest="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/fluttertoast/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml"
+    manifestMergeReport="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/fluttertoast/outputs/logs/manifest-merger-release-report.txt"
+    proguardFiles="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/fluttertoast/intermediates/default_proguard_files/global/proguard-android.txt-8.7.0"
+    partialResultsDir="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/fluttertoast/intermediates/lint_partial_results/release/lintAnalyzeRelease/out">
+  <buildFeatures
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+    <sourceProvider
+        manifests="src/main/AndroidManifest.xml"
+        javaDirectories="src/main/java:src/main/kotlin:src/release/java:src/release/kotlin"
+        resDirectories="src/main/res:src/release/res"
+        assetsDirectories="src/main/assets:src/release/assets"/>
+  </sourceProviders>
+  <testSourceProviders>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <artifact
+      classOutputs="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/fluttertoast/intermediates/javac/release/compileReleaseJavaWithJavac/classes:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/fluttertoast/tmp/kotlin-classes/release:/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/fluttertoast/intermediates/compile_r_class_jar/release/generateReleaseRFile/R.jar"
+      type="MAIN"
+      applicationId="io.github.ponnamkarthik.toast.fluttertoast"
+      generatedSourceFolders="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/fluttertoast/generated/ap_generated_sources/release/out"
+      generatedResourceFolders="/Users/apple/Desktop/ionHive_p3/ionHive_v3/APP/FRONTEND/build/fluttertoast/generated/res/resValues/release"
+      desugaredMethodsFiles="/Users/apple/.gradle/caches/8.10.2/transforms/5eeba8d9630bbcab133d18d6760e7c1c/transformed/D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

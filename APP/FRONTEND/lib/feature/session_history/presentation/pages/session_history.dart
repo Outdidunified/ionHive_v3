@@ -4,78 +4,54 @@ import 'package:intl/intl.dart';
 
 import 'package:ionhive/feature/session_history/presentation/controllers/session_history_controllers.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
 
 class SessionHistoryPage extends StatefulWidget {
-  const SessionHistoryPage({super.key});
+  SessionHistoryPage({super.key});
 
   @override
   State<SessionHistoryPage> createState() => _SessionHistoryPageState();
 }
 
-class _SessionHistoryPageState extends State<SessionHistoryPage>
-    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
+class _SessionHistoryPageState extends State<SessionHistoryPage> {
+  // Create controller in the state
   late final SessionHistoryControllers controller;
-  bool _isFirstLoad = true;
-  bool _isVisible = true;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    // Initialize controller in initState
     controller = Get.put(SessionHistoryControllers());
-    WidgetsBinding.instance.addObserver(this);
 
-    // Small delay to ensure the page is fully built before refreshing
+    // Load data after widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _isVisible = true;
-      refreshData();
-      _isFirstLoad = false;
+      print("SessionHistoryPage: Loading data");
+      loadData();
     });
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
+  // Simple method to load data
+  Future<void> loadData() async {
+    setState(() {
+      isLoading = true;
+    });
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _isVisible) {
-      // App came to foreground and our page is visible, refresh data
-      refreshData();
+    try {
+      await controller.refreshAllData();
+      print("SessionHistoryPage: Data loaded successfully");
+    } catch (e) {
+      print("SessionHistoryPage: Error loading data: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // This is called when the page becomes visible again
-    if (!_isFirstLoad) {
-      _isVisible = true;
-      // Refresh data when returning to this page
-      refreshData();
-    }
-  }
-
-  @override
-  void deactivate() {
-    // This is called when navigating away from the page
-    _isVisible = false;
-    super.deactivate();
-  }
-
-  Future<void> refreshData() async {
-    // Use the controller's method to refresh all data at once
-    await controller.refreshAllData();
-  }
-
-  @override
-  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -95,38 +71,20 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Obx(() {
-            // Create the content that will be shown with or without loading overlay
-            Widget content = RefreshIndicator(
-              onRefresh: refreshData,
-              color: theme.colorScheme.primary,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  _buildHeader(context),
-                  const SizedBox(height: 20),
-                  _buildSessionStatsRow(context, controller),
-                  const SizedBox(height: 20),
-                  _buildSectionTitle(context, 'Your Charging History'),
-                  const SizedBox(height: 12),
-                  _buildTransactionList(context),
-                ],
-              ),
-            );
-
-            // If it's the first load, show the shimmer loading effect
-            if (controller.isLoading.value && controller.sessions.isEmpty) {
-              return _buildContentLoading(context);
-            }
-
-            // For subsequent loads, show the loading overlay on top of existing content
-            return LoadingOverlay(
-              isLoading:
-                  controller.isLoading.value && controller.sessions.isNotEmpty,
-              opacity: 0.5,
-              child: content,
-            );
-          }),
+          child: isLoading
+              ? _buildContentLoading(context)
+              : Obx(() => ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      _buildHeader(context),
+                      const SizedBox(height: 20),
+                      _buildSessionStatsRow(context, controller),
+                      const SizedBox(height: 20),
+                      _buildSectionTitle(context, 'Your Charging History'),
+                      const SizedBox(height: 12),
+                      _buildTransactionList(context),
+                    ],
+                  )),
         ),
       ),
     );
@@ -318,7 +276,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Charger: ${session.chargerId}',
+                      session.chargerId,
                       style: txStyle!.copyWith(
                         fontWeight: FontWeight.w600,
                         color:
@@ -502,12 +460,12 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    width: 120,
+                    width: 100,
                     height: 16,
                     color: Colors.white,
                   ),
                   Container(
-                    width: 60,
+                    width: 80,
                     height: 16,
                     color: Colors.white,
                   ),
@@ -518,16 +476,22 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    width: 100,
-                    height: 14,
+                    width: 120,
+                    height: 12,
                     color: Colors.white,
                   ),
                   Container(
-                    width: 50,
-                    height: 14,
+                    width: 60,
+                    height: 12,
                     color: Colors.white,
                   ),
                 ],
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: 150,
+                height: 12,
+                color: Colors.white,
               ),
             ],
           ),
