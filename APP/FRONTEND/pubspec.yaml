@@ -60,8 +60,8 @@ flutter:
     - assets/ionHive_logo's/ionHive.png
     - assets/Image/
     - assets/icons/
-    - assets/map/Map.json
-    - assets/map/DarkMap.json
+    - assets/Map/Map.json
+    - assets/Map/DarkMap.json
 
 flutter_native_splash:
   color: "#000000"

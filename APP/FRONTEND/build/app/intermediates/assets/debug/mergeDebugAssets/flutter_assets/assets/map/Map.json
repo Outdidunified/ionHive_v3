@@ -83,9 +83,7 @@
   {
     "elementType": "labels",
     "stylers": [
-      { "visibility": "on" },
-      { "fontFamily": "CustomFont" },
-      { "fontWeight": "normal" }
+      { "visibility": "on" }
     ]
   }
 ]

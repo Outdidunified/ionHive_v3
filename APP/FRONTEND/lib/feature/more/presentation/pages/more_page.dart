@@ -322,8 +322,7 @@ class MoreePage extends StatelessWidget {
   }) {
     bool isLogout =
         title.toLowerCase() == 'logout'; // Check if it's the logout option
-    final effectiveIconColor =
-        iconColor ?? (isLogout ? Colors.red : theme.primaryColor);
+
 
     return InkWell(
       onTap: onTap,
@@ -371,18 +370,6 @@ class MoreePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSwitchTile(String title, bool value, ThemeData theme,
-      {String? subtitle, required Function(bool) onChanged}) {
-    return SwitchListTile(
-      title: Text(title, style: theme.textTheme.bodyLarge),
-      subtitle: subtitle != null
-          ? Text(subtitle, style: theme.textTheme.bodySmall)
-          : null,
-      value: value,
-      onChanged: (bool newValue) => onChanged(newValue),
-      activeColor: theme.colorScheme.primary,
-    );
-  }
 
   Widget _buildFooter(String version) {
     return Align(

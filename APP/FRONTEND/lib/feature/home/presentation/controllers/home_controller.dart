@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -9,14 +10,22 @@ import 'package:permission_handler/permission_handler.dart';
 class HomeController extends GetxController {
   final markers = <Marker>{}.obs;
   final isLoading = true.obs;
-  final darkMode = false.obs;
-  final zoomLevel = 15.0.obs;
-  final currentPosition = const LatLng(12.9716, 77.5946).obs; // Default to Bangalore
+  final zoomLevel = 16.5.obs;
+  final currentPosition = const LatLng(12.9716, 77.5946).obs;
   GoogleMapController? mapController;
   Completer<GoogleMapController> mapControllerCompleter = Completer();
 
-  // Charger data (simulated, replace with API call)
-  final List<Map<String, dynamic>> chargers = [
+  // Theme mode detection
+  final isDarkMode = false.obs;
+
+  // Custom icons
+  BitmapDescriptor? _locationIcon;
+  BitmapDescriptor? _largeChargerIcon;
+  BitmapDescriptor? _mediumChargerIcon;
+  BitmapDescriptor? _smallChargerIcon;
+
+  // Charger data
+  final List<Map<String, Object>> chargers = [
     {
       "id": "1",
       "position": const LatLng(12.9716, 77.5946),
@@ -24,7 +33,6 @@ class HomeController extends GetxController {
       "type": "Hyundai EVCS",
       "distance": 826,
       "available": true,
-      "icon": BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
     },
     {
       "id": "2",
@@ -33,9 +41,7 @@ class HomeController extends GetxController {
       "type": "Tata",
       "distance": 129,
       "available": true,
-      "icon": BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
     },
-    // Add more charger locations as needed
   ].obs;
 
   String lightStyle = '';
@@ -44,50 +50,94 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initThemeListener();
     loadMapStyles();
-    _loadChargerMarkers();
-    // Delay getting location until map is ready (handled in HomePage)
+
+    // Load custom icons first, then load markers after icons are loaded
+    _loadCustomIcons().then((_) {
+      // Now that icons are loaded, we can safely load markers
+      loadChargerMarkers();
+    });
+  }
+
+  Future<void> _loadCustomIcons() async {
+    try {
+      // Load location icon
+      _locationIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(64, 64)),
+        'assets/icons/customer.png',
+      );
+
+      // Load charger icons in different sizes
+      _largeChargerIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(64, 64)),
+        'assets/icons/ev-charger.png',
+      );
+
+      _mediumChargerIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(48, 48)),
+        'assets/icons/ev-charger.png',
+      );
+
+      _smallChargerIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(32, 32)),
+        'assets/icons/ev-charger.png',
+      );
+
+      debugPrint('All custom icons loaded successfully');
+    } catch (e) {
+      debugPrint('Error loading custom icons: $e');
+      // Fallback to default markers if custom icons fail to load
+      _locationIcon =
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+      _largeChargerIcon =
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+      _mediumChargerIcon =
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+      _smallChargerIcon =
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+    }
+  }
+
+  void _initThemeListener() {
+    isDarkMode.value = Get.isDarkMode;
+    ever(isDarkMode, (_) async {
+      if (mapController != null) await applyMapStyle();
+    });
   }
 
   Future<void> loadMapStyles() async {
     try {
-      lightStyle = await rootBundle.loadString('assets/map_styles/Map.json');
-      darkStyle = await rootBundle.loadString('assets/map_styles/DarkMap.json');
-      if (mapController != null) {
-        applyMapStyle();
-      }
+      lightStyle = await rootBundle.loadString('assets/Map/Map.json');
+      darkStyle = await rootBundle.loadString('assets/Map/DarkMap.json');
+      debugPrint('Map styles loaded successfully');
     } catch (e) {
       debugPrint('Error loading map styles: $e');
+      lightStyle = '';
+      darkStyle = '';
     }
   }
 
-  void toggleMapTheme() {
-    darkMode.toggle();
-    applyMapStyle();
-    _forceMapRefresh();
-  }
+  Future<bool> applyMapStyle() async {
+    if (mapController == null) return false;
+    final style = isDarkMode.value ? darkStyle : lightStyle;
+    if (style.isEmpty) return false;
 
-  void applyMapStyle() {
-    if (mapController == null) return;
-    final style = darkMode.value ? darkStyle : lightStyle;
-    mapController!.setMapStyle(style);
+    try {
+      await mapController!.setMapStyle(style);
+      return true;
+    } catch (e) {
+      debugPrint('Error applying map style: $e');
+      return false;
+    }
   }
 
   Future<void> getCurrentLocation() async {
     isLoading.value = true;
-
-    final status = await Permission.location.request();
-    if (status != PermissionStatus.granted) {
-      isLoading.value = false;
-      Get.snackbar('Permission required', 'Location permission is needed');
-      return;
-    }
-
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        serviceEnabled = await Geolocator.openLocationSettings();
-        if (!serviceEnabled) throw 'Location services disabled';
+      final status = await Permission.locationWhenInUse.request();
+      if (status != PermissionStatus.granted) {
+        throw 'Location permission denied';
       }
 
       final position = await Geolocator.getCurrentPosition(
@@ -96,13 +146,13 @@ class HomeController extends GetxController {
       );
 
       currentPosition.value = LatLng(position.latitude, position.longitude);
-      _loadChargerMarkers(); // Update markers with new position for distance
+      loadChargerMarkers();
 
       if (mapController != null) {
         await mapController!.animateCamera(
           CameraUpdate.newLatLngZoom(currentPosition.value, zoomLevel.value),
         );
-        _forceMapRefresh();
+        await _zoomToNearestMarker();
       }
     } catch (e) {
       Get.snackbar('Error', 'Could not get location: ${e.toString()}');
@@ -111,50 +161,188 @@ class HomeController extends GetxController {
     }
   }
 
-  void _loadChargerMarkers() {
+  Future<void> _zoomToNearestMarker() async {
+    if (chargers.isEmpty) return;
+
+    final nearest = chargers.reduce((a, b) {
+      final distA =
+          _calculateDistance(currentPosition.value, a['position'] as LatLng);
+      final distB =
+          _calculateDistance(currentPosition.value, b['position'] as LatLng);
+      return distA < distB ? a : b;
+    });
+
+    final nearestPosition = nearest['position'] as LatLng;
+    final bounds = LatLngBounds(
+      southwest: LatLng(
+        min(currentPosition.value.latitude, nearestPosition.latitude),
+        min(currentPosition.value.longitude, nearestPosition.longitude),
+      ),
+      northeast: LatLng(
+        max(currentPosition.value.latitude, nearestPosition.latitude),
+        max(currentPosition.value.longitude, nearestPosition.longitude),
+      ),
+    );
+
+    await mapController!.animateCamera(
+      CameraUpdate.newLatLngBounds(bounds, 150),
+    );
+    await Future.delayed(const Duration(milliseconds: 500));
+    await mapController!.animateCamera(CameraUpdate.zoomBy(0.5));
+  }
+
+  double _calculateDistance(LatLng pos1, LatLng pos2) {
+    return Geolocator.distanceBetween(
+      pos1.latitude,
+      pos1.longitude,
+      pos2.latitude,
+      pos2.longitude,
+    );
+  }
+
+  void loadChargerMarkers() {
+    debugPrint('Loading markers...');
     markers.clear();
+
+    // Determine appropriate icon size based on zoom level
+    // Use a default icon if custom icons aren't loaded yet
+    BitmapDescriptor chargerIcon;
+    if (_largeChargerIcon == null ||
+        _mediumChargerIcon == null ||
+        _smallChargerIcon == null) {
+      // Icons not loaded yet, use default
+      debugPrint('Custom charger icons not loaded yet, using default');
+      chargerIcon =
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+    } else if (zoomLevel.value >= 18.0) {
+      chargerIcon = _largeChargerIcon!;
+    } else if (zoomLevel.value >= 15.0) {
+      chargerIcon = _mediumChargerIcon!;
+    } else {
+      chargerIcon = _smallChargerIcon!;
+    }
+
+    // Add charger markers
     for (var charger in chargers) {
       markers.add(Marker(
-        markerId: MarkerId(charger['id']),
-        position: charger['position'],
-        icon: charger['icon'],
+        markerId: MarkerId(charger['id'] as String),
+        position: charger['position'] as LatLng,
+        icon: chargerIcon,
         infoWindow: InfoWindow(
-          title: charger['name'],
-          snippet: '${charger['type']} - ${charger['distance']}m',
+          title: charger['name'] as String,
+          snippet:
+              '${charger['type'] as String} - ${charger['distance'] as int}m',
         ),
+        zIndex: 1,
       ));
     }
+
+    // Add current location marker
     markers.add(Marker(
       markerId: const MarkerId('currentLocation'),
       position: currentPosition.value,
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      icon: _locationIcon ??
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      zIndex: 2,
     ));
   }
 
-  void _forceMapRefresh() {
-    final current = currentPosition.value;
-    if (mapController != null) {
-      mapController!.animateCamera(CameraUpdate.newLatLng(current));
-    }
-  }
-
   void zoomIn() {
-    zoomLevel.value += 1;
-    if (mapController != null) {
-      mapController!.animateCamera(CameraUpdate.zoomTo(zoomLevel.value));
-    }
+    debugPrint('Zooming in to current location');
+    // Increase zoom level by 1.5 for more noticeable zoom
+    zoomLevel.value = min(zoomLevel.value + 1.5, 21.0);
+    // Always zoom to current location
+    _updateMapZoom(centerOnCurrentLocation: true);
   }
 
   void zoomOut() {
-    zoomLevel.value -= 1;
+    debugPrint('Zooming out from current location');
+    // Decrease zoom level by 1.5 for more noticeable zoom
+    zoomLevel.value = max(zoomLevel.value - 1.5, 2.0);
+    // Always zoom to current location
+    _updateMapZoom(centerOnCurrentLocation: true);
+  }
+
+  void _updateMapZoom({bool centerOnCurrentLocation = false}) {
     if (mapController != null) {
-      mapController!.animateCamera(CameraUpdate.zoomTo(zoomLevel.value));
+      if (centerOnCurrentLocation) {
+        // Zoom to current location with the new zoom level
+        debugPrint(
+            'Centering on current location at zoom level: ${zoomLevel.value}');
+        mapController!
+            .animateCamera(
+          CameraUpdate.newLatLngZoom(currentPosition.value, zoomLevel.value),
+        )
+            .then((_) {
+          loadChargerMarkers();
+          markers.refresh();
+        });
+      } else {
+        // Just update the zoom level without changing the center
+        mapController!
+            .animateCamera(
+          CameraUpdate.zoomTo(zoomLevel.value),
+        )
+            .then((_) {
+          loadChargerMarkers();
+          markers.refresh();
+        });
+      }
+    }
+  }
+
+  // Method to zoom to user's current location with a higher zoom level
+  Future<void> zoomToCurrentLocation() async {
+    debugPrint('Zooming to current location...');
+
+    // First check if we have location permission
+    final permissionStatus = await Permission.locationWhenInUse.status;
+    if (permissionStatus != PermissionStatus.granted) {
+      debugPrint('Location permission not granted, requesting...');
+      final requestStatus = await Permission.locationWhenInUse.request();
+      if (requestStatus != PermissionStatus.granted) {
+        Get.snackbar('Permission required',
+            'Location permission is needed to show your position');
+        return;
+      }
+    }
+
+    // Get the latest position
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 5),
+      );
+
+      debugPrint(
+          'Updated position: ${position.latitude}, ${position.longitude}');
+      currentPosition.value = LatLng(position.latitude, position.longitude);
+
+      // Update charger markers
+      loadChargerMarkers();
+      markers.refresh();
+
+      if (mapController != null) {
+        // Use a higher zoom level (19.0) for street-level detail
+        final zoomValue = 19.0;
+        debugPrint('Animating camera to zoom level: $zoomValue');
+
+        await mapController!.animateCamera(
+          CameraUpdate.newLatLngZoom(currentPosition.value, zoomValue),
+        );
+      } else {
+        debugPrint('Map controller is null, cannot zoom to current location');
+      }
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+      Get.snackbar('Error', 'Could not get your location');
     }
   }
 
   @override
   void onClose() {
-    mapControllerCompleter = Completer();
+    mapController?.dispose();
+    mapController = null;
     super.onClose();
   }
 }

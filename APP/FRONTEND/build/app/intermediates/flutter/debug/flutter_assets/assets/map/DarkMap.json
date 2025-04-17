@@ -10,16 +10,17 @@
   {
     "elementType": "labels",
     "stylers": [
-      {"fontFamily": "CustomFont"},
-      {"fontWeight": "normal"}
+      {
+        "visibility": "on"
+      }
     ]
   },
   {
     "elementType": "labels.text",
     "stylers": [
-      {"fontFamily": "CustomFont"},
-      {"fontWeight": "normal"},
-      {"color": "#ffffff"}
+      {
+        "color": "#ffffff"
+      }
     ]
   },
   {
@@ -79,30 +80,6 @@
       {
         "color": "#bdbdbd"
       }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "labels.text",
-    "stylers": [
-      {"fontFamily": "CustomFont"},
-      {"fontWeight": "normal"}
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "labels.text",
-    "stylers": [
-      {"fontFamily": "CustomFont"},
-      {"fontWeight": "normal"}
-    ]
-  },
-  {
-    "featureType": "transit",
-    "elementType": "labels.text",
-    "stylers": [
-      {"fontFamily": "CustomFont"},
-      {"fontWeight": "normal"}
     ]
   },
   {
