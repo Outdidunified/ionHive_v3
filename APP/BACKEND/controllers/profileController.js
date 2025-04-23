@@ -909,6 +909,80 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
     }
 };
 
+// FAQ'S
+const fetchFAQsFromDB = async (category, keyword) => {
+    try {
+        if (!db) {
+            throw new Error('Database connection failed.');
+        }
+
+        const faqs = await faqModel.find({
+            ...(category && { category: category }),  // Only include category filter if it's passed
+            ...(keyword && { question: { $regex: keyword, $options: 'i' } })  // Only include keyword filter if it's passed
+        });
+
+        return faqs;
+    } catch (error) {
+        console.error("Error fetching FAQs from DB:", error);
+        throw new Error("Failed to fetch FAQs");
+    }
+};
+const chatbotResponse = async (req, res) => {
+    try {
+        const userMessage = req.body.message.toLowerCase();
+        let responseMessage = '';
+
+        // Greet the user
+        if (userMessage.includes("hi") || userMessage.includes("hello")) {
+            responseMessage = "Hello! How can I assist you today?";
+        }
+        // If the user asks about FAQs
+        else if (userMessage.includes("faq") || userMessage.includes("question")) {
+            const faqs = await fetchFAQsFromDB(); // Fetch all FAQs if no category/keyword is specified
+            if (faqs.length > 0) {
+                responseMessage = "Here are some frequently asked questions (FAQs):\n";
+                faqs.forEach((faq, index) => {
+                    responseMessage += `${index + 1}. ${faq.question}\n`;
+                });
+            } else {
+                responseMessage = "Sorry, I couldn't find any FAQs. Can you provide more details or try another query?";
+            }
+        }
+        // If the user asks about a specific category or question
+        else if (userMessage.includes("charging") || userMessage.includes("policy")) {
+            const faqs = await fetchFAQsFromDB("charging", userMessage); // Search in the "charging" category
+            if (faqs.length > 0) {
+                responseMessage = faqs.map(faq => `${faq.question}: ${faq.answer}`).join("\n");
+            } else {
+                responseMessage = "Sorry, I couldn't find an answer in the 'charging' category. Can you ask a different question?";
+            }
+        }
+        // If the user asks for a specific FAQ by keyword or question
+        else {
+            const faqs = await fetchFAQsFromDB(null, userMessage); // Search based on the keyword in the question
+            if (faqs.length > 0) {
+                responseMessage = faqs.map(faq => `${faq.question}: ${faq.answer}`).join("\n");
+            } else {
+                responseMessage = "I couldn't find an answer to your question. Can you try rephrasing it or asking a different question?";
+            }
+        }
+
+        return res.status(200).json({
+            error: false,
+            message: responseMessage
+        });
+
+    } catch (error) {
+        console.error("Error in chatbot response:", error.message);
+        return res.status(500).json({
+            error: true,
+            message: "Internal Server Error",
+            error_details: error.message
+        });
+    }
+};
+
+
 // ACCOUNT
 // deleteAccount
 const deleteAccount = async (req, res) => {
@@ -989,6 +1063,8 @@ module.exports = {
     savevehicleModel,
     RemoveVehicleOfUser,
     getAllvehicleModels,
+    // FAQ's
+    chatbotResponse,
     // ACCOUNT
     deleteAccount
 };

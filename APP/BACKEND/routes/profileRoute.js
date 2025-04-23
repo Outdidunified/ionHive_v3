@@ -80,6 +80,10 @@ router.post('/RemoveStation', authUser.isAuthenticated, StationController.Remove
 // Route to fetch payment history
 router.post("/fetchChargingSessionDetails", authUser.isAuthenticated, SessionController.fetchChargingSessionDetails); // Route to fetch charging session details
 
+// FAQ'S
+router.post("/chatbot", authUser.isAuthenticated, Controller.chatbotResponse); // Route to fetch FAQs
+
+
 // ACCOUNT
 // deleteAccount
 router.post('/deleteAccount', authUser.isAuthenticated, Controller.deleteAccount);

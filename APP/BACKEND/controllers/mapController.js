@@ -9,10 +9,8 @@ const initializeDB = async () => {
 };
 initializeDB(); // Initialize the DB connection once
 
-
-const EARTH_RADIUS = 6371; // Earth radius in KM
-const RADIUS_KM = 80; // Search radius
-
+const EARTH_RADIUS_KM = 6371;
+const RADIUS_KM = 100;
 
 // MANAGE GENERIC FILTER  //TODO - 1
 // Saved Filter
@@ -202,8 +200,6 @@ const getNearbyStations = async (req, res) => {
     try {
         const { latitude, longitude, user_id, email_id } = req.body;
 
-
-        // Validate required parameters
         if (!latitude || !longitude || !user_id || !email_id) {
             return res.status(400).json({
                 error: true,
@@ -211,7 +207,6 @@ const getNearbyStations = async (req, res) => {
             });
         }
 
-        // Ensure database connection exists
         if (!db) {
             logger.loggerError("Database connection failed");
             return res.status(500).json({
@@ -220,48 +215,64 @@ const getNearbyStations = async (req, res) => {
             });
         }
 
-
+        const lat = parseFloat(latitude);
+        const lon = parseFloat(longitude);
         const stationsCollection = db.collection("charging_stations");
 
-        // Fetch nearby stations using aggregation
+        // Constants
+        const EARTH_RADIUS_KM = 6371; // Radius of Earth in KM
+        const PI = Math.PI;
+        const DEG_TO_RAD = PI / 180;
+
+        const userLatRad = lat * DEG_TO_RAD;
+        const userLonRad = lon * DEG_TO_RAD;
+
         const nearbyStations = await stationsCollection.aggregate([
             {
                 $addFields: {
-                    latitudeRadians: { $multiply: ["$latitude", Math.PI / 180] },
-                    longitudeRadians: { $multiply: ["$longitude", Math.PI / 180] },
-                    userLatitudeRadians: { $multiply: [latitude, Math.PI / 180] },
-                    userLongitudeRadians: { $multiply: [longitude, Math.PI / 180] }
+                    latRad: { $multiply: ["$latitude", DEG_TO_RAD] },
+                    lonRad: { $multiply: ["$longitude", DEG_TO_RAD] },
                 }
             },
             {
                 $addFields: {
-                    distance: {
-                        $multiply: [
-                            EARTH_RADIUS,
+                    dLat: { $subtract: ["$latRad", userLatRad] },
+                    dLon: { $subtract: ["$lonRad", userLonRad] }
+                }
+            },
+            {
+                $addFields: {
+                    a: {
+                        $add: [
+                            { $pow: [{ $sin: { $divide: ["$dLat", 2] } }, 2] },
                             {
-                                $acos: {
-                                    $add: [
-                                        {
-                                            $multiply: [
-                                                { $sin: "$latitudeRadians" },
-                                                { $sin: "$userLatitudeRadians" }
-                                            ]
-                                        },
-                                        {
-                                            $multiply: [
-                                                { $cos: "$latitudeRadians" },
-                                                { $cos: "$userLatitudeRadians" },
-                                                { $cos: { $subtract: ["$longitudeRadians", "$userLongitudeRadians"] } }
-                                            ]
-                                        }
-                                    ]
-                                }
+                                $multiply: [
+                                    { $cos: userLatRad },
+                                    { $cos: "$latRad" },
+                                    { $pow: [{ $sin: { $divide: ["$dLon", 2] } }, 2] }
+                                ]
                             }
                         ]
                     }
                 }
             },
-            { $match: { distance: { $lte: RADIUS_KM } } }, // Filter stations within radius
+            {
+                $addFields: {
+                    distance: {
+                        $round: [
+                            {
+                                $multiply: [
+                                    2,
+                                    EARTH_RADIUS_KM,
+                                    { $atan2: [{ $sqrt: "$a" }, { $sqrt: { $subtract: [1, "$a"] } }] }
+                                ]
+                            },
+                            2
+                        ]
+                    }
+                }
+            },
+            { $match: { distance: { $lte: 100 } } }, // RADIUS_KM can be replaced here
             {
                 $lookup: {
                     from: "charger_details",
@@ -283,8 +294,7 @@ const getNearbyStations = async (req, res) => {
                     latitude: 1,
                     longitude: 1,
                     charger_type: 1,
-                    // chargers: 1,
-                    distance: 1, // Include calculated distance
+                    distance: 1,
                     charger_details: {
                         charger_id: 1,
                         model: 1,
@@ -302,10 +312,10 @@ const getNearbyStations = async (req, res) => {
                         status: 1,
                         address: 1,
                         landmark: 1
-                    } // Include only necessary charger details
+                    }
                 }
             },
-            { $sort: { distance: 1 } } // Sort nearest first
+            { $sort: { distance: 1 } }
         ]).toArray();
 
         logger.loggerSuccess(`Found ${nearbyStations.length} nearby stations & retrieved successfully`);
@@ -325,6 +335,7 @@ const getNearbyStations = async (req, res) => {
         });
     }
 };
+
 
 
 // MANAGE ACTIVE CHARGER'S OF SPECIFIC USER
