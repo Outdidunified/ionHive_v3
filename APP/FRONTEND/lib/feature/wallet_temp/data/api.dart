@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:ionhive/feature/wallet/data/urls.dart';
-import 'package:ionhive/feature/wallet/domain/models/payment_request.dart';
+import 'package:ionhive/feature/wallet_temp/data/urls.dart';
+import 'package:ionhive/feature/wallet_temp/domain/models/payment_request.dart';
 import 'package:ionhive/utils/exception/exception.dart'; // Exception thrown Handler
 
 class WalletAPICalls {

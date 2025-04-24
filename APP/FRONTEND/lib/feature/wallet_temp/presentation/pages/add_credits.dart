@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
-import 'package:ionhive/feature/wallet/presentation/controller/addcredits_controller.dart';
-import 'package:ionhive/feature/wallet/presentation/controller/wallet_controller.dart';
+import 'package:ionhive/feature/wallet_temp/presentation/controller/addcredits_controller.dart';
+import 'package:ionhive/feature/wallet_temp/presentation/controller/wallet_controller.dart';
 import 'package:ionhive/utils/theme/theme_controller.dart';
 import 'package:ionhive/utils/widgets/button/custom_button.dart';
 

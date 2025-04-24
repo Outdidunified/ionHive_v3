@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/feature/session_history/presentation/pages/session_history.dart';
-import 'package:ionhive/feature/wallet/presentation/pages/wallet_page.dart';
+import 'package:ionhive/feature/wallet_temp/presentation/pages/wallet_page.dart';
 
 import '../core/components/footer.dart'; // Footer Component
 import 'package:ionhive/feature/landing_page_controller.dart'; // Landing page controller
