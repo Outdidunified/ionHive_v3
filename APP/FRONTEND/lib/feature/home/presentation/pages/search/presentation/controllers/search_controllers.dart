@@ -22,6 +22,31 @@ class SearchpageController extends GetxController {
     suggestedLocations.clear();
   }
 
+  @override
+  void onClose() {
+    // Clear all controller data when the page is closed
+    clearAll();
+    super.onClose();
+  }
+
+  // Method to clear all controller data
+  void clearAll() {
+    isChargerId.value = true; // Reset to default search mode
+    searchQuery.value = '';
+    recentChargerSearches.clear();
+    recentLocationSearches.clear();
+    isLoading.value = false;
+    suggestedLocations.clear();
+    // Optionally, clear SharedPreferences as well
+    _clearRecentSearchesFromStorage();
+  }
+
+  Future<void> _clearRecentSearchesFromStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('recent_charger_searches');
+    await prefs.remove('recent_location_searches');
+  }
+
   Future<void> _loadRecentSearches() async {
     isLoading.value = true;
     final prefs = await SharedPreferences.getInstance();
@@ -130,8 +155,7 @@ class SearchpageController extends GetxController {
           final locationData = data['results'][0]['geometry']['location'];
           return {
             'latitude': locationData['lat'] as double,
-            'longitude': locationData['lng']
-                as double, // Fixed: was using data['lng'] instead of locationData['lng']
+            'longitude': locationData['lng'] as double,
           };
         } else {
           throw Exception('No coordinates found for the location');
@@ -196,7 +220,7 @@ class SearchpageController extends GetxController {
 
   void removeFromRecentSearches(String value) {
     final list =
-        isChargerId.value ? recentChargerSearches : recentLocationSearches;
+    isChargerId.value ? recentChargerSearches : recentLocationSearches;
     list.remove(value);
     _saveRecentSearches();
   }
@@ -213,7 +237,6 @@ class SearchpageController extends GetxController {
   Future<void> updateSearchWithCurrentLocation() async {
     isLoading.value = true;
     try {
-      // Check and request location permission
       final permissionStatus = await Permission.locationWhenInUse.status;
       if (permissionStatus != PermissionStatus.granted) {
         final requestStatus = await Permission.locationWhenInUse.request();
@@ -223,12 +246,10 @@ class SearchpageController extends GetxController {
             'Location permission is required to use current location.',
             snackPosition: SnackPosition.BOTTOM,
           );
-          isLoading.value = false;
           return;
         }
       }
 
-      // Get current location
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 15),
@@ -238,19 +259,16 @@ class SearchpageController extends GetxController {
       final longitude = position.longitude;
       final locationName = "Current Location";
 
-      // Update search query and clear suggestions
       searchQuery.value = locationName;
-      suggestedLocations.clear(); // Clear suggestions before navigating
+      suggestedLocations.clear();
 
-      // Add to recent searches
       _addToRecentSearches(locationName, isCharger: false);
 
       Get.back(result: {
         'name': locationName,
         'latitude': latitude,
         'longitude': longitude,
-        'isCurrentLocation':
-            true, // This flag ensures we use the customer.png icon
+        'isCurrentLocation': true,
       });
     } catch (e) {
       print('Error getting current location: $e');
@@ -276,8 +294,7 @@ class SearchpageController extends GetxController {
         'name': location,
         'latitude': coordinates['latitude'],
         'longitude': coordinates['longitude'],
-        'isCurrentLocation':
-            isCurrentLocationSearch, // Use customer.png icon if it's current location
+        'isCurrentLocation': isCurrentLocationSearch,
       });
     } else {
       Get.snackbar(

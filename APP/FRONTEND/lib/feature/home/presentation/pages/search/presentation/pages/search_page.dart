@@ -1,223 +1,234 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/feature/home/presentation/pages/search/presentation/controllers/search_controllers.dart';
+import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
 
-class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+class SearchPage extends StatelessWidget {
+  SearchPage({Key? key}) : super(key: key);
 
-  @override
-  State<SearchPage> createState() => _SearchPageState();
-}
-
-class _SearchPageState extends State<SearchPage> {
   final SearchpageController controller = Get.put(SearchpageController());
   final TextEditingController textEditingController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    // Clear text field when page is initialized
-    textEditingController.clear();
-  }
-
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed
-    textEditingController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
+    // Clear search when page builds (handles back navigation)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (textEditingController.text.isNotEmpty) {
+        textEditingController.clear();
+        controller.updateSearch('');
+        controller.suggestedLocations.clear();
+      }
+    });
 
-      ),
-      body: Obx(
-        () => controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 16),
-
-                    /// Toggle Buttons
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            _toggleButton(
-                              context,
-                              title: "Search by Charger ID",
-                              selected: controller.isChargerId.value,
-                              onTap: () {
-                                controller.toggleSearchType(true);
-                                controller.updateSearch('');
-                                textEditingController.clear();
-                              },
-                            ),
-                            _toggleButton(
-                              context,
-                              title: "Search by Location",
-                              selected: !controller.isChargerId.value,
-                              onTap: () {
-                                controller.toggleSearchType(false);
-                                controller.updateSearch('');
-                                textEditingController.clear();
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    /// Search Input
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: textEditingController,
-                                  onChanged: (val) {
-                                    controller.updateSearch(val);
-                                    if (!controller.isChargerId.value) {
-                                      controller.updateSuggestions(val);
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                    hintText: controller.isChargerId.value
-                                        ? 'Enter charger ID...'
-                                        : 'Enter location name...',
-                                    prefixIcon: const Icon(Icons.search),
-                                    suffixIcon: controller
-                                            .searchQuery.value.isNotEmpty
-                                        ? IconButton(
-                                            icon: const Icon(Icons.clear),
-                                            onPressed: () {
-                                              controller.updateSearch('');
-                                              textEditingController.clear();
-                                              FocusScope.of(context).unfocus();
-                                            },
-                                          )
-                                        : const SizedBox.shrink(),
-                                    border: _outlineBorder(
-                                        context, isDark, colorScheme),
-                                    enabledBorder: _outlineBorder(
-                                        context, isDark, colorScheme),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(
-                                          color: colorScheme.primary, width: 2),
-                                    ),
-                                    filled: true,
-                                    fillColor: isDark
-                                        ? Colors.grey[800]
-                                        : Colors.grey[50],
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                  ),
-                                  onSubmitted: (_) =>
-                                      controller.performSearch(),
-                                ),
-                              ),
-                              if (!controller.isChargerId.value) ...[
-                                const SizedBox(width: 8),
-                                _locationButton(context, isDark),
-                              ]
-                            ],
-                          ),
-
-                          /// Suggested Locations
-                          if (!controller.isChargerId.value &&
-                              controller.suggestedLocations.isNotEmpty &&
-                              controller.searchQuery.value.isNotEmpty)
-                            Container(
-                              margin: const EdgeInsets.only(top: 8),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).cardColor,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 4,
-                                  )
-                                ],
-                              ),
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: controller.suggestedLocations.length,
-                                itemBuilder: (context, index) {
-                                  final suggestion =
-                                      controller.suggestedLocations[index];
-                                  return ListTile(
-                                    title: Text(suggestion),
-                                    leading: const Icon(Icons.place_outlined),
-                                    onTap: () {
-                                      controller.updateSearch(suggestion);
-                                      textEditingController.text = suggestion;
-                                      controller
-                                          .performSearch(); // This will navigate back with the location data
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-
-                          // Recent Searches Section
-                          if (controller.searchQuery.value.isEmpty) ...[
-                            const SizedBox(height: 24),
-
-                            // Recent Searches Header
-                            _searchHeader(
-                              context,
-                              title: controller.isChargerId.value
-                                  ? 'Recent Charger ID Searches'
-                                  : 'Recent Location Searches',
-                              onClear: () => controller.clearRecentSearches(),
-                            ),
-
-                            const SizedBox(height: 8),
-
-                            // Recent Searches List
-                            _buildRecentSearchesList(context, isDark),
-                          ],
-                        ],
-                      ),
-                    ),
+    return WillPopScope(
+      onWillPop: () async {
+        // Clear controller data when navigating back
+        controller.clearAll();
+        // Clear text editing controller
+        textEditingController.clear();
+        return true; // Allow navigation
+      },
+      child: Obx(
+            () => LoadingOverlay(
+          isLoading: controller.isLoading.value,
+          opacity: 0.7,
+          child: Scaffold(
+            appBar: AppBar(elevation: 0),
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  _buildToggleButtons(context, isDark),
+                  const SizedBox(height: 16),
+                  _buildSearchInput(context, isDark, colorScheme),
+                  if (!controller.isChargerId.value &&
+                      controller.suggestedLocations.isNotEmpty &&
+                      controller.searchQuery.value.isNotEmpty)
+                    _buildSuggestedLocations(context),
+                  if (controller.searchQuery.value.isEmpty) ...[
+                    const SizedBox(height: 24),
+                    _buildRecentSearchesHeader(context),
+                    const SizedBox(height: 8),
+                    _buildRecentSearchesList(context, isDark),
                   ],
-                ),
+                ],
               ),
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  /// Recent Searches List
+  // --- Helper Widgets ---
+
+  Widget _buildToggleButtons(BuildContext context, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            _toggleButton(
+              context,
+              title: "Search by Charger ID",
+              selected: controller.isChargerId.value,
+              onTap: () {
+                controller.toggleSearchType(true);
+                controller.updateSearch('');
+                textEditingController.clear();
+              },
+            ),
+            _toggleButton(
+              context,
+              title: "Search by Location",
+              selected: !controller.isChargerId.value,
+              onTap: () {
+                controller.toggleSearchType(false);
+                controller.updateSearch('');
+                textEditingController.clear();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchInput(
+      BuildContext context, bool isDark, ColorScheme colorScheme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: textEditingController,
+                  onChanged: (val) {
+                    controller.updateSearch(val);
+                    if (!controller.isChargerId.value) {
+                      controller.updateSuggestions(val);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    hintText: controller.isChargerId.value
+                        ? 'Enter charger ID...'
+                        : 'Enter location name...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: controller.searchQuery.value.isNotEmpty
+                        ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        controller.updateSearch('');
+                        textEditingController.clear();
+                        FocusScope.of(context).unfocus();
+                      },
+                    )
+                        : null,
+                    border: _outlineBorder(context, isDark, colorScheme),
+                    enabledBorder: _outlineBorder(context, isDark, colorScheme),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                    ),
+                    filled: true,
+                    fillColor: isDark ? Colors.grey[800] : Colors.grey[50],
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onSubmitted: (_) => controller.performSearch(),
+                ),
+              ),
+              if (!controller.isChargerId.value) ...[
+                const SizedBox(width: 8),
+                _locationButton(context, isDark),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestedLocations(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: controller.suggestedLocations.length,
+        itemBuilder: (context, index) {
+          final suggestion = controller.suggestedLocations[index];
+          return ListTile(
+            title: Text(suggestion),
+            leading: const Icon(Icons.place_outlined),
+            onTap: () {
+              controller.updateSearch(suggestion);
+              textEditingController.text = suggestion;
+              controller.performSearch();
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRecentSearchesHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            controller.isChargerId.value
+                ? 'Recent Charger ID Searches'
+                : 'Recent Location Searches',
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          TextButton(
+            onPressed: () => controller.clearRecentSearches(),
+            child: Text(
+              'Clear All',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRecentSearchesList(BuildContext context, bool isDark) {
     final list = controller.isChargerId.value
         ? controller.recentChargerSearches
@@ -232,7 +243,7 @@ class _SearchPageState extends State<SearchPage> {
               Image.asset(
                 controller.isChargerId.value
                     ? 'assets/icons/saved_device.png'
-                    : 'assets/icons/distance.png', // you can change this to another icon path
+                    : 'assets/icons/distance.png',
                 width: 48,
                 height: 48,
                 color: Colors.grey[400],
@@ -261,7 +272,7 @@ class _SearchPageState extends State<SearchPage> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 4,
-          )
+          ),
         ],
       ),
       child: ListView.separated(
@@ -281,22 +292,22 @@ class _SearchPageState extends State<SearchPage> {
           return ListTile(
             leading: controller.isChargerId.value
                 ? Image.asset(
-                    'assets/icons/saved_device.png',
-                    width: 24,
-                    height: 24,
-                    color: Theme.of(context).primaryColor,
-                  )
+              'assets/icons/saved_device.png',
+              width: 24,
+              height: 24,
+              color: Theme.of(context).primaryColor,
+            )
                 : (isCurrentLocation
-                    ? Icon(
-                        Icons.my_location,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : Image.asset(
-                        'assets/icons/distance.png',
-                        width: 24,
-                        height: 24,
-                        color: Theme.of(context).primaryColor,
-                      )),
+                ? Icon(
+              Icons.my_location,
+              color: Theme.of(context).primaryColor,
+            )
+                : Image.asset(
+              'assets/icons/distance.png',
+              width: 24,
+              height: 24,
+              color: Theme.of(context).primaryColor,
+            )),
             title: Text(
               search,
               style: TextStyle(
@@ -320,26 +331,31 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  /// Toggle Button UI
-  Widget _toggleButton(BuildContext context,
-      {required String title,
-      required bool selected,
-      required VoidCallback onTap}) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+  // --- UI Components ---
+
+  Widget _toggleButton(
+      BuildContext context, {
+        required String title,
+        required bool selected,
+        required VoidCallback onTap,
+      }) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: selected ? colorScheme.primary : Colors.transparent,
+            color: selected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,
           child: Text(
             title,
-            style: textTheme.titleSmall!.copyWith(
-              color: selected ? Colors.white : colorScheme.onSurface,
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+              color: selected
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -348,7 +364,6 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  /// Location Button UI
   Widget _locationButton(BuildContext context, bool isDark) {
     return Container(
       height: 50,
@@ -374,48 +389,25 @@ class _SearchPageState extends State<SearchPage> {
               ? const Color.fromARGB(255, 185, 227, 185)
               : Colors.green[800],
         ),
-        onPressed: () {
-          controller.updateSearchWithCurrentLocation();
-          textEditingController.text = controller.searchQuery.value;
+        onPressed: () async {
+          controller.isLoading.value = true;
+          try {
+            await controller.updateSearchWithCurrentLocation();
+            textEditingController.text = controller.searchQuery.value;
+          } finally {
+            controller.isLoading.value = false;
+          }
         },
       ),
     );
   }
 
-  /// Border style
   OutlineInputBorder _outlineBorder(
       BuildContext context, bool isDark, ColorScheme colorScheme) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide:
-          BorderSide(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
-    );
-  }
-
-  /// Header with Clear All Button
-  Widget _searchHeader(BuildContext context,
-      {required String title, required VoidCallback onClear}) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          TextButton(
-            onPressed: onClear,
-            child: Text(
-              'Clear All',
-              style: TextStyle(color: colorScheme.primary, fontSize: 12),
-            ),
-          ),
-        ],
-      ),
+      borderSide: BorderSide(
+          color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
     );
   }
 }

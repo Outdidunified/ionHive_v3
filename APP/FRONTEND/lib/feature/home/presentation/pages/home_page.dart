@@ -29,16 +29,16 @@ class HomePage extends StatelessWidget {
           return false;
         } else {
           final shouldExit =
-              await controller.showExitConfirmationDialog(context);
+          await controller.showExitConfirmationDialog(context);
           return shouldExit;
         }
       },
-      child: Scaffold(
-        body: Obx(() {
-          return LoadingOverlay(
-            isLoading: controller.isLoading.value,
-            opacity: 0.7,
-            child: Stack(
+      child: Obx(
+            () => LoadingOverlay(
+          isLoading: controller.isLoading.value,
+          opacity: 0.7,
+          child: Scaffold(
+            body: Stack(
               children: [
                 _buildMapWithControls(controller, context),
                 Positioned(
@@ -60,8 +60,8 @@ class HomePage extends StatelessWidget {
                 ),
               ],
             ),
-          );
-        }),
+          ),
+        ),
       ),
     );
   }
@@ -238,7 +238,7 @@ class HomePage extends StatelessWidget {
         final result = await Navigator.of(context).push(
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
-                SearchPage(),
+             SearchPage(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               const begin = Offset(-1.0, 0.0);
@@ -246,7 +246,7 @@ class HomePage extends StatelessWidget {
               const curve = Curves.easeInOut;
 
               var tween =
-                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
               var offsetAnimation = animation.drive(tween);
 
               return SlideTransition(
@@ -295,9 +295,9 @@ class HomePage extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             border: isDarkTheme
                 ? Border.all(
-                    color: Colors.grey.withOpacity(0.3),
-                    width: 0.8,
-                  )
+              color: Colors.grey.withOpacity(0.3),
+              width: 0.8,
+            )
                 : null,
             boxShadow: [
               BoxShadow(
@@ -439,73 +439,73 @@ class HomePage extends StatelessWidget {
             Expanded(
               child: controller.chargers.isEmpty
                   ? Center(
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey,
-                            width: 0.2,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          color: isDarkTheme
-                              ? Colors.black.withOpacity(0.7)
-                              : Colors.white.withOpacity(0.9),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'No Charging Stations available in this location',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        Expanded(
-                          child: PageView.builder(
-                            controller: controller.stationPageController ??=
-                                PageController(
-                              viewportFraction: 0.85,
-                              initialPage:
-                                  controller.selectedChargerIndex.value,
-                            ),
-                            padEnds: false,
-                            physics: const BouncingScrollPhysics(),
-                            onPageChanged: (index) {
-                              controller.animateToCharger(index);
-                            },
-                            itemCount: controller.chargers.length,
-                            itemBuilder: (context, index) {
-                              final station = controller.chargers[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(left: 12),
-                                child: StationCard(
-                                  station: station,
-                                  isDarkTheme: isDarkTheme,
-                                  onTap: () {
-                                    controller.showStationDetails(station);
-                                    if (controller.mapController != null) {
-                                      final position =
-                                          station['position'] as LatLng;
-                                      controller.mapController!.animateCamera(
-                                        CameraUpdate.newLatLngZoom(
-                                            position, 18.0),
-                                      );
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                child: Container(
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 0.2,
                     ),
+                    borderRadius: BorderRadius.circular(16),
+                    color: isDarkTheme
+                        ? Colors.black.withOpacity(0.7)
+                        : Colors.white.withOpacity(0.9),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'No Charging Stations available in this location',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              )
+                  : Column(
+                children: [
+                  Expanded(
+                    child: PageView.builder(
+                      controller: controller.stationPageController ??=
+                          PageController(
+                            viewportFraction: 0.85,
+                            initialPage:
+                            controller.selectedChargerIndex.value,
+                          ),
+                      padEnds: false,
+                      physics: const BouncingScrollPhysics(),
+                      onPageChanged: (index) {
+                        controller.animateToCharger(index);
+                      },
+                      itemCount: controller.chargers.length,
+                      itemBuilder: (context, index) {
+                        final station = controller.chargers[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: StationCard(
+                            station: station,
+                            isDarkTheme: isDarkTheme,
+                            onTap: () {
+                              controller.showStationDetails(station);
+                              if (controller.mapController != null) {
+                                final position =
+                                station['position'] as LatLng;
+                                controller.mapController!.animateCamera(
+                                  CameraUpdate.newLatLngZoom(
+                                      position, 18.0),
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
