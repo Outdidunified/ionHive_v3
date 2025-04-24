@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ionhive/feature/auth/presentation/pages/login_page.dart';
 import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/feature/more/presentation/controllers/more_controllers.dart';
+import 'package:ionhive/utils/responsive/responsive.dart';
 import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
 import 'package:ionhive/feature/more/presentation/pages/account/presentation/pages/account_privacy_page.dart';
 import 'package:ionhive/feature/more/presentation/pages/banner_image/banner_image.dart';
@@ -17,10 +18,11 @@ import 'package:ionhive/feature/more/presentation/pages/transactions/presentatio
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ionhive/feature/more/presentation/pages/theme/theme_settings_page.dart';
-import 'package:fui_kit/fui_kit.dart';
 
 class MoreePage extends StatelessWidget {
   final sessionController = Get.find<SessionController>();
+
+  MoreePage({super.key});
 
   // Fetch app version dynamically
   Future<String> _getAppVersion() async {
@@ -30,12 +32,10 @@ class MoreePage extends StatelessWidget {
 
   void handleLogout() {
     if (!Get.isRegistered<LandingPageController>()) {
-      Get.put(LandingPageController()); // Register if not already registered
+      Get.put(LandingPageController());
     }
 
     final landingPageController = Get.find<LandingPageController>();
-
-    // Clear the page index
     landingPageController.clearPageIndex();
     Get.find<SessionController>().clearSession();
     Get.offAll(() => LoginPage());
@@ -43,8 +43,8 @@ class MoreePage extends StatelessWidget {
 
   void _launchURL() async {
     const url = 'https://www.ionhive.in/';
-    if (await canLaunch(url)) {
-      await launch(url);
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
     } else {
       throw 'Could not launch $url';
     }
@@ -55,11 +55,13 @@ class MoreePage extends StatelessWidget {
     final theme = Theme.of(context);
     final MoreController moreController = Get.put(MoreController());
 
-    final isLoggedIn = sessionController.isLoggedIn.value;
     final userId = sessionController.userId.value;
     final username = sessionController.username.value;
     final emailId = sessionController.emailId.value;
     final token = sessionController.token.value;
+
+    final bool isSmallScreen = context.screenWidth < 375;
+    final bool isLargeScreen = context.screenWidth > 600;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
@@ -72,27 +74,42 @@ class MoreePage extends StatelessWidget {
             emailId: emailId,
             token: token,
           ),
-          const SizedBox(height: 10),
+          SizedBox(
+              height: context
+                  .rHeight(isLargeScreen ? 20 : (isSmallScreen ? 12 : 100))),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(15),
+              padding: EdgeInsets.symmetric(
+                horizontal: context
+                    .rWidth(isLargeScreen ? 20 : (isSmallScreen ? 10 : 15)),
+                vertical: context
+                    .rHeight(isLargeScreen ? 12 : (isSmallScreen ? 6 : 8)),
+              ),
               children: [
-                // _buildInviteFriendsCard(theme), // Commented out as per original code
                 SizedBox(
-                  height: 210,
+                  height: context.rHeight(
+                      isLargeScreen ? 140 : (isSmallScreen ? 100 : 120)),
                   child: BannerImage(),
                 ),
-                _buildSectionTitle('Manage'),
+                SizedBox(
+                    height: context.rHeight(
+                        isLargeScreen ? 20 : (isSmallScreen ? 12 : 16))),
+                _buildSectionTitle(
+                    'Manage', context, isSmallScreen, isLargeScreen),
                 _buildMenuOption(
                   'RFID',
                   Image.asset(
-                    'assets/icons/rfid.png', // Replace with your actual asset filename
-                    width: 24, // Match the size of the previous Icon (24)
-                    height: 24,
-                    color: theme
-                        .primaryColor, // Optional: Match the icon color if needed
+                    'assets/icons/rfid.png',
+                    width: context
+                        .rWidth(isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    height: context.rHeight(
+                        isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    color: theme.primaryColor,
                   ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   onTap: () {
                     Get.to(() => RfidPage(
                           userId: userId,
@@ -105,13 +122,17 @@ class MoreePage extends StatelessWidget {
                 _buildMenuOption(
                   'Vehicle',
                   Image.asset(
-                    'assets/icons/charging-vehicle.png', // Replace with your actual asset filename
-                    width: 24, // Match the size of the previous Icon (24)
-                    height: 24,
-                    color: theme
-                        .primaryColor, // Optional: Match the icon color if needed
+                    'assets/icons/charging-vehicle.png',
+                    width: context
+                        .rWidth(isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    height: context.rHeight(
+                        isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    color: theme.primaryColor,
                   ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   onTap: () {
                     Get.to(() => VehiclePage(
                           userId: userId,
@@ -124,13 +145,17 @@ class MoreePage extends StatelessWidget {
                 _buildMenuOption(
                   'Saved Device',
                   Image.asset(
-                    'assets/icons/saved_device.png', // Replace with your actual asset filename
-                    width: 24, // Match the size of the previous Icon (24)
-                    height: 24,
-                    color: theme
-                        .primaryColor, // Optional: Match the icon color if needed
+                    'assets/icons/saved_device.png',
+                    width: context
+                        .rWidth(isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    height: context.rHeight(
+                        isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    color: theme.primaryColor,
                   ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   onTap: () {
                     Get.to(() => SavedDevicepage(
                           userId: userId,
@@ -140,18 +165,25 @@ class MoreePage extends StatelessWidget {
                         ));
                   },
                 ),
-                const SizedBox(height: 16),
-                _buildSectionTitle('Stations'),
+                SizedBox(
+                    height: context.rHeight(
+                        isLargeScreen ? 16 : (isSmallScreen ? 8 : 12))),
+                _buildSectionTitle(
+                    'Stations', context, isSmallScreen, isLargeScreen),
                 _buildMenuOption(
                   'Saved Stations',
                   Image.asset(
-                    'assets/icons/bookmark.png', // Replace with your actual asset filename
-                    width: 20, // Match the size of the previous Icon (24)
-                    height: 20,
-                    color: theme
-                        .primaryColor, // Optional: Match the icon color if needed
+                    'assets/icons/bookmark.png',
+                    width: context
+                        .rWidth(isLargeScreen ? 24 : (isSmallScreen ? 16 : 20)),
+                    height: context.rHeight(
+                        isLargeScreen ? 24 : (isSmallScreen ? 16 : 20)),
+                    color: theme.primaryColor,
                   ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   onTap: () {
                     Get.to(() => SavedStationsPages(
                           userId: userId,
@@ -161,18 +193,25 @@ class MoreePage extends StatelessWidget {
                         ));
                   },
                 ),
-                // _buildMenuOption('Captitative Stations', Icons.ev_station, theme), // Commented out as per original code
-                _buildSectionTitle('Transactions'),
+                SizedBox(
+                    height: context.rHeight(
+                        isLargeScreen ? 16 : (isSmallScreen ? 8 : 12))),
+                _buildSectionTitle(
+                    'Transactions', context, isSmallScreen, isLargeScreen),
                 _buildMenuOption(
                   'Payment History',
                   Image.asset(
-                    'assets/icons/transaction-history.png', // Replace with your actual asset filename
-                    width: 24, // Match the size of the previous Icon (24)
-                    height: 24,
-                    color: theme
-                        .primaryColor, // Optional: Match the icon color if needed
+                    'assets/icons/transaction-history.png',
+                    width: context
+                        .rWidth(isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    height: context.rHeight(
+                        isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    color: theme.primaryColor,
                   ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   onTap: () {
                     Get.to(() => PaymentHistoryPage(
                           userId: userId,
@@ -182,31 +221,49 @@ class MoreePage extends StatelessWidget {
                         ));
                   },
                 ),
-                const SizedBox(height: 16),
-                _buildSectionTitle('Shop'),
+                SizedBox(
+                    height: context.rHeight(
+                        isLargeScreen ? 16 : (isSmallScreen ? 8 : 12))),
+                _buildSectionTitle(
+                    'Shop', context, isSmallScreen, isLargeScreen),
                 _buildMenuOption(
                   'Order a Device',
                   Image.asset(
-                    'assets/icons/shopping-bag.png', // Replace with your actual asset filename
-                    width: 24, // Match the size of the previous Icon (24)
-                    height: 24,
-                    color: theme
-                        .primaryColor, // Optional: Match the icon color if needed
+                    'assets/icons/shopping-bag.png',
+                    width: context
+                        .rWidth(isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    height: context.rHeight(
+                        isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    color: theme.primaryColor,
                   ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   onTap: _launchURL,
                 ),
-                const SizedBox(height: 16),
-                _buildSectionTitle('App'),
+                SizedBox(
+                    height: context.rHeight(
+                        isLargeScreen ? 16 : (isSmallScreen ? 8 : 12))),
+                _buildSectionTitle(
+                    'Shop', context, isSmallScreen, isLargeScreen),
                 Obx(() => SwitchListTile(
-                      title: const Text("Notification"),
+                      title: Text(
+                        "Notification",
+                        style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.height *
+                              0.027, // ~16.2 pixels on a 600-pixel-high screen
+                        ),
+                      ),
                       subtitle: Text(
                         moreController.isNotificationAvailable.value
                             ? "Manage and stay updated with app alerts."
                             : "Notifications are disabled in app settings.",
                         style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.height *
+                              0.02, // ~12 pixels on a 600-pixel-high screen
                           color: moreController.isNotificationAvailable.value
-                              ? Colors.black38
+                              ? theme.primaryColor
                               : Colors.red[300],
                         ),
                       ),
@@ -215,7 +272,7 @@ class MoreePage extends StatelessWidget {
                           ? (value) {
                               moreController.toggleNotification(value);
                             }
-                          : null, // Disable the switch if notifications are not available
+                          : null,
                       activeColor: theme.primaryColor,
                       inactiveTrackColor:
                           moreController.isNotificationAvailable.value
@@ -224,41 +281,62 @@ class MoreePage extends StatelessWidget {
                     )),
                 _buildMenuOption(
                   'Theme Settings',
-                  Icon(Icons.color_lens, color: theme.primaryColor),
+                  Icon(
+                    Icons.color_lens,
+                    color: theme.primaryColor,
+                    size: context.rIconSize(
+                        isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                  ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   onTap: () {
                     Get.to(() => ThemeSettingsPage());
                   },
                 ),
-
-                const SizedBox(height: 16),
-                _buildSectionTitle('Help & Support'),
+                SizedBox(
+                    height: context.rHeight(
+                        isLargeScreen ? 16 : (isSmallScreen ? 8 : 12))),
+                _buildSectionTitle(
+                    'Help & Support', context, isSmallScreen, isLargeScreen),
                 _buildMenuOption(
                   'Contact Us',
                   Image.asset(
-                    'assets/icons/contact.png', // Replace with your actual asset filename
-                    width: 24, // Match the size of the previous Icon (24)
-                    height: 24,
-                    color: theme
-                        .primaryColor, // Optional: Match the icon color if needed
+                    'assets/icons/contact.png',
+                    width: context
+                        .rWidth(isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    height: context.rHeight(
+                        isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    color: theme.primaryColor,
                   ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   onTap: () {
                     Get.to(() => ContactUs());
                   },
                 ),
-                const SizedBox(height: 16),
-                _buildSectionTitle('Account'),
+                SizedBox(
+                    height: context.rHeight(
+                        isLargeScreen ? 16 : (isSmallScreen ? 8 : 12))),
+                _buildSectionTitle(
+                    'Account', context, isSmallScreen, isLargeScreen),
                 _buildMenuOption(
                   'Privacy and Policy',
                   Image.asset(
-                    'assets/icons/insurance.png', // Replace with your actual asset filename
-                    width: 24, // Match the size of the previous Icon (24)
-                    height: 24,
-                    color: theme
-                        .primaryColor, // Optional: Match the icon color if needed
+                    'assets/icons/insurance.png',
+                    width: context
+                        .rWidth(isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    height: context.rHeight(
+                        isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    color: theme.primaryColor,
                   ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   onTap: () {
                     Get.to(() => AccountAndPrivacyPage());
                   },
@@ -266,28 +344,38 @@ class MoreePage extends StatelessWidget {
                 _buildMenuOption(
                   'Logout',
                   Image.asset(
-                    'assets/icons/logout.png', // Replace with your actual asset filename
-                    width: 24, // Match the size of the previous Icon (24)
-                    height: 24,
-                    color:
-                        Colors.red, // Optional: Match the icon color if needed
+                    'assets/icons/logout.png',
+                    width: context
+                        .rWidth(isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    height: context.rHeight(
+                        isLargeScreen ? 28 : (isSmallScreen ? 20 : 24)),
+                    color: Colors.red,
                   ),
                   theme,
+                  context,
+                  isSmallScreen,
+                  isLargeScreen,
                   iconColor: Colors.red,
                   titleColor: Colors.red,
                   onTap: handleLogout,
                 ),
-                const SizedBox(height: 20),
+                SizedBox(
+                    height: context.rHeight(
+                        isLargeScreen ? 24 : (isSmallScreen ? 16 : 20))),
                 FutureBuilder<String>(
                   future: _getAppVersion(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const LoadingIndicator(size: 30.0);
+                      return LoadingIndicator(
+                          size: context.rWidth(
+                              isLargeScreen ? 40 : (isSmallScreen ? 20 : 30)));
                     }
                     if (snapshot.hasData) {
-                      return _buildFooter(snapshot.data!);
+                      return _buildFooter(snapshot.data!, context,
+                          isSmallScreen, isLargeScreen);
                     } else {
-                      return _buildFooter('Unknown Version');
+                      return _buildFooter('Unknown Version', context,
+                          isSmallScreen, isLargeScreen);
                     }
                   },
                 ),
@@ -299,30 +387,37 @@ class MoreePage extends StatelessWidget {
     );
   }
 
-  // ✅ Section Title Function (No Changes)
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, BuildContext context,
+      bool isSmallScreen, bool isLargeScreen) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(
+          vertical:
+              context.rHeight(isLargeScreen ? 10 : (isSmallScreen ? 6 : 8))),
       child: Text(
         title,
-        style: const TextStyle(
-            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
+        style: TextStyle(
+          fontSize:
+              context.rFontSize(isLargeScreen ? 18 : (isSmallScreen ? 14 : 16)),
+          fontWeight: FontWeight.bold,
+          color: Colors.grey,
+        ),
       ),
     );
   }
 
   Widget _buildMenuOption(
     String title,
-    Widget icon, // Changed from IconData to Widget
-    ThemeData theme, {
+    Widget icon,
+    ThemeData theme,
+    BuildContext context,
+    bool isSmallScreen,
+    bool isLargeScreen, {
     Widget? trailing,
     Color? titleColor,
     Color? iconColor,
     VoidCallback? onTap,
   }) {
-    bool isLogout =
-        title.toLowerCase() == 'logout'; // Check if it's the logout option
-
+    bool isLogout = title.toLowerCase() == 'logout';
 
     return InkWell(
       onTap: onTap,
@@ -332,28 +427,36 @@ class MoreePage extends StatelessWidget {
       highlightColor: isLogout
           ? Colors.red.withOpacity(0.1)
           : theme.primaryColor.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(context.rRadius(10)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+        padding: EdgeInsets.symmetric(
+          vertical:
+              context.rHeight(isLargeScreen ? 10 : (isSmallScreen ? 6 : 8)),
+          horizontal:
+              context.rWidth(isLargeScreen ? 10 : (isSmallScreen ? 6 : 8)),
+        ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(
+                  context.rWidth(isLargeScreen ? 10 : (isSmallScreen ? 6 : 8))),
               decoration: BoxDecoration(
                 color: isLogout
-                    ? (iconColor ?? Colors.red)
-                        .withOpacity(0.1) // Red background for logout
+                    ? Colors.red.withOpacity(0.1)
                     : theme.primaryColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: icon, // Use the widget directly
+              child: icon,
             ),
-            const SizedBox(width: 16),
+            SizedBox(
+                width: context
+                    .rWidth(isLargeScreen ? 20 : (isSmallScreen ? 12 : 16))),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: context.rFontSize(
+                      isLargeScreen ? 18 : (isSmallScreen ? 14 : 16)),
                   fontWeight: FontWeight.w500,
                   color: isLogout
                       ? Colors.red
@@ -362,32 +465,33 @@ class MoreePage extends StatelessWidget {
               ),
             ),
             trailing ??
-                const Icon(Icons.arrow_forward_ios,
-                    size: 16, color: Colors.grey),
+                Icon(
+                  Icons.chevron_right,
+                  size: context.rIconSize(
+                      isLargeScreen ? 24 : (isSmallScreen ? 16 : 20)),
+                  color: Colors.grey,
+                ),
           ],
         ),
       ),
     );
   }
 
-
-  Widget _buildFooter(String version) {
+  Widget _buildFooter(String version, BuildContext context, bool isSmallScreen,
+      bool isLargeScreen) {
     return Align(
-      alignment: Alignment.bottomCenter,
+      alignment: Alignment.center,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Powered by Outdid \n Version $version',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
-          ],
+        padding: EdgeInsets.all(
+            context.rWidth(isLargeScreen ? 20 : (isSmallScreen ? 12 : 16))),
+        child: Text(
+          'Powered by Outdid \n Version $version',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: context
+                .rFontSize(isLargeScreen ? 16 : (isSmallScreen ? 12 : 14)),
+            color: Colors.grey,
+          ),
         ),
       ),
     );

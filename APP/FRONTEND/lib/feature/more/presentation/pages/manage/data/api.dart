@@ -5,8 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:ionhive/feature/more/presentation/pages/manage/data/url.dart';
 import 'package:ionhive/utils/exception/exception.dart';
 
-class Manageapicall{
-
+class Manageapicall {
   String _getDefaultErrorMessage(int statusCode) {
     switch (statusCode) {
       case 400:
@@ -52,17 +51,11 @@ class Manageapicall{
         body: jsonEncode({'email_id': email}),
       );
 
-      // Print raw response details
-      debugPrint('Response Status Code: ${response.statusCode}');
-      debugPrint('Response Body: ${response.body}');
-
       // Parse response properly
       final responseData = _handleResponse(response);
 
-      debugPrint('Parsed Response Data: $responseData');
-
       return responseData;
-     } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,
@@ -73,7 +66,8 @@ class Manageapicall{
     }
   }
 
-  Future<Map<String, dynamic>> DeactivateRfid(String email, String token ,int userid,String tagid, bool status) async {
+  Future<Map<String, dynamic>> DeactivateRfid(
+      String email, String token, int userid, String tagid, bool status) async {
     final url = Manageurl.DeactivateRfid;
 
     try {
@@ -83,20 +77,19 @@ class Manageapicall{
           'Content-Type': 'application/json',
           'Authorization': token,
         },
-        body: jsonEncode({'email_id': email,'user_id':userid,'tag_id':tagid,'status':false}),
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': userid,
+          'tag_id': tagid,
+          'status': false
+        }),
       );
-
-      // Print raw response details
-      debugPrint('Response Status Code: ${response.statusCode}');
-      debugPrint('Response Body: ${response.body}');
 
       // Parse response properly
       final responseData = _handleResponse(response);
 
-      debugPrint('Parsed Response Data: $responseData');
-
       return responseData;
-     } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,
@@ -106,6 +99,4 @@ class Manageapicall{
       return {"error": true, "message": "Unexpected error: ${e.toString()}"};
     }
   }
-
-
 }

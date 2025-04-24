@@ -60,9 +60,6 @@ class HeaderAPICalls {
         requestBody["phone_number"] = phone_number;
       }
 
-      print("Sending request to: $url");
-      print("Request body: ${jsonEncode(requestBody)}");
-
       final response = await http
           .post(
         Uri.parse(url),
@@ -78,10 +75,6 @@ class HeaderAPICalls {
           throw TimeoutException(408, 'Request timed out. Please try again.');
         },
       );
-
-      print("Response status code: ${response.statusCode}");
-      print("Response body: ${response.body}");
-
       return _handleResponse(response);
     } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
@@ -107,9 +100,6 @@ class HeaderAPICalls {
         },
         body: jsonEncode({'email_id': email, 'user_id': user_id}),
       );
-      final data = jsonDecode(response.body);
-      print('fetching body : $data');
-      print(response.statusCode);
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -136,9 +126,6 @@ class HeaderAPICalls {
         },
         body: jsonEncode({'email_id': email, 'user_id': user_id}),
       );
-      final data = jsonDecode(response.body);
-      print('fetching body : $data');
-      print(response.statusCode);
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -165,9 +152,6 @@ class HeaderAPICalls {
         },
         body: jsonEncode({'email_id': email, 'user_id': user_id}),
       );
-      final data = jsonDecode(response.body);
-      print('fetching body : $data');
-      print(response.statusCode);
 
       return _handleResponse(response);
     } on TimeoutException {

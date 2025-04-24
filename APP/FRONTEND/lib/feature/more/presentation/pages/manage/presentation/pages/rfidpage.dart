@@ -153,12 +153,12 @@ class RFIDBottomSheet extends StatelessWidget {
   final String token;
 
   const RFIDBottomSheet({
-    Key? key,
+    super.key,
     required this.controller,
     required this.userId,
     required this.emailId,
     required this.token,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

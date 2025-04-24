@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:ionhive/feature/wallet%20/data/urls.dart';
-import 'package:ionhive/feature/wallet%20/domain/models/payment_request.dart';
+import 'package:ionhive/feature/wallet/data/urls.dart';
+import 'package:ionhive/feature/wallet/domain/models/payment_request.dart';
 import 'package:ionhive/utils/exception/exception.dart'; // Exception thrown Handler
 
 class WalletAPICalls {
@@ -52,9 +52,6 @@ class WalletAPICalls {
         },
         body: jsonEncode({'email_id': email, 'user_id': user_id}),
       );
-      final data = jsonDecode(response.body);
-      print('fetching body : $data');
-      print(response.statusCode);
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -82,7 +79,6 @@ class WalletAPICalls {
         body: jsonEncode(paymentRequest.toJson()),
       );
 
-      debugPrint('Save payment response: ${response.body}');
       return _handleResponse(response);
     } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
@@ -113,7 +109,6 @@ class WalletAPICalls {
         }),
       );
 
-      debugPrint('Create order response: ${response.body}');
       return _handleResponse(response);
     } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');

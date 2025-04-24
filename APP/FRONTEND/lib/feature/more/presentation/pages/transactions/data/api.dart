@@ -55,10 +55,8 @@ class Transactionapicalls {
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
       });
-      final data = jsonDecode(response.body);
-      print('transaction response :$data');
       return _handleResponse(response);
-     } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,
@@ -95,15 +93,13 @@ class Transactionapicalls {
       );
 
       final data = jsonDecode(response.body);
-      print('Transaction filter response: $data');
-
       if (response.statusCode == 200) {
         return data;
       } else {
         throw HttpException(
             response.statusCode, data['message'] ?? 'Unknown error');
       }
-     } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,
@@ -131,10 +127,8 @@ class Transactionapicalls {
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
       });
-      final data = jsonDecode(response.body);
-      print('transaction response :$data');
       return _handleResponse(response);
-     } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,
@@ -162,10 +156,9 @@ class Transactionapicalls {
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
       });
-      final data = jsonDecode(response.body);
-      print('transaction response :$data');
+
       return _handleResponse(response);
-     } on TimeoutException {
+    } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
       throw HttpException(503,

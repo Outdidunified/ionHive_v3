@@ -31,12 +31,12 @@ class ThemeSettingsPage extends StatelessWidget {
             _buildSectionTitle('App Theme', theme),
             const SizedBox(height: 16),
             _buildThemeModeSelector(theme),
-            const SizedBox(height: 32),
-            _buildSectionTitle('Primary Color', theme),
-            const SizedBox(height: 16),
-            _buildColorPalette(theme),
-            const SizedBox(height: 32),
-            _buildThemePreview(theme),
+            // const SizedBox(height: 32),
+            // _buildSectionTitle('Primary Color', theme),
+            // const SizedBox(height: 16),
+            // _buildColorPalette(theme),
+            // const SizedBox(height: 32),
+            // _buildThemePreview(theme),
           ],
         ),
       ),
@@ -145,208 +145,208 @@ class ThemeSettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildColorPalette(ThemeData theme) {
-    return Obx(() => Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: themeController.availableColors.map((color) {
-            final isSelected =
-                themeController.primaryColor.value.value == color.value;
-            final bool isDarkColor = color.computeLuminance() < 0.5;
-            final Color borderColor = isSelected
-                ? (isDarkColor ? Colors.white : Colors.black)
-                : Colors.transparent;
-            final Color checkColor = isDarkColor ? Colors.white : Colors.black;
+  // Widget _buildColorPalette(ThemeData theme) {
+  //   return Obx(() => Wrap(
+  //         spacing: 16,
+  //         runSpacing: 16,
+  //         children: themeController.availableColors.map((color) {
+  //           final isSelected =
+  //               themeController.primaryColor.value.value == color.value;
+  //           final bool isDarkColor = color.computeLuminance() < 0.5;
+  //           final Color borderColor = isSelected
+  //               ? (isDarkColor ? Colors.white : Colors.black)
+  //               : Colors.transparent;
+  //           final Color checkColor = isDarkColor ? Colors.white : Colors.black;
 
-            return GestureDetector(
-              onTap: () {
-                themeController.changePrimaryColor(color);
-                CustomSnackbar.showSuccess(message: 'Color theme updated');
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: borderColor,
-                    width: 3,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withOpacity(0.4),
-                      blurRadius: 8,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: isSelected
-                    ? Icon(
-                        Icons.check,
-                        color: checkColor,
-                        size: 30,
-                      )
-                    : null,
-              ),
-            );
-          }).toList(),
-        ));
-  }
+  //           return GestureDetector(
+  //             onTap: () {
+  //               themeController.changePrimaryColor(color);
+  //               CustomSnackbar.showSuccess(message: 'Color theme updated');
+  //             },
+  //             child: AnimatedContainer(
+  //               duration: const Duration(milliseconds: 200),
+  //               width: 60,
+  //               height: 60,
+  //               decoration: BoxDecoration(
+  //                 color: color,
+  //                 shape: BoxShape.circle,
+  //                 border: Border.all(
+  //                   color: borderColor,
+  //                   width: 3,
+  //                 ),
+  //                 boxShadow: [
+  //                   BoxShadow(
+  //                     color: color.withOpacity(0.4),
+  //                     blurRadius: 8,
+  //                     spreadRadius: 2,
+  //                   ),
+  //                 ],
+  //               ),
+  //               child: isSelected
+  //                   ? Icon(
+  //                       Icons.check,
+  //                       color: checkColor,
+  //                       size: 30,
+  //                     )
+  //                   : null,
+  //             ),
+  //           );
+  //         }).toList(),
+  //       ));
+  // }
 
-  Widget _buildThemePreview(ThemeData theme) {
-    final bool isDarkMode = theme.brightness == Brightness.dark;
+  // Widget _buildThemePreview(ThemeData theme) {
+  //   final bool isDarkMode = theme.brightness == Brightness.dark;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Preview', theme),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: isDarkMode
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                spreadRadius: isDarkMode ? 0 : 1,
-              ),
-            ],
-            border: isDarkMode
-                ? Border.all(color: theme.dividerColor, width: 0.5)
-                : null,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Theme Preview',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        foregroundColor: theme.colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('Primary Button'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: theme.colorScheme.primary,
-                        side: BorderSide(color: theme.colorScheme.primary),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('Outlined Button'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.primary,
-                      theme.colorScheme.primary.withOpacity(0.7),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'This is how your primary color looks in gradients',
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildIconPreview(Icons.home, 'Home', theme),
-                  _buildIconPreview(Icons.favorite, 'Favorite', theme),
-                  _buildIconPreview(Icons.settings, 'Settings', theme),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       _buildSectionTitle('Preview', theme),
+  //       const SizedBox(height: 16),
+  //       Container(
+  //         padding: const EdgeInsets.all(20),
+  //         decoration: BoxDecoration(
+  //           color: theme.cardColor,
+  //           borderRadius: BorderRadius.circular(16),
+  //           boxShadow: [
+  //             BoxShadow(
+  //               color: isDarkMode
+  //                   ? Colors.black.withOpacity(0.3)
+  //                   : Colors.black.withOpacity(0.05),
+  //               blurRadius: 10,
+  //               spreadRadius: isDarkMode ? 0 : 1,
+  //             ),
+  //           ],
+  //           border: isDarkMode
+  //               ? Border.all(color: theme.dividerColor, width: 0.5)
+  //               : null,
+  //         ),
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(
+  //               'Theme Preview',
+  //               style: TextStyle(
+  //                 fontSize: 18,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: theme.colorScheme.primary,
+  //               ),
+  //             ),
+  //             const SizedBox(height: 16),
+  //             Row(
+  //               children: [
+  //                 Expanded(
+  //                   child: ElevatedButton(
+  //                     onPressed: () {},
+  //                     style: ElevatedButton.styleFrom(
+  //                       backgroundColor: theme.colorScheme.primary,
+  //                       foregroundColor: theme.colorScheme.onPrimary,
+  //                       padding: const EdgeInsets.symmetric(vertical: 14),
+  //                       shape: RoundedRectangleBorder(
+  //                         borderRadius: BorderRadius.circular(10),
+  //                       ),
+  //                     ),
+  //                     child: const Text('Primary Button'),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(width: 12),
+  //                 Expanded(
+  //                   child: OutlinedButton(
+  //                     onPressed: () {},
+  //                     style: OutlinedButton.styleFrom(
+  //                       foregroundColor: theme.colorScheme.primary,
+  //                       side: BorderSide(color: theme.colorScheme.primary),
+  //                       padding: const EdgeInsets.symmetric(vertical: 14),
+  //                       shape: RoundedRectangleBorder(
+  //                         borderRadius: BorderRadius.circular(10),
+  //                       ),
+  //                     ),
+  //                     child: const Text('Outlined Button'),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             const SizedBox(height: 20),
+  //             Container(
+  //               padding: const EdgeInsets.all(14),
+  //               decoration: BoxDecoration(
+  //                 gradient: LinearGradient(
+  //                   colors: [
+  //                     theme.colorScheme.primary,
+  //                     theme.colorScheme.primary.withOpacity(0.7),
+  //                   ],
+  //                   begin: Alignment.topLeft,
+  //                   end: Alignment.bottomRight,
+  //                 ),
+  //                 borderRadius: BorderRadius.circular(14),
+  //               ),
+  //               child: Row(
+  //                 children: [
+  //                   Icon(
+  //                     Icons.info_outline,
+  //                     color: theme.colorScheme.onPrimary,
+  //                   ),
+  //                   const SizedBox(width: 12),
+  //                   Expanded(
+  //                     child: Text(
+  //                       'This is how your primary color looks in gradients',
+  //                       style: TextStyle(
+  //                         color: theme.colorScheme.onPrimary,
+  //                         fontWeight: FontWeight.w500,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //             const SizedBox(height: 20),
+  //             Row(
+  //               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //               children: [
+  //                 _buildIconPreview(Icons.home, 'Home', theme),
+  //                 _buildIconPreview(Icons.favorite, 'Favorite', theme),
+  //                 _buildIconPreview(Icons.settings, 'Settings', theme),
+  //               ],
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  Widget _buildIconPreview(IconData icon, String label, ThemeData theme) {
-    final bool isDarkMode = theme.brightness == Brightness.dark;
-    final double backgroundOpacity = isDarkMode ? 0.2 : 0.1;
+  // Widget _buildIconPreview(IconData icon, String label, ThemeData theme) {
+  //   final bool isDarkMode = theme.brightness == Brightness.dark;
+  //   final double backgroundOpacity = isDarkMode ? 0.2 : 0.1;
 
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withOpacity(backgroundOpacity),
-            shape: BoxShape.circle,
-            border: isDarkMode
-                ? Border.all(
-                    color: theme.colorScheme.primary.withOpacity(0.3), width: 1)
-                : null,
-          ),
-          child: Icon(
-            icon,
-            color: theme.colorScheme.primary,
-            size: 26,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: theme.textTheme.bodyMedium?.color,
-          ),
-        ),
-      ],
-    );
-  }
+  //   return Column(
+  //     children: [
+  //       Container(
+  //         padding: const EdgeInsets.all(12),
+  //         decoration: BoxDecoration(
+  //           color: theme.colorScheme.primary.withOpacity(backgroundOpacity),
+  //           shape: BoxShape.circle,
+  //           border: isDarkMode
+  //               ? Border.all(
+  //                   color: theme.colorScheme.primary.withOpacity(0.3), width: 1)
+  //               : null,
+  //         ),
+  //         child: Icon(
+  //           icon,
+  //           color: theme.colorScheme.primary,
+  //           size: 26,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 8),
+  //       Text(
+  //         label,
+  //         style: TextStyle(
+  //           fontSize: 13,
+  //           fontWeight: FontWeight.w500,
+  //           color: theme.textTheme.bodyMedium?.color,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 }

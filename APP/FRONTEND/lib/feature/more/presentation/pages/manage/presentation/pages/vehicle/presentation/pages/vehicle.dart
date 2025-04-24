@@ -51,11 +51,6 @@ class _VehiclePageState extends State<VehiclePage> {
     // Initialize the VehicleController
     final VehicleController controller = Get.find<VehicleController>();
 
-    print("AppBar background color: ${theme.appBarTheme.backgroundColor}");
-    print(
-        "AppBar title text color: ${theme.appBarTheme.titleTextStyle?.color}");
-    print("AppBar icon color: ${theme.appBarTheme.iconTheme?.color}");
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -167,13 +162,6 @@ class _VehiclePageState extends State<VehiclePage> {
                             ? "$cleanBaseUrl/$cleanImagePath"
                             : '';
 
-                        print("Base URL: $baseUrl");
-                        print("Clean Base URL: $cleanBaseUrl");
-                        print("Image Path: $imagePath");
-                        print("Normalized Image Path: $normalizedImagePath");
-                        print("Clean Image Path: $cleanImagePath");
-                        print("Full Image URL: $fullImageUrl");
-
                         return Card(
                           shape: RoundedRectangleBorder(
                             borderRadius:
@@ -262,8 +250,6 @@ class _VehiclePageState extends State<VehiclePage> {
                                               ),
                                               errorWidget:
                                                   (context, url, error) {
-                                                print(
-                                                    "Image load error for URL: $url, Error: $error");
                                                 return Image.asset(
                                                   "assets/images/noimage2.png",
                                                   width: screenWidth * 0.4,
@@ -327,9 +313,7 @@ class _VehiclePageState extends State<VehiclePage> {
                                             ),
                                             TextButton(
                                               onPressed: () async {
-                                                final scaffoldMessenger =
-                                                    ScaffoldMessenger.of(
-                                                        context);
+                                                ScaffoldMessenger.of(context);
                                                 Navigator.pop(context);
                                                 setState(() {
                                                   controller.isLoading.value =
@@ -373,8 +357,6 @@ class _VehiclePageState extends State<VehiclePage> {
                                                     );
                                                   }
                                                 } catch (e) {
-                                                  print(
-                                                      "issue with removing vehicle: $e");
                                                   CustomSnackbar.showError(
                                                     message:
                                                         "issue with removing vehicle: $e",

@@ -29,10 +29,12 @@ class Transaction {
 class FetchAllTransactionResponse {
   final bool error;
   final List<Transaction> transactions;
+  final String? message; // Added message property
 
   FetchAllTransactionResponse({
     required this.error,
     required this.transactions,
+    this.message, // Optional message
   });
 
   factory FetchAllTransactionResponse.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class FetchAllTransactionResponse {
       transactions: (json['data'] as List<dynamic>)
           .map((item) => Transaction.fromJson(item))
           .toList(),
+      message: json['message'] as String?, // Extract message if available
     );
   }
 
@@ -48,6 +51,7 @@ class FetchAllTransactionResponse {
     return {
       'error': error,
       'data': transactions.map((t) => t.toJson()).toList(),
+      'message': message,
     };
   }
 }
@@ -69,8 +73,8 @@ class SaveFilterResponse {
       message: json['message'] as String,
       days: json['updatedTransactionFilter'] != null
           ? (json['updatedTransactionFilter'] as List).isNotEmpty
-          ? json['updatedTransactionFilter'][0]['days'] as int?
-          : null
+              ? json['updatedTransactionFilter'][0]['days'] as int?
+              : null
           : null,
     );
   }
@@ -114,7 +118,6 @@ class FetchTransactionFilter {
   }
 }
 
-
 class Clearsavedfilter {
   final bool error; // Updated to match the response structure
   final String message; // Message field
@@ -140,6 +143,3 @@ class Clearsavedfilter {
     };
   }
 }
-
-
-

@@ -29,9 +29,6 @@ class SavedDeviceControllers extends GetxController {
     try {
       final response =
           await _savedDeviceRepoistory.fetchprofile(userId, emailId, authToken);
-      print(
-          "fetching saved device body : $response"); // Debug the full response
-
       if (response.success) {
         if (response.saveddevice != null) {
           // Process favChargersDetails into savedDevices
@@ -55,8 +52,6 @@ class SavedDeviceControllers extends GetxController {
                 'max_power': '${charger['max_power']}W', // Example formatting
               };
             }).toList());
-            print(
-                "Processed savedDevices: $savedDevices"); // Debug the processed data
           } else {
             // Empty list is a valid response, not an error
             savedDevices.clear();
@@ -66,7 +61,7 @@ class SavedDeviceControllers extends GetxController {
           savedDevices.clear();
         }
       } else {
-        errorMessage.value = response.message ?? 'Failed to fetch devices';
+        errorMessage.value = response.message;
       }
     } catch (e) {
       errorMessage.value = "Failed to fetch devices: ${e.toString()}";

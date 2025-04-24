@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
-import 'package:ionhive/feature/wallet%20/domain/models/wallet_model.dart';
-import 'package:ionhive/feature/wallet%20/domain/repositories/wallet_repository.dart';
-
+import 'package:ionhive/feature/wallet/domain/models/wallet_model.dart';
+import 'package:ionhive/feature/wallet/domain/repositories/wallet_repository.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class WalletController extends GetxController {
@@ -11,6 +10,9 @@ class WalletController extends GetxController {
   final sessionController = Get.find<SessionController>();
 
   final RxBool isLoading = false.obs;
+  final RxBool hasInitialData = false.obs;
+  final RxBool hasError = false.obs;
+  final RxString errorMessage = ''.obs;
 
   // Reactive variables for wallet data
   final RxString walletBalance = 'Rs.0'.obs; // Default value
@@ -25,11 +27,9 @@ class WalletController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    debugPrint('WalletController onInit called');
 
     // Wait for session data to be loaded before fetching wallet balance
     ever(sessionController.isLoggedIn, (isLoggedIn) {
-      debugPrint('Session login status changed: $isLoggedIn');
       if (isLoggedIn) {
         fetchwalletbalance();
       }
@@ -42,20 +42,21 @@ class WalletController extends GetxController {
     }
   }
 
+  /// Refreshes wallet data with synchronized loading state
   Future<void> fetchwalletbalance() async {
     final authToken = sessionController.token.value;
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
 
-    debugPrint(
-        'Session data - userId: $userId, emailId: $emailId, token: ${authToken.isNotEmpty ? "exists" : "empty"}');
-
     if (emailId.isEmpty || authToken.isEmpty || userId == 0) {
-      debugPrint('User details are incomplete, cannot fetch wallet balance');
       CustomSnackbar.showError(message: "User details are incomplete");
       isLoading.value = false;
       return;
     }
+
+    // Reset error state
+    hasError.value = false;
+    errorMessage.value = '';
 
     isLoading.value = true;
     try {
@@ -81,11 +82,38 @@ class WalletController extends GetxController {
         if (response.progressMetrics != null) {
           progressMetrics.value = response.progressMetrics!;
         }
+
+        // Set hasInitialData to true after first successful data load
+        if (!hasInitialData.value) {
+          hasInitialData.value = true;
+        }
       } else {
-        debugPrint("${response.message}");
+        throw Exception(response.message);
       }
     } catch (e) {
-      debugPrint("Error fetching wallet balance: $e");
+      debugPrint("WalletController: fetchwalletbalance error: $e");
+
+      // Determine the error message based on the exception
+      String errorMsg =
+          "An error occurred while loading data. Please try again later.";
+      if (e.toString().contains("Unable to reach the server")) {
+        errorMsg = "Unable to connect to the server. Please try again later.";
+      } else if (e is Exception) {
+        errorMsg = e.toString().replaceAll(
+            "Exception: ", ""); // Use the exception message if available
+      }
+
+      // Update error state and message
+      errorMessage.value = errorMsg;
+
+      // Only show error UI if we don't have any data yet
+      if (!hasInitialData.value) {
+        hasError.value = true;
+        CustomSnackbar.showError(message: errorMsg);
+      } else {
+        // If we already have data, show a snackbar with the specific error
+        CustomSnackbar.showError(message: errorMsg);
+      }
     } finally {
       isLoading.value = false;
     }
@@ -121,6 +149,7 @@ class WalletController extends GetxController {
 
   @override
   void onClose() {
+    debugPrint('WalletController: onClose called');
     super.onClose();
     Get.closeAllSnackbars(); // Close all active snackbars
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/AddVehicle/data/api.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/pages/AddVehicle/domain/model/addvehicle_model.dart';
 
@@ -7,10 +8,9 @@ class AddVehicleRepository {
   Future<GetAllVehicleModel> fetchvehiclemodel(String authToken) async {
     try {
       final responseJson = await _api.fetchvehiclemodel(authToken);
-      print(' rep: $GetAllVehicleModel.fromJson(responseJson)');
       return GetAllVehicleModel.fromJson(responseJson);
     } catch (e) {
-      print("Repository error in fetchvehiclemodel: $e");
+      debugPrint("Repository error in fetchvehiclemodel: $e");
       rethrow;
     }
   }
@@ -32,7 +32,7 @@ class AddVehicleRepository {
       );
       return AddVehicleResponse.fromJson(responseJson);
     } catch (e) {
-      print("Repository error in addVehicleRepo: $e");
+      debugPrint("Repository error in addVehicleRepo: $e");
       rethrow;
     }
   }

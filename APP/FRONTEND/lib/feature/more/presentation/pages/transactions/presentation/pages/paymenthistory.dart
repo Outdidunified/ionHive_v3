@@ -9,7 +9,8 @@ class PaymentHistoryPage extends StatelessWidget {
   final String username;
   final String emailId;
   final String token;
-  final TransactionController controller = Get.put(TransactionController());
+  final TransactionController controller = Get.put(TransactionController(),
+      permanent: true, tag: 'transaction_history');
 
   PaymentHistoryPage({
     super.key,
@@ -18,8 +19,8 @@ class PaymentHistoryPage extends StatelessWidget {
     required this.emailId,
     required this.token,
   }) {
-    controller.fetchTransactionFilter();
-    controller.fetchAllTransactions();
+    // Use the refreshAllData method to load data with proper error handling
+    controller.refreshAllData();
   }
 
   @override
@@ -32,8 +33,8 @@ class PaymentHistoryPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           "Payment History",
-          style:
-              theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.headlineMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -43,94 +44,153 @@ class PaymentHistoryPage extends StatelessWidget {
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.05,
-                vertical: screenHeight * 0.02,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Obx(() => DropdownButton<String>(
-                        value: controller.selectedFilter.value,
-                        items: const [
-                          DropdownMenuItem(
-                              value: 'All transactions',
-                              child: Text('All transactions')),
-                          DropdownMenuItem(
-                              value: 'Credited', child: Text('Credited')),
-                          DropdownMenuItem(
-                              value: 'Debited', child: Text('Debited')),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            controller.selectedFilter.value = value;
-                          }
-                        },
-                      )),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(16)),
-                        ),
-                        isScrollControlled: true,
-                        builder: (context) => _buildFilterModal(context),
-                      );
-                    },
-                    icon: Icon(Icons.filter_list_alt,
-                        color: theme.iconTheme.color),
-                    label: Text('Filters', style: theme.textTheme.bodyMedium),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                        side:
-                            BorderSide(color: Colors.grey.shade400, width: 0.5),
+      body: Obx(() {
+        // Show error state
+        if (controller.hasError.value) {
+          return _buildShimmerList(context);
+        }
+
+        // Show loading state
+        if (!controller.hasInitialData.value) {
+          return _buildShimmerList(context);
+        }
+
+        // Show content if we have data
+        return RefreshIndicator(
+          onRefresh: () => controller.refreshAllData(),
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.05,
+                        vertical: screenHeight * 0.02,
                       ),
-                      backgroundColor: theme.cardColor,
-                      elevation: 0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Obx(() => DropdownButton<String>(
+                                value: controller.selectedFilter.value,
+                                items: const [
+                                  DropdownMenuItem(
+                                      value: 'All transactions',
+                                      child: Text('All transactions')),
+                                  DropdownMenuItem(
+                                      value: 'Credited',
+                                      child: Text('Credited')),
+                                  DropdownMenuItem(
+                                      value: 'Debited', child: Text('Debited')),
+                                ],
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    controller.selectedFilter.value = value;
+                                  }
+                                },
+                              )),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(16)),
+                                ),
+                                isScrollControlled: true,
+                                builder: (context) =>
+                                    _buildFilterModal(context),
+                              );
+                            },
+                            icon: Icon(Icons.filter_list_alt,
+                                color: theme.iconTheme.color),
+                            label: Text('Filters',
+                                style: theme.textTheme.bodyMedium),
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                side: BorderSide(
+                                    color: Colors.grey.shade400, width: 0.5),
+                              ),
+                              backgroundColor: theme.cardColor,
+                              elevation: 0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Show a subtle loading indicator at the top when refreshing
+                    if (controller.isLoading.value)
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: LinearProgressIndicator(
+                          backgroundColor:
+                              theme.colorScheme.primary.withOpacity(0.1),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            theme.colorScheme.primary,
+                          ),
+                          minHeight: 2,
+                        ),
+                      ),
+                    SizedBox(
+                      height: screenHeight * 0.75,
+                      child: Obx(() {
+                        if (controller.filteredTransactions.isEmpty) {
+                          return Center(
+                            child: Text("No transactions found",
+                                style: theme.textTheme.bodyMedium),
+                          );
+                        }
+                        return ListView.builder(
+                          padding: EdgeInsets.only(bottom: screenHeight * 0.05),
+                          itemCount: controller.filteredTransactions.length,
+                          itemBuilder: (context, index) {
+                            var transaction =
+                                controller.filteredTransactions[index];
+                            return _buildTransactionItem(
+                              transaction['date'] ?? '',
+                              transaction['status'] ?? '',
+                              transaction['amount']?.toDouble() ?? 0.0,
+                              transaction['type'] ?? '',
+                              screenWidth,
+                              context,
+                            );
+                          },
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+              // Show a loading indicator overlay when refreshing
+              if (controller.isLoading.value)
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          theme.colorScheme.primary,
+                        ),
+                      ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: screenHeight * 0.75,
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return _buildShimmerList();
-                }
-                if (controller.filteredTransactions.isEmpty) {
-                  return Center(
-                    child: Text("No transactions found",
-                        style: theme.textTheme.bodyMedium),
-                  );
-                }
-                return ListView.builder(
-                  padding: EdgeInsets.only(bottom: screenHeight * 0.05),
-                  itemCount: controller.filteredTransactions.length,
-                  itemBuilder: (context, index) {
-                    var transaction = controller.filteredTransactions[index];
-                    return _buildTransactionItem(
-                      transaction['date'] ?? '',
-                      transaction['status'] ?? '',
-                      transaction['amount']?.toDouble() ?? 0.0,
-                      transaction['type'] ?? '',
-                      screenWidth,
-                      context,
-                    );
-                  },
-                );
-              }),
-            ),
-          ],
-        ),
-      ),
+                ),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -228,23 +288,115 @@ class PaymentHistoryPage extends StatelessWidget {
         ));
   }
 
-  Widget _buildShimmerList() {
-    return ListView.builder(
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: Colors.grey.shade300,
-          highlightColor: Colors.grey.shade100,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+  Widget _buildShimmerList(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Shimmer.fromColors(
+      baseColor: theme.brightness == Brightness.dark
+          ? Colors.grey[700]!
+          : Colors.grey[300]!,
+      highlightColor: theme.brightness == Brightness.dark
+          ? Colors.grey[600]!
+          : Colors.grey[100]!,
+      child: Column(
+        children: [
+          // Filter row shimmer
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.05,
+              vertical: MediaQuery.of(context).size.height * 0.02,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Dropdown button shimmer
+                Container(
+                  width: 150,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                // Filter button shimmer
+                Container(
+                  width: 100,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ],
             ),
           ),
-        );
-      },
+          // Transaction list shimmer
+          Expanded(
+            child: ListView.builder(
+              itemCount: 8,
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).size.height * 0.05,
+              ),
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.05,
+                    vertical: 4,
+                  ),
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      children: [
+                        // Icon placeholder
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Content placeholder
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                height: 14,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                width: 100,
+                                height: 14,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Amount placeholder
+                        Container(
+                          width: 80,
+                          height: 20,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -264,7 +416,7 @@ class PaymentHistoryPage extends StatelessWidget {
       final parsedDate = DateTime.parse(date);
       formattedDate = DateFormat('dd MMM yyyy').format(parsedDate);
     } catch (e) {
-      print("Error parsing date: $e");
+      debugPrint("Error parsing date: $e");
     }
 
     return Container(

@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:ionhive/feature/more/presentation/pages/manage/domain/manage_model.dart';
-import 'package:ionhive/feature/more/presentation/pages/manage/domain/manage_repository.dart';
+import 'package:ionhive/feature/more/presentation/pages/manage/domain/models/manage_model.dart';
+import 'package:ionhive/feature/more/presentation/pages/manage/domain/repositories/manage_repository.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class ManageController extends GetxController {
@@ -16,10 +16,10 @@ class ManageController extends GetxController {
 
       if (response.error) {
         // Get.snackbar("Message", response.message);
-        // print(response.message);
+        // debugPrint(response.message);
       } else {
         // final message = response.message; // ✅ Extract message object
-        // print(message);
+        // debugPrint(message);
         // Get.snackbar(
         //     "Success",
         //     "RFID: ${message['tag_id']}, Assigned: ${message['tag_id_assigned']}"
@@ -46,10 +46,10 @@ class ManageController extends GetxController {
 
       if (response.error) {
         // Get.snackbar("Message", response.message);
-        // print(response.message);
+        // debugPrint(response.message);
       } else {
         // final message = response.message; // ✅ Extract message object
-        // print(message);
+        // debugPrint(message);
         // Get.snackbar(
         //     "Success",
         //     "RFID: ${message['tag_id']}, Assigned: ${message['tag_id_assigned']}"
@@ -60,7 +60,7 @@ class ManageController extends GetxController {
     } catch (e) {
       CustomSnackbar.showError(
           message: "An unexpected error occurred: ${e.toString()}");
-      // print("An unexpected error occurred: ${e.toString()}");
+      // debugPrint("An unexpected error occurred: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }

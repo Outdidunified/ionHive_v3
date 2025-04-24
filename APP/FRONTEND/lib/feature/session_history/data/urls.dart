@@ -6,4 +6,7 @@ class Sessionurl {
 
   static final String fetchSessionHistoryDetails =
       '${iOnHiveCore.baseUrl}/session/fetchChargingSessionDetails';
+
+  static final String downloadChargingSessionDetails =
+      '${iOnHiveCore.baseUrl}/session/downloadChargingSessionDetails';
 }

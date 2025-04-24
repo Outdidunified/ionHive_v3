@@ -38,7 +38,6 @@ class Saveddeviceapicalls {
     );
   }
 
-
   Future<Map<String, dynamic>> fetchsaveddevice(
       int user_id, String email, String authToken) async {
     final url = Saveddeviceurl.fetchsavedchargers;
@@ -52,9 +51,6 @@ class Saveddeviceapicalls {
         },
         body: jsonEncode({'email_id': email, 'user_id': user_id}),
       );
-      final data = jsonDecode(response.body);
-      print('fetching saved device body : $data');
-      print(response.statusCode);
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -62,11 +58,9 @@ class Saveddeviceapicalls {
     } on http.ClientException {
       throw HttpException(503,
           'Unable to reach the server. \nPlease check your connection or try again later.');
-    }  catch (e) {
+    } catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');
     }
   }
-
-
 }

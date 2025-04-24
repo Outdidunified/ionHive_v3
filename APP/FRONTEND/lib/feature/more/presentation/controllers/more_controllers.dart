@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,10 +67,6 @@ class MoreController extends GetxController {
         await prefs.setBool('notification_permission', false);
       }
     }
-
-    // Debug output
-    print(
-        'Notification Status: System=${status.isGranted}, Saved=$savedState, Enabled=${isNotificationEnabled.value}, Available=${isNotificationAvailable.value}, Platform=${Platform.operatingSystem}');
   }
 
   // Toggle switch with confirmation dialog when disabling notifications
@@ -94,9 +89,8 @@ class MoreController extends GetxController {
     if (value && !currentStatus.isGranted) {
       if (Platform.isIOS) {
         // On iOS, we need special handling
-        bool? savedState = prefs.getBool('notification_permission');
-        bool isFirstTimeAsking = savedState == null && currentStatus.isDenied;
-
+        prefs.getBool('notification_permission');
+//
         // Request permission (iOS will only show the prompt once)
         PermissionStatus status = await Permission.notification.request();
         isNotificationEnabled.value = status.isGranted;

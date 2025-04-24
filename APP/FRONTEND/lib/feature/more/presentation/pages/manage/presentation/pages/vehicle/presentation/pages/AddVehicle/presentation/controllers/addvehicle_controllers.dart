@@ -57,14 +57,13 @@ class AddvehicleControllers extends GetxController {
       // ✅ No 'error' or 'message' field in response, so just assign
       vehicleModels.assignAll(response.vehicleModels);
 
-      print("Fetched Vehicle Models:");
       for (var vehicle in response.vehicleModels) {
-        print(
+        debugPrint(
             "ID: ${vehicle.id}, Model: ${vehicle.model}, Company: ${vehicle.vehicleCompany}, Battery: ${vehicle.batterySizeKwh} kWh, Charger Type: ${vehicle.chargerType}");
       }
     } catch (e) {
       errorMessage("Error fetching vehicle models: $e");
-      print("methods Exception: $e");
+      debugPrint("methods Exception: $e");
     } finally {
       isLoading(false);
     }
@@ -112,8 +111,9 @@ class AddvehicleControllers extends GetxController {
   }
 
   Future<void> submitVehicleNumber() async {
-    if (!isVehicleNumberValid.value || selectedVehicleModel.value == null)
+    if (!isVehicleNumberValid.value || selectedVehicleModel.value == null) {
       return;
+    }
 
     try {
       isLoading(true);

@@ -38,10 +38,7 @@ class AddVehicleApicalls {
     );
   }
 
-
-
-  Future<Map<String, dynamic>> fetchvehiclemodel(
-      String authToken) async {
+  Future<Map<String, dynamic>> fetchvehiclemodel(String authToken) async {
     final url = AddVehicleurl.fetchvehiclemodel;
 
     try {
@@ -51,11 +48,7 @@ class AddVehicleApicalls {
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-
       );
-      final data = jsonDecode(response.body);
-      print('fetching body vehiclemodel : $data');
-      print(response.statusCode);
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -63,7 +56,7 @@ class AddVehicleApicalls {
     } on http.ClientException {
       throw HttpException(503,
           'Unable to reach the server. \nPlease check your connection or try again later.');
-    }  catch (e) {
+    } catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');
     }
@@ -92,10 +85,6 @@ class AddVehicleApicalls {
           'vehicle_id': vehicleId,
         }),
       );
-
-      final data = jsonDecode(response.body);
-      debugPrint('Add vehicle response: $data');
-      debugPrint('Status code: ${response.statusCode}');
 
       return _handleResponse(response);
     } on TimeoutException {

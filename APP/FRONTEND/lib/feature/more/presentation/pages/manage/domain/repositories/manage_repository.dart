@@ -1,5 +1,5 @@
 import 'package:ionhive/feature/more/presentation/pages/manage/data/api.dart';
-import 'package:ionhive/feature/more/presentation/pages/manage/domain/manage_model.dart';
+import 'package:ionhive/feature/more/presentation/pages/manage/domain/models/manage_model.dart';
 
 class Managerepository{
   final Manageapicall _api = Manageapicall();

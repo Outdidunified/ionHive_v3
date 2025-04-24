@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:ionhive/feature/session_history/domain/repositories/session_history_repository.dart';
-
 import '../../domain/models/session_history_model.dart';
 
 class SessionHistoryControllers extends GetxController {
@@ -11,166 +11,194 @@ class SessionHistoryControllers extends GetxController {
   final SessionController sessionController = Get.find<SessionController>();
 
   final RxBool isLoading = false.obs;
+  final RxBool hasInitialData = false.obs;
+  final RxBool hasError = false.obs;
+  final RxString errorMessage = ''.obs;
 
   // Store fetched total session data
   RxMap<String, dynamic>? totalData = RxMap();
 
   final RxString totalSessions = '0'.obs; // Default value
-  final RxString totalEnergy = '0'.obs; // Default value
-  final RxString totalChargingTime = '0'.obs; // New field for totalChargingTime
+  final RxString totalEnergy = '0.00 kWh'.obs; // Default value with unit
+  final RxString totalChargingTime = '0.00 hrs'.obs; // Default value with unit
   final RxList<SessionHistoryItem> sessions = <SessionHistoryItem>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Initial data loading will be handled by the page
-    // to ensure proper refresh when navigating back
 
-    // Listen for changes in the session controller's login status
-    ever(sessionController.isLoggedIn, (isLoggedIn) {
-      if (isLoggedIn) {
-        refreshAllData();
+    try {
+      // Listen for changes in the session controller's login status
+      ever(sessionController.isLoggedIn, (isLoggedIn) {
+        if (isLoggedIn) {
+          // Delay the refresh to avoid blocking the UI thread
+          Future.delayed(Duration(milliseconds: 500), () {
+            refreshAllData();
+          });
+        }
+      });
+
+      // Trigger initial data fetch if already logged in
+      if (sessionController.isLoggedIn.value) {
+        // Delay the initial fetch to avoid blocking the UI thread
+        Future.delayed(Duration(milliseconds: 500), () {
+          refreshAllData();
+        });
       }
-    });
-
-    // Also check if already logged in
-    if (sessionController.isLoggedIn.value) {
-      refreshAllData();
+    } catch (e) {
+      debugPrint('SessionHistoryControllers: Error in onInit: $e');
     }
-  }
-
-  @override
-  void onReady() {
-    super.onReady();
-    // This ensures data is loaded when the controller is first created
-    refreshAllData();
   }
 
   Future<void> fetchtotalsessions() async {
-    final authToken = sessionController.token.value;
-    final userId = sessionController.userId.value;
-    final emailId = sessionController.emailId.value;
-
-    // Only set loading to true if it's not already loading
-    final bool wasLoading = isLoading.value;
-    if (!wasLoading) {
-      isLoading.value = true;
-    }
-
     try {
-      print("Fetching session history data...");
+      final authToken = sessionController.token.value;
+      final userId = sessionController.userId.value;
+      final emailId = sessionController.emailId.value;
+
+      if (emailId.isEmpty || authToken.isEmpty || userId == 0) {
+        throw Exception('User details are incomplete');
+      }
+
       final fetchResponseModel = await _fetchtotalsessioncountrep
           .fetchtotaldata(userId, emailId, authToken);
-      print("Fetch response: ${fetchResponseModel.toJson()}");
 
       if (fetchResponseModel.success) {
         if (fetchResponseModel.totalData != null) {
           totalData?.value = fetchResponseModel.totalData!;
 
-          // Format total sessions
-          final sessions = fetchResponseModel.totalData!['totalSessions'];
-          totalSessions.value = sessions != null ? sessions.toString() : '0';
-
-          // Format total energy with 2 decimal places
+          totalSessions.value =
+              fetchResponseModel.totalData!['totalSessions']?.toString() ?? '0';
           final energy = fetchResponseModel.totalData!['totalEnergyConsumed'];
-          if (energy != null) {
-            final energyNum = energy is num
-                ? energy
-                : double.tryParse(energy.toString()) ?? 0.0;
-            totalEnergy.value = '${energyNum.toStringAsFixed(2)} kWh';
-          } else {
-            totalEnergy.value = '0.00 kWh';
-          }
-
-          // Format charging time with 2 decimal places
+          totalEnergy.value = energy != null
+              ? '${(energy is num ? energy : double.tryParse(energy.toString()) ?? 0.0).toStringAsFixed(2)} kWh'
+              : '0.00 kWh';
           final chargingTime =
               fetchResponseModel.totalData!['totalChargingTimeInHours'];
-          if (chargingTime != null) {
-            final timeNum = chargingTime is num
-                ? chargingTime
-                : double.tryParse(chargingTime.toString()) ?? 0.0;
-            totalChargingTime.value = '${timeNum.toStringAsFixed(2)} hrs';
-          } else {
-            totalChargingTime.value = '0.00 hrs';
-          }
-
-          print(
-              "Updated values - Sessions: ${totalSessions.value}, Energy: ${totalEnergy.value}, Time: ${totalChargingTime.value}");
+          totalChargingTime.value = chargingTime != null
+              ? '${(chargingTime is num ? chargingTime : double.tryParse(chargingTime.toString()) ?? 0.0).toStringAsFixed(2)} hrs'
+              : '0.00 hrs';
         } else {
-          print("Total session data is null");
           totalSessions.value = '0';
           totalEnergy.value = '0.00 kWh';
           totalChargingTime.value = '0.00 hrs';
           CustomSnackbar.showError(message: "No session data available");
         }
       } else {
-        print("Fetch failed: ${fetchResponseModel.message}");
-        CustomSnackbar.showError(message: fetchResponseModel.message);
+        throw Exception(fetchResponseModel.message);
       }
-    } catch (e, stackTrace) {
-      print("Error fetching session data: $e");
-      print("Stack trace: $stackTrace");
-      CustomSnackbar.showError(message: "Failed to fetch session data: $e");
-    } finally {
-      // Only set loading to false if we were the ones who set it to true
-      if (!wasLoading) {
-        isLoading.value = false;
-      }
+    } catch (e) {
+      debugPrint("Error fetching total sessions: $e");
+      rethrow; // Propagate error to be handled by refreshAllData
     }
   }
 
   Future<void> fetchallsessiondetails() async {
-    final authToken = sessionController.token.value;
-    final userId = sessionController.userId.value;
-    final emailId = sessionController.emailId.value;
-
-    // Only set loading to true if it's not already loading
-    // This prevents flickering when both methods are called together
-    final bool wasLoading = isLoading.value;
-    if (!wasLoading) {
-      isLoading.value = true;
-    }
-
-    sessions.clear(); // Clear previous data
     try {
-      print("Fetching session details...");
+      final authToken = sessionController.token.value;
+      final userId = sessionController.userId.value;
+      final emailId = sessionController.emailId.value;
+
+      if (emailId.isEmpty || authToken.isEmpty || userId == 0) {
+        throw Exception('User details are incomplete');
+      }
+
       final response = await _fetchtotalsessioncountrep.fetchallsessiondetails(
           userId, emailId, authToken);
 
       if (response.success) {
         sessions.assignAll(response.sessions);
-        print("Loaded ${sessions.length} sessions");
       } else {
-        print("Failed to load sessions: ${response.message}");
-        CustomSnackbar.showError(message: response.message);
+        throw Exception(response.message);
       }
-    } catch (e, stackTrace) {
-      print("Error fetching session details: $e");
-      print("Stack trace: $stackTrace");
-      CustomSnackbar.showError(message: "Failed to load sessions");
-    } finally {
-      // Only set loading to false if we were the ones who set it to true
-      if (!wasLoading) {
-        isLoading.value = false;
-      }
+    } catch (e) {
+      debugPrint("Error fetching session details: $e");
+      rethrow; // Propagate error to be handled by refreshAllData
     }
   }
 
-  /// Refreshes all data at once
+  /// Refreshes all data at once with synchronized loading state
   Future<void> refreshAllData() async {
-    print("SessionHistoryControllers: refreshAllData called");
-    isLoading.value = true;
     try {
-      // Run both requests in parallel
-      await Future.wait([
-        fetchtotalsessions(),
-        fetchallsessiondetails(),
-      ]);
-      print("SessionHistoryControllers: refreshAllData completed");
+      final authToken = sessionController.token.value;
+      final userId = sessionController.userId.value;
+      final emailId = sessionController.emailId.value;
+
+      if (emailId.isEmpty || authToken.isEmpty || userId == 0) {
+        CustomSnackbar.showError(message: "User details are incomplete");
+        isLoading.value = false;
+        return;
+      }
+
+      // Reset error state
+      hasError.value = false;
+      errorMessage.value = '';
+
+      isLoading.value = true;
+
+      try {
+        // Run both requests in parallel and wait for all to complete
+        await Future.wait([fetchtotalsessions(), fetchallsessiondetails()]);
+
+        // Set hasInitialData to true after first successful data load
+        if (!hasInitialData.value) {
+          hasInitialData.value = true;
+        }
+      } catch (e) {
+        debugPrint("SessionHistoryControllers: refreshAllData error: $e");
+
+        // Determine the error message based on the exception
+        String errorMsg =
+            "An error occurred while loading data. Please try again later.";
+        if (e.toString().contains("Unable to reach the server")) {
+          errorMsg = "Unable to connect to the server. Please try again later.";
+        } else if (e is Exception) {
+          errorMsg = e.toString(); // Use the exception message if available
+        }
+
+        // Update error state and message
+        errorMessage.value = errorMsg;
+
+        // Only show error UI if we don't have any data yet
+        if (!hasInitialData.value) {
+          hasError.value = true;
+          CustomSnackbar.showError(message: errorMsg);
+        } else {
+          // If we already have data, show a snackbar with the specific error
+          CustomSnackbar.showError(message: errorMsg);
+        }
+      } finally {
+        isLoading.value = false;
+      }
     } catch (e) {
-      print("SessionHistoryControllers: refreshAllData error: $e");
-    } finally {
+      debugPrint(
+          "SessionHistoryControllers: Unexpected error in refreshAllData: $e");
       isLoading.value = false;
+    }
+  }
+
+  double _calculateTotalEnergy() {
+    return sessions.fold(0.0, (sum, session) => sum + session.unitConsumed);
+  }
+
+  Future<void> downloadSessionDetails() async {
+    final authToken = sessionController.token.value;
+    final emailId = sessionController.emailId.value;
+
+    try {
+      final totalEnergy = _calculateTotalEnergy();
+
+      await _fetchtotalsessioncountrep.downloadChargingSessionDetails(
+        emailId,
+        totalEnergy,
+        authToken,
+      );
+    } catch (e) {
+      debugPrint('Error downloading session details: $e');
+      CustomSnackbar.showError(
+        message:
+            "Issue in downloading session details \nPlease try again later",
+      );
     }
   }
 

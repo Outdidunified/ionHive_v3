@@ -8,6 +8,8 @@ class TransactionController extends GetxController {
   final RxList<Map<String, dynamic>> transactions =
       <Map<String, dynamic>>[].obs;
   var isLoading = false.obs;
+  var hasInitialData = false.obs;
+  var hasError = false.obs;
   var errorMessage = ''.obs;
   var selectedFilter = 'All transactions'.obs; // Track selected filter
   var selectedDateFilter = "Last 30 days".obs;
@@ -28,16 +30,26 @@ class TransactionController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchTransactionFilter().then((_) {
-      print("Selected Days After Fetch: ${selectedDays.value}");
-      fetchFilteredTransactions(); // Ensure correct filtering
-    });
+
+    try {
+      fetchTransactionFilter().then((_) {
+        // Delay the fetch to avoid blocking the UI thread
+        Future.delayed(Duration(milliseconds: 500), () {
+          fetchFilteredTransactions(); // Ensure correct filtering
+        });
+      });
+    } catch (e) {
+      debugPrint("TransactionController: Error in onInit: $e");
+    }
   }
 
   /// Fetch all transactions from the repository
-  void fetchAllTransactions() async {
-    isLoading.value = true;
+  Future<void> fetchAllTransactions() async {
+    // Reset error state
+    hasError.value = false;
     errorMessage.value = '';
+
+    isLoading.value = true;
 
     try {
       final response = await _transactionrepository.fetchAllTransactions(
@@ -47,20 +59,41 @@ class TransactionController extends GetxController {
         transactions.assignAll(response.transactions.map((t) {
           return {
             "date": t.time != null ? t.time.toString() : '',
-            "status": t.status ?? '',
-            "amount": t.amount ?? 0.0,
+            "status": t.status,
+            "amount": t.amount,
             "type": t.status == "Credited" ? "Credited" : "Debited",
           };
         }).toList());
+
+        // Set hasInitialData to true after first successful data load
+        if (!hasInitialData.value) {
+          hasInitialData.value = true;
+        }
       } else {
-        errorMessage.value = "Failed to fetch transactions.";
-        CustomSnackbar.showError(message: errorMessage.value);
+        throw Exception(response.message ?? "Failed to fetch transactions.");
       }
     } catch (e) {
-      errorMessage.value = "Failed to fetch transactions. Please try again.";
-      print("Error fetching transactions: $e");
+      debugPrint("TransactionController: fetchAllTransactions error: $e");
 
-      CustomSnackbar.showError(message: errorMessage.value);
+      // Determine the error message based on the exception
+      String errorMsg = "Failed to fetch transactions. Please try again.";
+      if (e.toString().contains("Unable to reach the server")) {
+        errorMsg = "Unable to connect to the server. Please try again later.";
+      } else if (e is Exception) {
+        errorMsg = e.toString().replaceAll(
+            "Exception: ", ""); // Use the exception message if available
+      }
+
+      // Update error state and message
+      errorMessage.value = errorMsg;
+
+      // Only show error UI if we don't have any data yet
+      if (!hasInitialData.value) {
+        hasError.value = true;
+      } else {
+        // If we already have data, show a snackbar with the specific error
+        CustomSnackbar.showError(message: errorMsg);
+      }
     } finally {
       isLoading.value = false;
     }
@@ -68,6 +101,12 @@ class TransactionController extends GetxController {
 
   /// Fetch filtered transactions based on applied filters
   Future<void> fetchFilteredTransactions() async {
+    // Reset error state only if we don't have initial data yet
+    if (!hasInitialData.value) {
+      hasError.value = false;
+      errorMessage.value = '';
+    }
+
     isLoading.value = true;
 
     try {
@@ -80,22 +119,46 @@ class TransactionController extends GetxController {
       if (!response.error) {
         transactions.assignAll(response.transactions
             .where((t) =>
-                _isWithinSelectedDays(t.time?.toString())) // Ensure filtering
+                _isWithinSelectedDays(t.time.toString())) // Ensure filtering
             .map((t) {
           return {
-            "date": t.time?.toString() ?? '',
-            "status": t.status ?? '',
-            "amount": t.amount ?? 0.0,
+            "date": t.time.toString(),
+            "status": t.status,
+            "amount": t.amount,
             "type": t.status == "Credited" ? "Credited" : "Debited",
           };
         }).toList());
 
-        print("Filtered transactions updated successfully.");
+        // Set hasInitialData to true after first successful data load
+        if (!hasInitialData.value) {
+          hasInitialData.value = true;
+        }
       } else {
-        print("Failed to fetch transactions.");
+        throw Exception(response.message ?? "Failed to fetch transactions.");
       }
     } catch (e) {
-      print("Error fetching filtered transactions: $e");
+      debugPrint("TransactionController: fetchFilteredTransactions error: $e");
+
+      // Determine the error message based on the exception
+      String errorMsg = "Failed to fetch transactions. Please try again.";
+      if (e.toString().contains("Unable to reach the server")) {
+        errorMsg = "Unable to connect to the server. Please try again later.";
+      } else if (e is Exception) {
+        errorMsg = e.toString().replaceAll(
+            "Exception: ", ""); // Use the exception message if available
+      }
+
+      // Update error state and message
+      errorMessage.value = errorMsg;
+
+      // Only show error UI if we don't have any data yet
+      if (!hasInitialData.value) {
+        hasError.value = true;
+        CustomSnackbar.showError(message: errorMsg);
+      } else {
+        // If we already have data, show a snackbar with the specific error
+        CustomSnackbar.showError(message: errorMsg);
+      }
     } finally {
       isLoading.value = false;
     }
@@ -104,8 +167,6 @@ class TransactionController extends GetxController {
   /// Apply filters and update transactions accordingly
   Future<void> applyFilters() async {
     try {
-      print("Applying filter for last ${selectedDays.value} days");
-
       final response = await _transactionrepository.SaveFilter(
         email,
         userId,
@@ -114,20 +175,17 @@ class TransactionController extends GetxController {
       );
 
       if (!response.error) {
-        print("Filter applied successfully: ${response.message}");
-
         if (response.days != null) {
           selectedDays.value = response.days!;
-          print("Updated days: ${selectedDays.value}");
         }
 
         // Fetch filtered transactions after applying the filter
         await fetchFilteredTransactions();
       } else {
-        print("Failed to apply filter: ${response.message}");
+        debugPrint("Failed to apply filter: ${response.message}");
       }
     } catch (e) {
-      print("Error applying filter: $e");
+      debugPrint("Error applying filter: $e");
     }
   }
 
@@ -140,12 +198,11 @@ class TransactionController extends GetxController {
       if (!response.error) {
         selectedDays.value =
             response.days ?? 1; // Ensure selectedDays updates correctly
-        print("Transaction filter fetched: ${selectedDays.value}");
       } else {
-        print("Failed to fetch transaction filter: ${response.message}");
+        debugPrint("Failed to fetch transaction filter: ${response.message}");
       }
     } catch (e) {
-      print("Error fetching transaction filter: $e");
+      debugPrint("Error fetching transaction filter: $e");
     } finally {
       isLoading.value = false;
     }
@@ -158,15 +215,14 @@ class TransactionController extends GetxController {
           email, userId, authToken);
       if (!response.error) {
         selectedDays.value = null; // Reset the filter to null
-        print("Transaction filter cleared. Fetching all transactions...");
 
         // Fetch all transactions after clearing the filter
         fetchAllTransactions();
       } else {
-        print("Failed to clear transaction filter: ${response.message}");
+        debugPrint("Failed to clear transaction filter: ${response.message}");
       }
     } catch (e) {
-      print("Error clearing transaction filter: $e");
+      debugPrint("Error clearing transaction filter: $e");
     } finally {
       isLoading.value = false;
     }
@@ -174,8 +230,11 @@ class TransactionController extends GetxController {
 
   /// Helper function to filter transactions within the selected days
   bool _isWithinSelectedDays(String? timeString) {
-    if (timeString == null || timeString.isEmpty || selectedDays.value == null)
+    if (timeString == null ||
+        timeString.isEmpty ||
+        selectedDays.value == null) {
       return true; // If null, show all
+    }
 
     try {
       DateTime date = DateTime.parse(timeString);
@@ -184,7 +243,7 @@ class TransactionController extends GetxController {
 
       return difference < selectedDays.value!; // Fix comparison
     } catch (e) {
-      print("Error parsing date: $e");
+      debugPrint("Error parsing date: $e");
       return false;
     }
   }
@@ -199,10 +258,66 @@ class TransactionController extends GetxController {
         .toList();
   }
 
-  /// Clear applied filters
-}
+  /// Refreshes all data at once with synchronized loading state
+  Future<void> refreshAllData() async {
+    try {
+      if (email.isEmpty || authToken.isEmpty || userId == 0) {
+        CustomSnackbar.showError(message: "User details are incomplete");
+        isLoading.value = false;
+        return;
+      }
 
-@override
-void onClose() {
-  Get.closeAllSnackbars(); // Close all active snackbars
+      // Reset error state
+      hasError.value = false;
+      errorMessage.value = '';
+      isLoading.value = true;
+
+      try {
+        // Run both requests in parallel and wait for all to complete
+        await Future.wait([fetchTransactionFilter(), fetchAllTransactions()]);
+
+        // Set hasInitialData to true after first successful data load
+        if (!hasInitialData.value) {
+          hasInitialData.value = true;
+        }
+      } catch (e) {
+        debugPrint("TransactionController: refreshAllData error: $e");
+
+        // Determine the error message based on the exception
+        String errorMsg =
+            "An error occurred while loading data. Please try again later.";
+        if (e.toString().contains("Unable to reach the server")) {
+          errorMsg = "Unable to connect to the server. Please try again later.";
+        } else if (e is Exception) {
+          errorMsg = e.toString().replaceAll(
+              "Exception: ", ""); // Use the exception message if available
+        }
+
+        // Update error state and message
+        errorMessage.value = errorMsg;
+
+        // Only show error UI if we don't have any data yet
+        if (!hasInitialData.value) {
+          hasError.value = true;
+          CustomSnackbar.showError(message: errorMsg);
+        } else {
+          // If we already have data, show a snackbar with the specific error
+          CustomSnackbar.showError(message: errorMsg);
+        }
+      } finally {
+        debugPrint("TransactionController: Setting isLoading to false");
+        isLoading.value = false;
+      }
+    } catch (e) {
+      debugPrint(
+          "TransactionController: Unexpected error in refreshAllData: $e");
+      isLoading.value = false;
+    }
+  }
+
+  @override
+  void onClose() {
+    super.onClose();
+    Get.closeAllSnackbars(); // Close all active snackbars
+  }
 }

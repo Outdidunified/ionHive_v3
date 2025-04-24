@@ -1,16 +1,16 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
-import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/Saved_Device/domain/repository/saved_device_repoistory.dart';
 import 'package:ionhive/feature/more/presentation/pages/saved_stations/domain/repository/saved_stations_repository.dart';
 
 class SavedStationsControllers extends GetxController {
-  final SavedStationsRepository _savedStationsRepository = SavedStationsRepository();
+  final SavedStationsRepository _savedStationsRepository =
+      SavedStationsRepository();
   final sessionController = Get.find<SessionController>();
 
   final RxBool isLoading = false.obs;
-  final RxList<Map<String, dynamic>> savedStations = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> savedStations =
+      <Map<String, dynamic>>[].obs;
   final RxString errorMessage = ''.obs;
 
   // Map to track bookmark status for each station
@@ -33,10 +33,10 @@ class SavedStationsControllers extends GetxController {
     try {
       final response = await _savedStationsRepository.fetchsavedstations(
           userId, emailId, authToken);
-      print("fetching saved stations body: $response");
 
       if (response.success) {
-        if (response.savedstation != null && response.savedstation!.isNotEmpty) {
+        if (response.savedstation != null &&
+            response.savedstation!.isNotEmpty) {
           savedStations.assignAll(response.savedstation!);
           // Initialize bookmark status for all stations
           for (var station in savedStations) {
@@ -46,7 +46,7 @@ class SavedStationsControllers extends GetxController {
           savedStations.clear();
         }
       } else {
-        errorMessage.value = response.message ?? 'Failed to fetch stations';
+        errorMessage.value = response.message;
       }
     } catch (e) {
       errorMessage.value = "Failed to fetch stations: ${e.toString()}";

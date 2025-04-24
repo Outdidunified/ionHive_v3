@@ -57,8 +57,6 @@ class HeaderController extends GetxController {
 
     isLoading.value = true;
     try {
-      print(
-          "Updating profile with: username=$newUsername, phoneNumber=$newPhoneNumber");
       final authenticateResponse = await _headerRepository.CompleteProfile(
         newUsername,
         userId,
@@ -66,8 +64,6 @@ class HeaderController extends GetxController {
         newPhoneNumber,
         authToken,
       );
-
-      print("API Response: ${authenticateResponse.toJson()}");
 
       if (!authenticateResponse.error) {
         sessionController.username.value = newUsername;
@@ -95,11 +91,8 @@ class HeaderController extends GetxController {
 
     isLoading.value = true;
     try {
-      print("Fetching profile...");
       final fetchResponseModel =
           await _headerRepository.fetchprofile(userId, emailId, authToken);
-
-      print("Fetch response: ${fetchResponseModel.toJson()}");
 
       if (fetchResponseModel.success) {
         if (fetchResponseModel.profile != null) {
@@ -113,33 +106,15 @@ class HeaderController extends GetxController {
           // Update phone number if available and not null
           phoneNumberController.text =
               fetchResponseModel.profile!['phone_no']?.toString() ?? '';
-
-          // Print fetched values for debugging
-          print("Fetched Username: ${fetchResponseModel.profile!['username']}");
-          print(
-              "Fetched Phone Number: ${fetchResponseModel.profile!['phone_no']}");
-
-          // // Show fetched values in a snackbar
-          // Get.snackbar(
-          //   "Fetched Profile",
-          //   "Username: ${fetchResponseModel.profile!['username'] ?? 'N/A'}\n"
-          //       "Phone Number: ${fetchResponseModel.profile!['phone_no']?.toString() ?? 'N/A'}",
-          //   backgroundColor: Colors.green,
-          //   colorText: Colors.white,
-          //   duration: Duration(seconds: 5),
-          // );
         } else {
-          print("Profile data is null");
           CustomSnackbar.showError(message: "Profile data is null");
         }
       } else {
-        print("Fetch failed: ${fetchResponseModel.message}");
-        // CustomSnackbar.showError(message: fetchResponseModel.message);
+        debugPrint("Fetch failed: ${fetchResponseModel.message}");
       }
     } catch (e, stackTrace) {
-      print("Error fetching profile: $e");
-      print("Stack trace: $stackTrace");
-      // CustomSnackbar.showError(message: "Failed to fetch profile: $e");
+      debugPrint("Error fetching profile: $e");
+      debugPrint("Stack trace: $stackTrace");
     } finally {
       isLoading.value = false;
     }
@@ -158,19 +133,12 @@ class HeaderController extends GetxController {
 
     isLoading.value = true;
     try {
-      print("Fetching wallet balance...");
       final response = await _headerRepository.fetchwalletbalance(
           userId, emailId, authToken);
-
-      print("Wallet balance response: $response");
 
       if (!response.error) {
         final balance = response.walletBalance ?? '0';
         walletBalance.value = 'Rs.$balance'; // Update reactive variable
-        print("Wallet Balance: $walletBalance");
-      } else {
-        debugPrint(response.message);
-        // CustomSnackbar.showError(message: response.message ?? "Unknown error");
       }
     } catch (e) {
       debugPrint("Error fetching wallet balance: $e");
@@ -193,24 +161,15 @@ class HeaderController extends GetxController {
 
     isLoading.value = true;
     try {
-      print("Fetching total sessions...");
       final response = await _headerRepository.fetchtotalsessions(
           userId, emailId, authToken);
-
-      print("Total session response: $response");
 
       if (!response.error) {
         final totalSesion = response.totalSessions ?? '0';
         totalsession.value = '$totalSesion'; // Update reactive variable
-        print(" totalsession: $totalsession");
-      } else {
-        debugPrint(response.message);
-
-        // CustomSnackbar.showError(message: response.message ?? "Unknown error");
       }
     } catch (e) {
       debugPrint("Error fetching wallet balance: $e");
-      // CustomSnackbar.showError(message: "Failed to fetch session history: $e");
     } finally {
       isLoading.value = false;
     }
@@ -237,14 +196,12 @@ class HeaderController extends GetxController {
 
     // Fetch wallet balance
     try {
-      print("Fetching wallet balance...");
       final walletResponse = await _headerRepository.fetchwalletbalance(
           userId, emailId, authToken);
 
       if (!walletResponse.error) {
         final balance = walletResponse.walletBalance ?? '0';
         walletBalance.value = 'Rs.$balance';
-        print("Wallet Balance updated: ${walletBalance.value}");
       } else {
         errors.add("Wallet: ${walletResponse.message ?? 'Unknown error'}");
       }
@@ -255,30 +212,18 @@ class HeaderController extends GetxController {
 
     // Fetch total sessions
     try {
-      print("Fetching total sessions...");
       final sessionResponse = await _headerRepository.fetchtotalsessions(
           userId, emailId, authToken);
 
       if (!sessionResponse.error) {
         final totalSesion = sessionResponse.totalSessions ?? '0';
         totalsession.value = '$totalSesion';
-        print("Total Sessions updated: ${totalsession.value}");
       } else {
         errors.add("Sessions: ${sessionResponse.message ?? 'Unknown error'}");
       }
     } catch (e) {
       debugPrint("Error fetching total sessions: $e");
       errors.add("Sessions: ${e.toString()}");
-    }
-
-    // Show a single error message if there were any errors
-    if (errors.isNotEmpty) {
-      // Combine error messages if there are multiple
-      String errorMessage = errors.length > 1
-          ? "Failed to fetch some data: ${errors.join(', ')}"
-          : "Failed to fetch data: ${errors.first}";
-
-      // CustomSnackbar.showError(message: errorMessage);
     }
 
     isLoading.value = false;

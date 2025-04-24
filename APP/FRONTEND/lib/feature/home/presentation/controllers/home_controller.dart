@@ -1,48 +1,55 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:ionhive/core/controllers/session_controller.dart';
+import 'package:ionhive/feature/home/domain/repositories/home_repository.dart';
+import 'package:ionhive/feature/home/presentation/pages/Viewallnearbychargers.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../controllers/navigation_helper.dart';
 
-class HomeController extends GetxController {
+class HomeController extends GetxController with WidgetsBindingObserver {
   final markers = <Marker>{}.obs;
   final isLoading = true.obs;
   final zoomLevel = 16.5.obs;
   final currentPosition = const LatLng(12.9716, 77.5946).obs;
+  final isLocationFetched = false.obs;
+  final selectedChargerIndex = 0.obs;
   GoogleMapController? mapController;
   Completer<GoogleMapController> mapControllerCompleter = Completer();
+  PageController? stationPageController;
+  SessionController? _sessionController;
 
-  // Theme mode detection
+  // Store the selected location marker data to persist it
+  Marker? _selectedLocationMarker;
+
+  SessionController get sessionController {
+    if (_sessionController == null) {
+      try {
+        _sessionController = Get.find<SessionController>();
+      } catch (e) {
+        debugPrint("SessionController not found: $e");
+      }
+    }
+    return _sessionController ?? SessionController();
+  }
+
+  final HomeRepository _homeRepository = HomeRepository();
   final isDarkMode = false.obs;
 
-  // Custom icons
   BitmapDescriptor? _locationIcon;
   BitmapDescriptor? _largeChargerIcon;
   BitmapDescriptor? _mediumChargerIcon;
   BitmapDescriptor? _smallChargerIcon;
+  BitmapDescriptor? _selectedLocationIcon;
 
-  // Charger data
-  final List<Map<String, Object>> chargers = [
-    {
-      "id": "1",
-      "position": const LatLng(12.9716, 77.5946),
-      "name": "KA | Bengaluru | The Pavilion...",
-      "type": "Hyundai EVCS",
-      "distance": 826,
-      "available": true,
-    },
-    {
-      "id": "2",
-      "position": const LatLng(12.9650, 77.5900),
-      "name": "Tata Nexon EV | Bahja-HA",
-      "type": "Tata",
-      "distance": 129,
-      "available": true,
-    },
-  ].obs;
+  final RxList<Map<String, dynamic>> chargers = <Map<String, dynamic>>[].obs;
 
   String lightStyle = '';
   String darkStyle = '';
@@ -50,25 +57,46 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     _initThemeListener();
     loadMapStyles();
 
-    // Load custom icons first, then load markers after icons are loaded
     _loadCustomIcons().then((_) {
-      // Now that icons are loaded, we can safely load markers
       loadChargerMarkers();
     });
+
+    mapControllerCompleter.future.then((controller) {
+      mapController = controller;
+      applyMapStyle();
+      _checkLocationPermissionAndFetch();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkLocationPermissionOnResume();
+    }
+  }
+
+  Future<void> _checkLocationPermissionOnResume() async {
+    try {
+      final permissionStatus = await Permission.locationWhenInUse.status;
+      if (permissionStatus == PermissionStatus.granted) {
+        await getCurrentLocation();
+      }
+    } catch (e) {
+      debugPrint('Error checking location permission on resume: $e');
+    }
   }
 
   Future<void> _loadCustomIcons() async {
     try {
-      // Load location icon
       _locationIcon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(size: Size(64, 64)),
         'assets/icons/customer.png',
       );
 
-      // Load charger icons in different sizes
       _largeChargerIcon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(size: Size(64, 64)),
         'assets/icons/ev-charger.png',
@@ -84,10 +112,15 @@ class HomeController extends GetxController {
         'assets/icons/ev-charger.png',
       );
 
-      debugPrint('All custom icons loaded successfully');
+      _selectedLocationIcon = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(48, 48)),
+        'assets/icons/slocation.png',
+      );
+
+      debugPrint(
+          'All custom icons loaded successfully, including customer.png and slocation.png');
     } catch (e) {
       debugPrint('Error loading custom icons: $e');
-      // Fallback to default markers if custom icons fail to load
       _locationIcon =
           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
       _largeChargerIcon =
@@ -96,6 +129,8 @@ class HomeController extends GetxController {
           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
       _smallChargerIcon =
           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+      _selectedLocationIcon =
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
     }
   }
 
@@ -104,6 +139,21 @@ class HomeController extends GetxController {
     ever(isDarkMode, (_) async {
       if (mapController != null) await applyMapStyle();
     });
+  }
+
+  Future<void> _checkLocationPermissionAndFetch() async {
+    try {
+      final permissionStatus = await Permission.locationWhenInUse.status;
+      if (permissionStatus == PermissionStatus.granted) {
+        debugPrint('Location permission already granted, fetching location...');
+        await getCurrentLocation();
+      } else {
+        debugPrint(
+            'Location permission not granted yet, waiting for user action');
+      }
+    } catch (e) {
+      debugPrint('Error checking location permission: $e');
+    }
   }
 
   Future<void> loadMapStyles() async {
@@ -135,9 +185,23 @@ class HomeController extends GetxController {
   Future<void> getCurrentLocation() async {
     isLoading.value = true;
     try {
-      final status = await Permission.locationWhenInUse.request();
-      if (status != PermissionStatus.granted) {
-        throw 'Location permission denied';
+      final permissionStatus = await Permission.locationWhenInUse.status;
+
+      if (permissionStatus != PermissionStatus.granted) {
+        debugPrint('Location permission not granted, requesting...');
+        final requestStatus = await Permission.locationWhenInUse.request();
+
+        if (requestStatus != PermissionStatus.granted) {
+          CustomSnackbar.showPermissionRequest(
+            message:
+                'Location permission is needed to locate nearby charging stations',
+            onOpenSettings: () async {
+              await openAppSettings();
+            },
+          );
+          isLoading.value = false;
+          return;
+        }
       }
 
       final position = await Geolocator.getCurrentPosition(
@@ -146,6 +210,9 @@ class HomeController extends GetxController {
       );
 
       currentPosition.value = LatLng(position.latitude, position.longitude);
+      isLocationFetched.value = true;
+
+      await fetchNearbyChargers();
       loadChargerMarkers();
 
       if (mapController != null) {
@@ -155,7 +222,21 @@ class HomeController extends GetxController {
         await _zoomToNearestMarker();
       }
     } catch (e) {
-      Get.snackbar('Error', 'Could not get location: ${e.toString()}');
+      debugPrint('Error getting location: ${e.toString()}');
+
+      if (e is LocationServiceDisabledException) {
+        CustomSnackbar.showPermissionRequest(
+          message:
+              'Location services are disabled. Please enable them to find nearby charging stations',
+          onOpenSettings: () async {
+            await Geolocator.openLocationSettings();
+          },
+        );
+      } else {
+        CustomSnackbar.showError(
+          message: 'Could not get your location. Please try again later.',
+        );
+      }
     } finally {
       isLoading.value = false;
     }
@@ -201,16 +282,21 @@ class HomeController extends GetxController {
   }
 
   void loadChargerMarkers() {
-    debugPrint('Loading markers...');
+    debugPrint('Loading charger markers...');
+
+    // Preserve the selected location marker if it exists
+    final selectedLocationMarker = markers.firstWhere(
+      (marker) => marker.markerId.value == 'selectedLocation',
+      orElse: () => Marker(markerId: MarkerId('not_found')),
+    );
+
+    // Clear existing markers
     markers.clear();
 
-    // Determine appropriate icon size based on zoom level
-    // Use a default icon if custom icons aren't loaded yet
     BitmapDescriptor chargerIcon;
     if (_largeChargerIcon == null ||
         _mediumChargerIcon == null ||
         _smallChargerIcon == null) {
-      // Icons not loaded yet, use default
       debugPrint('Custom charger icons not loaded yet, using default');
       chargerIcon =
           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
@@ -222,22 +308,42 @@ class HomeController extends GetxController {
       chargerIcon = _smallChargerIcon!;
     }
 
-    // Add charger markers
-    for (var charger in chargers) {
+    for (var i = 0; i < chargers.length; i++) {
+      final charger = chargers[i];
+      final isSelected = i == selectedChargerIndex.value;
+
       markers.add(Marker(
         markerId: MarkerId(charger['id'] as String),
         position: charger['position'] as LatLng,
-        icon: chargerIcon,
+        icon: isSelected ? (_largeChargerIcon ?? chargerIcon) : chargerIcon,
         infoWindow: InfoWindow(
           title: charger['name'] as String,
           snippet:
               '${charger['type'] as String} - ${charger['distance'] as int}m',
         ),
-        zIndex: 1,
+        zIndex: isSelected ? 2.0 : 1.0,
+        onTap: () {
+          showStationDetails(charger);
+
+          if (selectedChargerIndex.value != i) {
+            selectedChargerIndex.value = i;
+            loadChargerMarkers();
+            markers.refresh();
+            debugPrint('Refreshed markers after selecting charger $i');
+
+            if (stationPageController != null) {
+              stationPageController!.animateToPage(
+                i,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            }
+          }
+        },
       ));
     }
 
-    // Add current location marker
+    // Add the current location marker
     markers.add(Marker(
       markerId: const MarkerId('currentLocation'),
       position: currentPosition.value,
@@ -245,28 +351,35 @@ class HomeController extends GetxController {
           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       zIndex: 2,
     ));
+
+    // Re-add the selected location marker if it existed
+    if (selectedLocationMarker.markerId.value != 'not_found') {
+      markers.add(selectedLocationMarker);
+      debugPrint('Preserved selectedLocation marker: $selectedLocationMarker');
+    } else if (_selectedLocationMarker != null) {
+      markers.add(_selectedLocationMarker!);
+      debugPrint(
+          'Restored selectedLocation marker from stored data: $_selectedLocationMarker');
+    }
+
+    debugPrint('Loaded ${markers.length} markers');
   }
 
   void zoomIn() {
     debugPrint('Zooming in to current location');
-    // Increase zoom level by 1.5 for more noticeable zoom
     zoomLevel.value = min(zoomLevel.value + 1.5, 21.0);
-    // Always zoom to current location
     _updateMapZoom(centerOnCurrentLocation: true);
   }
 
   void zoomOut() {
     debugPrint('Zooming out from current location');
-    // Decrease zoom level by 1.5 for more noticeable zoom
     zoomLevel.value = max(zoomLevel.value - 1.5, 2.0);
-    // Always zoom to current location
     _updateMapZoom(centerOnCurrentLocation: true);
   }
 
   void _updateMapZoom({bool centerOnCurrentLocation = false}) {
     if (mapController != null) {
       if (centerOnCurrentLocation) {
-        // Zoom to current location with the new zoom level
         debugPrint(
             'Centering on current location at zoom level: ${zoomLevel.value}');
         mapController!
@@ -276,9 +389,9 @@ class HomeController extends GetxController {
             .then((_) {
           loadChargerMarkers();
           markers.refresh();
+          debugPrint('Zoom in/out completed, markers refreshed');
         });
       } else {
-        // Just update the zoom level without changing the center
         mapController!
             .animateCamera(
           CameraUpdate.zoomTo(zoomLevel.value),
@@ -286,28 +399,114 @@ class HomeController extends GetxController {
             .then((_) {
           loadChargerMarkers();
           markers.refresh();
+          debugPrint('Zoom in/out completed, markers refreshed');
         });
       }
     }
   }
 
-  // Method to zoom to user's current location with a higher zoom level
+  Future<void> animateToCharger(int index) async {
+    if (index < 0 || index >= chargers.length || mapController == null) {
+      return;
+    }
+
+    selectedChargerIndex.value = index;
+    final charger = chargers[index];
+    final position = charger['position'] as LatLng;
+
+    loadChargerMarkers();
+    markers.refresh();
+
+    await mapController!.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: position,
+          zoom: 16.0,
+          bearing: 0,
+          tilt: 0,
+        ),
+      ),
+    );
+
+    await Future.delayed(const Duration(milliseconds: 150));
+
+    await mapController!.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: position,
+          zoom: 18.0,
+          tilt: 30.0,
+          bearing: 0.0,
+        ),
+      ),
+    );
+
+    _bounceMarker(charger['id'].toString());
+  }
+
+  void _bounceMarker(String markerId) async {
+    loadChargerMarkers();
+
+    final markerToHighlight = markers.firstWhere(
+      (marker) => marker.markerId.value == markerId,
+      orElse: () => Marker(markerId: MarkerId('not_found')),
+    );
+
+    if (markerToHighlight.markerId.value != 'not_found') {
+      for (int i = 0; i < 2; i++) {
+        final largeMarker = markerToHighlight.copyWith(
+          iconParam: _largeChargerIcon,
+          zIndexParam: 3.0,
+        );
+
+        markers.remove(markerToHighlight);
+        markers.add(largeMarker);
+        markers.refresh();
+
+        await Future.delayed(const Duration(milliseconds: 150));
+
+        final mediumMarker = markerToHighlight.copyWith(
+          iconParam: _mediumChargerIcon,
+          zIndexParam: 2.5,
+        );
+
+        markers.remove(largeMarker);
+        markers.add(mediumMarker);
+        markers.refresh();
+
+        await Future.delayed(const Duration(milliseconds: 150));
+      }
+
+      final finalMarker = markerToHighlight.copyWith(
+        iconParam: _largeChargerIcon,
+        zIndexParam: 2.0,
+      );
+
+      markers.removeWhere((m) => m.markerId.value == markerId);
+      markers.add(finalMarker);
+      markers.refresh();
+    }
+  }
+
   Future<void> zoomToCurrentLocation() async {
     debugPrint('Zooming to current location...');
 
-    // First check if we have location permission
     final permissionStatus = await Permission.locationWhenInUse.status;
     if (permissionStatus != PermissionStatus.granted) {
       debugPrint('Location permission not granted, requesting...');
       final requestStatus = await Permission.locationWhenInUse.request();
       if (requestStatus != PermissionStatus.granted) {
-        Get.snackbar('Permission required',
-            'Location permission is needed to show your position');
+        CustomSnackbar.showPermissionRequest(
+          message:
+              'Location permission is needed to locate nearby charging stations',
+          onOpenSettings: () async {
+            await openAppSettings();
+          },
+        );
         return;
       }
     }
 
-    // Get the latest position
     try {
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -317,13 +516,20 @@ class HomeController extends GetxController {
       debugPrint(
           'Updated position: ${position.latitude}, ${position.longitude}');
       currentPosition.value = LatLng(position.latitude, position.longitude);
+      isLocationFetched.value = true;
 
-      // Update charger markers
+      // Remove any existing selected location marker if it's a current location marker
+      // This prevents duplicate current location markers
+      markers
+          .removeWhere((marker) => marker.markerId.value == 'selectedLocation');
+      _selectedLocationMarker = null;
+
+      await fetchNearbyChargers();
+
       loadChargerMarkers();
       markers.refresh();
 
       if (mapController != null) {
-        // Use a higher zoom level (19.0) for street-level detail
         final zoomValue = 19.0;
         debugPrint('Animating camera to zoom level: $zoomValue');
 
@@ -335,14 +541,557 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error getting location: $e');
-      Get.snackbar('Error', 'Could not get your location');
+
+      if (e is LocationServiceDisabledException) {
+        CustomSnackbar.showPermissionRequest(
+          message:
+              'Location services are disabled. Please enable them to find nearby charging stations',
+          onOpenSettings: () async {
+            await Geolocator.openLocationSettings();
+          },
+        );
+      } else {
+        CustomSnackbar.showError(
+          message: 'Could not get your location. Please try again later.',
+        );
+      }
     }
+  }
+
+  Future<void> fetchNearbyChargers(
+      {double? latitude, double? longitude}) async {
+    if (!Get.isRegistered<SessionController>()) {
+      debugPrint("SessionController not registered yet, skipping fetch");
+      return;
+    }
+
+    final authToken = sessionController.token.value;
+    final userId = sessionController.userId.value;
+    final emailId = sessionController.emailId.value;
+
+    if (authToken.isEmpty || userId <= 0 || emailId.isEmpty) {
+      debugPrint("Missing session data, skipping fetch");
+      return;
+    }
+
+    // Use provided coordinates if available, otherwise fall back to currentPosition
+    final fetchLat = latitude ?? currentPosition.value.latitude;
+    final fetchLng = longitude ?? currentPosition.value.longitude;
+
+    debugPrint(
+        'Fetching nearby chargers for coordinates: ($fetchLat, $fetchLng)');
+
+    isLoading.value = true;
+    try {
+      debugPrint("Fetching nearby chargers...");
+      final fetchResponseModel = await _homeRepository.fetchnearbychargers(
+          userId, emailId, authToken, fetchLat, fetchLng);
+
+      debugPrint(
+          "Fetch nearbychargers response: ${fetchResponseModel.toJson()}");
+
+      if (fetchResponseModel.success) {
+        if (fetchResponseModel.nearbychargers != null) {
+          final nearbyChargersData = fetchResponseModel.nearbychargers;
+
+          if (nearbyChargersData is List) {
+            final List<dynamic> stationsData = nearbyChargersData;
+
+            chargers.clear();
+
+            for (var i = 0; i < stationsData.length; i++) {
+              final station = stationsData[i];
+
+              if (station['station_id'] != null &&
+                  station['latitude'] != null &&
+                  station['longitude'] != null) {
+                double lat, lng;
+                try {
+                  lat = double.parse(station['latitude'].toString());
+                  lng = double.parse(station['longitude'].toString());
+                } catch (e) {
+                  debugPrint("Error parsing coordinates: $e");
+                  continue;
+                }
+
+                // Calculate distance from the selected or current location
+                final distance = Geolocator.distanceBetween(
+                  fetchLat,
+                  fetchLng,
+                  lat,
+                  lng,
+                ).round();
+
+                chargers.add({
+                  "id": station['station_id'].toString(),
+                  "station_id": station['station_id'],
+                  "position": LatLng(lat, lng),
+                  "name":
+                      "${station['location_id'] ?? ''} | ${station['station_address'] ?? 'Unknown Location'}",
+                  "type": station['charger_type'] ?? "Unknown Type",
+                  "distance": distance,
+                  "available": station['availability'] == "Open 24/7" ||
+                      station['availability'] == "Available",
+                  "location_id": station['location_id'] ?? '',
+                  "station_address":
+                      station['station_address'] ?? 'Unknown Location',
+                  "landmark": station['landmark'] ?? 'No landmark information',
+                  "network": station['network'] ?? 'Unknown Network',
+                  "availability": station['availability'] ?? 'Unknown',
+                  "accessibility": station['accessibility'] ?? 'Public',
+                  "charger_type": station['charger_type'] ?? 'Unknown',
+                });
+              }
+            }
+
+            loadChargerMarkers();
+            markers.refresh();
+
+            debugPrint(
+                "Updated chargers list with ${chargers.length} stations");
+          } else if (nearbyChargersData is Map &&
+              nearbyChargersData.containsKey('charger_details')) {
+            final List<dynamic> chargerDetails =
+                nearbyChargersData['charger_details'];
+
+            chargers.clear();
+
+            for (var i = 0; i < chargerDetails.length; i++) {
+              final charger = chargerDetails[i];
+
+              if (charger['charger_id'] != null &&
+                  charger['lat'] != null &&
+                  charger['long'] != null) {
+                double lat, lng;
+                try {
+                  lat = double.parse(charger['lat'].toString());
+                  lng = double.parse(charger['long'].toString());
+                } catch (e) {
+                  debugPrint("Error parsing coordinates: $e");
+                  continue;
+                }
+
+                // Calculate distance from the selected or current location
+                final distance = Geolocator.distanceBetween(
+                  fetchLat,
+                  fetchLng,
+                  lat,
+                  lng,
+                ).round();
+
+                chargers.add({
+                  "id": charger['charger_id'].toString(),
+                  "position": LatLng(lat, lng),
+                  "name":
+                      "${charger['model'] ?? ''} | ${charger['address'] ?? 'Unknown Location'}",
+                  "type": charger['charger_type'] ?? "Unknown Type",
+                  "distance": distance,
+                  "available": charger['status'] == true,
+                });
+              }
+            }
+
+            loadChargerMarkers();
+            markers.refresh();
+
+            debugPrint(
+                "Updated chargers list with ${chargers.length} chargers");
+          } else {
+            debugPrint("Unexpected response format: $nearbyChargersData");
+          }
+        } else {
+          debugPrint("Nearby chargers data is null");
+        }
+      } else {
+        debugPrint("Fetch failed: ${fetchResponseModel.message}");
+      }
+    } catch (e, stackTrace) {
+      debugPrint("Error fetching nearby chargers: $e");
+      CustomSnackbar.showError(message: 'Error: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void navigateToAllChargers() {
+    if (chargers.isEmpty) {
+      Get.snackbar(
+        'No Chargers',
+        'No nearby chargers available',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } else {
+      Get.to(
+        () => ViewAllNearbyChargers(),
+        transition: Transition.rightToLeft,
+        duration: Duration(milliseconds: 300),
+      );
+    }
+  }
+
+  Future<void> launchGoogleMapsNavigation(LatLng destination) async {
+    print("lat long : $destination");
+    final uri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}&travelmode=driving',
+    );
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        CustomSnackbar.showError(message: 'Could not launch Google Maps');
+      }
+    } catch (e) {
+      debugPrint('Error launching Google Maps: $e');
+      CustomSnackbar.showError(message: 'Error opening navigation');
+    }
+  }
+
+  Future<void> launchGoogleMapsNavigationWithName(
+      double latitude, double longitude, String destinationName) async {
+    try {
+      final encodedName = Uri.encodeComponent(destinationName);
+      final googleMapsUrl =
+          'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude&destination_place_id=$encodedName&travelmode=driving';
+      final uri = Uri.parse(googleMapsUrl);
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        Get.snackbar(
+          'Navigation Error',
+          'Could not open Google Maps. Please make sure you have Google Maps installed.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[700],
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error launching Google Maps: $e');
+      Get.snackbar(
+        'Navigation Error',
+        'Could not open Google Maps: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[700],
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  void showStationDetails(Map<String, dynamic> station) {
+    final isDark = isDarkMode.value;
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    station['name'] as String,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    station['network'] as String? ?? 'Unknown Network',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.green[700],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    station['station_address'] as String? ?? 'Unknown Location',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark ? Colors.grey[300] : Colors.grey[800],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (station['landmark'] != null &&
+                (station['landmark'] as String).isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4, left: 24),
+                child: Text(
+                  station['landmark'] as String,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                buildAppliedLocationItem(
+                  icon: Icons.directions_car,
+                  label: 'Distance',
+                  value: '${station['distance'] as int} m',
+                  isDark: isDark,
+                ),
+                buildAppliedLocationItem(
+                  icon: Icons.electrical_services,
+                  label: 'Type',
+                  value: station['charger_type'] as String? ?? 'Unknown',
+                  isDark: isDark,
+                ),
+                buildAppliedLocationItem(
+                  icon: Icons.access_time,
+                  label: 'Availability',
+                  value: station['availability'] as String? ?? 'Unknown',
+                  isDark: isDark,
+                  valueColor: (station['available'] as bool?) == true
+                      ? Colors.green[700]
+                      : Colors.red[700],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Get.back();
+                      NavigationHelper.navigateToStation(station);
+                    },
+                    icon: const Icon(Icons.directions),
+                    label: const Text('Navigate'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green[700],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Get.back();
+                      Get.snackbar(
+                        'Station Details',
+                        'Full station details will be implemented',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    },
+                    icon: const Icon(Icons.info_outline),
+                    label: const Text('Details'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.green[700],
+                      side: BorderSide(color: Colors.green[700]!),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
+  Widget buildAppliedLocationItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required bool isDark,
+    Color? valueColor,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[600]),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.grey[400] : Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: valueColor ?? (isDark ? Colors.white : Colors.black87),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void addSelectedLocationMarker(String name, double latitude, double longitude,
+      {bool isCurrentLocation = false}) async {
+    debugPrint(
+        'Attempting to add selected location marker for $name at ($latitude, $longitude), isCurrentLocation: $isCurrentLocation');
+
+    final position = LatLng(latitude, longitude);
+
+    // Remove any existing selected location marker
+    markers
+        .removeWhere((marker) => marker.markerId.value == 'selectedLocation');
+    debugPrint('Removed any previous selectedLocation marker');
+
+    // Create the new marker based on whether it's the current location
+    final newMarker = Marker(
+      markerId: const MarkerId('selectedLocation'),
+      position: position,
+      icon: isCurrentLocation
+          ? (_locationIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue))
+          : (_selectedLocationIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)),
+      infoWindow: InfoWindow(title: name),
+      zIndex: 3.0,
+    );
+    debugPrint('Created new marker: $newMarker');
+
+    // Store the marker to persist it
+    _selectedLocationMarker = newMarker;
+    debugPrint('Stored selectedLocation marker in _selectedLocationMarker');
+
+    // Add the marker to the set
+    markers.add(newMarker);
+    debugPrint('Added marker to markers set, total markers: ${markers.length}');
+
+    // Verify the marker is in the set
+    final addedMarker = markers.firstWhere(
+      (marker) => marker.markerId.value == 'selectedLocation',
+      orElse: () => Marker(markerId: MarkerId('not_found')),
+    );
+    if (addedMarker.markerId.value == 'not_found') {
+      debugPrint('Error: Newly added marker not found in markers set');
+    } else {
+      debugPrint('Marker successfully verified in the set');
+    }
+
+    // Ensure the map controller exists and animate to the location
+    if (mapController == null) {
+      debugPrint('Error: Map controller is null, cannot animate camera');
+      CustomSnackbar.showError(message: 'Map not ready, please try again.');
+      return;
+    }
+
+    try {
+      debugPrint('Animating camera to $position at zoom level 15.0');
+      await mapController!.animateCamera(
+        CameraUpdate.newLatLngZoom(position, 15.0),
+      );
+      debugPrint('Camera animation completed');
+    } catch (e) {
+      debugPrint('Error animating camera: $e');
+      CustomSnackbar.showError(
+          message: 'Failed to move map to selected location.');
+    }
+
+    // Fetch nearby chargers around the selected location
+    debugPrint('Fetching nearby chargers around selected location...');
+    await fetchNearbyChargers(latitude: latitude, longitude: longitude);
+
+    // Force a refresh to ensure the marker is displayed
+    markers.refresh();
+    debugPrint('Markers refreshed, forcing UI update');
+  }
+
+  Future<bool> showExitConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Exit App?'),
+            content: const Text('Are you sure you want to exit the app?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: Theme.of(context).hintColor),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  'Exit',
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  void handleQrScannerPress() {
+    debugPrint('QR scanner pressed');
+    Get.snackbar(
+      'QR Scanner',
+      'QR Scanner functionality will be implemented here',
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     mapController?.dispose();
     mapController = null;
+    stationPageController?.dispose();
+    stationPageController = null;
+    _selectedLocationMarker = null; // Clear stored marker on close
     super.onClose();
   }
 }

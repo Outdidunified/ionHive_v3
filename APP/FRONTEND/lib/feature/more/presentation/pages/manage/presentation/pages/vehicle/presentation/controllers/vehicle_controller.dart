@@ -35,15 +35,12 @@ class VehicleController extends GetxController {
       final userId = sessionController.userId.value;
       final emailId = sessionController.emailId.value;
 
-      print("Fetching saved vehicles for userId: $userId, emailId: $emailId");
-
       final response = await _vehicleRepository.fetchsavedvehicle(
           userId, emailId, authToken);
-      print("Response: $response");
 
       if (response.error) {
         errorMessage(response.message ?? "Failed to fetch vehicles");
-        print("Error: ${response.message}");
+        debugPrint("Error: ${response.message}");
         throw Exception(response.message ?? "Failed to fetch vehicles");
       }
 
@@ -65,13 +62,11 @@ class VehicleController extends GetxController {
               })
           .toList();
 
-      print("Mapped vehicle list: $vehicleList");
-
       return vehicleList;
     } catch (e) {
       errorMessage("Error fetching vehicles: $e");
       hasError.value = true; // Set error state on failure
-      print("Exception: $e");
+      debugPrint("Exception: $e");
       throw Exception("Error fetching vehicles: $e");
     } finally {
       isLoading(false);
@@ -95,26 +90,16 @@ class VehicleController extends GetxController {
     try {
       await fetchSavedVehicles();
     } catch (e) {
-      print("Error refreshing vehicles: $e");
+      debugPrint("Error refreshing vehicles: $e");
     }
   }
 
   /// Sets the vehicle data from the snapshot
   void setVehicleData(List<Map<String, dynamic>> vehicleData) {
     try {
-      // Process the vehicle data directly without converting to VehicleModel
-      // This is because we're already using the data from the snapshot in the UI
-      print("Setting vehicle data with ${vehicleData.length} vehicles");
-
-      // Extract vehicle IDs for debugging
-      final vehicleIds = vehicleData.map((v) => v['vehicle_id']).toList();
-      print("Vehicle IDs: $vehicleIds");
-
-      // We'll use the fetchSavedVehicles method to properly update the vehicles list
-      // This ensures the data is properly formatted according to the VehicleModel class
       refreshVehicles();
     } catch (e) {
-      print("Error setting vehicle data: $e");
+      debugPrint("Error setting vehicle data: $e");
       errorMessage("Error setting vehicle data: $e");
     }
   }
@@ -130,8 +115,6 @@ class VehicleController extends GetxController {
       final userId = sessionController.userId.value;
       final emailId = sessionController.emailId.value;
 
-      print("Removing vehicle: $vehicleNumber for userId: $userId");
-
       // Find the vehicle_id based on vehicleNumber
       final vehicleToRemove = vehicles.firstWhere(
         (vehicle) => vehicle.vehicleNumber == vehicleNumber,
@@ -143,7 +126,6 @@ class VehicleController extends GetxController {
       }
 
       final vehicleId = vehicleToRemove.id; // Use 'id' from VehicleModel
-      print("Found vehicle with ID: $vehicleId");
 
       // Call the remove API
       final response = await _vehicleRepository.removevehiclerep(
@@ -157,9 +139,8 @@ class VehicleController extends GetxController {
         if (indexToRemove != -1) {
           // Remove only the specific vehicle
           vehicles.removeAt(indexToRemove);
-          print("Vehicle removed successfully from local list");
         } else {
-          print(
+          debugPrint(
               "Vehicle was not found in local list after successful API call");
           // Refresh the list from server to ensure UI is in sync
           await refreshVehicles();
@@ -172,7 +153,7 @@ class VehicleController extends GetxController {
         };
       } else {
         errorMessage(response.message);
-        print("Failed to remove vehicle: ${response.message}");
+        debugPrint("Failed to remove vehicle: ${response.message}");
         return {
           'success': false,
           'message': response.message,
@@ -181,7 +162,7 @@ class VehicleController extends GetxController {
       }
     } catch (e) {
       errorMessage("Error removing vehicle: $e");
-      print("Error removing vehicle: $e");
+      debugPrint("Error removing vehicle: $e");
       return {
         'success': false,
         'message': "Error removing vehicle: $e",

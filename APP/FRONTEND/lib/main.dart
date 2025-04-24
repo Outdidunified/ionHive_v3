@@ -33,12 +33,16 @@ void main() async {
     ),
   );
 
+  // Initialize theme controller first to ensure theme is applied before other controllers
+  final themeController = Get.put(ThemeController());
+  await themeController.loadThemePreferences(); // Wait for theme to be loaded
+
+  // Initialize other controllers
   Get.put(LandingPageController());
   Get.put(HomeController());
   Get.put(SessionController()); // Ensure it is available globally
   Get.put(ConnectivityController());
   Get.put(VehicleController());
-  Get.put(ThemeController()); // Initialize theme controller
 
   runApp(const IonHive());
 }
@@ -63,7 +67,15 @@ class IonHive extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the theme controller
     final themeController = Get.find<ThemeController>();
+
+    // Force theme update when the app starts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // This ensures the theme is applied correctly after the app is built
+      final currentMode = themeController.themeMode.value;
+      themeController.changeThemeMode(currentMode);
+    });
 
     return Obx(() => GetMaterialApp(
           title: 'ionHive',

@@ -1,7 +1,8 @@
-import 'package:ionhive/feature/wallet%20/domain/models/wallet_model.dart';
-import 'package:ionhive/feature/wallet%20/domain/models/payment_request.dart';
-import 'package:ionhive/feature/wallet%20/domain/models/payment_response.dart';
-import 'package:ionhive/feature/wallet%20/domain/models/order_response.dart';
+
+import 'package:ionhive/feature/wallet/domain/models/order_response.dart';
+import 'package:ionhive/feature/wallet/domain/models/payment_request.dart';
+import 'package:ionhive/feature/wallet/domain/models/payment_response.dart';
+import 'package:ionhive/feature/wallet/domain/models/wallet_model.dart';
 
 import '../../data/api.dart';
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
-import 'package:ionhive/feature/wallet%20/presentation/controller/addcredits_controller.dart';
-import 'package:ionhive/feature/wallet%20/presentation/controller/wallet_controller.dart';
+import 'package:ionhive/feature/wallet/presentation/controller/addcredits_controller.dart';
+import 'package:ionhive/feature/wallet/presentation/controller/wallet_controller.dart';
 import 'package:ionhive/utils/theme/theme_controller.dart';
 import 'package:ionhive/utils/widgets/button/custom_button.dart';
 
@@ -10,7 +10,8 @@ class AddCreditsPage extends StatelessWidget {
   AddCreditsPage({super.key});
 
   final sessionController = Get.find<SessionController>();
-  final walletController = Get.find<WalletController>();
+  final walletController =
+      Get.put(WalletController(), permanent: true, tag: 'wallet');
   final addCreditsController = Get.put(AddCreditsController());
   final themeController = Get.find<ThemeController>();
 
@@ -25,8 +26,7 @@ class AddCreditsPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: BackButton(color: isDarkMode ? Colors.white : Colors.black),
-        title: Text('Add Credits', style: theme.textTheme.titleLarge),
+        title: Text('Add Credits', style: theme.textTheme.headlineMedium),
       ),
       body: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
@@ -215,7 +215,7 @@ class AddCreditsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Payment Method",
+          "Payment Method Available",
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w500,
             color: isDarkMode ? Colors.white70 : Colors.black54,
@@ -258,7 +258,7 @@ class AddCreditsPage extends StatelessWidget {
               _buildPaymentOption(
                 "Credit / Debit Card",
                 Icons.credit_card,
-                false,
+                true,
                 theme,
                 isDarkMode,
               ),
@@ -271,7 +271,7 @@ class AddCreditsPage extends StatelessWidget {
               _buildPaymentOption(
                 "Net Banking",
                 Icons.account_balance_wallet,
-                false,
+                true,
                 theme,
                 isDarkMode,
               ),
@@ -356,21 +356,11 @@ class AddCreditsPage extends StatelessWidget {
               : () => addCreditsController.processPayment(),
           isLoading: isLoading,
           borderRadius: 16.0,
-          textStyle: theme.textTheme.titleLarge!.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          textStyle: theme.textTheme.bodyLarge!,
           boxShadow: BoxShadow(
-            color: theme.colorScheme.primary.withOpacity(0.4),
+            color: theme.primaryColor.withOpacity(0.5),
             blurRadius: 8,
             offset: const Offset(0, 4),
-          ),
-          gradient: LinearGradient(
-            colors: [
-              theme.colorScheme.primary,
-              theme.colorScheme.primary.withOpacity(0.8),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
           ),
         ),
       );

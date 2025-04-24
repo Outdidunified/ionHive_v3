@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ionhive/feature/wallet%20/domain/repositories/wallet_repository.dart';
+import 'package:ionhive/feature/wallet/domain/models/payment_request.dart';
+import 'package:ionhive/feature/wallet/domain/repositories/wallet_repository.dart';
+import 'package:ionhive/feature/wallet/presentation/controller/wallet_controller.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
-import 'package:ionhive/feature/wallet%20/domain/models/payment_request.dart';
-import 'package:ionhive/feature/wallet%20/presentation/controller/wallet_controller.dart';
+
 
 class AddCreditsController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -19,7 +20,8 @@ class AddCreditsController extends GetxController
   double? _lastPaymentAmount;
 
   final sessionController = Get.find<SessionController>();
-  final walletController = Get.find<WalletController>();
+  final walletController =
+      Get.put(WalletController(), permanent: true, tag: 'wallet');
   final walletRepository = WalletRepository();
 
   AnimationController? _animationController;
@@ -43,7 +45,7 @@ class AddCreditsController extends GetxController
       duration: const Duration(milliseconds: 500),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController!, curve: Curves.easeOutBack),
     );
 
@@ -190,7 +192,6 @@ class AddCreditsController extends GetxController
       if (orderResponse.success) {
         final order = orderResponse.order;
         final orderId = order.id;
-        debugPrint("Order created: $orderId");
 
         var options = {
           // 'key': 'rzp_live_62NvZ13QGMQk1S',
