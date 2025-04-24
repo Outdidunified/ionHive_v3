@@ -37,10 +37,13 @@ dependencies:
   provider: ^6.1.2
   flutter_dotenv: ^5.1.0
   google_maps_flutter: ^2.6.0  # Updated to latest
+  geocoding: ^2.1.0
   geolocator: ^10.0.0  # Updated to latest
   path_provider: ^2.1.5
   razorpay_flutter: ^1.4.0
   fluttertoast: ^8.2.12  # Compatible with embedding v2
+  open_file: ^3.5.10
+
 
 dev_dependencies:
   flutter_test:
