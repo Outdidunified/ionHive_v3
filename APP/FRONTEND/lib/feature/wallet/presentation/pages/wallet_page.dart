@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/transactions/presentation/pages/paymenthistory.dart';
-import 'package:ionhive/feature/wallet_temp/presentation/pages/add_credits.dart';
+import 'package:ionhive/feature/wallet/presentation/pages/add_credits.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../controller/wallet_controller.dart';

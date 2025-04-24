@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
-import 'package:ionhive/feature/wallet_temp/domain/models/wallet_model.dart';
-import 'package:ionhive/feature/wallet_temp/domain/repositories/wallet_repository.dart';
+import 'package:ionhive/feature/wallet/domain/models/wallet_model.dart';
+import 'package:ionhive/feature/wallet/domain/repositories/wallet_repository.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class WalletController extends GetxController {

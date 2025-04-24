@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ionhive/feature/wallet_temp/domain/models/payment_request.dart';
-import 'package:ionhive/feature/wallet_temp/domain/repositories/wallet_repository.dart';
-import 'package:ionhive/feature/wallet_temp/presentation/controller/wallet_controller.dart';
+import 'package:ionhive/feature/wallet/domain/models/payment_request.dart';
+import 'package:ionhive/feature/wallet/domain/repositories/wallet_repository.dart';
+import 'package:ionhive/feature/wallet/presentation/controller/wallet_controller.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
