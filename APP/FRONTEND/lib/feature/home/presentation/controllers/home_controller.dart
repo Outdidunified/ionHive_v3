@@ -898,7 +898,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                       Get.back();
                       NavigationHelper.navigateToStation(station);
                     },
-                    icon: const Icon(Icons.directions),
+                    icon: const Icon(Icons.directions,color: Colors.white,),
                     label: const Text('Navigate'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green[700],

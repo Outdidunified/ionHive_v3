@@ -470,16 +470,15 @@ class WalletPage extends StatelessWidget {
 
   Widget _buildOptionCard(IconData icon, String title, String subtitle,
       Color color, ThemeData theme) {
+    bool showCornerTag = title == 'Withdraw';
+
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          // Handle navigation based on the option title
           if (title == 'Add Credits') {
-            Get.to(
-              () => AddCreditsPage(),
-              transition: Transition.rightToLeft,
-              duration: const Duration(milliseconds: 300),
-            );
+            Get.to(() => AddCreditsPage(),
+                transition: Transition.rightToLeft,
+                duration: const Duration(milliseconds: 300));
           } else if (title == 'Transaction') {
             final userId = sessionController.userId.value;
             final username = sessionController.username.value;
@@ -487,7 +486,7 @@ class WalletPage extends StatelessWidget {
             final token = sessionController.token.value;
 
             Get.to(
-              () => PaymentHistoryPage(
+                  () => PaymentHistoryPage(
                 userId: userId,
                 username: username,
                 emailId: emailId,
@@ -497,45 +496,63 @@ class WalletPage extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
             );
           }
-          // Add more conditions for other options if needed
         },
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: theme.cardColor,
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: theme.colorScheme.primary,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: theme.cardColor,
+                    child: Icon(
+                      icon,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color:
+                      theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 👉 Positioned Corner Tag
+            if (showCornerTag)
+              Positioned(
+                top: -7,
+                right: 25,
+                child: CornerTag(
+                  label: 'Soon!',
+                  isCapitative: false,
+                  isDarkTheme: theme.brightness == Brightness.dark,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                subtitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
+
 
   Widget _buildProgressCards(ThemeData theme) {
     return Column(
@@ -946,6 +963,72 @@ class WalletPage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class CornerTag extends StatelessWidget {
+  final String label;
+  final bool isCapitative;
+  final bool isDarkTheme;
+
+  const CornerTag({
+    Key? key,
+    required this.label,
+    required this.isCapitative,
+    required this.isDarkTheme,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+    final tagWidth = isSmallScreen
+        ? (isCapitative ? screenWidth * 0.22 : screenWidth * 0.16)
+        : (isCapitative ? screenWidth * 0.25 : screenWidth * 0.18);
+    // Make the tag slightly taller to add space at the bottom
+    final tagHeight = isSmallScreen ? screenWidth * 0.03 : screenWidth * 0.04;
+
+    return Container(
+      width: tagWidth,
+      height: tagHeight,
+      // All sides same margin
+      decoration: BoxDecoration(
+        color:  Colors.orange.shade800,
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(11), // Match the card's corner radius
+          bottomLeft: Radius.circular(16),
+          bottomRight:
+          Radius.circular(4), // Add a small curve at the bottom right
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkTheme
+                ? Colors.black45.withOpacity(0.3)
+                : Colors.black.withOpacity(0.3),
+            blurRadius: 6,
+            spreadRadius: 1,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding:
+        const EdgeInsets.only(bottom: 1.0), // Add padding at the bottom
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: isSmallScreen
+                  ? (isCapitative ? screenWidth * 0.024 : screenWidth * 0.026)
+                  : (isCapitative ? screenWidth * 0.026 : screenWidth * 0.028),
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
     );
   }
 }
