@@ -5,25 +5,26 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAssignReseller from '../../hooks/ManageDevice/AssignResellerHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const AssignReseller = ({ userInfo, handleLogout }) => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const backManageDevice = () => {
-    navigate('/superadmin/ManageDevice');
-  };
+    const backManageDevice = () => {
+        navigate('/superadmin/ManageDevice');
+    };
 
-  const {
-    chargers,
-    resellers,
-    reseller_id,
-    charger_ids,
-    filteredChargers,
-    handleResellerChange,
-    handleChargerChange,
-    handleModelChange,
-    handleSubmit,
-    loading
-  } = useAssignReseller(userInfo, backManageDevice);
+    const {
+        chargers,
+        resellers,
+        reseller_id,
+        charger_ids,
+        filteredChargers,
+        handleResellerChange,
+        handleChargerChange,
+        handleModelChange,
+        handleSubmit,
+        loading
+    } = useAssignReseller(userInfo, backManageDevice);
 
     return (
         <div className='container-scroller'>
@@ -103,7 +104,7 @@ const AssignReseller = ({ userInfo, handleLogout }) => {
                                                                             filteredChargers.map((charger) => (
                                                                                 <div className="form-check form-check-success" key={charger.charger_id}>
                                                                                     <label className="form-check-label">
-                                                                                        <input
+                                                                                        <InputField
                                                                                             style={{ textAlign: 'center' }}
                                                                                             type="checkbox"
                                                                                             className="form-check-input"
@@ -124,12 +125,12 @@ const AssignReseller = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                     </div>
                                                     <LoadingButton
-  type="submit"
-  loading={loading}
-  disabled={loading}
->
-  Assign
-</LoadingButton>
+                                                        type="submit"
+                                                        loading={loading}
+                                                        disabled={loading}
+                                                    >
+                                                        Assign
+                                                    </LoadingButton>
 
                                                 </form>
                                             </div>

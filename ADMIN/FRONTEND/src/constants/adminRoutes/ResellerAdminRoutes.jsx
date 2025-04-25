@@ -20,8 +20,7 @@ import AssignedDevicesClient from '../../roles/reselleradmin/page/Manageclient/A
 import Sessionhistoryclient from '../../roles/reselleradmin/page/Manageclient/Sessionhistoryclient';
 
 //wallet
-import Wallet from '../../roles/reselleradmin/page/Wallet/Wallet'
-
+import Withdraw from '../../roles/reselleradmin/page/Withdraw/Withdraw';
 import DeviceReport from '../../roles/reselleradmin/page/ManageReport/DeviceReport';
 import RevenueReport from '../../roles/reselleradmin/page/ManageReport/RevenueReport';
 
@@ -220,9 +219,9 @@ const ResellerAdminApp = () => {
         {/*  */}
 
         <Route
-          path="/Wallet"
+          path="/Withdraw"
           element={loggedIn ? (
-            <Wallet userInfo={userInfo} handleLogout={handleLogout} />
+            <Withdraw userInfo={userInfo} handleLogout={handleLogout} />
           ) : (
             <Navigate to="/reselleradmin" />
           )}

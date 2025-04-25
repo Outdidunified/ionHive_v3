@@ -4,6 +4,7 @@ import Footer from '../../components/Footer';
 import useEditUser from '../../hooks/ManageUsers/EditUserListHooks';
 import { useNavigate } from 'react-router-dom';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 
 const EditUserList = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
@@ -68,7 +69,7 @@ const EditUserList = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">User Name</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text" className="form-control" value={username} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setUsername(sanitizedValue); }} readOnly required />
+                                                                        <InputField  value={username} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setUsername(sanitizedValue); }} readOnly required />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -76,7 +77,7 @@ const EditUserList = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Phone Number</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text" className="form-control" value={phone_no} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPhoneNo(sanitizedValue); }} required />
+                                                                        <InputField  value={phone_no} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPhoneNo(sanitizedValue); }} required />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -86,7 +87,7 @@ const EditUserList = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Email ID</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="email" className="form-control" value={email_id} onChange={(e) => setEmailId(e.target.value)} readOnly required />
+                                                                        <InputField  value={email_id} onChange={(e) => setEmailId(e.target.value)} readOnly required />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -94,7 +95,7 @@ const EditUserList = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Password</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text" className="form-control" value={passwords} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue); }} required />
+                                                                        <InputField  value={passwords} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue); }} required />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -105,8 +106,7 @@ const EditUserList = ({ userInfo, handleLogout }) => {
                                                                     <div className="form-group row">
                                                                         <label className="col-sm-12 col-form-label labelInput">Wallet</label>
                                                                         <div className="col-sm-12">
-                                                                            <input type="text"
-                                                                                className="form-control"
+                                                                            <InputField 
                                                                                 value={wallet_bal}
                                                                                 onChange={(e) => {
                                                                                     let value = e.target.value;

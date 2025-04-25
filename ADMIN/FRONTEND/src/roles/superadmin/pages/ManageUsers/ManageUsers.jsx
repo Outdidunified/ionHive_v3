@@ -4,6 +4,7 @@ import Footer from '../../components/Footer';
 import ManageUser from '../../hooks/ManageUsers/ManageUsersHooks';
 import { useNavigate } from 'react-router-dom';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const ManageUsers = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
 
@@ -98,13 +99,13 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '125px' }}>User Name</span>
                                                                     </div>
-                                                                    <input type="text" className="form-control" placeholder="User Name" value={username} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setuserName(sanitizedValue); }} required />
+                                                                    <InputField  placeholder="User Name" value={username} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setuserName(sanitizedValue); }} required />
                                                                 </div>
                                                                 <div className="input-group">
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '125px' }}>Email ID</span>
                                                                     </div>
-                                                                    <input type="email" className="form-control" placeholder="Email ID" value={email_id}
+                                                                    <InputField type="email"  placeholder="Email ID" value={email_id}
                                                                         onChange={(e) => {
                                                                             const value = e.target.value;
                                                                             // Remove spaces and invalid characters
@@ -124,13 +125,13 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '125px' }}>Phone</span>
                                                                     </div>
-                                                                    <input type="phone" className="form-control" placeholder="Phone" value={phoneNo} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPhone(sanitizedValue); }} required />
+                                                                    <InputField type="phone" placeholder="Phone" value={phoneNo} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPhone(sanitizedValue); }} required />
                                                                 </div>
                                                                 <div className="input-group">
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '125px' }}>Password</span>
                                                                     </div>
-                                                                    <input type="text" className="form-control" placeholder="Password" value={Password} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue); }} required />
+                                                                    <InputField  placeholder="Password" value={Password} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue); }} required />
                                                                 </div>
                                                             </div>
                                                             {errorMessage && <div className="text-danger">{errorMessage}</div>}<br />
@@ -169,7 +170,7 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" aria-label="search" aria-describedby="search" autoComplete="off" onChange={handleSearchInputChange} />
+                                                            <InputField  placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange} />
                                                         </div>
                                                     </div>
                                                 </div>

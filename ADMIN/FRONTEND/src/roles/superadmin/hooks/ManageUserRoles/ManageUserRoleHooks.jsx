@@ -110,8 +110,10 @@ const useManageUserRole = (userInfo) => {
              showErrorAlert('Error', 'Failed to update user role, ' + response.data.message);
           }
         } catch (error) {
-           showErrorAlert('Error', 'An error occurred while updating user role');
-        } finally {
+          const errorMessage = error?.response?.data?.message || 'An error occurred while updating user role';
+          showErrorAlert('Error', errorMessage);
+        }
+         finally {
           setEditLoading(false);
         }
       };

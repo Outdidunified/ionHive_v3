@@ -3,6 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAddManageReseller from '../../hooks/ManageReseller/AddManageResellerHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const AddManageReseller = ({ userInfo, handleLogout }) => {
   const {
     reseller_name, setResellerName,
@@ -52,9 +53,7 @@ const AddManageReseller = ({ userInfo, handleLogout }) => {
                               <div className="col-md-6">
                                 <div className="form-group">
                                   <label className="col-form-label labelInput">Reseller Name</label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
+                                  <InputField
                                     placeholder="Reseller Name"
                                     value={reseller_name}
                                     maxLength={25}
@@ -72,9 +71,7 @@ const AddManageReseller = ({ userInfo, handleLogout }) => {
                               <div className="col-md-6">
                                 <div className="form-group">
                                   <label className="col-form-label labelInput">Phone Number</label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
+                                  <InputField
                                     placeholder="Phone Number"
                                     value={phoneNumber}
                                     maxLength={10}
@@ -94,9 +91,8 @@ const AddManageReseller = ({ userInfo, handleLogout }) => {
                               <div className="col-md-6">
                                 <div className="form-group">
                                   <label className="col-form-label labelInput">Email ID</label>
-                                  <input
+                                  <InputField
                                     type="email"
-                                    className="form-control"
                                     placeholder="Email ID"
                                     value={reseller_email_id}
                                     onChange={(e) => {
@@ -117,9 +113,7 @@ const AddManageReseller = ({ userInfo, handleLogout }) => {
                               <div className="col-md-6">
                                 <div className="form-group">
                                   <label className="col-form-label labelInput">Address</label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
+                                  <InputField
                                     placeholder="Address"
                                     value={reseller_address}
                                     maxLength={150}

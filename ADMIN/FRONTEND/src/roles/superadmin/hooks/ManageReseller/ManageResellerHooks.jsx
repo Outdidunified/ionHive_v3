@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../../../../utils/utils';
-const useResellerData = () => {
+const useResellerData = (userInfo) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

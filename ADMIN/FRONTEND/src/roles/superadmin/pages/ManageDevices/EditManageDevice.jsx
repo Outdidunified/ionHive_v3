@@ -3,6 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useEditManageDevice from '../../hooks/ManageDevice/EditManageDeviceHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const EditManageDevice = ({ userInfo, handleLogout }) => {
   const {
     backManageDevice,
@@ -76,9 +77,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
     <div className="form-group row">
         <label className="col-sm-12 col-form-label labelInput">Charger ID</label>
         <div className="col-sm-12">
-            <input
-                type="text"
-                className="form-control"
+            <InputField
                 placeholder="Charger ID"
                 value={charger_id}
                 maxLength={14}
@@ -96,7 +95,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Vendor</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text" className="form-control" placeholder="Vendor" value={vendor} maxLength={20} onChange={(e) => {const value = e.target.value; let sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setVendor(sanitizedValue); }} required/>
+                                                                        <InputField  placeholder="Vendor" value={vendor} maxLength={20} onChange={(e) => {const value = e.target.value; let sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setVendor(sanitizedValue); }} required/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -133,9 +132,8 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Max Current</label>
                                                                     <div className="col-sm-12">
-                                                                        <input 
+                                                                        <InputField 
                                                                             type="tel" 
-                                                                            className="form-control" 
                                                                             placeholder="Max Current" 
                                                                             value={max_current} 
                                                                             onChange={(e) => {
@@ -166,7 +164,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Max Power</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="tel" className="form-control" placeholder="Max Power" value={max_power} 
+                                                                        <InputField type="tel"  placeholder="Max Power" value={max_power} 
                                                                         onChange={(e) => {
                                                                             let value = e.target.value;
                                                                             

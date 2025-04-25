@@ -3,6 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import Swal from 'sweetalert2';
 import useWithdrawRequests from '../../hooks/Withdraw/WithdrawHooks';
+import InputField from '../../../../utils/InputField';
 const Withdraw = ({ userInfo, handleLogout }) => {
     const {
         withdrawalRequests,
@@ -145,9 +146,7 @@ const Withdraw = ({ userInfo, handleLogout }) => {
                 <i className="icon-search"></i>
             </span>
         </div>
-        <input 
-            type="text" 
-            className="form-control" 
+        <InputField
             placeholder="Search now" 
             value={searchQuery} 
             onChange={(e) => setSearchQuery(e.target.value)}

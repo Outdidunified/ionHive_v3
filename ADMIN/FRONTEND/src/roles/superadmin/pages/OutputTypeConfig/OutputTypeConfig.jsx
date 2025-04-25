@@ -4,6 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useOutputTypeConfig from '../../hooks/OutputTypeConfig/OutputTypeConfigHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 
 const OutputTypeConfig = ({ userInfo, handleLogout }) => {
     const {
@@ -92,7 +93,7 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '150px' }}>Type Name</span>
                                                                     </div>
-                                                                    <input type="text" className="form-control" placeholder="Output Type Name" maxLength={12} value={add_OutputTypeConfig}
+                                                                    <InputField  placeholder="Output Type Name" maxLength={12} value={add_OutputTypeConfig}
                                                                         onChange={(e) => {
                                                                             const value = e.target.value;
                                                                             // Use a regex to allow only letters and numbers
@@ -126,13 +127,13 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '180px' }}>Type</span>
                                                                     </div>
-                                                                    <input type="text" className="form-control" placeholder="Output Type" style={{ width: '200px' }} value={dataItem?.output_type || ''} readOnly />
+                                                                    <InputField  placeholder="Output Type" style={{ width: '200px' }} value={dataItem?.output_type || ''} readOnly />
                                                                 </div>
                                                                 <div className="input-group">
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '180px' }}>Type Name</span>
                                                                     </div>
-                                                                    <input type="text" className="form-control" placeholder="Output Type Name" maxLength={12} style={{ width: '200px' }} value={output_type_name}
+                                                                    <InputField  placeholder="Output Type Name" maxLength={12} style={{ width: '200px' }} value={output_type_name}
                                                                         onChange={(e) => {
                                                                             const value = e.target.value;
                                                                             // Use a regex to allow only letters and numbers
@@ -179,7 +180,7 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search by Output Type/Name" aria-label="search" aria-describedby="search" autoComplete="off" onChange={handleSearchInputChange} />
+                                                            <InputField  placeholder="Search by Output Type/Name" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange} />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -229,7 +230,7 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                             {dataItem.status ? (
                                                                                 <div className="form-check form-check-danger">
                                                                                     <label className="form-check-label">
-                                                                                        <input
+                                                                                        <InputField
                                                                                             type="radio"
                                                                                             className="form-check-input"
                                                                                             name="optionsRadios1"
@@ -242,7 +243,7 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                             ) : (
                                                                                 <div className="form-check form-check-success">
                                                                                     <label className="form-check-label">
-                                                                                        <input
+                                                                                        <InputField
                                                                                             type="radio"
                                                                                             className="form-check-input"
                                                                                             name="optionsRadios1"

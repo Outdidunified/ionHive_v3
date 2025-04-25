@@ -4,6 +4,8 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useAssignCharger from '../../hooks/ManageReseller/AssignChargerHooks';
+import InputField from '../../../../utils/InputField';
+
 const AssignCharger = ({ userInfo, handleLogout }) => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -64,7 +66,13 @@ const AssignCharger = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" aria-label="search" aria-describedby="search" autoComplete="off" onChange={handleSearchInputChange} />
+                                                            <InputField
+    placeholder="Search now"
+    ariaLabel="search"
+    ariadescribedby="search"
+    autoComplete="off"
+    onChange={handleSearchInputChange}
+/>
                                                         </div>
                                                     </div>
                                                 </div>

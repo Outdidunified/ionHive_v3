@@ -4,6 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import useResellerData from '../../hooks/ManageReseller/ManageResellerHooks';
+import InputField from '../../../../utils/InputField';
 
 const ManageReseller = ({ userInfo, handleLogout }) => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const ManageReseller = ({ userInfo, handleLogout }) => {
   };
 
   // Using the custom hook
-  const { loading, error, posts, handleSearchInputChange } = useResellerData();
+  const { loading, error, posts, handleSearchInputChange,filteredData} = useResellerData();
   
     return (
         <div className='container-scroller'>
@@ -71,7 +72,7 @@ const ManageReseller = ({ userInfo, handleLogout }) => {
                                                                 <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" aria-label="search" aria-describedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
+                                                            <InputField  placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
                                                         </div>
                                                     </div>
                                                 </div>

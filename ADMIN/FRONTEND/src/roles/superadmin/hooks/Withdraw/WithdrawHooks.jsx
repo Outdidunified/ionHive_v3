@@ -82,8 +82,10 @@ const useWithdrawRequests = (userInfo) => {
                     Swal.fire({ icon: 'success', title: 'Status Updated', text: response.data.message });
                 }
             } catch (error) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update the status. Please try again.' });
+                const errorMessage = error?.response?.data?.message || 'Failed to update the status. Please try again.';
+                Swal.fire({ icon: 'error', title: 'Error', text: errorMessage });
             }
+            
         };
 
    

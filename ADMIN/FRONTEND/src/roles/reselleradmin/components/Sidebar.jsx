@@ -41,8 +41,8 @@ const Sidebar = () => {
                     </Link>
                 </li>
                 
-                <li className={location.pathname === '/reselleradmin/Wallet' ? 'nav-item active' : 'nav-item'} key="Wallet">
-                    <Link className="nav-link" to={{ pathname: "/reselleradmin/Wallet" }}>
+                <li className={location.pathname === '/reselleradmin/Withdraw' ? 'nav-item active' : 'nav-item'} key="Withdraw">
+                    <Link className="nav-link" to={{ pathname: "/reselleradmin/Withdraw" }}>
                         <i className="icon-head menu-icon mdi mdi-wallet"></i>
                         <span className="menu-title">Withdraw</span>
                     </Link>

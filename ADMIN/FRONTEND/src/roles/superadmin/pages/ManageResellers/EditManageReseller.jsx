@@ -5,6 +5,7 @@ import Footer from '../../components/Footer';
 import useEditResellerForm from '../../hooks/ManageReseller/EditManageResellerHooks';
 import { useNavigate } from 'react-router-dom';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 
 const EditManageReseller = ({ userInfo, handleLogout }) => {
         const navigate = useNavigate();
@@ -72,14 +73,14 @@ const EditManageReseller = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group ">
                                                                     <label className="col-form-label labelInput">Reseller Name</label>
                                                                     
-                                                                        <input type="text" className="form-control" value={reseller_name} onChange={(e) => setResellerName(e.target.value )}readOnly required />
+                                                                        <InputField value={reseller_name} onChange={(e) => setResellerName(e.target.value )}readOnly required />
                                                                     </div>
                                                                 </div>
                                                             <div className="col-md-6">
                                                                 <div className="form-group">
                                                                     <label className="col-form-label labelInput">Phone Number</label>
                                                                     
-                                                                        <input type="text" className="form-control" value={reseller_phone_no} maxLength={10} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setResellerPhoneNumber(sanitizedValue);}} required/>
+                                                                        <InputField  value={reseller_phone_no} maxLength={10} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setResellerPhoneNumber(sanitizedValue);}} required/>
                                                                     </div>
                                                             </div>
                                                         </div>
@@ -87,14 +88,13 @@ const EditManageReseller = ({ userInfo, handleLogout }) => {
                                                             <div className="col-md-6">
                                                                 <div className="form-group">
                                                                     <label className="col-form-label labelInput">Email ID</label>
-                                                                        <input type="email" className="form-control" value={reseller_email_id} onChange={(e) => setEmilaID(e.target.value )}readOnly required />
+                                                                        <InputField type="email"  value={reseller_email_id} onChange={(e) => setEmilaID(e.target.value )}readOnly required />
                                                                     </div>
                                                                 </div>
                                                             <div className="col-md-6">
                                                                 <div className="form-group">
                                                                     <label className="col-form-label labelInput">Wallet</label>
-                                                                        <input type="text"
-                                                                            className="form-control"
+                                                                        <InputField 
                                                                             value={reseller_wallet}
                                                                             onChange={(e) => {
                                                                                 let value = e.target.value;

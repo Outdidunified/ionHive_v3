@@ -12,7 +12,7 @@ const useOcppConfig = ({ userInfo, handleLogout }) => {
     const [chargerId, setChargerId] = useState('');
     const [commandsLibrary, setCommandsLibrary] = useState([]);
     const [selectedCommand, setSelectedCommand] = useState("ChangeAvailability");
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     // const [payload, setPayload] = useState('');
     const [response, setResponse] = useState('');

@@ -129,7 +129,7 @@ const useDashboard = (userInfo) => {
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
-            isFetching.current = false; // ✅ Ensure future fetches work
+            isFetching.current = false; 
         }
     };
 

@@ -32,8 +32,7 @@ import Sessionhistoryass from '../../roles/clientadmin/page/ManageAssociation/Se
 
 import DeviceReport from '../../roles/clientadmin/page/ManageReport/DeviceReport';
 import RevenueReport from '../../roles/clientadmin/page/ManageReport/RevenueReport';
-
-import Wallet from '../../roles/clientadmin/page/Wallet/Wallet';
+import Withdraw from '../../roles/clientadmin/page/Withdraw/Withdraw';
 import Profile from '../../roles/clientadmin/page/Profile/Profile';
 import Header from '../../roles/clientadmin/components/Header';
 import ClientOccpConfig from '../../roles/clientadmin/page/ClientOcppConfig/ClientOcppConfig';
@@ -253,9 +252,9 @@ const ClientAdminApp = () => {
         {/*  */}
         
         <Route
-          path="/Wallet"
+          path="/Withdraw"
           element={loggedIn ? (
-            <Wallet userInfo={userInfo} handleLogout={handleLogout} />
+            <Withdraw userInfo={userInfo} handleLogout={handleLogout} />
           ) : (
             <Navigate to="/clientadmin" />
           )}

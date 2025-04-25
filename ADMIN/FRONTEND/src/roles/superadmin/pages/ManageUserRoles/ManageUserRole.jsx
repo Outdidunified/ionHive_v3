@@ -3,6 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useManageUserRole from '../../hooks/ManageUserRoles/ManageUserRoleHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const ManageUserRole = ({ userInfo, handleLogout }) => {
     const {
         data,
@@ -74,7 +75,7 @@ const ManageUserRole = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '125px' }}>Role Name</span>
                                                                     </div>
-                                                                    <input type="text" className="form-control" placeholder="Role Name" value={roleEditname} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setEdituserRole(sanitizedValue); }} required />
+                                                                    <InputField  placeholder="Role Name" value={roleEditname} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setEdituserRole(sanitizedValue); }} required />
                                                                 </div>
                                                             </div>
 
@@ -113,7 +114,7 @@ const ManageUserRole = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" aria-label="search" aria-describedby="search" autoComplete="off" onChange={handleSearchInputChange} />
+                                                            <InputField placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange} />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -158,11 +159,11 @@ const ManageUserRole = ({ userInfo, handleLogout }) => {
                                                                         <div className='form-group' style={{ paddingTop: '13px' }}>
                                                                             {dataItem.status === true ?
                                                                                 <div className="form-check form-check-danger">
-                                                                                    <label className="form-check-label"><input type="radio" className="form-check-input" name="optionsRadios1" id="optionsRadios2" value={false} onClick={(e) => changeDeActivate(e, dataItem.role_id)} />DeActive<i className="input-helper"></i></label>
+                                                                                    <label className="form-check-label"><InputField type="radio" className="form-check-input" name="optionsRadios1" id="optionsRadios2" value={false} onClick={(e) => changeDeActivate(e, dataItem.role_id)} />DeActive<i className="input-helper"></i></label>
                                                                                 </div>
                                                                                 :
                                                                                 <div className="form-check form-check-success">
-                                                                                    <label className="form-check-label"><input type="radio" className="form-check-input" name="optionsRadios1" id="optionsRadios1" value={true} onClick={(e) => changeActivate(e, dataItem.role_id)} />Active<i className="input-helper"></i></label>
+                                                                                    <label className="form-check-label"><InputField type="radio" className="form-check-input" name="optionsRadios1" id="optionsRadios1" value={true} onClick={(e) => changeActivate(e, dataItem.role_id)} />Active<i className="input-helper"></i></label>
                                                                                 </div>
                                                                             }
                                                                         </div>

@@ -2,7 +2,8 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useOcppConfig from '../../hooks/Occp/Occp.configHooks';
-// import { useNavigate } from 'react-router-dom';
+import InputField from '../../../../utils/InputField';
+
 
 const OcppConfig = ({ userInfo, handleLogout }) => {
    const {
@@ -121,7 +122,7 @@ handleChargerIdChange
                                                     </div>
                                                     <div className="col-8 col-xl-4">
                                                         <div className="input-group">
-                                                            <input type="text" className="form-control" style={{borderRadius: '10px 0 10px 0', borderColor:'#57B657'}} placeholder="Charger ID" aria-label="search" aria-describedby="search" autoComplete="off" value={chargerId} onChange={handleChargerIdChange} required/>
+                                                            <InputField  style={{borderRadius: '10px 0 10px 0', borderColor:'#57B657'}} placeholder="Charger ID" ariaLabel="search" ariadescribedby="search" autoComplete="off" value={chargerId} onChange={handleChargerIdChange} required/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -167,7 +168,7 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleCancelReservation}>
                                                             <div className="form-group">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>ID of the Existing Reservation:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={reservationId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setReservationId(sanitizedValue); }} required autoComplete="off"/>
+                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={reservationId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setReservationId(sanitizedValue); }} required autoComplete="off"/>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -196,7 +197,7 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleChangeAvailability}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID (integer):</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="If empty, 0 = charge point as a whole" style={{ height: '30px' }} autoComplete="off" value={connectorId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setConnectorId(sanitizedValue);}}/>
+                                                                <InputField  id="exampleInputUsername1" placeholder="If empty, 0 = charge point as a whole" style={{ height: '30px' }} autoComplete="off" value={connectorId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setConnectorId(sanitizedValue);}}/>
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Availability Type:</label>
@@ -278,12 +279,12 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="customConfigKey" style={{marginBottom:'0px'}}>Custom Configuration Key:</label>
-                                                                <input type="text" className="form-control" id="customConfigKey" style={{ height: '30px' }} value={customConfigKey} onChange={(e) => setCustomConfigKey(e.target.value)} disabled={keyType !== 'Custom'}/>
+                                                                <InputField  id="customConfigKey" style={{ height: '30px' }} value={customConfigKey} onChange={(e) => setCustomConfigKey(e.target.value)} disabled={keyType !== 'Custom'}/>
                                                             </div>
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="value" style={{marginBottom:'0px'}}>Value:</label>
-                                                                <input type="text" className="form-control" id="value" style={{ height: '30px' }} value={value} onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setValue(numericValue);}}/>
+                                                                <InputField  id="value" style={{ height: '30px' }} value={value} onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setValue(numericValue);}}/>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -349,7 +350,7 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="chargingProfileId" style={{ marginBottom: '0px' }}>Charging Profile ID:</label>
-                                                                <input type="text" className="form-control" id="chargingProfileId" style={{ height: '30px' }} autoComplete="off" value={clearChargingProfileID}
+                                                                <InputField  id="chargingProfileId" style={{ height: '30px' }} autoComplete="off" value={clearChargingProfileID}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -359,7 +360,7 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="connectorId" style={{ marginBottom: '0px' }}>Connector ID (integer):</label>
-                                                                <input type="text" className="form-control" id="connectorId" placeholder="0 = charge point as a whole. Leave empty to not set." style={{ height: '30px' }} autoComplete="off" value={clearChargingProfileConnectorId}
+                                                                <InputField  id="connectorId" placeholder="0 = charge point as a whole. Leave empty to not set." style={{ height: '30px' }} autoComplete="off" value={clearChargingProfileConnectorId}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -380,7 +381,7 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="stackLevel" style={{ marginBottom: '0px' }}>Stack Level (integer):</label>
-                                                                <input type="text" className="form-control" id="stackLevel" style={{ height: '30px' }} autoComplete="off" value={stackLevel}
+                                                                <InputField  id="stackLevel" style={{ height: '30px' }} autoComplete="off" value={stackLevel}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -432,7 +433,7 @@ handleChargerIdChange
                                                                     <form className="forms-sample" onSubmit={handleDataTransferCustom}>
                                                                         <div className="form-group paddingInput">
                                                                             <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Vendor ID (String):</label>
-                                                                            <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={vendorId}
+                                                                            <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={vendorId}
                                                                                 onChange={(e) => {
                                                                                     const value = e.target.value;
                                                                                     // Allow only alphabetic characters
@@ -446,7 +447,7 @@ handleChargerIdChange
                                                                         </div>
                                                                         <div className="form-group paddingInput">
                                                                             <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Message ID (String):</label>
-                                                                            <input type="text" className="form-control" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} autoComplete="off" value={messageId} onChange={(e) => setMessageId(e.target.value)}/>
+                                                                            <InputField id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} autoComplete="off" value={messageId} onChange={(e) => setMessageId(e.target.value)}/>
                                                                         </div>
                                                                         <div className="form-group paddingInput">
                                                                             <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Data (Text):</label>
@@ -486,37 +487,37 @@ handleChargerIdChange
                                                                             <div className="row">
                                                                                 <div className="col-md-6">
                                                                                     <label htmlFor="keyType" style={{marginBottom:'0px'}}>IP</label>
-                                                                                    <input type="text" className="form-control" placeholder="IP" style={{ height: '30px' }} autoComplete="off" value={ip} onChange={(e) => setIp(e.target.value)} required/>
+                                                                                    <InputField  placeholder="IP" style={{ height: '30px' }} autoComplete="off" value={ip} onChange={(e) => setIp(e.target.value)} required/>
                                                                                 </div> 
                                                                                 <div className="col-md-6">
                                                                                     <label htmlFor="keyType" style={{marginBottom:'0px'}}>PORT</label>
-                                                                                    <input type="text" className="form-control" placeholder="PORT" style={{ height: '30px' }} autoComplete="off" value={port} onChange={(e) => setPort(e.target.value)} required/>
+                                                                                    <InputField placeholder="PORT" style={{ height: '30px' }} autoComplete="off" value={port} onChange={(e) => setPort(e.target.value)} required/>
                                                                                 </div>
                                                                             </div>
                                                                                                                                                     
                                                                             <label htmlFor="keyType" style={{marginBottom:'0px'}}>URL</label>
-                                                                            <input type="text" className="form-control" placeholder="URL" style={{ height: '30px' }} value={url} onChange={(e) => setUrl(e.target.value)} autoComplete="off"/>
+                                                                            <InputField  placeholder="URL" style={{ height: '30px' }} value={url} onChange={(e) => setUrl(e.target.value)} autoComplete="off"/>
                                                                         </div>
                                                                     )}
 
                                                                     {keyTypeData === "Predefined" && command === "SetChargerID" && (
                                                                         <div className="form-group paddingInput">
                                                                             <label htmlFor="keyType" style={{marginBottom:'0px'}}>Charger ID</label>
-                                                                            <input type="text" className="form-control" placeholder="Charger ID" style={{ height: '30px' }} autoComplete="off" value={chargerids} onChange={(e) => setChargerids(e.target.value)} required/>
+                                                                            <InputField  placeholder="Charger ID" style={{ height: '30px' }} autoComplete="off" value={chargerids} onChange={(e) => setChargerids(e.target.value)} required/>
                                                                         </div>
                                                                     )}
                                                                    
                                                                     {keyTypeData === "Predefined" && command === "SetFaultParametersConfig" && (
                                                                         <div className="form-group paddingInput">
                                                                             <label htmlFor="keyType" style={{marginBottom:'0px'}}>Set Fault Parameters Config</label>
-                                                                            <input type="text" className="form-control" placeholder="Set Fault Parameters Config" style={{ height: '30px' }} autoComplete="off" value={faultParametersConfig} onChange={(e) => setFaultParametersConfig(e.target.value)} required/>
+                                                                            <InputField  placeholder="Set Fault Parameters Config" style={{ height: '30px' }} autoComplete="off" value={faultParametersConfig} onChange={(e) => setFaultParametersConfig(e.target.value)} required/>
                                                                         </div>
                                                                     )}
 
                                                                     {keyTypeData === "Predefined" && command === "SetMaxCurrent" && (
                                                                         <div className="form-group paddingInput">
                                                                             <label htmlFor="keyType" style={{marginBottom:'0px'}}>Set Max Current</label>
-                                                                            <input type="text" className="form-control" placeholder="Set Max Current" style={{ height: '30px'}} autoComplete="off" value={maxCurrent} onChange={(e) => SetMaxCurrent(e.target.value)} required/>
+                                                                            <InputField placeholder="Set Max Current" style={{ height: '30px'}} autoComplete="off" value={maxCurrent} onChange={(e) => SetMaxCurrent(e.target.value)} required/>
                                                                         </div>
                                                                     )}
                                 
@@ -548,7 +549,7 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleGetCompositeSchedule}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="connectorId" style={{ marginBottom: '0px' }}>Connector ID (integer):</label>
-                                                                <input type="text" className="form-control" id="connectorId" placeholder="0 = charge point as a whole." style={{ height: '30px' }} autoComplete="off" value={getCompositeScheduleConnectorId}
+                                                                <InputField  id="connectorId" placeholder="0 = charge point as a whole." style={{ height: '30px' }} autoComplete="off" value={getCompositeScheduleConnectorId}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -559,7 +560,7 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="stackLevel" style={{ marginBottom: '0px' }}>Duration (in seconds):</label>
-                                                                <input type="text" className="form-control" id="stackLevel" style={{ height: '30px' }} autoComplete="off" value={duration}
+                                                                <InputField  id="stackLevel" style={{ height: '30px' }} autoComplete="off" value={duration}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -609,8 +610,8 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleGetConfiguration}>
                                                             <div className="form-group paddingInput">
                                                                 <div style={{ marginBottom: '10px' }}>
-                                                                    <input type="button" value="Select All" onClick={() => handleSelectAll(true)} style={{ marginRight: '10px' }} />
-                                                                    <input type="button" value="Select None" onClick={() => handleSelectAll(false)} />
+                                                                    <InputField type="button" value="Select All" onClick={() => handleSelectAll(true)} style={{ marginRight: '10px' }} />
+                                                                    <InputField type="button" value="Select None" onClick={() => handleSelectAll(false)} />
                                                                 </div>
                                                                 
                                                                 <div className="info">
@@ -669,7 +670,7 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Custom Configuration Keys:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="optional comma separated list" style={{ height: '30px' }} autoComplete="off" value={customKeys} onChange={(e) => setCustomKeys(e.target.value)}/>
+                                                                <InputField  id="exampleInputUsername1" placeholder="optional comma separated list" style={{ height: '30px' }} autoComplete="off" value={customKeys} onChange={(e) => setCustomKeys(e.target.value)}/>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -698,25 +699,25 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleGetDiagnostics}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Location (directory URI):</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={location} onChange={(e) => setLocation(e.target.value)} required autoComplete="off"/>
+                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={location} onChange={(e) => setLocation(e.target.value)} required autoComplete="off"/>
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Retries (integer):</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={retries} 
+                                                                <InputField id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={retries} 
                                                                 onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setRetries(numericValue);}} autoComplete="off"/>
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Retry Interval (integer):</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={retryInterval} 
+                                                                <InputField id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={retryInterval} 
                                                                 onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setRetryInterval(numericValue);}} autoComplete="off"/>
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Start Date/Time:</label>
-                                                                <input type="datetime-local" className="form-control" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={startTime} onChange={(e) => setStartTime(e.target.value)} autoComplete="off"/>
+                                                                <InputField type="datetime-local" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={startTime} onChange={(e) => setStartTime(e.target.value)} autoComplete="off"/>
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Stop Date/Time:</label>
-                                                                <input type="datetime-local" className="form-control" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={stopTime} onChange={(e) => setStopTime(e.target.value)} autoComplete="off"/>
+                                                                <InputField type="datetime-local"  id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={stopTime} onChange={(e) => setStopTime(e.target.value)} autoComplete="off"/>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -773,12 +774,12 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleRemoteStartTransaction}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={connectorIds} 
+                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={connectorIds} 
                                                                 onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setConnectorIds(numericValue);}}/>
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>OCPP ID Tag:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={idTag} onChange={(e) => setIdTag(e.target.value)}/>
+                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={idTag} onChange={(e) => setIdTag(e.target.value)}/>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -807,7 +808,7 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleRemoteStopTransaction}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>ID of the Active Transaction:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" requiredvalue={transaction} 
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" requiredvalue={transaction} 
                                                                 onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setTransaction(numericValue);}}/>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
@@ -837,16 +838,16 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleReserveNow}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={reserveConnectorId} 
+                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={reserveConnectorId} 
                                                                 onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setReserveConnectorId(numericValue);}} required/>
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Expiry Date/Time:</label>
-                                                                <input type="datetime-local" className="form-control" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} required/>
+                                                                <InputField type="datetime-local"  id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} required/>
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>OCPP ID Tag:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={reserveIdTag} onChange={(e) => setReserveIdTag(e.target.value)}/>
+                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={reserveIdTag} onChange={(e) => setReserveIdTag(e.target.value)}/>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -911,7 +912,7 @@ handleChargerIdChange
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>List Version (integer):</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} required autoComplete="off"
+                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} required autoComplete="off"
                                                                     value={listVersion} onChange={(e) => setListVersion(e.target.value.replace(/[^0-9]/g, ''))} />
                                                             </div>
                                                             <div className="form-group paddingInput">
@@ -924,15 +925,15 @@ handleChargerIdChange
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="addUpdateList" style={{ marginBottom: '0px' }}>Add/Update List:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={addUpdateList} onChange={(e) => setAddUpdateList(e.target.value)} />
+                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={addUpdateList} onChange={(e) => setAddUpdateList(e.target.value)} />
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="addUpdateList" style={{ marginBottom: '0px' }}>Delete List:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={deleteList} onChange={(e) => setDeleteList(e.target.value)} />
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={deleteList} onChange={(e) => setDeleteList(e.target.value)} />
                                                             </div>
                                                             <div className="form-group paddingInput" style={{ display: 'flex', alignItems: 'center' }}>
                                                                 <label htmlFor="sendEmptyListWhenFull" style={{ marginBottom: '0px', marginRight: '10px' }}>Send empty list?:</label>
-                                                                <input id="sendEmptyListWhenFull" name="sendEmptyListWhenFull" type="checkbox" value="true"
+                                                                <InputField id="sendEmptyListWhenFull" name="sendEmptyListWhenFull" type="checkbox" value="true"
                                                                 style={{ marginRight: '10px' }} checked={sendEmptyListWhenFull} onChange={(e) => setSendEmptyListWhenFull(e.target.checked)} />
                                                             </div>
                                                             <div className="form-group paddingInput">
@@ -966,7 +967,7 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleSetChargingProfile}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="connectorId" style={{ marginBottom: '0px' }}>Charging Profile ID:</label>
-                                                                <input type="text" className="form-control" id="connectorId" placeholder="" style={{ height: '30px' }} autoComplete="off" value={chargingProfileId}
+                                                                <InputField  id="connectorId" placeholder="" style={{ height: '30px' }} autoComplete="off" value={chargingProfileId}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -977,7 +978,7 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="stackLevel" style={{ marginBottom: '0px' }}>Connector ID (integer):</label>
-                                                                <input type="text" className="form-control" id="stackLevel" style={{ height: '30px' }} placeholder="0 = charge point as a whole." autoComplete="off" value={setChargingProfileConnectorID}
+                                                                <InputField  id="stackLevel" style={{ height: '30px' }} placeholder="0 = charge point as a whole." autoComplete="off" value={setChargingProfileConnectorID}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -1031,7 +1032,7 @@ handleChargerIdChange
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID (integer):</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="If empty, charge point as a whole" style={{ height: '30px' }} autoComplete="off" value={triggerConnectorId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setTriggerConnectorId(sanitizedValue);}}/>
+                                                                <InputField  id="exampleInputUsername1" placeholder="If empty, charge point as a whole" style={{ height: '30px' }} autoComplete="off" value={triggerConnectorId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setTriggerConnectorId(sanitizedValue);}}/>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -1060,7 +1061,7 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleUnlockConnector}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID:</label>
-                                                                <input type="text" className="form-control" id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" required value={unlockConnectorConnectorId} 
+                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" required value={unlockConnectorConnectorId} 
                                                                 onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setUnlockConnectorConnectorId(numericValue);}}/>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
@@ -1090,9 +1091,7 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleUpdateFirmware}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="locationInput" style={{ marginBottom: '0px' }}>Location (directory URI):</label>
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
+                                                                <InputField
                                                                     id="locationInput"
                                                                     placeholder=""
                                                                     style={{ height: '30px' }}
@@ -1104,9 +1103,7 @@ handleChargerIdChange
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="retriesInput" style={{ marginBottom: '0px' }}>Retries (integer):</label>
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
+                                                                <InputField
                                                                     id="retriesInput"
                                                                     placeholder="optional"
                                                                     style={{ height: '30px' }}
@@ -1120,9 +1117,8 @@ handleChargerIdChange
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="retryIntervalInput" style={{ marginBottom: '0px' }}>Retry Interval (integer):</label>
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
+                                                                <InputField
+                                                                  
                                                                     id="retryIntervalInput"
                                                                     placeholder="optional"
                                                                     style={{ height: '30px' }}
@@ -1136,9 +1132,8 @@ handleChargerIdChange
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="retrieveDateInput" style={{ marginBottom: '0px' }}>Retrieve Date/Time:</label>
-                                                                <input
+                                                                <InputField
                                                                     type="datetime-local"
-                                                                    className="form-control"
                                                                     id="retrieveDateInput"
                                                                     placeholder="optional"
                                                                     style={{ height: '30px' }}

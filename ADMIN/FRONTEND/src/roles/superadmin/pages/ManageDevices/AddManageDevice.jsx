@@ -5,6 +5,7 @@ import Footer from '../../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import useAddManageDevice from '../../hooks/ManageDevice/AddManageDeviceHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const AddManageDevice = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
 
@@ -12,8 +13,8 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
         charger_id, charger_model, vendor, maxCurrent, maxPower, errorMessage, selectChargerType,
         connectors, data, errorMessageCurrent, errorMessagePower, wifi_module, bluetooth_module, loading,
         setChargerID, setVendor, setMaxCurrent, setMaxPower, setErrorMessagePower, setErrorMessageCurrent,
-         handleClone, addConnector, removeConnector, handleConnectorChange, handleConnectorType,
-         addManageDevice, handleModel, handleChargerType, handleBluetoothModule, handleWiFiModule,
+        handleClone, addConnector, removeConnector, handleConnectorChange, handleConnectorType,
+        addManageDevice, handleModel, handleChargerType, handleBluetoothModule, handleWiFiModule,
     } = useAddManageDevice(userInfo);
 
 
@@ -71,21 +72,44 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                             <div className="col-md-6">
                                                                 <div className="form-group">
                                                                     <label className="col-form-label labelInput">Charger ID</label>
-                                                                    <input type="text" className="form-control" placeholder="Charger ID" value={charger_id} maxLength={20} onChange={(e) => {
+                                                                    {/* <input type="text" className="form-control" placeholder="Charger ID" value={charger_id} maxLength={20} onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
                                                                         setChargerID(sanitizedValue);
-                                                                    }} required />
+                                                                    }} required /> */}
+                                                                    <InputField
+                                                                        placeholder="Charger ID"
+                                                                        value={charger_id}
+                                                                        maxLength={20}
+                                                                        onChange={(e) => {
+                                                                            const value = e.target.value;
+                                                                            const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
+                                                                            setChargerID(sanitizedValue);
+                                                                        }}
+                                                                        required
+                                                                    />
                                                                 </div>
                                                             </div>
                                                             <div className="col-md-6">
                                                                 <div className="form-group">
                                                                     <label className="col-form-label labelInput">Vendor</label>
-                                                                    <input type="text" className="form-control" placeholder="Vendor" value={vendor} maxLength={20} onChange={(e) => {
+                                                                    {/* <input type="text" className="form-control" placeholder="Vendor" value={vendor} maxLength={20} onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         let sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, '');
                                                                         setVendor(sanitizedValue);
-                                                                    }} required />
+                                                                    }} required /> */}
+                                                                    <InputField
+                                                                        placeholder="Vendor"
+                                                                        value={vendor}
+                                                                        maxLength={20}
+                                                                        onChange={(e) => {
+                                                                            const value = e.target.value;
+                                                                            const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, '');
+                                                                            setVendor(sanitizedValue);
+                                                                        }}
+                                                                        required
+                                                                    />
+
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -119,7 +143,7 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                             <div className="col-md-6">
                                                                 <div className="form-group">
                                                                     <label className="col-form-label labelInput">Max Current</label>
-                                                                    <input type="tel" className="form-control" placeholder="Max Current" value={maxCurrent}
+                                                                    {/* <input type="tel" className="form-control" placeholder="Max Current" value={maxCurrent}
                                                                         onChange={(e) => {
                                                                             let value = e.target.value;
                                                                             value = value.replace(/\D/g, ''); // Remove non-numeric
@@ -130,14 +154,30 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                                                 value = '32';
                                                                             }
                                                                             setMaxCurrent(value);
-                                                                        }} required />
+                                                                        }} required /> */}
+                                                                    <InputField
+                                                                        type="tel"
+                                                                        placeholder="Max Current"
+                                                                        value={maxCurrent}
+                                                                        onChange={(e) => {
+                                                                            let value = e.target.value.replace(/\D/g, '');
+                                                                            if (value < 1) {
+                                                                                value = '';
+                                                                            } else if (value > 32) {
+                                                                                setErrorMessageCurrent('Max Current must be between 1 and 32');
+                                                                                value = '32';
+                                                                            }
+                                                                            setMaxCurrent(value);
+                                                                        }}
+                                                                        required
+                                                                    />
                                                                     {errorMessageCurrent && <div className="text-danger">{errorMessageCurrent}</div>}
                                                                 </div>
                                                             </div>
                                                             <div className="col-md-6">
                                                                 <div className="form-group">
                                                                     <label className="col-form-label labelInput">Max Power</label>
-                                                                    <input type="tel" className="form-control" placeholder="Max Power" value={maxPower}
+                                                                    {/* <input type="tel" className="form-control" placeholder="Max Power" value={maxPower}
                                                                         onChange={(e) => {
                                                                             let value = e.target.value;
                                                                             value = value.replace(/\D/g, '');
@@ -148,7 +188,24 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                                                 value = '22000';
                                                                             }
                                                                             setMaxPower(value);
-                                                                        }} required />
+                                                                        }} required /> */}
+
+                                                                    <InputField
+                                                                        type="tel"
+                                                                        placeholder="Max Power"
+                                                                        value={maxPower}
+                                                                        onChange={(e) => {
+                                                                            let value = e.target.value.replace(/\D/g, '');
+                                                                            if (value < 1) {
+                                                                                value = '';
+                                                                            } else if (value > 22000) {
+                                                                                setErrorMessagePower('Max Power must be between 1 and 22,000');
+                                                                                value = '22000';
+                                                                            }
+                                                                            setMaxPower(value);
+                                                                        }}
+                                                                        required
+                                                                    />
                                                                     {errorMessagePower && <div className="text-danger">{errorMessagePower}</div>}
                                                                 </div>
                                                             </div>

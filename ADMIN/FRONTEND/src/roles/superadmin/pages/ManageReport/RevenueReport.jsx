@@ -13,7 +13,7 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
         setFirstTableSearchQuery,
         setSecondTableSearchQuery
     } = useRevenueReport();
-       
+
     return (
         <div className="container-scroller">
             <Header userInfo={userInfo} handleLogout={handleLogout} />
@@ -33,20 +33,18 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
                                                 <i className="icon-search"></i>
                                             </span>
                                         </div>
-                                        <input 
-                                            type="text" 
-                                            className="form-control" 
-                                            placeholder="Search now" 
-                                            value={firstTableSearchQuery} 
-                                            onChange={(e) => setFirstTableSearchQuery(e.target.value)} 
+                                        <InputField
+                                            placeholder="Search now"
+                                            value={firstTableSearchQuery}
+                                            onChange={(e) => setFirstTableSearchQuery(e.target.value)}
                                         />
                                     </div>
                                 </div>
                                 <div className="table-responsive" style={{ maxHeight: '450px', overflowY: 'auto' }}>
                                     <table className="table table-striped">
-                                    <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                    <tr>
-                                            <th>Sl.No</th>
+                                        <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
+                                            <tr>
+                                                <th>Sl.No</th>
                                                 <th>Charge ID</th>
                                                 <th>Reseller</th>
                                                 <th>Client</th>
@@ -59,8 +57,8 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
                                                 <tr><td colSpan="6" className="text-center">Loading...</td></tr>
                                             ) : filteredFirstTableData.length > 0 ? (
                                                 filteredFirstTableData.map((item, index) => (
-<tr key={index} style={{ height: "95px" }}>
-<td>{index + 1}</td>
+                                                    <tr key={index} style={{ height: "95px" }}>
+                                                        <td>{index + 1}</td>
                                                         <td>{item.chargeId || '-'}</td>
                                                         <td>{item.reseller || '-'}</td>
                                                         <td>{item.client || '-'}</td>
@@ -89,19 +87,17 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
                                                 <i className="icon-search"></i>
                                             </span>
                                         </div>
-                                        <input 
-                                            type="text" 
-                                            className="form-control" 
-                                            placeholder="Search now" 
-                                            value={secondTableSearchQuery} 
-                                            onChange={(e) => setSecondTableSearchQuery(e.target.value)} 
+                                        <InputField
+                                            placeholder="Search now"
+                                            value={secondTableSearchQuery}
+                                            onChange={(e) => setSecondTableSearchQuery(e.target.value)}
                                         />
                                     </div>
                                 </div>
                                 <div className="table-responsive">
                                     <table className="table table-striped">
-                                    <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                    <tr>
+                                        <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
+                                            <tr>
                                                 <th>Sl.No</th>
                                                 <th>Charger ID</th>
                                                 <th>Session ID</th>
@@ -126,9 +122,9 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
                                                 <tr><td colSpan="14" className="text-center">Loading...</td></tr>
                                             ) : filteredSecondTableData.length > 0 ? (
                                                 filteredSecondTableData.map((item, index) => (
-<tr key={index} style={{ height: "95px" }}>
-<td>{index+1}</td>
-                                                        <td>{item.chargerId|| '-'}</td>
+                                                    <tr key={index} style={{ height: "95px" }}>
+                                                        <td>{index + 1}</td>
+                                                        <td>{item.chargerId || '-'}</td>
                                                         <td>{item.sessionId || '-'}</td>
                                                         <td>{item.customerName || '-'}</td>
                                                         <td>{formatDate(item.startTime) || '-'}</td>
@@ -140,7 +136,7 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
                                                         <td>{item.reseller || '-'}</td>
                                                         <td>{item.client || '-'}</td>
                                                         <td>{item.association || '-'}</td>
-                                                        <td>{item.totalRevenue|| '-'}</td>
+                                                        <td>{item.totalRevenue || '-'}</td>
                                                     </tr>
                                                 ))
                                             ) : (

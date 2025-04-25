@@ -3,6 +3,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import { useNavigate } from 'react-router-dom';
+import InputField from '../../../../utils/InputField';
 
 const OcppConfigLog = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
@@ -52,7 +53,7 @@ const OcppConfigLog = ({ userInfo, handleLogout }) => {
                                                                 <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search by Ocpp Config Log" aria-label="search" aria-describedby="search" autoComplete="off"/>
+                                                            <InputField  placeholder="Search by Ocpp Config Log" ariaLabel="search" ariadescribedby="search" autoComplete="off"/>
                                                         </div>
                                                     </div>
                                                 </div>

@@ -4,7 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import useSessionHistory from '../../hooks/ManageReseller/SessionHistoryHooks';
-
+import InputField from '../../../../utils/InputField';
 const SessionHistory = ({ userInfo, handleLogout }) => {
   const navigate = useNavigate();
   const {
@@ -56,12 +56,10 @@ const SessionHistory = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input 
-                                                                type="text" 
-                                                                className="form-control" 
+                                                            <InputField 
                                                                 placeholder="Search user or charger id" 
-                                                                aria-label="search" 
-                                                                aria-describedby="search" 
+                                                                ariaLabel="search" 
+                                                                ariadescribedby="search" 
                                                                 autoComplete="off" 
                                                                 onChange={handleSearchInputChange} 
                                                             />

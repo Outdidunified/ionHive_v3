@@ -5,14 +5,11 @@ import useWallet from '../../hooks/Withdraw/WithdrawHooks';
 
 const Withdraw = ({ userInfo, handleLogout }) => {
   const {
-    commissionAmount, setCommissionAmount,
-        isLoading, setIsLoading,
-        withdrawalRequests, setWithdrawalRequests,
-        clientData, setClientData,
-        userData, setUserData,
-        formData, setFormData,
-        initialData, setInitialData,
-        isEditing, setIsEditing,errors, setErrors,
+    commissionAmount, 
+        isLoading, 
+        withdrawalRequests, 
+        formData, 
+        isEditing, errors, 
         handleChange,
         hasChanges,
         handleSubmit,handleWithdraw,
@@ -152,7 +149,7 @@ const Withdraw = ({ userInfo, handleLogout }) => {
                                             <div className="text-center mt-3">
     {isLoading ? (
         <button type="button" className="btn btn-primary" disabled>
-            <span className="spinner-border spinner-border-sm"></span> Processing...
+            <span className="spinner-border spinner-border-sm"></span> 
         </button>
     ) : isEditing ? (
         <button 

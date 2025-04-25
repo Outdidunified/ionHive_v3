@@ -1,8 +1,7 @@
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
-import useWallet from '../../hooks/Wallet/WalletHooks';
-
+import useWithdraw from '../../hooks/Withdraw/WithdrawHooks'
 const Withdraw = ({ userInfo, handleLogout }) => {
     const{
     commissionAmount, 
@@ -15,7 +14,7 @@ const Withdraw = ({ userInfo, handleLogout }) => {
     handleSubmit,handleWithdraw,
     fetchData,
     
-    }=useWallet(userInfo)
+    }=useWithdraw(userInfo)
     
     return (
         <div className="container-scroller">

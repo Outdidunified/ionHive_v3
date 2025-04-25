@@ -4,6 +4,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAllocatedChargers from '../../hooks/ManageDevice/AllocateddeviceHooks';
+import InputField from '../../../../utils/InputField';
 const Allocateddevice = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
     const {
@@ -57,7 +58,13 @@ const Allocateddevice = ({ userInfo, handleLogout }) => {
                                                             <i className="icon-search"></i>
                                                         </span>
                                                     </div>
-                                                    <input type="text" className="form-control" placeholder="Search now" value={searchQuery} onChange={handleSearch} />
+                                                    {/* <input type="text" className="form-control" placeholder="Search now" value={searchQuery} onChange={handleSearch} /> */}
+
+                                                    <InputField
+                                                        placeholder="Search now"
+                                                        value={searchQuery}
+                                                        onChange={handleSearch}
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
@@ -79,75 +86,89 @@ const Allocateddevice = ({ userInfo, handleLogout }) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody style={{ textAlign: 'center' }}>
-    {loading ? (
-        <tr className="text-center">
-            <td colSpan="12">Loading...</td>
-        </tr>
-    ) : filterChargers(allocatedChargers).length > 0 ? (
-        filterChargers(allocatedChargers).map((charger, index) => (
-            <tr key={charger.charger_id}>
-                <td>{index + 1}</td>
-                <td>{charger.charger_id}</td>
-                <td>{charger.charger_model ? `${charger.charger_model} kW` : '-'}</td>
-                <td>{charger.charger_type || '-'}</td>
-                <td>{charger.max_current || '-'}</td>
-                <td>{charger.reseller_email_id || '-'}</td>
-                <td>{charger.client_email_id || '-'}</td>
-                <td>{charger.association_email_id || '-'}</td>
-                <td style={{ color: charger.status ? 'green' : 'red' }}>
-                    {charger.status ? 'Active' : 'DeActive'}
-                </td>
-                <td>
-                    <div className="form-group" style={{ paddingTop: '13px' }}>
-                        {charger.status === true ? (
-                            <div className="form-check form-check-danger">
-                                <label className="form-check-label">
-                                    <input
-                                        type="radio"
-                                        className="form-check-input"
-                                        name={`status-${index}`}
-                                        value={false}
-                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
-                                    />
-                                    DeActive
-                                    <i className="input-helper"></i>
-                                </label>
-                            </div>
-                        ) : (
-                            <div className="form-check form-check-success">
-                                <label className="form-check-label">
-                                    <input
-                                        type="radio"
-                                        className="form-check-input"
-                                        name={`status-${index}`}
-                                        value={true}
-                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
-                                    />
-                                    Active
-                                    <i className="input-helper"></i>
-                                </label>
-                            </div>
-                        )}
-                    </div>
-                </td>
-                <td>
-                    <button
-                        type="button"
-                        className="btn btn-outline-success btn-icon-text"
-                        onClick={() => navigateToViewChargerDetails(charger)}
-                        style={{ marginBottom: '10px', marginRight: '10px' }}
-                    >
-                        <i className="mdi mdi-eye btn-icon-prepend"></i>View
-                    </button>
-                </td>
-            </tr>
-        ))
-    ) : (
-        <tr className="text-center">
-            <td colSpan="12">No Record Found</td>
-        </tr>
-    )}
-</tbody>
+                                                    {loading ? (
+                                                        <tr className="text-center">
+                                                            <td colSpan="12">Loading...</td>
+                                                        </tr>
+                                                    ) : filterChargers(allocatedChargers).length > 0 ? (
+                                                        filterChargers(allocatedChargers).map((charger, index) => (
+                                                            <tr key={charger.charger_id}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{charger.charger_id}</td>
+                                                                <td>{charger.charger_model ? `${charger.charger_model} kW` : '-'}</td>
+                                                                <td>{charger.charger_type || '-'}</td>
+                                                                <td>{charger.max_current || '-'}</td>
+                                                                <td>{charger.reseller_email_id || '-'}</td>
+                                                                <td>{charger.client_email_id || '-'}</td>
+                                                                <td>{charger.association_email_id || '-'}</td>
+                                                                <td style={{ color: charger.status ? 'green' : 'red' }}>
+                                                                    {charger.status ? 'Active' : 'DeActive'}
+                                                                </td>
+                                                                <td>
+                                                                    <div className="form-group" style={{ paddingTop: '13px' }}>
+                                                                        {charger.status === true ? (
+                                                                            <div className="form-check form-check-danger">
+                                                                                <label className="form-check-label">
+                                                                                    {/* <input
+                                                                                        type="radio"
+                                                                                        className="form-check-input"
+                                                                                        name={`status-${index}`}
+                                                                                        value={false}
+                                                                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
+                                                                                    /> */}
+                                                                                    <InputField
+                                                                                        type="radio"
+                                                                                        className="form-check-input"
+                                                                                        name={`status-${index}`}
+                                                                                        value={false}
+                                                                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
+                                                                                    />
+                                                                                    DeActive
+                                                                                    <i className="input-helper"></i>
+                                                                                </label>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="form-check form-check-success">
+                                                                                <label className="form-check-label">
+                                                                                    {/* <input
+                                                                                        type="radio"
+                                                                                        className="form-check-input"
+                                                                                        name={`status-${index}`}
+                                                                                        value={true}
+                                                                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
+                                                                                    /> */}
+                                                                                    <InputField
+                                                                                        type="radio"
+                                                                                        className="form-check-input"
+                                                                                        name={`status-${index}`}
+                                                                                        value={true}
+                                                                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
+                                                                                    />
+                                                                                    Active
+                                                                                    <i className="input-helper"></i>
+                                                                                </label>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-success btn-icon-text"
+                                                                        onClick={() => navigateToViewChargerDetails(charger)}
+                                                                        style={{ marginBottom: '10px', marginRight: '10px' }}
+                                                                    >
+                                                                        <i className="mdi mdi-eye btn-icon-prepend"></i>View
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr className="text-center">
+                                                            <td colSpan="12">No Record Found</td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
 
 
                                             </table>

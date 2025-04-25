@@ -3,7 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useProfile from '../../hooks/Profile/ProfileHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
-
+import InputField from '../../../../utils/InputField';
 const Profile = ({ userInfo, handleLogout }) => {
     const {
         username, setUpdateUname,
@@ -44,9 +44,7 @@ const Profile = ({ userInfo, handleLogout }) => {
                                                         <div className="form-group row">
                                                             <label htmlFor="exampleInputUsername2" className="col-sm-12zzz col-form-label labelInput">User Name</label>
                                                             <div className="col-sm-10">
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
+                                                                <InputField
                                                                     placeholder="Username"
                                                                     value={username}
                                                                     maxLength={25}
@@ -63,9 +61,8 @@ const Profile = ({ userInfo, handleLogout }) => {
                                                         <div className="form-group row">
                                                             <label htmlFor="exampleInputEmail2" className="col-sm-2 col-form-label labelInput">Email</label>
                                                             <div className="col-sm-10">
-                                                                <input
+                                                                <InputField
                                                                     type="email"
-                                                                    className="form-control"
                                                                     placeholder="Email"
                                                                     value={email_id}
                                                                     onChange={(e) => setUpdateEmail(e.target.value)}
@@ -77,9 +74,7 @@ const Profile = ({ userInfo, handleLogout }) => {
                                                         <div className="form-group row">
                                                             <label htmlFor="exampleInputMobile" className="col-sm-2 col-form-label labelInput">Phone</label>
                                                             <div className="col-sm-10">
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
+                                                                <InputField
                                                                     placeholder="Phone number"
                                                                     value={phone_no}
                                                                     maxLength={10}
@@ -95,9 +90,7 @@ const Profile = ({ userInfo, handleLogout }) => {
                                                         <div className="form-group row">
                                                             <label htmlFor="exampleInputPassword2" className="col-sm-2 col-form-label labelInput">Password</label>
                                                             <div className="col-sm-10">
-                                                                <input
-                                                                    type="text"
-                                                                    className="form-control"
+                                                                <InputField
                                                                     placeholder="Password"
                                                                     value={password}
                                                                     maxLength={4}

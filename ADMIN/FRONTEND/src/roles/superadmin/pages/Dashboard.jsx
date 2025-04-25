@@ -5,43 +5,36 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 import Chart from 'react-apexcharts';
-import useDashboardData from '../hooks/DashboardHooks';
-// Register ChartJS components
+import useDashboard from '../hooks/DashboardHooks';// Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const Dashboard = ({ userInfo, handleLogout }) => {
-   
 
     const {
-        setScrollIndex,
+        totalChargers, setTotalChargers,
+        availableChargers, setAvailableChargers,
+        faultedChargers, setFaultedChargers,
+        offlineChargers, setOfflineChargers,
+        totalsession, setTotalSession,
+        scrollIndex, setScrollIndex,
         visibleBars,
-        scrollIndex,
-        totalChargers,
-    availableChargers,
-    faultedChargers,
-    offlineChargers,
-    totalsession,
-    totalCounts,
-    chargersData,
-    energyData,
-    fetchData,
-    getChartData,
-    containerRef,
-    totalChargersRef,
-    onlineChargersRef,
-    faultedChargersRef,
-    offlineChargersRef,
-    selectedCharger,
-    isModalOpen,
-    viewMode,
-    setIsModalOpen,
-    setViewMode,
-    setHover,
-    handleChargerClick,
-    scrollLeft,
-    scrollRight
+        containerRef,
+        hover, setHover,
+        totalChargersRef,
+        onlineChargersRef,
+        faultedChargersRef,
+        offlineChargersRef,
+        selectedCharger,
+        setSelectedCharger,
+        isModalOpen,
+        setIsModalOpen,
+        totalCounts,setTotalCounts,chargersData,setChargersData,
+        energyData, setEnergyData,viewMode, setViewMode,
+        isFetching,fetchData,getChartData,scrollLeft,
+        scrollRight,handleChargerClick,
+    
+    }=useDashboard(userInfo)
 
-      } = useDashboardData();
     
 
     return (
