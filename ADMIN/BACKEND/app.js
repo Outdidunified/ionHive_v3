@@ -13,7 +13,7 @@ const logger = require('./utils/logger.js');
 // Import Routes
 const SuperAdminRoute = require('./routes/superAdminRoute.js');
 const ResellerAdminRoute = require('./routes/resellerAdminRoute.js');
-// const ClientAdminRoute = require('./routes/clientAdminRoute.js');
+const ClientAdminRoute = require('./routes/clientAdminRoute.js');
 // const AssociationAdminRoute = require('./routes/associationAdminRoute.js');
 
 // Initialize Express App
@@ -51,7 +51,7 @@ app.use((req, res, next) => {
 // Register Routes
 app.use('/superadmin', SuperAdminRoute);
 app.use('/reselleradmin', ResellerAdminRoute);
-// app.use('/clientadmin', ClientAdminRoute);
+app.use('/clientadmin', ClientAdminRoute);
 // app.use('/associationadmin', AssociationAdminRoute);
 
 // Error Handling Middleware
