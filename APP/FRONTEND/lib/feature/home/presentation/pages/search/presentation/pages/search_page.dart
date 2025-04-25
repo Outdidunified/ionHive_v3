@@ -32,7 +32,7 @@ class SearchPage extends StatelessWidget {
         return true; // Allow navigation
       },
       child: Obx(
-            () => LoadingOverlay(
+        () => LoadingOverlay(
           isLoading: controller.isLoading.value,
           opacity: 0.7,
           child: Scaffold(
@@ -135,19 +135,20 @@ class SearchPage extends StatelessWidget {
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: controller.searchQuery.value.isNotEmpty
                         ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        controller.updateSearch('');
-                        textEditingController.clear();
-                        FocusScope.of(context).unfocus();
-                      },
-                    )
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              controller.updateSearch('');
+                              textEditingController.clear();
+                              FocusScope.of(context).unfocus();
+                            },
+                          )
                         : null,
                     border: _outlineBorder(context, isDark, colorScheme),
                     enabledBorder: _outlineBorder(context, isDark, colorScheme),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                      borderSide:
+                          BorderSide(color: colorScheme.primary, width: 2),
                     ),
                     filled: true,
                     fillColor: isDark ? Colors.grey[800] : Colors.grey[50],
@@ -211,8 +212,8 @@ class SearchPage extends StatelessWidget {
                 ? 'Recent Charger ID Searches'
                 : 'Recent Location Searches',
             style: Theme.of(context).textTheme.titleSmall!.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           TextButton(
             onPressed: () => controller.clearRecentSearches(),
@@ -292,22 +293,22 @@ class SearchPage extends StatelessWidget {
           return ListTile(
             leading: controller.isChargerId.value
                 ? Image.asset(
-              'assets/icons/saved_device.png',
-              width: 24,
-              height: 24,
-              color: Theme.of(context).primaryColor,
-            )
+                    'assets/icons/saved_device.png',
+                    width: 24,
+                    height: 24,
+                    color: Theme.of(context).primaryColor,
+                  )
                 : (isCurrentLocation
-                ? Icon(
-              Icons.my_location,
-              color: Theme.of(context).primaryColor,
-            )
-                : Image.asset(
-              'assets/icons/distance.png',
-              width: 24,
-              height: 24,
-              color: Theme.of(context).primaryColor,
-            )),
+                    ? Icon(
+                        Icons.my_location,
+                        color: Theme.of(context).primaryColor,
+                      )
+                    : Image.asset(
+                        'assets/icons/distance.png',
+                        width: 24,
+                        height: 24,
+                        color: Theme.of(context).primaryColor,
+                      )),
             title: Text(
               search,
               style: TextStyle(
@@ -334,11 +335,11 @@ class SearchPage extends StatelessWidget {
   // --- UI Components ---
 
   Widget _toggleButton(
-      BuildContext context, {
-        required String title,
-        required bool selected,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required String title,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -353,11 +354,11 @@ class SearchPage extends StatelessWidget {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleSmall!.copyWith(
-              color: selected
-                  ? Colors.white
-                  : Theme.of(context).colorScheme.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: selected
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
       ),
@@ -406,8 +407,8 @@ class SearchPage extends StatelessWidget {
       BuildContext context, bool isDark, ColorScheme colorScheme) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(
-          color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
+      borderSide:
+          BorderSide(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
     );
   }
 }
