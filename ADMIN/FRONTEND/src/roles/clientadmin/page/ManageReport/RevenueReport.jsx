@@ -2,22 +2,23 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useRevenueReport from '../../hooks/ManageReport/RevenueReportHooks';
+import InputField from '../../../../utils/InputField';
 
 const RevenueReport = ({ userInfo, handleLogout }) => {
-   const {
- 
-    firstTableData,
-    totalRevenue,
-    secondTableData,
-    filteredFirstTableData,
-    filteredSecondTableData,
-    firstTableSearchQuery,
-    secondTableSearchQuery,
-    setSecondTableSearchQuery,
-    setFirstTableSearchQuery,
-    firstTableLoading,
-    secondTableLoading
-   }=useRevenueReport(userInfo)
+    const {
+
+        firstTableData,
+        totalRevenue,
+        secondTableData,
+        filteredFirstTableData,
+        filteredSecondTableData,
+        firstTableSearchQuery,
+        secondTableSearchQuery,
+        setSecondTableSearchQuery,
+        setFirstTableSearchQuery,
+        firstTableLoading,
+        secondTableLoading
+    } = useRevenueReport(userInfo)
 
     return (
         <div className="container-scroller">
@@ -42,7 +43,7 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
                                 <div className="card shadow-sm" style={{ height: "330px" }}>
                                     <div className="card-body d-flex flex-column">
                                         <div className="d-flex justify-content-between mb-3">
-                                        <h4 className="card-title mb-2">Total Revenue</h4>
+                                            <h4 className="card-title mb-2">Total Revenue</h4>
 
                                             <div className="input-group" style={{ width: '250px' }}>
                                                 <div className="input-group-prepend">
@@ -50,9 +51,8 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
                                                         <i className="icon-search"></i>
                                                     </span>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
+                                                <InputField
+
                                                     placeholder="Search now"
                                                     value={firstTableSearchQuery}
                                                     onChange={(e) => setFirstTableSearchQuery(e.target.value)}
@@ -71,21 +71,21 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-    {firstTableLoading ? (
-        <tr><td colSpan="4" className="text-center">Loading...</td></tr>
-    ) : filteredFirstTableData.length > 0 ? (
-        filteredFirstTableData.map((item, index) => (
-            <tr key={index} style={{ height: "95px" }}>
-                <td>{index + 1}</td>
-                <td>{item.charger_id || '-'}</td>
-                <td>{item.association_email_id || '-'}</td>
-                <td>{item.Revenue || '-'}</td>
-            </tr>
-        ))
-    ) : (
-        <tr><td colSpan="4" className="text-center">No Data Available</td></tr>
-    )}
-</tbody>
+                                                    {firstTableLoading ? (
+                                                        <tr><td colSpan="4" className="text-center">Loading...</td></tr>
+                                                    ) : filteredFirstTableData.length > 0 ? (
+                                                        filteredFirstTableData.map((item, index) => (
+                                                            <tr key={index} style={{ height: "95px" }}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{item.charger_id || '-'}</td>
+                                                                <td>{item.association_email_id || '-'}</td>
+                                                                <td>{item.Revenue || '-'}</td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr><td colSpan="4" className="text-center">No Data Available</td></tr>
+                                                    )}
+                                                </tbody>
 
                                             </table>
                                         </div>
@@ -95,60 +95,59 @@ const RevenueReport = ({ userInfo, handleLogout }) => {
 
                             {/* Second Table with Sessions Data */}
                             <div className="col-md-12 mt-4">
-    <div className="card shadow-sm">
-        <div className="card-body d-flex flex-column">
-            <div className="d-flex justify-content-between mb-3">
-                <h4 className="card-title mb-2">Charger Sessions</h4>
+                                <div className="card shadow-sm">
+                                    <div className="card-body d-flex flex-column">
+                                        <div className="d-flex justify-content-between mb-3">
+                                            <h4 className="card-title mb-2">Charger Sessions</h4>
 
-                <div className="input-group mb-0" style={{ width: '250px' }}>
-                    <div className="input-group-prepend">
-                        <span className="input-group-text">
-                            <i className="icon-search"></i>
-                        </span>
-                    </div>
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search now"
-                        value={secondTableSearchQuery}
-                        onChange={(e) => setSecondTableSearchQuery(e.target.value)}
-                    />
-                </div>
-            </div>
+                                            <div className="input-group mb-0" style={{ width: '250px' }}>
+                                                <div className="input-group-prepend">
+                                                    <span className="input-group-text">
+                                                        <i className="icon-search"></i>
+                                                    </span>
+                                                </div>
+                                                <InputField
 
-            <div className="table-responsive" style={{ flex: 1, overflowY: 'auto' }}>
-                <table className="table table-striped text-center">
-                    <thead style={{ position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 1 }}>
-                        <tr>
-                            <th>SI.NO</th>
-                            <th>Charger ID</th>
-                            <th>Session ID</th>
-                            <th>Association Email</th>
-                            <th>Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {secondTableLoading ? (
-                            <tr><td colSpan="5" className="text-center">Loading...</td></tr>
-                        ) : filteredSecondTableData.length > 0 ? (
-                            filteredSecondTableData.map((session, index) => (
-                                <tr key={index} style={{ height: "95px" }}>
-                                    <td>{index + 1}</td>
-                                    <td>{session.charger_id || '-'}</td>
-                                    <td>{session.session_id || '-'}</td>
-                                    <td>{session.association_email_id || '-'}</td>
-                                    <td>{session.Revenue || '-'}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr><td colSpan="5" className="text-center">No Data Available</td></tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+                                                    placeholder="Search now"
+                                                    value={secondTableSearchQuery}
+                                                    onChange={(e) => setSecondTableSearchQuery(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="table-responsive" style={{ flex: 1, overflowY: 'auto' }}>
+                                            <table className="table table-striped text-center">
+                                                <thead style={{ position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 1 }}>
+                                                    <tr>
+                                                        <th>SI.NO</th>
+                                                        <th>Charger ID</th>
+                                                        <th>Session ID</th>
+                                                        <th>Association Email</th>
+                                                        <th>Revenue</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {secondTableLoading ? (
+                                                        <tr><td colSpan="5" className="text-center">Loading...</td></tr>
+                                                    ) : filteredSecondTableData.length > 0 ? (
+                                                        filteredSecondTableData.map((session, index) => (
+                                                            <tr key={index} style={{ height: "95px" }}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{session.charger_id || '-'}</td>
+                                                                <td>{session.session_id || '-'}</td>
+                                                                <td>{session.association_email_id || '-'}</td>
+                                                                <td>{session.Revenue || '-'}</td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr><td colSpan="5" className="text-center">No Data Available</td></tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
                     </div>

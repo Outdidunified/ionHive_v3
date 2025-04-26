@@ -3,6 +3,7 @@ import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import usecreateUser from '../../hooks/ManageUser/CreateusersHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 
 const CreateUsers = ({ userInfo, handleLogout }) => {
     const {
@@ -93,9 +94,8 @@ const CreateUsers = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">User Name</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control" placeholder="User Name"
+                                                                        <InputField
+                                                                            placeholder="User Name"
                                                                             value={newUser.username}
                                                                             maxLength={25}
                                                                             onChange={(e) => {
@@ -111,9 +111,8 @@ const CreateUsers = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Phone No</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control" placeholder="Phone No"
+                                                                        <InputField
+                                                                            placeholder="Phone No"
                                                                             value={newUser.phone_no}
                                                                             maxLength={10}
                                                                             onChange={(e) => {
@@ -129,9 +128,9 @@ const CreateUsers = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Email ID</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
+                                                                        <InputField
                                                                             type="email"
-                                                                            className="form-control" placeholder="Email ID"
+                                                                            placeholder="Email ID"
                                                                             value={newUser.email_id}
                                                                             onChange={(e) => {
                                                                                 const value = e.target.value;
@@ -155,9 +154,8 @@ const CreateUsers = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Password</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control" placeholder="Password"
+                                                                        <InputField
+                                                                            placeholder="Password"
                                                                             value={newUser.password}
                                                                             maxLength={4}
                                                                             onChange={(e) => {
@@ -177,7 +175,7 @@ const CreateUsers = ({ userInfo, handleLogout }) => {
                                                             loading={isLoading}
                                                             disabled={isLoading}
                                                             type="submit">
-                                                                Create
+                                                            Create
                                                         </LoadingButton>
 
                                                     </form>

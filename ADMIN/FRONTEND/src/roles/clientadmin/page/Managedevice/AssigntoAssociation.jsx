@@ -3,21 +3,22 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useAssigntoAssociation from '../../hooks/ManageDevice/AssigntoAssociationHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const AssigntoAssociation = ({ userInfo, handleLogout }) => {
-  const {
-    selectedAssociationId, setSelectedAssociationId,
-    selectedChargers,setSelectedChargers  ,
-    commission, setCommission,reloadPage, setReloadPage,
-    chargersLoading, setChargersLoading,  
-    unallocatedChargers, setUnallocatedChargers,
-    clientsList, setClientsList,
-    fetchClientsCalled,
-    fetchUnallocatedChargersCalled,
-    selectedModel, setSelectedModel ,fetchClients,fetchUnallocatedChargers,handleAssociationChange,handleChargerChange,
-    errorMessage, setErrorMessage,handleCommissionChange,handleSubmit,submitAssign,goBack,
-    handleModelChange,filteredChargers,loading
+    const {
+        selectedAssociationId, setSelectedAssociationId,
+        selectedChargers, setSelectedChargers,
+        commission, setCommission, reloadPage, setReloadPage,
+        chargersLoading, setChargersLoading,
+        unallocatedChargers, setUnallocatedChargers,
+        clientsList, setClientsList,
+        fetchClientsCalled,
+        fetchUnallocatedChargersCalled,
+        selectedModel, setSelectedModel, fetchClients, fetchUnallocatedChargers, handleAssociationChange, handleChargerChange,
+        errorMessage, setErrorMessage, handleCommissionChange, handleSubmit, submitAssign, goBack,
+        handleModelChange, filteredChargers, loading
 
-  }=useAssigntoAssociation(userInfo);
+    } = useAssigntoAssociation(userInfo);
     return (
         <div className='container-scroller'>
             <Header userInfo={userInfo} handleLogout={handleLogout} />
@@ -32,7 +33,7 @@ const AssigntoAssociation = ({ userInfo, handleLogout }) => {
                                         <h3 className="font-weight-bold">Assign Chargers to Association</h3>
                                     </div>
                                     <div className="col-12 col-xl-4">
-                                        <div className="justify-content-end d-flex"> 
+                                        <div className="justify-content-end d-flex">
                                             <div className="dropdown">
                                                 <button className="btn btn-outline-warning btn-icon-text dropdown-toggle" type="button" style={{ marginRight: '10px' }} id="dropdownMenuIconButton1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i className="ti-file btn-icon-prepend"></i>Select Charger Model
@@ -71,7 +72,7 @@ const AssigntoAssociation = ({ userInfo, handleLogout }) => {
                                                                         <select
                                                                             className="form-control"
                                                                             value={selectedAssociationId}
-                                                                            style={{color:'black'}}
+                                                                            style={{ color: 'black' }}
                                                                             onChange={handleAssociationChange}
                                                                             required
                                                                         >
@@ -97,9 +98,7 @@ const AssigntoAssociation = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
                                                                                 maxLength={5}
                                                                                 value={commission}
                                                                                 name="commission" // Add name attribute
@@ -140,13 +139,13 @@ const AssigntoAssociation = ({ userInfo, handleLogout }) => {
                                                                                         filteredChargers.map((chargerObj) => (
                                                                                             <div key={chargerObj.charger_id} className="dropdown-item">
                                                                                                 <div className="form-check">
-                                                                                                    <input
+                                                                                                    <InputField
                                                                                                         className="form-check-input"
                                                                                                         type="checkbox"
                                                                                                         id={`charger-${chargerObj.charger_id}`}
                                                                                                         checked={selectedChargers.includes(chargerObj.charger_id)}
                                                                                                         onChange={(e) => handleChargerChange(chargerObj.charger_id, e.target.checked)}
-                                                                                                        name={`charger_${chargerObj.charger_id}`} 
+                                                                                                        name={`charger_${chargerObj.charger_id}`}
                                                                                                     />
                                                                                                     <label className="form-check-label" htmlFor={`charger-${chargerObj.charger_id}`}>
                                                                                                         {chargerObj.charger_id}
@@ -218,11 +217,11 @@ const AssigntoAssociation = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         </div> */}
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
-                                                       
+
                                                         <LoadingButton
-                                                        type="submit"
-                                                        loading={loading}
-                                                        disabled={loading}
+                                                            type="submit"
+                                                            loading={loading}
+                                                            disabled={loading}
                                                         >Submit
                                                         </LoadingButton>
                                                     </form>

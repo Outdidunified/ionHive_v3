@@ -2,6 +2,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useDeviceReport from '../../hooks/ManageReport/DeviceReportHooks';
+import InputField from '../../../../utils/InputField';
 
 const DeviceReport = ({ userInfo, handleLogout }) => {
     const {
@@ -19,11 +20,11 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
         tableData,
         deviceId,
         handleSearch,
-        error,handlePrint,handleExport
-      } = useDeviceReport(userInfo);
+        error, handlePrint, handleExport
+    } = useDeviceReport(userInfo);
 
     // Handle Print
-    
+
     return (
         <div className='container-scroller'>
             {/* Header */}
@@ -50,7 +51,7 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
                                             <form className="form-row" >
                                                 <div className="form-group">
                                                     <label htmlFor="fromDate" style={{ fontSize: '17px' }}>From Date</label>
-                                                    <input
+                                                    <InputField
                                                         type="date"
                                                         className="form-input inputCss"
                                                         id="fromDate"
@@ -68,7 +69,7 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
 
                                                 <div className="form-group">
                                                     <label htmlFor="toDate" style={{ fontSize: '17px' }}>To Date</label>
-                                                    <input
+                                                    <InputField
                                                         type="date"
                                                         className="form-input inputCss"
                                                         id="toDate"
@@ -107,19 +108,19 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
                                                     )}
                                                 </div>
                                                 <div className="form-group">
-                                                <button
-  type="button"
-  className="form-submit-btn inputCss"
-  onClick={handleSearch}
-  disabled={loading} 
->
-  {loading ? (
-    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 
-  ) : (
-    <i className="mdi mdi-magnify mr-1"></i> 
-  )}
-  {!loading && 'Search'} 
-</button>
+                                                    <button
+                                                        type="button"
+                                                        className="form-submit-btn inputCss"
+                                                        onClick={handleSearch}
+                                                        disabled={loading}
+                                                    >
+                                                        {loading ? (
+                                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                        ) : (
+                                                            <i className="mdi mdi-magnify mr-1"></i>
+                                                        )}
+                                                        {!loading && 'Search'}
+                                                    </button>
 
 
                                                 </div>

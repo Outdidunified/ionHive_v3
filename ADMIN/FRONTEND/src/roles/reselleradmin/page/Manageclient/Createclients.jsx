@@ -3,6 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useCreateClient from '../../hooks/ManageClient/CreateClientsHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const CreateClients = ({ userInfo, handleLogout }) => {
     const {
         client_name,
@@ -56,7 +57,7 @@ const CreateClients = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Client Name</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text" className="form-control" placeholder="Client Name" value={client_name} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setClientName(sanitizedValue); }} required />
+                                                                        <InputField placeholder="Client Name" value={client_name} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setClientName(sanitizedValue); }} required />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -64,7 +65,7 @@ const CreateClients = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Phone Number</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text" className="form-control" placeholder="Phone Number" value={client_phone_no} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPhoneNumber(sanitizedValue); }} required />
+                                                                        <InputField placeholder="Phone Number" value={client_phone_no} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPhoneNumber(sanitizedValue); }} required />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -74,7 +75,7 @@ const CreateClients = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Email ID</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="email" className="form-control" placeholder="Email ID" value={client_email_id} onChange={(e) => {
+                                                                        <InputField type="email" placeholder="Email ID" value={client_email_id} onChange={(e) => {
                                                                             const value = e.target.value;
                                                                             // Remove spaces and invalid characters
                                                                             const noSpaces = value.replace(/\s/g, '');

@@ -4,10 +4,11 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useProfile from '../../hooks/Profile/ProfileHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 
 const Profile = ({ userInfo, handleLogout }) => {
     const {
-        
+
         username, setUserUname,
         email_id, setUserEmail,
         phone_no, setUserPhone,
@@ -53,15 +54,15 @@ const Profile = ({ userInfo, handleLogout }) => {
                                         <form className="forms-sample" onSubmit={addResellerProfileUpdate}>
                                             <div className="form-group profileINputCss">
                                                 <label htmlFor="exampleInputUsername1">Username</label>
-                                                <input type="text" className="form-control" placeholder="Username" value={reseller_name} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setUpdateUname(sanitizedValue); }} readOnly required />
+                                                <InputField placeholder="Username" value={reseller_name} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setUpdateUname(sanitizedValue); }} readOnly required />
                                             </div>
                                             <div className="form-group profileINputCss">
                                                 <label htmlFor="exampleInputEmail1">Email address</label>
-                                                <input type="email" className="form-control" placeholder="Email" value={reseller_email_id} onChange={(e) => setUpdateEmail(e.target.value)} readOnly required />
+                                                <InputField type="email" placeholder="Email" value={reseller_email_id} onChange={(e) => setUpdateEmail(e.target.value)} readOnly required />
                                             </div>
                                             <div className="form-group profileINputCss">
                                                 <label htmlFor="exampleInputPassword1">Phone Number</label>
-                                                <input type="text" className="form-control" placeholder="Phone Number" value={reseller_phone_no} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setUpdatePhone(sanitizedValue); }} required />
+                                                <InputField placeholder="Phone Number" value={reseller_phone_no} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setUpdatePhone(sanitizedValue); }} required />
                                             </div>
                                             <div className="form-group profileINputCss">
                                                 <label htmlFor="exampleInputConfirmPassword1">Address</label>
@@ -89,19 +90,19 @@ const Profile = ({ userInfo, handleLogout }) => {
                                         <form className="forms-sample" onSubmit={addUserProfileUpdate}>
                                             <div className="form-group profileINputCss">
                                                 <label htmlFor="exampleInputUsername1">Username</label>
-                                                <input type="text" className="form-control" placeholder="Username" value={username} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setUserUname(sanitizedValue); }} readOnly required />
+                                                <InputField placeholder="Username" value={username} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setUserUname(sanitizedValue); }} readOnly required />
                                             </div>
                                             <div className="form-group profileINputCss">
                                                 <label htmlFor="exampleInputEmail1">Email address</label>
-                                                <input type="email" className="form-control" placeholder="Email" value={email_id} onChange={(e) => setUserEmail(e.target.value)} readOnly required />
+                                                <InputField type="email" placeholder="Email" value={email_id} onChange={(e) => setUserEmail(e.target.value)} readOnly required />
                                             </div>
                                             <div className="form-group profileINputCss">
                                                 <label htmlFor="exampleInputPassword1">Phone Number</label>
-                                                <input type="text" className="form-control" placeholder="Phone Number" value={phone_no} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setUserPhone(sanitizedValue); }} required />
+                                                <InputField placeholder="Phone Number" value={phone_no} maxLength={10} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setUserPhone(sanitizedValue); }} required />
                                             </div>
                                             <div className="form-group profileINputCss">
                                                 <label htmlFor="exampleInputConfirmPassword1">Password</label>
-                                                <input type="text" className="form-control" placeholder="Password" value={password} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setUserPassword(sanitizedValue); }} required />
+                                                <InputField placeholder="Password" value={password} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setUserPassword(sanitizedValue); }} required />
                                             </div>
                                             {errorMessage && <div className="text-danger">{errorMessage}</div>}<br />
 

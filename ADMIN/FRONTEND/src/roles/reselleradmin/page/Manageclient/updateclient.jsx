@@ -3,6 +3,7 @@ import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useUpdateClientForm from '../../hooks/ManageClient/UpdateClientsHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const UpdateClient = ({ userInfo, handleLogout }) => {
     const {
         client_name, setClientName,
@@ -54,9 +55,7 @@ const UpdateClient = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Client Name</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
                                                                             value={client_name}
                                                                             maxLength={25}
                                                                             onChange={(e) => {
@@ -73,9 +72,8 @@ const UpdateClient = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Phone No</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             value={client_phone_no}
                                                                             maxLength={10}
                                                                             onChange={(e) => {
@@ -91,9 +89,8 @@ const UpdateClient = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Email ID</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
+                                                                        <InputField
                                                                             type="email"
-                                                                            className="form-control"
                                                                             value={dataItems.client_email_id}
                                                                             readOnly
                                                                         />
@@ -104,8 +101,7 @@ const UpdateClient = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Wallet</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text"
-                                                                            className="form-control"
+                                                                        <InputField
                                                                             value={client_wallet}
                                                                             onChange={(e) => {
                                                                                 let value = e.target.value;

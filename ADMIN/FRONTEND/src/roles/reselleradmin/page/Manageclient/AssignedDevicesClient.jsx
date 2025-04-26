@@ -3,9 +3,10 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAssignedDevicesClient from '../../hooks/ManageClient/AssignedDevicesClientHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const AssignedDevicesClient = ({ userInfo, handleLogout }) => {
     const {
-        filteredData, 
+        filteredData,
         errorMessage, setErrorMessage,
         backToManageClient,
         navigateToSessionHistory,
@@ -14,9 +15,9 @@ const AssignedDevicesClient = ({ userInfo, handleLogout }) => {
         isLoading,
         closeEditModal,
         modalEditStyle,
-        theadBackgroundColor, 
+        theadBackgroundColor,
         theadsticky,
-        theadfixed, 
+        theadfixed,
         handleEditUserAndToggleBackground,
         reseller_commission,
         setEditRellComm,
@@ -59,7 +60,7 @@ const AssignedDevicesClient = ({ userInfo, handleLogout }) => {
                                                 <div className="input-group-prepend">
                                                     <span className="input-group-text" style={{ color: 'black', width: '185px' }}>Reseller Commission</span>
                                                 </div>
-                                                <input type="text" className="form-control" placeholder="Client Commission" value={reseller_commission} maxLength={5}
+                                                <InputField placeholder="Client Commission" value={reseller_commission} maxLength={5}
                                                     onChange={(e) => {
                                                         let value = e.target.value;
                                                         // Allow only numbers and a single decimal point
@@ -123,9 +124,7 @@ const AssignedDevicesClient = ({ userInfo, handleLogout }) => {
                                                                 <i className="icon-search"></i>
                                                             </span>
                                                         </div>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
+                                                        <InputField
                                                             placeholder="Search now"
                                                             onChange={handleSearchInputChange}
                                                         />

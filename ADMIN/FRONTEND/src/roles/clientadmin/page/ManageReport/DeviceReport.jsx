@@ -2,28 +2,29 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useDeviceReport from '../../hooks/ManageReport/DeviceReportHooks';
+import InputField from '../../../../utils/InputField';
 
-const DeviceReport = ({ userInfo, handleLogout }) => {  
-   const{
-    deviceData,
-loadingDevice,
-errorDevice,
-fromDate,setFromDate,
-toDate,setToDate,
-selectDevice,setDevice,
-loading,
-tableData,deviceId,error,today,
-handleSearch,handlePrint,handleExport
-   }=useDeviceReport(userInfo)
+const DeviceReport = ({ userInfo, handleLogout }) => {
+    const {
+        deviceData,
+        loadingDevice,
+        errorDevice,
+        fromDate, setFromDate,
+        toDate, setToDate,
+        selectDevice, setDevice,
+        loading,
+        tableData, deviceId, error, today,
+        handleSearch, handlePrint, handleExport
+    } = useDeviceReport(userInfo)
 
-   
+
     return (
         <div className='container-scroller'>
             {/* Header */}
             <Header userInfo={userInfo} handleLogout={handleLogout} />
             <div className="container-fluid page-body-wrapper">
                 {/* Sidebar */}
-                <Sidebar/>
+                <Sidebar />
                 <div className="main-panel">
                     <div className="content-wrapper">
                         <div className="row">
@@ -43,7 +44,7 @@ handleSearch,handlePrint,handleExport
                                             <form className="form-row" >
                                                 <div className="form-group">
                                                     <label htmlFor="fromDate" style={{ fontSize: '17px' }}>From Date</label>
-                                                    <input
+                                                    <InputField
                                                         type="date"
                                                         className="form-input inputCss"
                                                         id="fromDate"
@@ -61,7 +62,7 @@ handleSearch,handlePrint,handleExport
 
                                                 <div className="form-group">
                                                     <label htmlFor="toDate" style={{ fontSize: '17px' }}>To Date</label>
-                                                    <input
+                                                    <InputField
                                                         type="date"
                                                         className="form-input inputCss"
                                                         id="toDate"
@@ -73,7 +74,7 @@ handleSearch,handlePrint,handleExport
                                                     />
                                                 </div>
                                                 <div className="form-group">
-                                                    <label htmlFor="selectField" style={{fontSize:'17px'}}>Select Device</label>
+                                                    <label htmlFor="selectField" style={{ fontSize: '17px' }}>Select Device</label>
                                                     {/* <select name="selectField" value={selectDevice}  onChange={(e) => setDevice(e.target.value)} className="form-input inputCss">
                                                         <option value="" disabled>Select Device</option>
                                                         <option value="4989348034">4989348034</option>
@@ -86,7 +87,7 @@ handleSearch,handlePrint,handleExport
                                                     ) : deviceData.length === 0 ? (
                                                         <p>No device data available.</p>
                                                     ) : (
-                                                        <select 
+                                                        <select
                                                             name="selectField"
                                                             value={selectDevice}
                                                             onChange={(e) => setDevice(e.target.value)} className="form-input inputCss">
@@ -115,11 +116,11 @@ handleSearch,handlePrint,handleExport
                                                     </button>
                                                 </div>
                                             </form>
-                                        </div><hr/>
+                                        </div><hr />
                                         <div className="table-responsive" style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                             <table className="table table-striped">
                                                 <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                                    <tr> 
+                                                    <tr>
                                                         <th>Sl.No</th>
                                                         <th>Charger ID</th>
                                                         <th>Session ID</th>
@@ -143,11 +144,11 @@ handleSearch,handlePrint,handleExport
                                                                 {error}
                                                             </td>
                                                         </tr>
-                                                     ) : Array.isArray(tableData) && tableData.length > 0 ? (
+                                                    ) : Array.isArray(tableData) && tableData.length > 0 ? (
                                                         tableData.map((session, index) => (
                                                             <tr key={index}>
                                                                 <td>{index + 1}</td>
-                                                                <td>{deviceId || "-"}</td> 
+                                                                <td>{deviceId || "-"}</td>
                                                                 <td>{session.session_id || "-"}</td>
                                                                 <td>{session.user || "-"}</td>
                                                                 <td>{session.start_time || "-"}</td>
@@ -174,10 +175,10 @@ handleSearch,handlePrint,handleExport
                     </div>
                     {/* Footer */}
                     <Footer />
-                </div>         
-            </div>    
+                </div>
+            </div>
         </div>
     );
-}; 
-                 
+};
+
 export default DeviceReport

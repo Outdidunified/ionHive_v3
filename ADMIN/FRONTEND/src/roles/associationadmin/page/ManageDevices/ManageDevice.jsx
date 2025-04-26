@@ -1,257 +1,30 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
-import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
-import axios from "axios";
+import useManageDevice from '../../hooks/ManageDevice/ManageDeviceHooks';
 
 const ManageDevice = ({ userInfo, handleLogout }) => {    
-    const navigate = useNavigate();
-
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [filteredData] = useState([]);
-    const [posts, setPosts] = useState([]);
-    const fetchMangeCalled = useRef(false);
-    
-    // View manage device
-    const handleViewManageDevice = (dataItem) => {
-        navigate('/associationadmin/ViewManageDevice', { state: { dataItem } });
-    };
-    
-    // Get Allocated charger data
-    const FetchAllocatedCharger = useCallback(async () => {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/associationadmin/FetchAllocatedChargerByClientToAssociation`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ association_id: userInfo.data.association_id }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                // console.log('Response data:', data);
-                setData(data.data);
-                setLoading(false);
-            } else {
-                setError('Failed to fetch profile, ' + response.statusText);
-                console.error('Failed to fetch profile:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            setError('Error fetching data. Please try again.');
-            setLoading(false);
-        }
-    }, [userInfo.data.association_id]);
-
-    useEffect(() => {
-        if (!fetchMangeCalled.current && userInfo && userInfo.data && userInfo.data.user_id) {
-            FetchAllocatedCharger();
-            fetchMangeCalled.current = true;
-        }
-    }, [userInfo, FetchAllocatedCharger]);
-   
-    // Search data 
-    const handleSearchInputChange = (e) => {
-        const inputValue = e.target.value.toUpperCase();
-        if (Array.isArray(data)) {
-            const filteredData = data.filter((item) =>
-                item.charger_id.toUpperCase().includes(inputValue)
-            );
-            setPosts(filteredData);
-        }
-    };
-
-    // Update table data 'data', and 'filteredData' 
-    useEffect(() => {
-        switch (data) {
-            case 'filteredData':
-                setPosts(filteredData);
-                break;
-            default:
-                setPosts(data);
-                break;
-        }
-    }, [data, filteredData]);
-
-    // DeActive
-    const changeDeActivate = async (e, dataItem) => {
-        e.preventDefault();
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/associationadmin/DeActivateOrActivateCharger`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ charger_id:dataItem.charger_id, status:false, modified_by: userInfo.data.email_id }),
-            });
-            if (response.ok) {
-                Swal.fire({
-                    title: "DeActivate successfully",
-                    icon: "success"
-                });
-                FetchAllocatedCharger();
-            } else {
-                const responseData = await response.json();
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to DeActivate, " + responseData.message,
-                    icon: "error"
-                });
-            }
-        }catch (error) {
-            Swal.fire({
-                title: "Error:", error,
-                text: "An error occurred while updating user status.",
-                icon: "error"
-            });
-        }
-    };
-
-    // Active
-    const changeActivate = async (e, dataItem) => {
-        e.preventDefault();
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/associationadmin/DeActivateOrActivateCharger`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ charger_id:dataItem.charger_id, status:true, modified_by: userInfo.data.email_id }),
-            });
-            if (response.ok) {
-                Swal.fire({
-                    title: "Activate successfully",
-                    icon: "success"
-                });
-                FetchAllocatedCharger();
-            } else {
-                const responseData = await response.json();
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to Activate, " + responseData.message,
-                    icon: "error"
-                });
-            }
-        }catch (error) {
-            Swal.fire({
-                title: "Error:", error,
-                text: "An error occurred while updating user status.",
-                icon: "error"
-            });
-        }
-    };
-
-    const [showModal, setShowModal] = useState(false);
-    const [selectedChargerDitails, setSelectedChargerDitails] = useState("");
-    const [selectedFinanceId, setSelectedFinanceId] = useState("");
-    const [financeOptions, setFinanceOptions] = useState([]);
-    const [isEdited, setIsEdited] = useState(false);
-    
-    // Fetch Finance Details
-    const fetchFinanceDetails = useCallback(async () => {
-        try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/fetchFinance_dropdown`, {
-                association_id: userInfo.data.association_id
-            });
-    
-            if (response.status === 200) {
-                let fetchedOptions = response.data.data || [];
-    
-                if (selectedChargerDitails && selectedChargerDitails.finance_id) {
-                    const selectedId = selectedChargerDitails.finance_id;
-                    fetchedOptions = [
-                        ...fetchedOptions.filter(item => item.finance_id === selectedId),
-                        ...fetchedOptions.filter(item => item.finance_id !== selectedId)
-                    ];
-                    setSelectedFinanceId(selectedId.toString()); // Pre-fill selected
-                }
-    
-                setFinanceOptions(fetchedOptions);
-            } else {
-                console.error("Error fetching finance:", response.data);
-                setFinanceOptions([]);
-            }
-        } catch (error) {
-            console.error("Error fetching finance:", error);
-            setFinanceOptions([]);
-        }
-    }, [userInfo.data.association_id, selectedChargerDitails]);
-    
-    
-    useEffect(() => {
-        if (showModal) {
-            fetchFinanceDetails();
-        }
-    }, [fetchFinanceDetails, showModal]);
-    
-    
-    // Open Modal and Set Charger ID
-    const openFinanceModal = (dataItem) => {
-        setSelectedChargerDitails(dataItem);
-        setShowModal(true);
-    };
-    
-    // Handle Finance Selection
-    const handleFinanceChange = (e) => {
-        setSelectedFinanceId(e.target.value);
-        setIsEdited(true);
-    };
-    
-    // Close Modal and Reset States
-    const closeModal = () => {
-        setShowModal(false);
-        setSelectedFinanceId(null); // Reset selectedFinanceId when closing
-        setIsEdited(false);
-    };
-
-    // Handle Form Submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    
-        if (!selectedChargerDitails || !selectedFinanceId) {
-            Swal.fire("Error", "Please select a unit price", "error");
-            return;
-        }
-        const endpoint = selectedChargerDitails.finance_id !== undefined && selectedChargerDitails.finance_id !== null
-            ? "/reAssignFinance"
-            : "/assignFinance";
-    
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/associationadmin${endpoint}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    _id: selectedChargerDitails._id,
-                    charger_id: selectedChargerDitails.charger_id,
-                    finance_id: parseInt(selectedFinanceId),
-                    modified_by: userInfo.data.email_id,
-                }),
-            });
-    
-            const data = await response.json(); // Parse the response body
-    
-            if (response.ok && data.status === "Success") {
-                const actionType = selectedChargerDitails.finance_id ? "reassigned" : "assigned";
-                Swal.fire("Success", `Finance ${actionType} successfully`, "success");
-                setShowModal(false);
-                setSelectedFinanceId("");
-                setIsEdited(false);
-                FetchAllocatedCharger();
-                fetchFinanceDetails();
-            } else {
-                // Show server error message
-                Swal.fire("Error", data.message || "Failed to update finance", "error");
-            }
-        } catch (error) {
-            console.error("Error submitting finance:", error);
-            Swal.fire("Error", "Something went wrong", "error");
-        }
-    };
+  const {
+    data, setData,
+    loading,setLoading,
+    error, setError,
+    filteredData,
+    posts, setPosts,
+    fetchMangeCalled,
+    handleViewManageDevice,
+    FetchAllocatedCharger,
+    handleSearchInputChange,
+    changeDeActivate,
+    changeActivate,
+    showModal, setShowModal,
+    selectedChargerDitails,
+    setSelectedChargerDitails,
+    selectedFinanceId,setSelectedFinanceId,
+    financeOptions,setFinanceOptions,
+    isEdited,setIsEdited,fetchFinanceDetails,
+    openFinanceModal,handleFinanceChange,
+    closeModal,handleSubmit
+  }=useManageDevice(userInfo);
     
     
     

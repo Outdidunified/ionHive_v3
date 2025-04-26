@@ -2,16 +2,17 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useManageAssociation from '../../hooks/ManageAssociation/ManageAssociationHooks';
+import InputField from '../../../../utils/InputField';
 
 const ManageAssociation = ({ userInfo, handleLogout }) => {
     const {
-        associations, 
+        associations,
         searchQuery,
-        handleSearch,filterAssociations,
+        handleSearch, filterAssociations,
         navigateToViewAssociationDetails,
-        navtocreateass,navigatetochargerdetails,loading
+        navtocreateass, navigatetochargerdetails, loading
 
-    }=useManageAssociation(userInfo);
+    } = useManageAssociation(userInfo);
 
     return (
         <div className='container-scroller'>
@@ -58,9 +59,8 @@ const ManageAssociation = ({ userInfo, handleLogout }) => {
                                                             <i className="icon-search"></i>
                                                         </span>
                                                     </div>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control"
+                                                    <InputField
+
                                                         placeholder="Search now"
                                                         value={searchQuery}
                                                         onChange={handleSearch}
@@ -71,7 +71,7 @@ const ManageAssociation = ({ userInfo, handleLogout }) => {
                                         <div className="table-responsive" style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                             <table className="table table-striped">
                                                 <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                                    <tr> 
+                                                    <tr>
                                                         <th>Sl.No</th>
                                                         <th>Association Name</th>
                                                         <th>Email ID</th>
@@ -82,50 +82,50 @@ const ManageAssociation = ({ userInfo, handleLogout }) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody style={{ textAlign: 'center' }}>
-    {loading ? (
-        <tr>
-            <td colSpan="7">
-                <span>Loading...</span>
-            </td>
-        </tr>
-    ) : filterAssociations(associations).length > 0 ? (
-        filterAssociations(associations).map((association, index) => (
-            <tr key={association._id || index}>
-                <td>{index + 1}</td>
-                <td>{association.association_name || '-'}</td>
-                <td>{association.association_email_id || '-'}</td>
-                <td>{association.association_phone_no || '-'}</td>
-                <td style={{ color: association.status ? 'green' : 'red' }}>
-                    {association.status ? 'Active' : 'DeActive'}
-                </td>
-                <td>
-                    <button
-                        type="button"
-                        className="btn btn-outline-success btn-icon-text"
-                        onClick={() => navigateToViewAssociationDetails(association)}
-                        style={{ marginBottom: '10px', marginRight: '10px' }}
-                    >
-                        <i className="mdi mdi-eye btn-icon-prepend"></i>View
-                    </button>
-                </td>
-                <td>
-                    <button
-                        type="button"
-                        className="btn btn-outline-warning btn-icon-text"
-                        onClick={() => navigatetochargerdetails(association.association_id)}
-                        style={{ marginBottom: '10px', marginRight: '10px' }}
-                    >
-                        <i className="ti-file btn-icon-prepend"></i>Device
-                    </button>
-                </td>
-            </tr>
-        ))
-    ) : (
-        <tr>
-            <td colSpan="7">No Record Found</td>
-        </tr>
-    )}
-</tbody>
+                                                    {loading ? (
+                                                        <tr>
+                                                            <td colSpan="7">
+                                                                <span>Loading...</span>
+                                                            </td>
+                                                        </tr>
+                                                    ) : filterAssociations(associations).length > 0 ? (
+                                                        filterAssociations(associations).map((association, index) => (
+                                                            <tr key={association._id || index}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{association.association_name || '-'}</td>
+                                                                <td>{association.association_email_id || '-'}</td>
+                                                                <td>{association.association_phone_no || '-'}</td>
+                                                                <td style={{ color: association.status ? 'green' : 'red' }}>
+                                                                    {association.status ? 'Active' : 'DeActive'}
+                                                                </td>
+                                                                <td>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-success btn-icon-text"
+                                                                        onClick={() => navigateToViewAssociationDetails(association)}
+                                                                        style={{ marginBottom: '10px', marginRight: '10px' }}
+                                                                    >
+                                                                        <i className="mdi mdi-eye btn-icon-prepend"></i>View
+                                                                    </button>
+                                                                </td>
+                                                                <td>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-warning btn-icon-text"
+                                                                        onClick={() => navigatetochargerdetails(association.association_id)}
+                                                                        style={{ marginBottom: '10px', marginRight: '10px' }}
+                                                                    >
+                                                                        <i className="ti-file btn-icon-prepend"></i>Device
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="7">No Record Found</td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
 
                                             </table>
                                         </div>

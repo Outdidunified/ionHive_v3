@@ -3,18 +3,19 @@ import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useAssignfinance from '../../hooks/ManageAssociation/AssignFinanceHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 
 const Assignfinance = ({ userInfo, handleLogout }) => {
     const {
         fetchFinanceId,
         handleFinanceChange,
-        handleSubmit,goBack,chargerId,
-        financeOptions,selectedFinanceId,
-        isEdited,setFinanceOptions,
-        fetchFinanceIdCalled,setChargerId,
+        handleSubmit, goBack, chargerId,
+        financeOptions, selectedFinanceId,
+        isEdited, setFinanceOptions,
+        fetchFinanceIdCalled, setChargerId,
         setIsEdited
-    
-    }=useAssignfinance(userInfo);
+
+    } = useAssignfinance(userInfo);
     return (
         <div className='container-scroller'>
             <Header userInfo={userInfo} handleLogout={handleLogout} />
@@ -57,9 +58,8 @@ const Assignfinance = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Charger ID</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             value={chargerId}
                                                                             readOnly
                                                                         />
@@ -89,12 +89,12 @@ const Assignfinance = ({ userInfo, handleLogout }) => {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                       
+
 
                                                         <LoadingButton
-                                                        type="submit"
-                                                        loading={loading}
-                                                        disabled={isEdited}>Assign</LoadingButton>
+                                                            type="submit"
+                                                            loading={loading}
+                                                            disabled={isEdited}>Assign</LoadingButton>
                                                     </form>
                                                 </div>
                                             </div>

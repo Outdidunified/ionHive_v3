@@ -3,6 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useCreateass from '../../hooks/ManageAssociation/createassociationHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 
 const Createass = ({ userInfo, handleLogout }) => {
     const {
@@ -51,9 +52,8 @@ const Createass = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Association Name</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             placeholder="Association Name"
                                                                             value={newUser.association_name}
                                                                             maxLength={25}
@@ -70,9 +70,8 @@ const Createass = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Phone No</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             placeholder="Phone No"
                                                                             value={newUser.association_phone_no}
                                                                             maxLength={10}
@@ -89,9 +88,8 @@ const Createass = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Email ID</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
+                                                                        <InputField
                                                                             type="email"
-                                                                            className="form-control"
                                                                             placeholder="Email ID"
                                                                             value={newUser.association_email_id}
                                                                             onChange={(e) => {

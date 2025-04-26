@@ -31,8 +31,6 @@ import Updateuser from '../../roles/reselleradmin/page/Manageuser/updateuser';
 import Viewuser from '../../roles/reselleradmin/page/Manageuser/Viewuser';
 import Header from '../../roles/reselleradmin/components/Header';
 
-
-
 const ResellerAdminApp = () => {
   const storedUser = JSON.parse(sessionStorage.getItem('resellerAdminUser'));
   const [loggedIn, setLoggedIn] = useState(!!storedUser);

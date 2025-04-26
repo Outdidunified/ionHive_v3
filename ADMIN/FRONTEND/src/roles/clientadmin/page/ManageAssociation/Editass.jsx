@@ -4,21 +4,22 @@ import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useEditass from '../../hooks/ManageAssociation/EditAssociationHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 const Editass = ({ userInfo, handleLogout }) => {
-   const {
-    dataItems,
-    association_name, setAssociationName,
-    association_phone_no, setAssociationPhoneNo,
-    association_wallet, setAssociationWallet,
-    association_address, setAssociationAddress,
-    status, setStatus,
-    errorMessage, setErrorMessage,
-    initialValues, setInitialValues,
-    isModified,handleStatusChange,
-    updateAssociationDetails,
-    goBack,editBack,loading
-    
-   }=useEditass(userInfo)
+    const {
+        dataItems,
+        association_name, setAssociationName,
+        association_phone_no, setAssociationPhoneNo,
+        association_wallet, setAssociationWallet,
+        association_address, setAssociationAddress,
+        status, setStatus,
+        errorMessage, setErrorMessage,
+        initialValues, setInitialValues,
+        isModified, handleStatusChange,
+        updateAssociationDetails,
+        goBack, editBack, loading
+
+    } = useEditass(userInfo)
     return (
         <div className='container-scroller'>
             {/* Header */}
@@ -63,9 +64,8 @@ const Editass = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Association  Name</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             value={association_name}
                                                                             maxLength={25}
                                                                             onChange={(e) => {
@@ -95,9 +95,8 @@ const Editass = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Association Phone</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             value={association_phone_no}
                                                                             maxLength={10}
                                                                             onChange={(e) => {
@@ -113,9 +112,8 @@ const Editass = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Association Email</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
+                                                                        <InputField
                                                                             type="email"
-                                                                            className="form-control"
                                                                             value={dataItems.association_email_id}
                                                                             readOnly
                                                                         />
@@ -126,8 +124,7 @@ const Editass = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Association Wallet</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text"
-                                                                            className="form-control"
+                                                                        <InputField
                                                                             value={association_wallet}
                                                                             onChange={(e) => {
                                                                                 let value = e.target.value;
@@ -189,7 +186,7 @@ const Editass = ({ userInfo, handleLogout }) => {
                                                                         <select
                                                                             className="form-control"
                                                                             value={status}
-                                                                            onChange={handleStatusChange} 
+                                                                            onChange={handleStatusChange}
                                                                             required>
                                                                             <option value="true">Active</option>
                                                                             <option value="false">DeActive</option>
@@ -199,12 +196,12 @@ const Editass = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
-                                                       
 
-                                                        <LoadingButton 
-                                                        type="submit"
-                                                        disabled={!isModified}   
-                                                        loading={loading} >Update</LoadingButton>                                                </form>
+
+                                                        <LoadingButton
+                                                            type="submit"
+                                                            disabled={!isModified}
+                                                            loading={loading} >Update</LoadingButton>                                                </form>
                                                 </div>
                                             </div>
                                         </div>

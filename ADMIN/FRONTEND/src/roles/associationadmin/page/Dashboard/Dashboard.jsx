@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
-import axios from 'axios';
+import Header from '../../components/Header';
+import Sidebar from '../../components/Sidebar';
+import Footer from '../../components/Footer';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 import Chart from 'react-apexcharts';
+import useDashboard from '../../hooks/Dashboard/DashboardHooks';
 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -15,191 +14,28 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 
 const Dashboard = ({ userInfo, handleLogout }) => {
-    const [totalChargers, setTotalChargers] = useState(0);
-    const [availableChargers, setAvailableChargers] = useState(0);
-    const [faultedChargers, setFaultedChargers] = useState(0);
-    const [offlineChargers, setOfflineChargers] = useState(0);
-    const [totalsession, setTotalSession] = useState(0);
-    const [scrollIndex, setScrollIndex] = useState(0);
-    const visibleBars = 6;
-    const containerRef = useRef(null);
-    // eslint-disable-next-line
-    const [hover, setHover] = useState(false);
-    const totalChargersRef = useRef(null);
-    const onlineChargersRef = useRef(null);
-    const faultedChargersRef = useRef(null);
-    const offlineChargersRef = useRef(null);
-    const [selectedCharger, setSelectedCharger] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    // eslint-disable-next-line
-    const [totalCount, setTotalCounts] = useState({
-        resellersCount: 0,
-        clientsCount: 0,
-        associatinsCount: 0,
-        appUsersCount: 0
-    });
-    const [chargersData, setChargersData] = useState({
-        totalChargers: [],
-        availableChargers: [],
-        faultedChargers: [],
-        offlineChargers: [],
-    });
-    const [energyData, setEnergyData] = useState({
-        totalEnergyConsumed: 0,
-        CO2_from_EV: 0,
-        CO2_from_ICE: 0,
-        CO2_Savings: 0,
-        daytodaytotalEnergyConsumed: [],
-        weeklyEnergyConsumed: [],
-        monthlyEnergyConsumed: [],
-        yearlyEnergyConsumed: [],
-    });
-    const [viewMode, setViewMode] = useState('weekly');
-
-
-    const isFetching = useRef(false);
-
-
-    const fetchData = async (associationId) => {
-        if (isFetching.current) return; // Prevent multiple calls
-        isFetching.current = true;
-
-        try {
-            const totalRes = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/FetchTotalCharger`, {
-                association_id: userInfo.data.association_id,
-            });
-
-            const onlineRes = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/FetchOnlineCharger`, {
-                association_id: userInfo.data.association_id,
-            });
-
-            const faultRes = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/FetchFaultsCharger`, {
-                association_id: userInfo.data.association_id,
-            });
-
-            const offlineRes = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/FetchOfflineCharger`, {
-                association_id: userInfo.data.association_id,
-            });
-
-            const energyRes = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/FetchChargerTotalEnergy`, {
-                association_id: userInfo.data.association_id,
-            });
-
-            const totalsession = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/FetchTotalChargersSession`, {
-                association_id: userInfo.data.association_id,
-            });
-
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/FetchTotalUsers`, {
-                association_id: userInfo.data.association_id,
-            });
-
-            const { resellersCount, clientsCount, associatinsCount, appUsersCount } = res.data.TotalCounts;
-
-            setTotalCounts({
-                resellersCount,
-                clientsCount,
-                associatinsCount,
-                appUsersCount,
-            });
-
-            setTotalChargers(totalRes.data.totalCount);
-            setAvailableChargers(onlineRes.data.totalCount);
-            setFaultedChargers(faultRes.data.totalCount);
-            setOfflineChargers(offlineRes.data.totalCount);
-            setTotalSession(totalsession.data.totalCount);
-
-            setChargersData({
-                totalChargers: totalRes.data.data || [],
-                availableChargers: onlineRes.data.data || [],
-                faultedChargers: faultRes.data.data || [],
-                offlineChargers: offlineRes.data.data || [],
-                totalsession: totalsession.data.data || [],
-            });
-
-            const energyConsumed = energyRes.data.ChargerTotalEnergy.totalEnergyConsumed || 0;
-            const CO2_from_EV = energyRes.data.ChargerTotalEnergy.CO2_from_EV || 0;
-            const CO2_from_ICE = energyRes.data.ChargerTotalEnergy.CO2_from_ICE || 0;
-            const CO2_Savings = energyRes.data.ChargerTotalEnergy.CO2_Savings || 0;
-
-            const weeklyEnergyData = energyRes.data.ChargerTotalEnergy.weeklyTotalEnergyConsumed || [];
-            const monthlyEnergyData = energyRes.data.ChargerTotalEnergy.monthlyTotalEnergyConsumed || [];
-            const yearlyEnergyData = energyRes.data.ChargerTotalEnergy.yearlyTotalEnergyConsumed || [];
-
-            setEnergyData({
-                totalEnergyConsumed: energyConsumed,
-                CO2_from_EV,
-                CO2_from_ICE,
-                CO2_Savings,
-                weeklyEnergyConsumed: weeklyEnergyData,
-                monthlyEnergyConsumed: monthlyEnergyData,
-                yearlyEnergyConsumed: yearlyEnergyData,
-            });
-
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        } finally {
-            isFetching.current = false; // ✅ Reset isFetching after request
-        }
-    };
-
-
-    useEffect(() => {
-        fetchData();
-        // eslint-disable-next-line
-    }, [viewMode]);
-    const getChartData = () => {
-        let availableData = [];
-
-        if (viewMode === 'weekly') {
-            availableData = energyData.weeklyEnergyConsumed;
-        } else if (viewMode === 'monthly') {
-            availableData = energyData.monthlyEnergyConsumed;
-        } else if (viewMode === 'yearly') {
-            availableData = energyData.yearlyEnergyConsumed;
-        }
-
-        // Limit data to only visibleBars count
-        const visibleData = availableData.slice(scrollIndex, scrollIndex + visibleBars);
-        const labels = visibleData.map(entry =>
-            viewMode === 'weekly' ? ` ${entry.week}` :
-                viewMode === 'monthly' ? `Month ${entry.month}` :
-                    `Year ${entry.year}`
-        );
-
-        const data = visibleData.map(entry => entry.totalEnergyConsumed);
-
-        return {
-            labels,
-            datasets: [
-                {
-                    label: 'Energy Consumed (kWh)',
-                    data,
-                    backgroundColor: '#FF6347',
-                    borderColor: '#FF6347',
-                    borderWidth: 1,
-                },
-            ],
-        };
-    };
-
-    const scrollLeft = () => {
-        if (scrollIndex > 0) {
-            setScrollIndex(scrollIndex - 1);
-        }
-    };
-
-    const scrollRight = () => {
-        if (scrollIndex + visibleBars < energyData[`${viewMode}EnergyConsumed`].length) {
-            setScrollIndex(scrollIndex + 1);
-        }
-    };
-
-    const handleChargerClick = (charger) => {
-        setSelectedCharger(charger);
-        setIsModalOpen(true);
-    };
-
+  const {
+    totalChargers, setTotalChargers,
+    availableChargers, setAvailableChargers,
+    faultedChargers, setFaultedChargers,
+    offlineChargers, setOfflineChargers,
+    totalsession,setTotalSession,
+    scrollIndex,setScrollIndex,visibleBars,
+    containerRef,
+    hover, setHover,
+    totalChargersRef,
+    onlineChargersRef,
+    faultedChargersRef,
+    offlineChargersRef,
+    selectedCharger,setSelectedCharger,
+    isModalOpen,setIsModalOpen,
+    totalCount, setTotalCounts,
+    chargersData, setChargersData,
+    energyData, setEnergyData,
+    viewMode, setViewMode,
+    fetchData,getChartData,
+    scrollLeft,scrollRight,handleChargerClick
+  }=useDashboard(userInfo);
 
 
 
@@ -214,12 +50,12 @@ const Dashboard = ({ userInfo, handleLogout }) => {
             <div className="container-fluid page-body-wrapper">
                 <Sidebar />
                 <div className="main-panel">
-                    <div className="content-wrapper" style={{ padding: '20px' }}>
+                    <div className="content-wrapper">
                         <div className="row">
                             <div className="col-md-12 grid-margin d-flex justify-content-between align-items-center admin-header">
                                 <div>
                                     <h3 className="font-weight-bold" style={{ color: '#4B49AC' }}>
-                                        Welcome to <span>{userInfo.data.email_id}</span>,
+                                        Welcome to <span>{userInfo.email_id}</span>,
                                     </h3>
                                     <h4 className="font-weight-normal" style={{ fontSize: '1.4rem', color: '#333' }}>
                                         Association Admin Dashboard

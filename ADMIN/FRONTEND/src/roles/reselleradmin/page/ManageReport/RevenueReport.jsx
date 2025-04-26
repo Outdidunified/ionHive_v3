@@ -2,6 +2,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useRevenueData from '../../hooks/ManageReport/RevenueReportHooks';
+import InputField from '../../../../utils/InputField';
 const revenueData = ({ userInfo, handleLogout }) => {
 
 
@@ -46,7 +47,7 @@ const revenueData = ({ userInfo, handleLogout }) => {
                                 <div className="card shadow-sm" style={{ height: "330px" }}>
                                     <div className="card-body d-flex flex-column">
                                         <div className="d-flex justify-content-between mb-3">
-                                        <h4 className="card-title mb-2">Total Revenue</h4>
+                                            <h4 className="card-title mb-2">Total Revenue</h4>
 
                                             <div className="input-group" style={{ width: '250px' }}>
                                                 <div className="input-group-prepend">
@@ -54,9 +55,8 @@ const revenueData = ({ userInfo, handleLogout }) => {
                                                         <i className="icon-search"></i>
                                                     </span>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
+                                                <InputField
+
                                                     placeholder="Search now"
                                                     value={firstTableSearchQuery}
                                                     onChange={(e) => setFirstTableSearchQuery(e.target.value)}
@@ -109,9 +109,7 @@ const revenueData = ({ userInfo, handleLogout }) => {
                                                         <i className="icon-search"></i>
                                                     </span>
                                                 </div>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
+                                                <InputField
                                                     placeholder="Search now"
                                                     value={secondTableSearchQuery}
                                                     onChange={(e) => setSecondTableSearchQuery(e.target.value)}

@@ -2,17 +2,18 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAllocateddevice from '../../hooks/ManageDevice/AllocatedDeviceHooks';
+import InputField from '../../../../utils/InputField';
 
 const Allocateddevice = ({ userInfo, handleLogout }) => {
-   const {
-    allocatedChargers,setAllocatedChargers,
-    searchQuery,setSearchQuery,
-    handleSearch,filterChargers,
-    navigateToViewChargerDetails,
-    deactivateCharger,
-    fetchAllocatedChargerDetailsCalled,
-    fetchAllocatedChargerDetails,loading
-   }=useAllocateddevice(userInfo)
+    const {
+        allocatedChargers, setAllocatedChargers,
+        searchQuery, setSearchQuery,
+        handleSearch, filterChargers,
+        navigateToViewChargerDetails,
+        deactivateCharger,
+        fetchAllocatedChargerDetailsCalled,
+        fetchAllocatedChargerDetails, loading
+    } = useAllocateddevice(userInfo)
 
     return (
         <div className='container-scroller'>
@@ -52,9 +53,7 @@ const Allocateddevice = ({ userInfo, handleLogout }) => {
                                                             <i className="icon-search"></i>
                                                         </span>
                                                     </div>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control"
+                                                    <InputField
                                                         placeholder="Search now"
                                                         value={searchQuery}
                                                         onChange={handleSearch}
@@ -65,7 +64,7 @@ const Allocateddevice = ({ userInfo, handleLogout }) => {
                                         <div className="table-responsive" style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                             <table className="table table-striped">
                                                 <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                                    <tr> 
+                                                    <tr>
                                                         <th>Sl.No</th>
                                                         <th>Charger Id</th>
                                                         <th>Charger Model</th>
@@ -78,72 +77,72 @@ const Allocateddevice = ({ userInfo, handleLogout }) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody style={{ textAlign: 'center' }}>
-    {loading ? (
-        <tr>
-            <td colSpan="9">loading...</td>
-        </tr>
-    ) : filterChargers(allocatedChargers).length > 0 ? (
-        filterChargers(allocatedChargers).map((charger, index) => (
-            <tr key={charger.charger_id}>
-                <td>{index + 1}</td>
-                <td>{charger.charger_id || '-'}</td>
-                <td className="py-1">
-                    <img src={`../../images/dashboard/${charger.charger_model || '-'}kw.png`} alt="img" />
-                </td> 
-                <td>{charger.charger_type || '-'}</td>
-                <td>{charger.association_name || '-'}</td>
-                <td style={{ color: charger.status ? 'green' : 'red' }}>{charger.status ? 'Active' : 'DeActive'}</td>
-                <td>
-                    <div className='form-group' style={{ paddingTop: '13px' }}>
-                        {charger.status === true ? (
-                            <div className="form-check form-check-danger">
-                                <label className="form-check-label">
-                                    <input
-                                        type="radio"
-                                        className="form-check-input"
-                                        name="optionsRadios1"
-                                        id="optionsRadios2"
-                                        value={false}
-                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
-                                    />
-                                    DeActive<i className="input-helper"></i>
-                                </label>
-                            </div>
-                        ) : (
-                            <div className="form-check form-check-success">
-                                <label className="form-check-label">
-                                    <input
-                                        type="radio"
-                                        className="form-check-input"
-                                        name="optionsRadios1"
-                                        id="optionsRadios1"
-                                        value={true}
-                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
-                                    />
-                                    Active<i className="input-helper"></i>
-                                </label>
-                            </div>
-                        )}
-                    </div>
-                </td>
-                <td>
-                    <button
-                        type="button"
-                        className="btn btn-outline-success btn-icon-text"
-                        onClick={() => navigateToViewChargerDetails(charger)}
-                        style={{ marginBottom: '10px', marginRight: '10px' }}
-                    >
-                        <i className="mdi mdi-eye btn-icon-prepend"></i>View
-                    </button>
-                </td>
-            </tr>
-        ))
-    ) : (
-        <tr className="text-center">
-            <td colSpan="9">No Record Found</td>
-        </tr>
-    )}
-</tbody>
+                                                    {loading ? (
+                                                        <tr>
+                                                            <td colSpan="9">loading...</td>
+                                                        </tr>
+                                                    ) : filterChargers(allocatedChargers).length > 0 ? (
+                                                        filterChargers(allocatedChargers).map((charger, index) => (
+                                                            <tr key={charger.charger_id}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{charger.charger_id || '-'}</td>
+                                                                <td className="py-1">
+                                                                    <img src={`../../images/dashboard/${charger.charger_model || '-'}kw.png`} alt="img" />
+                                                                </td>
+                                                                <td>{charger.charger_type || '-'}</td>
+                                                                <td>{charger.association_name || '-'}</td>
+                                                                <td style={{ color: charger.status ? 'green' : 'red' }}>{charger.status ? 'Active' : 'DeActive'}</td>
+                                                                <td>
+                                                                    <div className='form-group' style={{ paddingTop: '13px' }}>
+                                                                        {charger.status === true ? (
+                                                                            <div className="form-check form-check-danger">
+                                                                                <label className="form-check-label">
+                                                                                    <InputField
+                                                                                        type="radio"
+                                                                                        className="form-check-input"
+                                                                                        name="optionsRadios1"
+                                                                                        id="optionsRadios2"
+                                                                                        value={false}
+                                                                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
+                                                                                    />
+                                                                                    DeActive<i className="input-helper"></i>
+                                                                                </label>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="form-check form-check-success">
+                                                                                <label className="form-check-label">
+                                                                                    <InputField
+                                                                                        type="radio"
+                                                                                        className="form-check-input"
+                                                                                        name="optionsRadios1"
+                                                                                        id="optionsRadios1"
+                                                                                        value={true}
+                                                                                        onClick={() => deactivateCharger(charger.charger_id, charger.status)}
+                                                                                    />
+                                                                                    Active<i className="input-helper"></i>
+                                                                                </label>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-success btn-icon-text"
+                                                                        onClick={() => navigateToViewChargerDetails(charger)}
+                                                                        style={{ marginBottom: '10px', marginRight: '10px' }}
+                                                                    >
+                                                                        <i className="mdi mdi-eye btn-icon-prepend"></i>View
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr className="text-center">
+                                                            <td colSpan="9">No Record Found</td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
 
                                             </table>
                                         </div>

@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-// import Swal from 'sweetalert2';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useManageclient from '../../hooks/ManageClient/ManageClientHooks';
+import InputField from '../../../../utils/InputField';
 const Manageclient = ({ userInfo, handleLogout }) => {
    const {
 navigateToCreateUser,
@@ -58,7 +55,7 @@ filteredUsers,
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" value={searchQuery} onChange={handleSearch}/>
+                                                            <InputField  placeholder="Search now" value={searchQuery} onChange={handleSearch}/>
                                                         </div>
                                                     </div>
                                                 </div>

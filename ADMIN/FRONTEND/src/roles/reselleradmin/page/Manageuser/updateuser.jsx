@@ -3,6 +3,7 @@ import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useUpdateUser from '../../hooks/ManageUser/updateusersHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 
 const UpdateUser = ({ userInfo, handleLogout }) => {
     const {
@@ -12,7 +13,7 @@ const UpdateUser = ({ userInfo, handleLogout }) => {
         phone_no, setPhoneNo,
         role_name,
         status,
-        errorMessage, 
+        errorMessage,
         isModified,
         updateClientUser,
         goBack,
@@ -56,9 +57,8 @@ const UpdateUser = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">User Name</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             value={username}
                                                                             maxLength={25}
                                                                             onChange={(e) => {
@@ -75,9 +75,8 @@ const UpdateUser = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Phone No</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             value={phone_no}
                                                                             maxLength={10}
                                                                             onChange={(e) => {
@@ -93,7 +92,7 @@ const UpdateUser = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Email ID</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
+                                                                        <InputField
                                                                             type="email"
                                                                             className="form-control"
                                                                             value={email_id}
@@ -106,9 +105,8 @@ const UpdateUser = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Password</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             value={password}
                                                                             maxLength={4}
                                                                             onChange={(e) => {
@@ -124,9 +122,8 @@ const UpdateUser = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Role Name</label>
                                                                     <div className="col-sm-12">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="form-control"
+                                                                        <InputField
+
                                                                             value={role_name}
                                                                             readOnly
                                                                         />
@@ -157,7 +154,7 @@ const UpdateUser = ({ userInfo, handleLogout }) => {
                                                             type="submit"
                                                             disabled={isLoading || !isModified}
                                                             loading={isLoading}>
-                                                        Update</LoadingButton>
+                                                            Update</LoadingButton>
 
                                                     </form>
                                                 </div>

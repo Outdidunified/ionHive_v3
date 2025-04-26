@@ -1,68 +1,17 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Header from '../../components/Header';
-import axios from 'axios';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
-import { useNavigate } from 'react-router-dom';
-// import Swal from 'sweetalert2';
-
+import useManagefinance from '../../hooks/ManageFinance/ManageFinanceHooks';
 const Managefinance = ({ userInfo, handleLogout }) => {
-    const navigate = useNavigate();
-    const [financeDetails, setFinanceDetails] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const fetchUsersCalled = useRef(false); 
-
-    console.log(financeDetails);
-    // fetch finance details
-    const fetchFinanceDetails = useCallback(async () => {
-        try {
-            const response = await axios.post(`${process.env.REACT_APP_SERVER_URL}/associationadmin/fetchFinance`, {
-                association_id: userInfo.data.association_id
-            });
-          
-            if (response.status === 200) {
-                setFinanceDetails(response.data.data || []);
-            } else {
-                const data = response.data.data;
-                console.error('Error fetching finance: ', data);
-                setFinanceDetails([]);
-            }
-        } catch (error) {
-            console.error('Error fetching finance:', error);
-            setFinanceDetails([]);
-        }
-    }, [userInfo.data.association_id]);
-
-    useEffect(() => {
-        if (!fetchUsersCalled.current) {
-            fetchFinanceDetails();
-            fetchUsersCalled.current = true;
-        }
-    }, [fetchFinanceDetails]);
-
-    // search
-    const handleSearch = (e) => {
-        setSearchQuery(e.target.value);
-    };
-    // Filtered finance details based on search query
-    const filteredFinanceDetails = financeDetails.filter((finance) => {
-        const searchFields = ['totalprice', 'eb_charge', 'margin', 'convenience_fee', 'parking_fee', 'processing_fee', 'service_fee', 'station_fee'];
-        return searchFields.some((field) =>
-            finance[field]?.toString().toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    });
-
-
-    // view finance page
-    const handleView = (finance) => {
-        navigate('/associationadmin/ViewFinance', { state: { finance } });
-    };
-
-    // view create finance page
-    const navigateToCreateUser = () => {
-        navigate('/associationadmin/CreateFinance');
-    };
-
+  const {
+    financeDetails, setFinanceDetails,
+        searchQuery, setSearchQuery,
+        fetchUsersCalled,
+        fetchFinanceDetails,
+        handleSearch,
+        filteredFinanceDetails,
+        handleView,navigateToCreateUser
+  }=useManagefinance(userInfo)
     return (
         <div className='container-scroller'>
             {/* Header */}

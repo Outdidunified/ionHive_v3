@@ -4,31 +4,32 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useAssigntoclients from '../../hooks/ManageDevice/AssigntoClientsHooks';
 import LoadingButton from '../../../../utils/LoadingButton';
+import InputField from '../../../../utils/InputField';
 
 const Assigntoclients = ({ userInfo, handleLogout }) => {
-  const {
-    selectedClientId,
-    selectedChargers, 
-    commission, 
-    chargersLoading, 
-    unallocatedChargers, 
-    clientsList, 
-    handleClientChange,
-    handleChargerChange,
-    errorMessage,
-    isSubmitting,
-    handleCommissionChange,
-    handleSubmit,
-    goBack,
-    handleModelChange,
-    filteredChargers
-  }=useAssigntoclients(userInfo);
+    const {
+        selectedClientId,
+        selectedChargers,
+        commission,
+        chargersLoading,
+        unallocatedChargers,
+        clientsList,
+        handleClientChange,
+        handleChargerChange,
+        errorMessage,
+        isSubmitting,
+        handleCommissionChange,
+        handleSubmit,
+        goBack,
+        handleModelChange,
+        filteredChargers
+    } = useAssigntoclients(userInfo);
     return (
         <div className='container-scroller'>
             {/* Header */}
             <Header userInfo={userInfo} handleLogout={handleLogout} />
-            <div className="container-fluid page-body-wrapper" style={{paddingTop:'40px'}}>
-               {/* Sidebar */}
+            <div className="container-fluid page-body-wrapper" style={{ paddingTop: '40px' }}>
+                {/* Sidebar */}
                 <Sidebar />
                 <div className="main-panel">
                     <div className="content-wrapper">
@@ -39,7 +40,7 @@ const Assigntoclients = ({ userInfo, handleLogout }) => {
                                         <h3 className="font-weight-bold">Assign Chargers to Clients</h3>
                                     </div>
                                     <div className="col-12 col-xl-4">
-                                        <div className="justify-content-end d-flex"> 
+                                        <div className="justify-content-end d-flex">
                                             <div className="dropdown">
                                                 <button className="btn btn-outline-warning btn-icon-text dropdown-toggle" type="button" style={{ marginRight: '10px' }} id="dropdownMenuIconButton1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i className="ti-file btn-icon-prepend"></i>Select Charger Model
@@ -78,7 +79,7 @@ const Assigntoclients = ({ userInfo, handleLogout }) => {
                                                                         <select
                                                                             className="form-control"
                                                                             value={selectedClientId}
-                                                                            style={{color:'black'}}
+                                                                            style={{ color: 'black' }}
                                                                             onChange={handleClientChange}
                                                                             required
                                                                         >
@@ -104,9 +105,8 @@ const Assigntoclients = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 maxLength={5}
                                                                                 value={commission}
                                                                                 name="commission" // Add name attribute
@@ -147,13 +147,13 @@ const Assigntoclients = ({ userInfo, handleLogout }) => {
                                                                                         filteredChargers.map((chargerObj) => (
                                                                                             <div key={chargerObj.charger_id} className="dropdown-item">
                                                                                                 <div className="form-check">
-                                                                                                    <input
+                                                                                                    <InputField
                                                                                                         className="form-check-input"
                                                                                                         type="checkbox"
                                                                                                         id={`charger-${chargerObj.charger_id}`}
                                                                                                         checked={selectedChargers.includes(chargerObj.charger_id)}
                                                                                                         onChange={(e) => handleChargerChange(chargerObj.charger_id, e.target.checked)}
-                                                                                                        name={`charger_${chargerObj.charger_id}`} 
+                                                                                                        name={`charger_${chargerObj.charger_id}`}
                                                                                                     />
                                                                                                     <label className="form-check-label" htmlFor={`charger-${chargerObj.charger_id}`}>
                                                                                                         {chargerObj.charger_id}

@@ -36,7 +36,6 @@ const SuperAdminApp = () => {
   const [userInfo, setUserInfo] = useState(storedUser || {});
   const navigate = useNavigate();
 
-  // Handl login
   const handleLogin = (data) => {
     const { token, user } = data;
     setUserInfo(user);
@@ -114,9 +113,7 @@ const SuperAdminApp = () => {
     <Navigate to="/superadmin" />
   )}
 />
-
-        
-        <Route
+    <Route
           path="EditManageDevice"
           element={loggedIn ? (
             <EditManageDevice userInfo={userInfo} handleLogout={handleLogout} />

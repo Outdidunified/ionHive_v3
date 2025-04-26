@@ -2,6 +2,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAssignToAssociation from '../../hooks/ManageClient/AssigntoassociationHooks';
+import InputField from '../../../../utils/InputField';
 
 const Assigntoass = ({ userInfo, handleLogout }) => {
     const {
@@ -50,9 +51,7 @@ const Assigntoass = ({ userInfo, handleLogout }) => {
                                                                 <i className="icon-search"></i>
                                                             </span>
                                                         </div>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
+                                                        <InputField
                                                             placeholder="Search now"
                                                             value={searchQuery}
                                                             onChange={handleSearch}
@@ -64,7 +63,7 @@ const Assigntoass = ({ userInfo, handleLogout }) => {
                                         <div className="table-responsive" style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                             <table className="table table-striped">
                                                 <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                                    <tr> 
+                                                    <tr>
                                                         <th>Sl.No</th>
                                                         <th>Association name</th>
                                                         <th>Phone Number</th>
@@ -74,37 +73,37 @@ const Assigntoass = ({ userInfo, handleLogout }) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-    {isLoading ? (
-        <tr>
-            <td colSpan="6" className="text-center py-4">
-                Loading...
-            </td>
-        </tr>
-    ) : filteredData.length > 0 ? (
-        filteredData.map((item, index) => (
-            <tr key={index} style={{ textAlign: 'center' }}>
-                <td>{index + 1}</td>
-                <td>{item.association_name || '-'}</td>
-                <td>{item.association_phone_no || '-'}</td>
-                <td>{item.association_email_id || '-'}</td>
-                <td>{item.association_address || '-'}</td>
-                <td>
-                    {item.status === true ? (
-                        <span className="text-success">Active</span>
-                    ) : (
-                        <span className="text-danger">DeActive</span>
-                    )}
-                </td>
-            </tr>
-        ))
-    ) : (
-        <tr>
-            <td colSpan="6" className="text-center py-4">
-                No associations found.
-            </td>
-        </tr>
-    )}
-</tbody>
+                                                    {isLoading ? (
+                                                        <tr>
+                                                            <td colSpan="6" className="text-center py-4">
+                                                                Loading...
+                                                            </td>
+                                                        </tr>
+                                                    ) : filteredData.length > 0 ? (
+                                                        filteredData.map((item, index) => (
+                                                            <tr key={index} style={{ textAlign: 'center' }}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{item.association_name || '-'}</td>
+                                                                <td>{item.association_phone_no || '-'}</td>
+                                                                <td>{item.association_email_id || '-'}</td>
+                                                                <td>{item.association_address || '-'}</td>
+                                                                <td>
+                                                                    {item.status === true ? (
+                                                                        <span className="text-success">Active</span>
+                                                                    ) : (
+                                                                        <span className="text-danger">DeActive</span>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="6" className="text-center py-4">
+                                                                No associations found.
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
 
                                             </table>
                                         </div>

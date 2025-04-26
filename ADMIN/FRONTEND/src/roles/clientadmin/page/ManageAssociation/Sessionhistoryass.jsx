@@ -2,6 +2,7 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useSessionhistoryass from '../../hooks/ManageAssociation/SessionHistoryAssociationHooks';
+import InputField from '../../../../utils/InputField';
 
 const Sessionhistoryass = ({ userInfo, handleLogout }) => {
     const {
@@ -51,12 +52,11 @@ const Sessionhistoryass = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input 
-                                                                type="text" 
-                                                                className="form-control" 
+                                                            <InputField 
+                                                             
                                                                 placeholder="Search user or charger id" 
                                                                 aria-label="search" 
-                                                                aria-describedby="search" 
+                                                                ariadescribedby="search" 
                                                                 autoComplete="off" 
                                                                 onChange={handleSearchInputChange} 
                                                             />

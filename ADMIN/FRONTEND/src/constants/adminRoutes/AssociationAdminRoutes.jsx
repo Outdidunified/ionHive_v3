@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import Login from '../../roles/associationadmin/page/Login';
-import Dashboard from '../../roles/associationadmin/page/Dashboard';
+import Dashboard from '../../roles/associationadmin/page/Dashboard/Dashboard';
 import ManageDevice from '../../roles/associationadmin/page/ManageDevices/ManageDevice';
 import ViewManageDevice from '../../roles/associationadmin/page/ManageDevices/ViewManageDevice';
 import EditManageDevice from '../../roles/associationadmin/page/ManageDevices/EditManageDevice';
@@ -12,8 +12,8 @@ import AssignTagID from '../../roles/associationadmin/page/ManageUser/AssignTagI
 import ManageTagID from '../../roles/associationadmin/page/ManageTagID/ManageTagID';
 import Withdraw from '../../roles/associationadmin/page/Withdraw/Withdraw';
 import Profile from '../../roles/associationadmin/page/Profile/Profile';
-import Assignuser from '../../roles/associationadmin/page/Assignuser';
 import Header from '../../roles/associationadmin/components/Header';
+import Assignuser from '../../roles/associationadmin/page/AssignUser/Assignuser';
 import DeviceReport from '../../roles/associationadmin/page/ManageReport/DeviceReport';
 import RevenueReport from '../../roles/associationadmin/page/ManageReport/RevenueReport';
 

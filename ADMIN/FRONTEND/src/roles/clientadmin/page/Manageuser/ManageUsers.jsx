@@ -2,6 +2,7 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useManageUsers from '../../hooks/ManageUser/ManageUserHooks';
+import InputField from '../../../../utils/InputField';
 // import Swal from 'sweetalert2';
 
 const ManageUsers = ({ userInfo, handleLogout, children }) => {
@@ -51,7 +52,7 @@ const ManageUsers = ({ userInfo, handleLogout, children }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" value={searchQuery} onChange={handleSearch}/>
+                                                            <InputField  placeholder="Search now" value={searchQuery} onChange={handleSearch}/>
                                                         </div>
                                                     </div>
                                                 </div>

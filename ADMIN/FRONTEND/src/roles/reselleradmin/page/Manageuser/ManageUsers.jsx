@@ -3,6 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useManageUsers from '../../hooks/ManageUser/ManageUsersHooks';
+import InputField from '../../../../utils/InputField';
 
 const ManageUsers = ({ userInfo, handleLogout }) => {
    const {
@@ -53,7 +54,7 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" value={searchQuery} onChange={handleSearch} />
+                                                            <InputField  placeholder="Search now" value={searchQuery} onChange={handleSearch} />
                                                         </div>
                                                     </div>
                                                 </div>

@@ -5,13 +5,14 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import Swal from 'sweetalert2';
+import InputField from '../../../../utils/InputField';
 
 const EditFinance = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const dataItems = location.state?.newfinance || JSON.parse(localStorage.getItem('editDeviceData'));
     localStorage.setItem('editDeviceData', JSON.stringify(dataItems));
-    
+
     const [eb_charges, setEbCharges] = useState(dataItems?.eb_charges || '');
     const [app_charges, setAppCharges] = useState(dataItems?.app_charges || '');
     const [other_charges, setOtherCharges] = useState(dataItems?.other_charges || '');
@@ -25,70 +26,70 @@ const EditFinance = ({ userInfo, handleLogout }) => {
     const [errorMessage, setErrorMessage] = useState('');
 
     const validateInputrs = (value) => {
-       // Allow only numbers and a single decimal point
-       value = value.replace(/[^0-9.]/g, '');
-    
-       // Check if the value starts with multiple zeros
-       if (value.startsWith('00')) {
-           value = value.slice(1); // Remove one leading zero
-       }
-        
-       const parts = value.split('.');
-       
-       // Ensure there's only one decimal point and limit to two decimal places
-       if (parts.length > 2) {
-           value = parts[0] + '.' + parts[1];
-       } else if (parts.length === 2 && parts[1].length > 2) {
-           value = parts[0] + '.' + parts[1].slice(0, 2);
-       }
-   
-       // Ensure that the value does not start with zero unless it is "0.00"
-       if (value.startsWith('0') && value.length > 1 && !value.startsWith('0.')) {
-           value = value.replace(/^0+/, ''); // Remove leading zeros
-       }
-   
-       // Limit the length to 7 characters
-       if (value.length > 6) {
-           value = value.slice(0, 6);
-       }
-   
-       // Convert to float and validate range
-       const numericValue = parseFloat(value);
-       if (numericValue < 1 || numericValue > 100) {
-           setErrorMessage(`Please enter a value between ₹1.00 and ₹100.00.`);
-           return '';
-       } else {
-           setErrorMessage(''); // Clear error if within range
-       }
-   
-       return value;
-    }; 
-    
-
-    // Input validation function
-    const validateInput = (value) => {
         // Allow only numbers and a single decimal point
         value = value.replace(/[^0-9.]/g, '');
-        
+
+        // Check if the value starts with multiple zeros
+        if (value.startsWith('00')) {
+            value = value.slice(1); // Remove one leading zero
+        }
+
         const parts = value.split('.');
-        
+
         // Ensure there's only one decimal point and limit to two decimal places
         if (parts.length > 2) {
             value = parts[0] + '.' + parts[1];
         } else if (parts.length === 2 && parts[1].length > 2) {
             value = parts[0] + '.' + parts[1].slice(0, 2);
         }
-    
+
         // Ensure that the value does not start with zero unless it is "0.00"
         if (value.startsWith('0') && value.length > 1 && !value.startsWith('0.')) {
             value = value.replace(/^0+/, ''); // Remove leading zeros
         }
-    
+
         // Limit the length to 7 characters
         if (value.length > 6) {
             value = value.slice(0, 6);
         }
-    
+
+        // Convert to float and validate range
+        const numericValue = parseFloat(value);
+        if (numericValue < 1 || numericValue > 100) {
+            setErrorMessage(`Please enter a value between ₹1.00 and ₹100.00.`);
+            return '';
+        } else {
+            setErrorMessage(''); // Clear error if within range
+        }
+
+        return value;
+    };
+
+
+    // Input validation function
+    const validateInput = (value) => {
+        // Allow only numbers and a single decimal point
+        value = value.replace(/[^0-9.]/g, '');
+
+        const parts = value.split('.');
+
+        // Ensure there's only one decimal point and limit to two decimal places
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts[1];
+        } else if (parts.length === 2 && parts[1].length > 2) {
+            value = parts[0] + '.' + parts[1].slice(0, 2);
+        }
+
+        // Ensure that the value does not start with zero unless it is "0.00"
+        if (value.startsWith('0') && value.length > 1 && !value.startsWith('0.')) {
+            value = value.replace(/^0+/, ''); // Remove leading zeros
+        }
+
+        // Limit the length to 7 characters
+        if (value.length > 6) {
+            value = value.slice(0, 6);
+        }
+
         // Convert to float and validate range
         const numericValue = parseFloat(value);
         if (numericValue < 0 || numericValue > 10) {
@@ -97,7 +98,7 @@ const EditFinance = ({ userInfo, handleLogout }) => {
         } else {
             setErrorMessage(''); // Clear error if within range
         }
-    
+
         return value;
     };
 
@@ -138,7 +139,7 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                 modified_by: userInfo.data.email_id,
                 status: status === 'true',
             };
-    
+
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/clientadmin/UpdateFinanceDetails`, formattedFinanceData);
             if (response.data.status === 'Success') {
                 Swal.fire({
@@ -169,7 +170,7 @@ const EditFinance = ({ userInfo, handleLogout }) => {
             });
         }
     };
-    
+
     // Back page
     const goBack = () => {
         navigate(-1);
@@ -223,9 +224,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="eb_charges"
                                                                                 maxLength={6}
                                                                                 value={eb_charges}
@@ -244,9 +244,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="app_charges"
                                                                                 maxLength={5}
                                                                                 value={app_charges}
@@ -265,9 +264,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="other_charges"
                                                                                 maxLength={5}
                                                                                 value={other_charges}
@@ -286,9 +284,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="parking_charges"
                                                                                 maxLength={5}
                                                                                 value={parking_charges}
@@ -307,9 +304,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="rent_charges"
                                                                                 maxLength={5}
                                                                                 value={rent_charges}
@@ -328,9 +324,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="open_a_eb_charges"
                                                                                 maxLength={5}
                                                                                 value={open_a_eb_charges}
@@ -349,9 +344,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="open_other_charges"
                                                                                 maxLength={5}
                                                                                 value={open_other_charges}
@@ -362,7 +356,7 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            
+
                                                             <div className="col-md-6">
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Status</label>
@@ -376,7 +370,7 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
-                                                        <div style={{ textAlign: 'center', padding:'15px'}}>
+                                                        <div style={{ textAlign: 'center', padding: '15px' }}>
                                                             <button type="submit" className="btn btn-primary mr-2" disabled={!isEdited}>Update</button>
                                                         </div>
                                                     </form>

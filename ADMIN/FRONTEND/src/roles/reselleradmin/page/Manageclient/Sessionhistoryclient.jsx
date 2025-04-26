@@ -2,14 +2,15 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useSessionHistoryClient from '../../hooks/ManageClient/SessionHistoryClientHooks';
-    const Sessionhistoryclient = ({ userInfo, handleLogout }) => {
-        const {
-            sessions,
-            handleSearchInputChange,
-            goBack,
-            formatTimestamp
-        } = useSessionHistoryClient();
-    
+import InputField from '../../../../utils/InputField';
+const Sessionhistoryclient = ({ userInfo, handleLogout }) => {
+    const {
+        sessions,
+        handleSearchInputChange,
+        goBack,
+        formatTimestamp
+    } = useSessionHistoryClient();
+
     return (
         <div className='container-scroller'>
             {/* Header */}
@@ -50,14 +51,12 @@ import useSessionHistoryClient from '../../hooks/ManageClient/SessionHistoryClie
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input 
-                                                                type="text" 
-                                                                className="form-control" 
-                                                                placeholder="Search user or charger id" 
-                                                                aria-label="search" 
-                                                                aria-describedby="search" 
-                                                                autoComplete="off" 
-                                                                onChange={handleSearchInputChange} 
+                                                            <InputField
+                                                                placeholder="Search user or charger id"
+                                                                ariaLabel="search"
+                                                                ariadescribedby="search"
+                                                                autoComplete="off"
+                                                                onChange={handleSearchInputChange}
                                                             />
                                                         </div>
                                                     </div>
@@ -86,9 +85,9 @@ import useSessionHistoryClient from '../../hooks/ManageClient/SessionHistoryClie
                                                                 <td>{index + 1}</td>
                                                                 <td>{session.user ? session.user : '-'}</td>
                                                                 <td>{session.charger_id ? session.charger_id : '-'}</td>
-                                                                <td>{session.session_id ?  session.session_id : '-'}</td>
+                                                                <td>{session.session_id ? session.session_id : '-'}</td>
                                                                 <td>{session.created_date ? formatTimestamp(session.created_date) : '-'}</td>
-                                                                <td>{session.price ? session.price :'-'}</td>
+                                                                <td>{session.price ? session.price : '-'}</td>
                                                                 <td>{session.unit_consummed ? session.unit_consummed : '-'}</td>
                                                                 <td>{session.start_time ? formatTimestamp(session.start_time) : '-'}</td>
                                                                 <td>{session.stop_time ? formatTimestamp(session.stop_time) : '-'}</td>
