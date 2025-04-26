@@ -859,7 +859,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                   style: TextStyle(
                     fontSize: 13,
                     color: isDark ? Colors.grey[400] : Colors.grey[700],
-                    fontStyle: FontStyle.italic,
+                 
                   ),
                 ),
               ),
