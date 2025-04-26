@@ -1,5 +1,5 @@
 {
-  "name": "cms_admin_backend",
+  "name": "admin_backend",
   "description": "Your project description",
   "main": "server.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "winston": "^3.13.0",
     "xlsx": "^0.18.5"
   },
-  "author": "Anishkumar A",
+  "author": "Outdid DEV Team",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^3.1.4"
