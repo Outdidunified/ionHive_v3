@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
+import 'package:ionhive/feature/ChargingStation/presentation/pages/Chargingstation.dart';
 import 'package:ionhive/feature/home/domain/repositories/home_repository.dart';
 import 'package:ionhive/feature/home/presentation/pages/Viewallnearbychargers.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
@@ -625,6 +626,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                 chargers.add({
                   "id": station['station_id'].toString(),
                   "station_id": station['station_id'],
+                  "saved_station":station['saved_station'],
                   "position": LatLng(lat, lng),
                   "name":
                       "${station['location_id'] ?? ''} | ${station['station_address'] ?? 'Unknown Location'}",
@@ -915,11 +917,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       Get.back();
-                      Get.snackbar(
-                        'Station Details',
-                        'Full station details will be implemented',
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
+                      Get.to(() => ChargingStationPage(station: station));
+
+
                     },
                     icon: const Icon(Icons.info_outline),
                     label: const Text('Details'),

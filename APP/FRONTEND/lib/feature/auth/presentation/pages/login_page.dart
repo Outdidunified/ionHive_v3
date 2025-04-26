@@ -34,7 +34,7 @@ class LoginPage extends StatelessWidget {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(35.0),
                               child: Image.asset(
-                                "assets/ionHive_logo's/ionHive.png",
+                                "assets/ionHive_logo/ionHive.png",
                                 width: 90.0,
                                 height: 90.0,
                                 fit: BoxFit.cover,

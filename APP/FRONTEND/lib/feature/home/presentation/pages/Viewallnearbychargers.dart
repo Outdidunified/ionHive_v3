@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ionhive/feature/ChargingStation/presentation/pages/Chargingstation.dart';
 import 'package:ionhive/feature/home/presentation/controllers/home_controller.dart';
 
 class ViewAllNearbyChargers extends StatelessWidget {
@@ -9,12 +10,11 @@ class ViewAllNearbyChargers extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
 
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nearby Charging Stations'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Get.back(),
         ),
       ),
@@ -28,11 +28,9 @@ class ViewAllNearbyChargers extends StatelessWidget {
             station: station,
             isDarkTheme: isDarkTheme,
             onTap: () {
-              // Close the list view
-              Get.back();
-              // Show station details on map
-              controller.animateToCharger(index);
-              controller.showStationDetails(station);
+              // Navigate to ChargingStation with the selected station details with left-to-right transition
+              Get.to(() => ChargingStationPage(station: station),
+                  transition: Transition.leftToRight);
             },
           );
         },
@@ -47,7 +45,6 @@ class ViewAllNearbyChargers extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final title = '${station['location_id']} | ${station['station_address']}';
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallScreen = screenWidth < 360 || screenHeight < 600;
     final iconSize = isSmallScreen ? screenWidth * 0.035 : screenWidth * 0.04;
@@ -92,7 +89,7 @@ class ViewAllNearbyChargers extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        title,
+                        '${station['location_id']} | ${station['station_address']}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                           fontSize: screenWidth * 0.036,
@@ -129,8 +126,7 @@ class ViewAllNearbyChargers extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: Text(
-                            "${(station['distance'] as int) ~/ 1000} km away",
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            "${(station['distance'] as int) ~/ 1000} km away",                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               fontSize: screenWidth * 0.031,
                               color: isDarkTheme ? Colors.white60 : Colors.grey[600],
                             ),
@@ -309,8 +305,7 @@ class CornerTag extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize:
-              isCapitative ? screenWidth * 0.026 : screenWidth * 0.028,
+              fontSize: isCapitative ? screenWidth * 0.026 : screenWidth * 0.028,
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
