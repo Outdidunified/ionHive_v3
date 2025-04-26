@@ -1,6 +1,8 @@
 const db_conn = require('../config/db');
 const emailer = require('../middlewares/emailer');
 const logger = require('../utils/logger');
+const natural = require("natural"); // Optional NLP support
+const tokenizer = new natural.WordTokenizer();
 let db;
 
 const initializeDB = async () => {
@@ -909,62 +911,90 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
     }
 };
 
-// FAQ'S
-const fetchFAQsFromDB = async (category, keyword) => {
+
+// FQQ's
+const extractKeywords = (message) => {
+    const tokens = tokenizer.tokenize(message.toLowerCase());
+    // Optional: Filter common stopwords (you can enhance this)
+    const stopwords = ["i", "need", "to", "know", "about", "the", "and", "a", "of", "is", "in", "on", "for"];
+    return tokens.filter(token => !stopwords.includes(token));
+};
+const fetchFAQsFromDB = async (category, keywords) => {
     try {
-        if (!db) {
-            throw new Error('Database connection failed.');
-        }
+        const faqsCollection = db.collection("faq_datas");
 
-        const faqs = await faqModel.find({
-            ...(category && { category: category }),  // Only include category filter if it's passed
-            ...(keyword && { question: { $regex: keyword, $options: 'i' } })  // Only include keyword filter if it's passed
-        });
+        const keywordConditions = keywords.map(kw => ({
+            $or: [
+                { question: { $regex: kw, $options: 'i' } },
+                { answer: { $regex: kw, $options: 'i' } }
+            ]
+        }));
 
+        const query = {
+            ...(category && category !== 'faq' && { category }),
+            ...(keywordConditions.length && { $and: keywordConditions })
+        };
+
+        const faqs = await faqsCollection.find(query).toArray();
         return faqs;
     } catch (error) {
         console.error("Error fetching FAQs from DB:", error);
         throw new Error("Failed to fetch FAQs");
     }
 };
+const detectIntentCategory = (message) => {
+    const tokens = tokenizer.tokenize(message.toLowerCase());
+
+    if (tokens.includes("pay") || tokens.includes("payment") || tokens.includes("price") || tokens.includes("charge")) {
+        return "payment";
+    }
+
+    if (tokens.includes("charging") || tokens.includes("station") || tokens.includes("plug")) {
+        return "charging";
+    }
+
+    if (tokens.includes("account") || tokens.includes("profile") || tokens.includes("login")) {
+        return "account";
+    }
+
+    if (tokens.includes("faq") || tokens.includes("question") || tokens.includes("help")) {
+        return "faq";
+    }
+
+    return "general";
+};
 const chatbotResponse = async (req, res) => {
     try {
-        const userMessage = req.body.message.toLowerCase();
+        const userMessage = req.body.message?.toLowerCase()?.trim();
         let responseMessage = '';
 
-        // Greet the user
-        if (userMessage.includes("hi") || userMessage.includes("hello")) {
-            responseMessage = "Hello! How can I assist you today?";
+        if (!userMessage) {
+            return res.status(400).json({
+                error: true,
+                message: "Message is required in the request body."
+            });
         }
-        // If the user asks about FAQs
-        else if (userMessage.includes("faq") || userMessage.includes("question")) {
-            const faqs = await fetchFAQsFromDB(); // Fetch all FAQs if no category/keyword is specified
-            if (faqs.length > 0) {
-                responseMessage = "Here are some frequently asked questions (FAQs):\n";
-                faqs.forEach((faq, index) => {
-                    responseMessage += `${index + 1}. ${faq.question}\n`;
-                });
-            } else {
-                responseMessage = "Sorry, I couldn't find any FAQs. Can you provide more details or try another query?";
-            }
+
+        // Greetings
+        if (["hi", "hello", "hey", "good morning", "good evening"].some(greet => userMessage.includes(greet))) {
+            return res.status(200).json({
+                error: false,
+                message: "Hi there! 👋 How can I help you today?"
+            });
         }
-        // If the user asks about a specific category or question
-        else if (userMessage.includes("charging") || userMessage.includes("policy")) {
-            const faqs = await fetchFAQsFromDB("charging", userMessage); // Search in the "charging" category
-            if (faqs.length > 0) {
-                responseMessage = faqs.map(faq => `${faq.question}: ${faq.answer}`).join("\n");
-            } else {
-                responseMessage = "Sorry, I couldn't find an answer in the 'charging' category. Can you ask a different question?";
-            }
-        }
-        // If the user asks for a specific FAQ by keyword or question
-        else {
-            const faqs = await fetchFAQsFromDB(null, userMessage); // Search based on the keyword in the question
-            if (faqs.length > 0) {
-                responseMessage = faqs.map(faq => `${faq.question}: ${faq.answer}`).join("\n");
-            } else {
-                responseMessage = "I couldn't find an answer to your question. Can you try rephrasing it or asking a different question?";
-            }
+
+        // Detect intent and extract keywords
+        const category = detectIntentCategory(userMessage);
+        const keywords = extractKeywords(userMessage);
+        const faqs = await fetchFAQsFromDB(category, keywords);
+
+        if (faqs.length > 0) {
+            const topFAQs = faqs.slice(0, 3);
+            responseMessage = topFAQs.map(faq =>
+                `🔹 **${faq.question}**\n➡️ ${faq.answer}`
+            ).join("\n\n");
+        } else {
+            responseMessage = `🤔 I couldn't find an exact answer to your question.\nWould you like to try rephrasing, or tell me more about what you're looking for?`;
         }
 
         return res.status(200).json({

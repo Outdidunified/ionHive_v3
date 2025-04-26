@@ -97,8 +97,8 @@ const SaveStations = async (req, res) => {
 
         if (updateResult.modifiedCount === 0) {
             logger.loggerWarn(`No changes made to favorite stations for user ${user_id}`);
-            return res.status(200).json({
-                error: false,
+            return res.status(401).json({
+                error: true,
                 message: 'No changes made to favorite stations',
                 updatedFavStations,
             });

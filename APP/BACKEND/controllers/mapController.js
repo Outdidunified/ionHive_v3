@@ -196,6 +196,7 @@ const fetchSavedSearchFilter = async (req, res) => {
 
 // STATIONS
 // Function to find nearby stations
+// Function to find nearby stations
 const getNearbyStations = async (req, res) => {
     try {
         const { latitude, longitude, user_id, email_id } = req.body;
@@ -218,8 +219,23 @@ const getNearbyStations = async (req, res) => {
         const lat = parseFloat(latitude);
         const lon = parseFloat(longitude);
         const stationsCollection = db.collection("charging_stations");
+        const usersCollection = db.collection("users");
 
-        // Constants
+        // Step 1: Fetch the user's saved stations (favStations)
+        const user = await usersCollection.findOne({ user_id: user_id, email_id: email_id });
+        if (!user) {
+            return res.status(404).json({
+                error: true,
+                message: "User not found",
+            });
+        }
+
+        const favStations = user.favStations || [];
+        const savedStationIds = favStations
+            .filter(station => station.status === true) // Only include stations with status: true
+            .map(station => station.station_id);
+
+        // Constants for distance calculation
         const EARTH_RADIUS_KM = 6371; // Radius of Earth in KM
         const PI = Math.PI;
         const DEG_TO_RAD = PI / 180;
@@ -227,6 +243,7 @@ const getNearbyStations = async (req, res) => {
         const userLatRad = lat * DEG_TO_RAD;
         const userLonRad = lon * DEG_TO_RAD;
 
+        // Step 2: Fetch nearby stations
         const nearbyStations = await stationsCollection.aggregate([
             {
                 $addFields: {
@@ -318,12 +335,21 @@ const getNearbyStations = async (req, res) => {
             { $sort: { distance: 1 } }
         ]).toArray();
 
-        logger.loggerSuccess(`Found ${nearbyStations.length} nearby stations & retrieved successfully`);
+        // Step 3: Add saved_station field to each nearby station
+        const updatedStations = nearbyStations.map(station => {
+            const isSaved = savedStationIds.includes(station.station_id);
+            return {
+                ...station,
+                saved_station: isSaved // Add saved_station key with true/false
+            };
+        });
+
+        logger.loggerSuccess(`Found ${updatedStations.length} nearby stations & retrieved successfully`);
 
         return res.status(200).json({
             error: false,
             message: "Nearby charging stations retrieved successfully",
-            stations: nearbyStations
+            stations: updatedStations
         });
 
     } catch (error) {
@@ -335,8 +361,6 @@ const getNearbyStations = async (req, res) => {
         });
     }
 };
-
-
 
 // MANAGE ACTIVE CHARGER'S OF SPECIFIC USER
 // Fetch active charging sessions of a user

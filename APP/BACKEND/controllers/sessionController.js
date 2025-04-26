@@ -193,7 +193,7 @@ const fetchChargingSessionDetails = async (req, res) => {
         // Validate input
         if (!email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Invalid input: email_id must be a non-empty string.',
             });
         }
@@ -234,15 +234,15 @@ const fetchChargingSessionDetails = async (req, res) => {
         const result = await collection.find(query).sort({ stop_time: -1 }).toArray();
 
         if (!result || result.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return res.status(200).json({
+                error: false,
                 message: 'No charging session records found!',
             });
         }
 
         logger.loggerSuccess(`Charge session retrieved successfully for email_id=${req.body?.email_id}`)
         return res.status(200).json({
-            success: true,
+            error: false,
             message: 'Charging session details retrieved successfully.',
             data: result,
         });
@@ -250,7 +250,7 @@ const fetchChargingSessionDetails = async (req, res) => {
     } catch (error) {
         logger.loggerError(`Error fetching charging session details for email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
-            success: false,
+            error: true,
             message: 'Internal Server Error',
             error: error.message,
         });
@@ -268,7 +268,7 @@ const DownloadChargingSessionDetails = async (req, res) => {
         // Validate input
         if (!email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Invalid input: email_id must be a non-empty string.',
             });
         }
