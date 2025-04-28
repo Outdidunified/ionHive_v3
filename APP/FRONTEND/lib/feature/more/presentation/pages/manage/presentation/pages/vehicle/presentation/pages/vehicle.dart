@@ -70,12 +70,13 @@ class _VehiclePageState extends State<VehiclePage> {
         actions: [
           Padding(
             padding:
-                EdgeInsets.all(screenWidth * 0.03), // 8 on a 400-width screen
-            child: Image.asset(
-              'assets/icons/Help2.png',
-              width: 22,
-              height: 22,
-              color: const Color(0xFF0A1F44),
+                EdgeInsets.all(screenWidth * 0.01), // 8 on a 400-width screen
+            child: IconButton(
+              icon: Image.asset('assets/icons/info.png',
+                  height: 18, width: 18, color: theme.iconTheme.color),
+              onPressed: () {
+                _showWalletInfoBottomSheet(context, theme);
+              },
             ),
           ),
         ],
@@ -502,6 +503,159 @@ class _VehiclePageState extends State<VehiclePage> {
     );
   }
 
+// Method to show wallet info as a bottom sheet sliding up from the bottom
+  void _showWalletInfoBottomSheet(BuildContext context, ThemeData theme) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.6,
+          minChildSize: 0.35,
+          maxChildSize: 0.9,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackgroundColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.15),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                    offset: const Offset(0, -3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with drag handle and title
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    child: Column(
+                      children: [
+                        // Drag handle
+                        Center(
+                          child: Container(
+                            width: 60,
+                            height: 5,
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: theme.textTheme.bodyMedium?.color
+                                  ?.withOpacity(0.30),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Scrollable content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoSection(
+                            theme,
+                            'What are Saved Vehicles?',
+                            'Saved vehicles allow you to track your electric vehicles in the ion Hive app. You can store details like model, charger type, and vehicle number to manage charging preferences and history.',
+                          ),
+                          _buildInfoSection(
+                            theme,
+                            'How to Add a Vehicle',
+                            '1. Tap the "Add Vehicle" button below the vehicle list.\n'
+                                '2. Enter vehicle details (model, vehicle number, charger type, etc.).\n'
+                                '3. Optionally, upload an image of your vehicle.\n'
+                                '4. Submit to save the vehicle to your profile.\n'
+                                '5. You can add up to 5 vehicles.',
+                          ),
+                          _buildInfoSection(
+                            theme,
+                            'How to Remove a Vehicle',
+                            '1. Locate the vehicle in the "Manage Vehicle" list.\n'
+                                '2. Tap the remove icon (trash can) on the vehicle card.\n'
+                                '3. Confirm the removal in the dialog that appears.\n'
+                                '4. The vehicle will be removed from your saved list.',
+                          ),
+                          _buildInfoSection(
+                            theme,
+                            'Tips for Managing Vehicles',
+                            '• Ensure vehicle details are accurate for optimal charging recommendations.\n'
+                                '• Update charger type if you modify your vehicle.\n'
+                                '• Remove unused vehicles to keep your list organized.\n'
+                                '• Contact support via the "Having Issue" button for assistance.',
+                          ),
+                          const SizedBox(
+                              height: 70), // Space for the close button
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+// Helper method to build info sections in the bottom sheet
+  Widget _buildInfoSection(ThemeData theme, String title, String content) {
+    return Card(
+      elevation: theme.cardTheme.elevation,
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: theme.cardTheme.shape,
+      color: theme.cardTheme.color,
+      surfaceTintColor: theme.cardTheme.surfaceTintColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              content,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.textTheme.bodyLarge?.color?.withOpacity(0.85),
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildNoVehiclesUI(BuildContext context) {
     final theme = Theme.of(context);
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -511,10 +665,16 @@ class _VehiclePageState extends State<VehiclePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.directions_car,
-            size: screenWidth * 0.2,
-            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+          Image.asset(
+            'assets/icons/no_vehicle.png', // Replace with actual device icon asset
+            width: screenWidth * 0.3,
+            height: screenWidth * 0.3,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(
+                Icons.directions_car,
+                size: 60,
+              );
+            },
           ),
           SizedBox(height: screenHeight * 0.015),
           Text(
@@ -527,18 +687,12 @@ class _VehiclePageState extends State<VehiclePage> {
           ),
           SizedBox(height: screenHeight * 0.01),
           Text(
-            "Add a vehicle to get started",
+            'You haven’t saved any vehicles yet. \nAdd a vehicle to track its charging history and preferences!',
             style: theme.textTheme.bodyMedium?.copyWith(
               fontSize: screenWidth * 0.035,
               color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
             ),
             textAlign: TextAlign.center,
-          ),
-          SizedBox(height: screenHeight * 0.03),
-          Icon(
-            Icons.arrow_downward,
-            size: screenWidth * 0.08,
-            color: theme.colorScheme.primary.withOpacity(0.7),
           ),
         ],
       ),

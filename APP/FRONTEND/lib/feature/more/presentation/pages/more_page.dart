@@ -246,13 +246,13 @@ class MoreePage extends StatelessWidget {
                     height: context.rHeight(
                         isLargeScreen ? 16 : (isSmallScreen ? 8 : 12))),
                 _buildSectionTitle(
-                    'Shop', context, isSmallScreen, isLargeScreen),
+                    'App settings', context, isSmallScreen, isLargeScreen),
                 Obx(() => SwitchListTile(
                       title: Text(
                         "Notification",
                         style: TextStyle(
                           fontSize: MediaQuery.of(context).size.height *
-                              0.027, // ~16.2 pixels on a 600-pixel-high screen
+                              0.018, // ~16.2 pixels on a 600-pixel-high screen
                         ),
                       ),
                       subtitle: Text(
@@ -261,9 +261,9 @@ class MoreePage extends StatelessWidget {
                             : "Notifications are disabled in app settings.",
                         style: TextStyle(
                           fontSize: MediaQuery.of(context).size.height *
-                              0.02, // ~12 pixels on a 600-pixel-high screen
+                              0.015, // ~12 pixels on a 600-pixel-high screen
                           color: moreController.isNotificationAvailable.value
-                              ? theme.primaryColor
+                              ? theme.textTheme.bodyLarge?.color
                               : Colors.red[300],
                         ),
                       ),

@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/ChargingStation/presentation/controllers/Chargingstation_controllers.dart';
 import 'package:ionhive/feature/ChargingStation/presentation/pages/Chargingstation.dart';
+import 'package:ionhive/feature/landing_page.dart';
+import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/saved_stations/presentation/controllers/saved_stations_controllers.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -29,7 +31,8 @@ class SavedStationsPages extends StatelessWidget {
     sessionController.token.value = token;
 
     Get.put(ChargingStationController());
-    final SavedStationsControllers controller = Get.put(SavedStationsControllers());
+    final SavedStationsControllers controller =
+        Get.put(SavedStationsControllers());
 
     final theme = Theme.of(context);
     final bool isDarkTheme = theme.brightness == Brightness.dark;
@@ -66,10 +69,6 @@ class SavedStationsPages extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('ERROR',
-                    style: theme.textTheme.displayLarge?.copyWith(
-                        fontSize: 50,
-                        color: isDarkTheme ? Colors.white : null)),
                 const SizedBox(height: 5),
                 Image.asset(
                   'assets/icons/error-history.png',
@@ -99,38 +98,73 @@ class SavedStationsPages extends StatelessWidget {
             ),
           );
         }
-
-        // Show empty state
+// Show empty state
         if (controller.savedStations.isEmpty) {
+          final screenWidth = MediaQuery.of(context).size.width;
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: isDarkTheme ? Colors.white70 : Colors.grey,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      "No saved stations found",
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontSize: 14,
-                        color: isDarkTheme ? Colors.white70 : Colors.grey[700],
-                      ),
-                    ),
-                  ],
+                Image.asset(
+                  'assets/icons/charging_station_fav.png', // Replace with your actual asset path
+                  width: screenWidth * 0.3,
+                  height: screenWidth * 0.3,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.location_off,
+                      size: 60,
+                      color: isDarkTheme ? Colors.white70 : Colors.grey[600],
+                    ); // Fallback icon if image fails
+                  },
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'No Saved Stations',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isDarkTheme ? Colors.white : Colors.black87,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
-                Image.asset(
-                  'assets/icons/no-history-found1.png',
-                  width: 200,
-                  height: 200,
-                  color: isDarkTheme ? Colors.white : null,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Text(
+                    'You haven’t saved any charging stations yet. Start exploring stations and save your favorites to access them quickly!',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDarkTheme ? Colors.white70 : Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigate to LandingPage and set pageIndex to 0
+                    Get.to(() => LandingPage(),
+                        transition: Transition.rightToLeft,
+                        duration: const Duration(milliseconds: 300));
+                    final LandingPageController landingController =
+                        Get.find<LandingPageController>();
+                    landingController
+                        .clearPageIndex(); // Set index to 0 (HomePage)
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                  ),
+                  child: Text(
+                    'Explore Stations',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -207,24 +241,28 @@ class SavedStationsPages extends StatelessWidget {
                       child: Text(
                         title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: screenWidth * 0.036,
-                          color: isDarkTheme ? Colors.white70 : null,
-                        ),
+                              fontWeight: FontWeight.w600,
+                              fontSize: screenWidth * 0.036,
+                              color: isDarkTheme ? Colors.white70 : null,
+                            ),
                       ),
                     ),
                     Obx(() => GestureDetector(
-                      onTap: () => controller.toggleBookmark(stationId, context),
-                      child: Icon(
-                        controller.bookmarkStatus[stationId] ?? false
-                            ? Icons.bookmark
-                            : Icons.bookmark_border,
-                        color: (controller.bookmarkStatus[stationId] ?? false)
-                            ? (isDarkTheme ? Colors.white : Colors.black)
-                            : (isDarkTheme ? Colors.white70 : Colors.black54),
-                        size: screenWidth * 0.055,
-                      ),
-                    )),
+                          onTap: () =>
+                              controller.toggleBookmark(stationId, context),
+                          child: Icon(
+                            controller.bookmarkStatus[stationId] ?? false
+                                ? Icons.bookmark
+                                : Icons.bookmark_border,
+                            color: (controller.bookmarkStatus[stationId] ??
+                                    false)
+                                ? (isDarkTheme ? Colors.white : Colors.black)
+                                : (isDarkTheme
+                                    ? Colors.white70
+                                    : Colors.black54),
+                            size: screenWidth * 0.055,
+                          ),
+                        )),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -233,9 +271,10 @@ class SavedStationsPages extends StatelessWidget {
                   child: Text(
                     station['landmark'] ?? '',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontSize: screenWidth * 0.031,
-                      color: isDarkTheme ? Colors.white60 : Colors.grey[600],
-                    ),
+                          fontSize: screenWidth * 0.031,
+                          color:
+                              isDarkTheme ? Colors.white60 : Colors.grey[600],
+                        ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -248,13 +287,16 @@ class SavedStationsPages extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: isDarkTheme
-                            ? _getAvailabilityColor(isOpen, isClosed, isUnderMaintenance)
-                            .withOpacity(0.1)
-                            : _getAvailabilityColor(isOpen, isClosed, isUnderMaintenance)
-                            .withOpacity(0.1),
+                            ? _getAvailabilityColor(
+                                    isOpen, isClosed, isUnderMaintenance)
+                                .withOpacity(0.1)
+                            : _getAvailabilityColor(
+                                    isOpen, isClosed, isUnderMaintenance)
+                                .withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: _getAvailabilityColor(isOpen, isClosed, isUnderMaintenance)
+                          color: _getAvailabilityColor(
+                                  isOpen, isClosed, isUnderMaintenance)
                               .withOpacity(isDarkTheme ? 0.3 : 0.3),
                           width: 1,
                         ),
@@ -263,24 +305,31 @@ class SavedStationsPages extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            _getAvailabilityIcon(isOpen, isClosed, isUnderMaintenance),
-                            color: _getAvailabilityColor(isOpen, isClosed, isUnderMaintenance),
+                            _getAvailabilityIcon(
+                                isOpen, isClosed, isUnderMaintenance),
+                            color: _getAvailabilityColor(
+                                isOpen, isClosed, isUnderMaintenance),
                             size: screenWidth * 0.04,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             isOpen
-                                ? _capitalizeFirstLetter(station['availability'] ?? 'Open')
+                                ? _capitalizeFirstLetter(
+                                    station['availability'] ?? 'Open')
                                 : isClosed
-                                ? "Closed"
-                                : isUnderMaintenance
-                                ? "Under Maintenance"
-                                : "Unknown",
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: screenWidth * 0.03,
-                              fontWeight: FontWeight.w500,
-                              color: _getAvailabilityColor(isOpen, isClosed, isUnderMaintenance),
-                            ),
+                                    ? "Closed"
+                                    : isUnderMaintenance
+                                        ? "Under Maintenance"
+                                        : "Unknown",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontSize: screenWidth * 0.03,
+                                  fontWeight: FontWeight.w500,
+                                  color: _getAvailabilityColor(
+                                      isOpen, isClosed, isUnderMaintenance),
+                                ),
                           ),
                         ],
                       ),
@@ -292,16 +341,18 @@ class SavedStationsPages extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: isDarkTheme ? Colors.grey[800] : Colors.grey[200],
+                        color:
+                            isDarkTheme ? Colors.grey[800] : Colors.grey[200],
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         station['charger_type'] ?? '',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: screenWidth * 0.03,
-                          fontWeight: FontWeight.w500,
-                          color: isDarkTheme ? Colors.white70 : Colors.black87,
-                        ),
+                              fontSize: screenWidth * 0.03,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  isDarkTheme ? Colors.white70 : Colors.black87,
+                            ),
                       ),
                     ),
                   ],
@@ -401,7 +452,8 @@ class SavedStationsPages extends StatelessWidget {
   }
 }
 
-IconData _getAvailabilityIcon(bool isOpen, bool isClosed, bool isUnderMaintenance) {
+IconData _getAvailabilityIcon(
+    bool isOpen, bool isClosed, bool isUnderMaintenance) {
   if (isOpen) {
     return Icons.check_circle;
   } else if (isClosed) {
@@ -413,7 +465,8 @@ IconData _getAvailabilityIcon(bool isOpen, bool isClosed, bool isUnderMaintenanc
   }
 }
 
-Color _getAvailabilityColor(bool isOpen, bool isClosed, bool isUnderMaintenance) {
+Color _getAvailabilityColor(
+    bool isOpen, bool isClosed, bool isUnderMaintenance) {
   if (isOpen) {
     return Colors.green;
   } else if (isClosed) {
@@ -430,7 +483,7 @@ String _capitalizeFirstLetter(String text) {
   return text
       .split(' ')
       .map((word) =>
-  word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
+          word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
       .join(' ');
 }
 
@@ -478,7 +531,8 @@ class CornerTag extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: isCapitative ? screenWidth * 0.026 : screenWidth * 0.028,
+              fontSize:
+                  isCapitative ? screenWidth * 0.026 : screenWidth * 0.028,
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),

@@ -2,134 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
-
 import 'package:ionhive/feature/session_history/presentation/controllers/session_history_controllers.dart';
 import 'package:ionhive/feature/session_history/presentation/pages/session_bill.dart';
 import 'package:shimmer/shimmer.dart';
 
-class SessionHistoryPage extends StatefulWidget {
-  SessionHistoryPage({super.key}) {
-    debugPrint("SessionHistoryPage: Constructor called");
-  }
-
-  @override
-  State<SessionHistoryPage> createState() => _SessionHistoryPageState();
-}
-
-class _SessionHistoryPageState extends State<SessionHistoryPage> {
-  // Controllers
-  late final SessionController sessionController;
-  late final SessionHistoryControllers controller;
-
-  // State variables
-  bool isLoading = true;
-  bool controllersInitialized = false;
-  String errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize controllers
-    _initControllers();
-    // Load data after widget is built if controllers are initialized
-    if (controllersInitialized) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        loadData();
-      });
-    }
-  }
-
-  void _initControllers() {
-    try {
-      // Get SessionController
-      sessionController = Get.find<SessionController>();
-
-      // Initialize SessionHistoryControllers
-      controller = Get.put(SessionHistoryControllers());
-
-      controllersInitialized = true;
-    } catch (e) {
-      debugPrint("SessionHistoryPage: Error initializing controllers: $e");
-      errorMessage = "Failed to initialize: $e";
-      controllersInitialized = false;
-    }
-  }
-
-  // Simple method to load data
-  Future<void> loadData() async {
-    if (!controllersInitialized) {
-      debugPrint(
-          "SessionHistoryPage: Controllers not initialized, cannot load data");
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      await controller.refreshAllData();
-    } catch (e) {
-      debugPrint("SessionHistoryPage: Error loading data: $e");
-      errorMessage = "Failed to load data: $e";
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      } else {
-        debugPrint("SessionHistoryPage: Widget no longer mounted");
-      }
-    }
-  }
+class SessionHistoryPage extends StatelessWidget {
+  const SessionHistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Use a unique tag to ensure a fresh controller instance or find existing
+    final SessionHistoryControllers controller =
+        Get.put(SessionHistoryControllers(), tag: 'session_history');
 
-    // Check if controllers are initialized
-    if (!controllersInitialized) {
-      return Scaffold(
-        backgroundColor: theme.colorScheme.background,
-        body: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Error initializing session history",
-                  style: theme.textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  errorMessage.isNotEmpty
-                      ? errorMessage
-                      : "Please restart the app",
-                  style: theme.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    _initControllers();
-                    if (controllersInitialized) {
-                      loadData();
-                      // Force rebuild
-                      setState(() {});
-                    }
-                  },
-                  child: Text("Retry"),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+    // Trigger data refresh when the page is displayed
+    if (!controller.isLoading.value) {
+      controller.refreshAllData().catchError((e) {
+        debugPrint("SessionHistoryPage: Error loading data: $e");
+      });
     }
-    if (controller.hasError.value) {
-      return _buildContentLoading(
-          context); // Use the enhanced error state from the previous response
-    }
+
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       floatingActionButton: Obx(() => FloatingActionButton(
@@ -149,29 +42,46 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: isLoading
-              ? _buildContentLoading(context)
-              : Obx(() => ListView(
-                    physics:
-                        const ClampingScrollPhysics(), // Changed to prevent pull effect
-                    children: [
-                      _buildHeader(context),
-                      const SizedBox(height: 20),
-                      _buildSessionStatsRow(context, controller),
-                      const SizedBox(height: 20),
-                      _buildSectionTitle(context, 'Your Charging History'),
-                      const SizedBox(height: 12),
-                      _buildTransactionList(context),
-                    ],
-                  )),
+          child: RefreshIndicator(
+            onRefresh: () => controller.refreshAllData(),
+            child: Obx(() {
+              debugPrint(
+                  "SessionHistoryPage: isLoading = ${controller.isLoading.value}");
+              debugPrint(
+                  "SessionHistoryPage: sessions.isEmpty = ${controller.sessions.isEmpty}");
+              debugPrint(
+                  "SessionHistoryPage: sessions.length = ${controller.sessions.length}");
+
+              if (controller.isLoading.value) {
+                return _buildContentLoading(context);
+              } else {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    _buildHeader(context),
+                    const SizedBox(height: 20),
+                    _buildSessionStatsRow(context, controller),
+                    const SizedBox(height: 20),
+                    _buildSectionTitle(context, 'Your Charging History'),
+                    const SizedBox(height: 12),
+                    _buildTransactionList(context, controller),
+                  ],
+                );
+              }
+            }),
+          ),
         ),
       ),
     );
   }
 
+  // Helper method to create a Future that completes after 2 seconds
+  Future<void> _delayForProgressIndicator() {
+    return Future.delayed(const Duration(seconds: 2));
+  }
+
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -207,12 +117,11 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
     );
   }
 
-// Method to show wallet info as a bottom sheet sliding up from the bottom
   void _showWalletInfoBottomSheet(BuildContext context, ThemeData theme) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       backgroundColor: Colors.transparent,
@@ -240,39 +149,32 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header with drag handle and title
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(20)),
+                          BorderRadius.vertical(top: Radius.circular(20)),
                     ),
-                    child: Column(
-                      children: [
-                        // Drag handle
-                        Center(
-                          child: Container(
-                            width: 60,
-                            height: 5,
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            decoration: BoxDecoration(
-                              color: theme.textTheme.bodyMedium?.color
-                                  ?.withOpacity(0.30),
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 3,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
+                    child: Center(
+                      child: Container(
+                        width: 60,
+                        height: 5,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: theme.textTheme.bodyMedium?.color
+                              ?.withOpacity(0.30),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 3,
+                              offset: const Offset(0, 1),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                  // Scrollable content
                   Expanded(
                     child: SingleChildScrollView(
                       controller: scrollController,
@@ -301,8 +203,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                                 '• Check the "Reason" field if a session ended unexpectedly.\n'
                                 '• For disputes or issues, contact support via the "Having Issue" button.',
                           ),
-                          const SizedBox(
-                              height: 70), // Space for the close button
+                          const SizedBox(height: 70),
                         ],
                       ),
                     ),
@@ -316,7 +217,6 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
     );
   }
 
-// Helper method to build info sections in the bottom sheet
   Widget _buildInfoSection(ThemeData theme, String title, String content) {
     return Card(
       elevation: theme.cardTheme.elevation,
@@ -442,28 +342,108 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
     );
   }
 
-  Widget _buildTransactionList(BuildContext context) {
+  Widget _buildNoSessionsFound(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final noSessionsImage = Image.asset(
+      'assets/icons/history.png',
+      width: screenWidth * 0.2,
+      height: screenWidth * 0.2,
+      errorBuilder: (context, error, stackTrace) {
+        return Icon(
+          Icons.error,
+          size: screenWidth * 0.15,
+          color: theme.colorScheme.primary.withOpacity(0.7),
+        );
+      },
+    );
+
+    debugPrint("SessionHistoryPage: Building No Sessions Found UI");
+
+    return Center(
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: EdgeInsets.only(top: screenHeight * 0.2),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              noSessionsImage,
+              const SizedBox(height: 20),
+              Text(
+                'No Session Data Found',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'No charging sessions available at the moment.',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTransactionList(
+      BuildContext context, SessionHistoryControllers controller) {
     final theme = Theme.of(context);
     final txStyle = theme.textTheme.titleLarge;
     final txSubStyle = theme.textTheme.bodyMedium;
     final cardColor = theme.cardTheme.color;
+    final SessionController sessionController = Get.find<SessionController>();
 
     return Obx(() {
-      if (controller.sessions.isEmpty) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'No charging sessions found',
-              style: theme.textTheme.bodyLarge,
-            ),
-          ),
+      debugPrint(
+          "_buildTransactionList: isLoading = ${controller.isLoading.value}");
+      debugPrint(
+          "_buildTransactionList: sessions.isEmpty = ${controller.sessions.isEmpty}");
+
+      if (controller.sessions.isEmpty && !controller.isLoading.value) {
+        return FutureBuilder<void>(
+          future: _delayForProgressIndicator(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 500),
+                  builder: (context, value, child) {
+                    return LinearProgressIndicator(
+                      value: value,
+                      backgroundColor:
+                          theme.colorScheme.primary.withOpacity(0.1),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.colorScheme.primary,
+                      ),
+                      minHeight: 2,
+                    );
+                  },
+                ),
+              );
+            }
+            return _buildNoSessionsFound(context);
+          },
         );
       }
 
-      return Column(
-        children: controller.sessions.map((session) {
-          // Format date and time
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: controller.sessions.length,
+        itemBuilder: (context, index) {
+          final session = controller.sessions[index];
           final startDate =
               DateFormat('MMM dd, yyyy').format(session.startTime);
           final startTime = DateFormat('hh:mm a').format(session.startTime);
@@ -471,7 +451,6 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
               ? DateFormat('hh:mm a').format(session.stopTime!)
               : 'In Progress';
 
-          // Calculate duration if session has ended
           String duration = '';
           if (session.stopTime != null) {
             final diff = session.stopTime!.difference(session.startTime);
@@ -480,7 +459,6 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
 
           return GestureDetector(
             onTap: () {
-              // Convert session to Map<String, dynamic> for SessionBill
               final Map<String, dynamic> sessionData = {
                 '_id': session.id,
                 'charger_id': session.chargerId,
@@ -489,14 +467,12 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                 'stop_time': session.stopTime?.toIso8601String(),
                 'unit_consummed': session.unitConsumed,
                 'price': session.price,
-                'connector_id': 1, // Default if not available
-                'connector_type': 1, // Default if not available
+                'connector_id': session.connectorId ?? 1,
+                'connector_type': session.connectorType ?? 1,
                 'email_id': sessionController.emailId.value,
-                'user': sessionController.username.value
-                    .split('@')[0], // Username from email
+                'user': sessionController.username.value.split('@')[0],
               };
 
-              // Navigate to session bill page
               Get.to(
                 () => SessionBill(sessionData),
                 transition: Transition.rightToLeft,
@@ -575,7 +551,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
               ),
             ),
           );
-        }).toList(),
+        },
       );
     });
   }

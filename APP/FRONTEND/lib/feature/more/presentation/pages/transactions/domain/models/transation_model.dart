@@ -38,11 +38,27 @@ class FetchAllTransactionResponse {
   });
 
   factory FetchAllTransactionResponse.fromJson(Map<String, dynamic> json) {
+    // Handle the case where 'data' might be null or not a list
+    List<Transaction> transactionsList = [];
+
+    if (json['data'] != null) {
+      try {
+        if (json['data'] is List) {
+          transactionsList = (json['data'] as List)
+              .map((item) => Transaction.fromJson(item as Map<String, dynamic>))
+              .toList();
+        } else {
+          // Log the unexpected data type
+          print("Unexpected data type for 'data': ${json['data'].runtimeType}");
+        }
+      } catch (e) {
+        print("Error parsing transactions: $e");
+      }
+    }
+
     return FetchAllTransactionResponse(
       error: json['error'] as bool,
-      transactions: (json['data'] as List<dynamic>)
-          .map((item) => Transaction.fromJson(item))
-          .toList(),
+      transactions: transactionsList,
       message: json['message'] as String?, // Extract message if available
     );
   }
@@ -68,14 +84,35 @@ class SaveFilterResponse {
   });
 
   factory SaveFilterResponse.fromJson(Map<String, dynamic> json) {
+    int? daysValue;
+
+    if (json['updatedTransactionFilter'] != null) {
+      try {
+        if (json['updatedTransactionFilter'] is List &&
+            (json['updatedTransactionFilter'] as List).isNotEmpty) {
+          // Handle updatedTransactionFilter as a list
+          daysValue = json['updatedTransactionFilter'][0]['days'] as int?;
+        } else if (json['updatedTransactionFilter'] is Map) {
+          // Handle updatedTransactionFilter as a map
+          final filterMap =
+              json['updatedTransactionFilter'] as Map<String, dynamic>;
+          if (filterMap.containsKey('days')) {
+            daysValue = filterMap['days'] as int?;
+          }
+        } else {
+          // Log the unexpected data type
+          print(
+              "Unexpected data type for 'updatedTransactionFilter': ${json['updatedTransactionFilter'].runtimeType}");
+        }
+      } catch (e) {
+        print("Error parsing updatedTransactionFilter days: $e");
+      }
+    }
+
     return SaveFilterResponse(
       error: json['error'] as bool,
       message: json['message'] as String,
-      days: json['updatedTransactionFilter'] != null
-          ? (json['updatedTransactionFilter'] as List).isNotEmpty
-              ? json['updatedTransactionFilter'][0]['days'] as int?
-              : null
-          : null,
+      days: daysValue,
     );
   }
 
@@ -100,12 +137,33 @@ class FetchTransactionFilter {
   });
 
   factory FetchTransactionFilter.fromJson(Map<String, dynamic> json) {
+    int? daysValue;
+
+    if (json['filter'] != null) {
+      try {
+        if (json['filter'] is List && (json['filter'] as List).isNotEmpty) {
+          // Handle filter as a list
+          daysValue = json['filter'][0]['days'] as int?;
+        } else if (json['filter'] is Map) {
+          // Handle filter as a map
+          final filterMap = json['filter'] as Map<String, dynamic>;
+          if (filterMap.containsKey('days')) {
+            daysValue = filterMap['days'] as int?;
+          }
+        } else {
+          // Log the unexpected data type
+          print(
+              "Unexpected data type for 'filter': ${json['filter'].runtimeType}");
+        }
+      } catch (e) {
+        print("Error parsing filter days: $e");
+      }
+    }
+
     return FetchTransactionFilter(
       error: json['error'] as bool,
       message: json['message'] as String,
-      days: json['filter'] != null && (json['filter'] as List).isNotEmpty
-          ? json['filter'][0]['days'] as int?
-          : null,
+      days: daysValue,
     );
   }
 

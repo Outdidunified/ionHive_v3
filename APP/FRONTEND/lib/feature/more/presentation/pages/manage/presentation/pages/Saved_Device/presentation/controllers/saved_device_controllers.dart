@@ -16,7 +16,6 @@ class SavedDeviceControllers extends GetxController {
   void onInit() {
     super.onInit();
     fetchSavedDevices();
-
   }
 
   Future<void> fetchSavedDevices() async {

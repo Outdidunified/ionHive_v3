@@ -126,9 +126,7 @@ class Transactionapicalls {
       )
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
-
       });
-
       return _handleResponse(response);
     } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');

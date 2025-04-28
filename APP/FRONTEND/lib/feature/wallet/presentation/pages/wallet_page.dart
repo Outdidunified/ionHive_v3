@@ -486,7 +486,7 @@ class WalletPage extends StatelessWidget {
             final token = sessionController.token.value;
 
             Get.to(
-                  () => PaymentHistoryPage(
+              () => PaymentHistoryPage(
                 userId: userId,
                 username: username,
                 emailId: emailId,
@@ -528,8 +528,7 @@ class WalletPage extends StatelessWidget {
                   Text(
                     subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color:
-                      theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
                     ),
                   ),
                 ],
@@ -552,7 +551,6 @@ class WalletPage extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildProgressCards(ThemeData theme) {
     return Column(
@@ -994,12 +992,12 @@ class CornerTag extends StatelessWidget {
       height: tagHeight,
       // All sides same margin
       decoration: BoxDecoration(
-        color:  Colors.orange.shade800,
+        color: Colors.orange.shade800,
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(11), // Match the card's corner radius
           bottomLeft: Radius.circular(16),
           bottomRight:
-          Radius.circular(4), // Add a small curve at the bottom right
+              Radius.circular(4), // Add a small curve at the bottom right
         ),
         boxShadow: [
           BoxShadow(
@@ -1014,7 +1012,7 @@ class CornerTag extends StatelessWidget {
       ),
       child: Padding(
         padding:
-        const EdgeInsets.only(bottom: 1.0), // Add padding at the bottom
+            const EdgeInsets.only(bottom: 1.0), // Add padding at the bottom
         child: Center(
           child: Text(
             label,

@@ -205,7 +205,7 @@ class HeaderCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Obx(() => _buildStatItem(
-                            "₹${controller.walletBalance.value}",
+                            controller.walletBalance.value,
                             "Wallet Balance",
                             context,
                             isSmallScreen,

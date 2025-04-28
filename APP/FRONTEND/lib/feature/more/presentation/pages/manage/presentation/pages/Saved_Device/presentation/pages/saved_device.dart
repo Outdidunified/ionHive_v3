@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ionhive/feature/landing_page.dart';
+import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/Saved_Device/presentation/controllers/saved_device_controllers.dart';
 import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
 
@@ -19,13 +21,32 @@ class SavedDevicepage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
+    final theme = Theme.of(context);
+    final bool isDarkTheme = theme.brightness == Brightness.dark;
     final SavedDeviceControllers controller = Get.put(SavedDeviceControllers());
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Saved Devices'),
+        title: Text(
+          'Saved Devices',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: isDarkTheme ? Colors.white : Colors.black,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: isDarkTheme ? const Color(0xFF121212) : Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkTheme ? Colors.white : Colors.black,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
+      backgroundColor: isDarkTheme ? const Color(0xFF121212) : Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Obx(() {
@@ -33,75 +54,106 @@ class SavedDevicepage extends StatelessWidget {
             return const LoadingIndicator();
           } else if (controller.errorMessage.value.isNotEmpty) {
             return Center(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'ERROR',
-                  style: TextStyle(fontSize: 50),
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                Image.asset(
-                  'assets/icons/error-history.png', // Error state image
-                  width: 200,
-                  height: 200,
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.grey,
-                      size: 14,
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      "Couldn't reach server",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ));
-          } else if (controller.savedDevices.isEmpty) {
-            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Image.asset(
+                    'assets/icons/error-history.png',
+                    width: 200,
+                    height: 200,
+                    color: isDarkTheme ? Colors.white : null,
+                  ),
+                  const SizedBox(height: 10),
                   Row(
-                    mainAxisSize: MainAxisSize
-                        .min, // Ensures the Row takes only the space it needs
-                    crossAxisAlignment: CrossAxisAlignment
-                        .center, // Aligns icon and text vertically
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.info_outline, // Info icon
-                        color: Colors.grey, // Matches the text color theme
-                        size: 16, // Slightly smaller than the text for balance
+                        Icons.info_outline,
+                        color: isDarkTheme ? Colors.white70 : Colors.grey,
+                        size: 14,
                       ),
-                      SizedBox(width: 4), // Small gap between icon and text
+                      const SizedBox(width: 4),
                       Text(
-                        "No saved devices found",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
+                        "Couldn't reach server",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontSize: 12,
+                          color:
+                              isDarkTheme ? Colors.white70 : Colors.grey[700],
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
+                ],
+              ),
+            );
+          } else if (controller.savedDevices.isEmpty) {
+            final screenWidth = MediaQuery.of(context).size.width;
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   Image.asset(
-                    'assets/icons/no-history-found1.png', // Empty state image
-                    width: 200,
-                    height: 200,
+                    'assets/icons/save_device.png', // Replace with actual device icon asset
+                    width: screenWidth * 0.3,
+                    height: screenWidth * 0.3,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.devices_other,
+                        size: 60,
+                        color: isDarkTheme ? Colors.white70 : Colors.grey[600],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'No Saved Devices',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isDarkTheme ? Colors.white : Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Text(
+                      'You haven’t saved any devices yet. Start exploring devices and save your favorites to access them quickly!',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isDarkTheme ? Colors.white70 : Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.to(
+                        () => LandingPage(),
+                        transition: Transition.rightToLeft,
+                        duration: const Duration(milliseconds: 300),
+                      );
+                      final LandingPageController landingController =
+                          Get.find<LandingPageController>();
+                      landingController.clearPageIndex();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                    ),
+                    child: Text(
+                      'Explore Devices',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -112,8 +164,7 @@ class SavedDevicepage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final device = controller.savedDevices[index];
                 return Padding(
-                  padding: const EdgeInsets.only(
-                      bottom: 10.0), // Add space below each card
+                  padding: const EdgeInsets.only(bottom: 10.0),
                   child: DeviceCard(device: device),
                 );
               },
