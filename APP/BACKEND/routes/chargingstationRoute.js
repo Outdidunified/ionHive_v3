@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Controller = require("../controllers/chargingstationController");
+const profileController = require('../controllers/profileController');
 const authUser = require("../middlewares/authenticated");
 
 // MANAGE SAVE STATION
@@ -13,6 +14,11 @@ router.post('/fetchSpecificStationsChragerDetailsWithConnector', authUser.isAuth
 
 // MANAGE CHARGING SESSION FOR USER
 router.post('/updateConnectorUser', authUser.isAuthenticated, Controller.updateConnectorUser); // Route to update connector user
+
+// DEVICES
+router.post('/fetchSavedDevices', authUser.isAuthenticated, profileController.fetchSavedDevices); // Route to Fetch Saved Devices
+router.post('/SaveDevices', authUser.isAuthenticated, profileController.SaveDevices); // Route to save Devices
+router.post('/RemoveDevice', authUser.isAuthenticated, profileController.RemoveDevice); // Route to Remove Devices
 
 
 // Export the router

@@ -514,6 +514,86 @@ const fetchSavedDevices = async (req, res) => {
         });
     }
 };
+// Remove devices
+const RemoveDevice = async (req, res) => {
+    try {
+        const { user_id, email_id, charger_id } = req.body;
+
+        // Validate input
+        if (!user_id || !email_id || !charger_id ||
+            !Number.isInteger(Number(user_id)) || typeof email_id !== 'string' ||
+            typeof charger_id !== 'string') {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: user_id must be an integer, email_id must be a string, and charger_id must be a string.',
+            });
+        }
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
+        const usersCollection = db.collection('users');
+
+        // Find the user with both user_id and email_id
+        const user = await usersCollection.findOne({ user_id: user_id, email_id });
+
+        if (!user) {
+            logger.loggerWarn(`User ${user_id} with email ${email_id} not found.`);
+            return res.status(404).json({
+                error: true,
+                message: 'User not found.',
+            });
+        }
+
+        let updatedFavChargers = user.favChargers || [];
+
+        // Check if charger_id exists in favChargers
+        const index = updatedFavChargers.findIndex(fav => fav.charger_id === charger_id);
+
+        if (index === -1) {
+            logger.loggerWarn(`Charger ${charger_id} not found in favorites for user ${user_id} with email ${email_id}.`);
+            return res.status(404).json({
+                error: true,
+                message: 'Charger not found in favorites.',
+            });
+        }
+
+        // Remove the charger from the list
+        updatedFavChargers.splice(index, 1);
+
+        // Update the user's favorite chargers array
+        const updateResult = await usersCollection.updateOne(
+            { user_id: user_id, email_id },
+            { $set: { favChargers: updatedFavChargers } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.loggerWarn(`Failed to remove favorite charger for user ${user_id} with email ${email_id}.`);
+            return res.status(500).json({
+                error: true,
+                message: 'Failed to remove favorite charger.',
+            });
+        }
+
+        logger.loggerSuccess(`Favorite charger ${charger_id} removed successfully for user ${user_id} with email ${email_id}.`);
+        return res.status(200).json({
+            error: false,
+            message: 'Favorite charger removed successfully',
+            updatedFavChargers,
+        });
+
+    } catch (error) {
+        logger.loggerError(`RemoveDevice - ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+        });
+    }
+};
+
 
 // VEHICLE
 //  - vehicle model details with images
@@ -1087,6 +1167,7 @@ module.exports = {
     // DEVICES
     SaveDevices,
     fetchSavedDevices,
+    RemoveDevice,
     SaveVehiclesOfUser,
     fetchSavedVehiclesOfUser,
     // VEHCILE

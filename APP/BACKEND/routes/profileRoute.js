@@ -58,6 +58,8 @@ router.post('/DeactivateRFID', authUser.isAuthenticated, Controller.DeactivateRF
 // DEVICES
 router.post('/fetchSavedDevices', authUser.isAuthenticated, Controller.fetchSavedDevices); // Route to Fetch Saved Devices
 router.post('/SaveDevices', authUser.isAuthenticated, Controller.SaveDevices); // Route to save Devices
+router.post('/RemoveDevice', authUser.isAuthenticated, Controller.RemoveDevice); // Route to Remove Devices
+
 // VEHICLE 
 //  - vehicle model details with images
 router.post("/addvehicleModel", authUser.isAuthenticated, upload.single("vehicle_image"), Controller.savevehicleModel); // Adding vehicle model and details
