@@ -7,12 +7,12 @@ const logger = require('../utils/logger');
 
 // 1.Login Controller
 // login function
-const authenticate = async (req) => {
+const authenticate = async (req, res) => {
     try {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return { error: true, status: 401, message: 'Email and Password required' };
+            return res.status(400).json({ status: 'Failed', message: 'Email and Password required' });
         }
 
         const db = await database.connectToDatabase();
@@ -22,22 +22,19 @@ const authenticate = async (req) => {
         const user = await usersCollection.findOne({ email_id: email, role_id: 3, status: true });
 
         if (!user || user.password !== password || user.role_id !== 3) {
-            return { error: true, status: 401, message: 'Invalid credentials or user is deactivated' };
+            return res.status(401).json({ status: 'Failed', message: 'Invalid credentials or user is deactivated' });
         }
 
-        // Fetch client details using client_id and check if the status is true
         const getclientDetails = await clientCollection.findOne({ client_id: user.client_id, status: true });
 
-        // If client details not found or deactivated, return an error
         if (!getclientDetails) {
-            return { status: 404, message: 'client details not found or deactivated' };
+            return res.status(404).json({ status: 'Failed', message: 'Client details not found or deactivated' });
         }
 
-        // Generate JWT token
         const token = jwt.sign({ username: user.username }, JWT_SECRET);
 
-        return {
-            error: false,
+        return res.status(200).json({
+            status: 'Success',
             user: {
                 client_name: getclientDetails.client_name,
                 client_id: getclientDetails.client_id,
@@ -46,204 +43,236 @@ const authenticate = async (req) => {
                 username: user.username,
                 email_id: user.email_id,
                 role_id: user.role_id,
-                token: token
-            }
-        };
+            },
+            token: token
+        });
 
     } catch (error) {
-        console.error(error);
-        return { error: true, status: 500, message: 'Internal Server Error' };
+        console.error('Error in authenticate:', error);
+        return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
     }
 };
 
 // 2.Dashboard
 // Function to fetch chargers assigned to a specific client
-async function FetchTotalCharger(client_id) {
+const FetchTotalCharger = async (req, res) => {
     try {
-        // console.log("Connecting to the database...");
+        const { client_id } = req.body;
+
+        if (!client_id) {
+            return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+        }
+
         const db = await database.connectToDatabase();
 
         if (!db) {
             console.error("Database connection failed!");
-            throw new Error("Database connection failed");
+            return res.status(500).json({ status: 'Failed', message: 'Database connection failed' });
         }
 
         const chargerCollection = db.collection("charger_details");
-
-        // console.log("Fetching chargers for client_id:", client_id);
 
         const recentChargers = await chargerCollection.find({
             assigned_client_id: client_id
         }).toArray();
 
-        const totalCount = recentChargers.length; // Get total count of matched chargers
+        const totalCount = recentChargers.length;
 
-        return { totalCount, recentChargers };
+        if (totalCount === 0) {
+            return res.status(200).json({ status: 'Success', totalCount, message: 'No chargers found' });
+        }
+
+        return res.status(200).json({ status: 'Success', totalCount, data: recentChargers });
+
     } catch (error) {
-        console.error(`Error fetching charger details: ${error}`);
-        throw new Error('Error fetching charger details');
+        console.error('Error in FetchTotalCharger:', error);
+        return res.status(500).json({ status: 'Failed', message: 'Failed to fetch charger details' });
     }
-}
+};
 
 // fetch FetchOnlineCharger
-async function FetchOnlineCharger(client_id) {
+async function FetchOnlineCharger(req, res) {
     try {
-        const db = await database.connectToDatabase();
+        const { client_id } = req.body;
 
+        if (!client_id) {
+            return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+        }
+
+        console.log("Fetching online chargers for client_id:", client_id);
+
+        const db = await database.connectToDatabase();
         const chargerCollection = db.collection("charger_details");
         const statusCollection = db.collection("charger_status");
 
-        // Get charger IDs assigned to the given client_id
+        // Get chargers assigned to the client
         const assignedChargers = await chargerCollection.find({ assigned_client_id: client_id }).toArray();
 
         if (!assignedChargers.length) {
-            return { totalCount: 0, onlineChargers: [], message: "No chargers assigned to this client" };
+            return res.status(200).json({ status: 'Success', totalCount: 0, message: "No chargers assigned to this client" });
         }
 
-        // Extract charger IDs
         const chargerIds = assignedChargers.map(charger => charger.charger_id);
-        // console.log("Charger IDs assigned to client:", chargerIds);
 
-        // Get the current time in UTC and calculate one hour ago
         const currentTime = new Date();
         const oneHourAgo = new Date(currentTime.getTime() - (1 * 60 * 60 * 1000));
 
-        // Fetch online chargers from charger_status table
+        // Find online chargers
         const onlineChargers = await statusCollection.find({
             charger_id: { $in: chargerIds },
-            timestamp: { $gte: oneHourAgo }, // Last modified within 1 hour
+            timestamp: { $gte: oneHourAgo },
             error_code: "NoError"
         }).toArray();
 
         const totalCount = onlineChargers.length;
 
         if (totalCount === 0) {
-            return { totalCount, onlineChargers: [], message: "No online chargers found in the last hour" };
+            return res.status(200).json({ status: 'Success', totalCount, message: "No online chargers found in the last hour" });
         }
 
-        return { totalCount, onlineChargers };
+        return res.status(200).json({ status: 'Success', totalCount, data: onlineChargers });
+
     } catch (error) {
-        console.error(`Error fetching online charger details: ${error}`);
-        throw new Error('Error fetching online charger details');
+        console.error('Error in FetchOnlineCharger:', error);
+        return res.status(500).json({ status: 'Failed', message: 'Failed to fetch online chargers' });
     }
 }
 
 // fetch FetchOfflineCharger
-async function FetchOfflineCharger(client_id) {
+async function FetchOfflineCharger(req, res) {
     try {
-        const db = await database.connectToDatabase();
+        const { client_id } = req.body;
 
+        if (!client_id) {
+            return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+        }
+
+        console.log("Fetching offline chargers for client_id:", client_id);
+
+        const db = await database.connectToDatabase();
         const chargerCollection = db.collection("charger_details");
         const statusCollection = db.collection("charger_status");
 
-        // Get charger IDs assigned to the given client_id
+        // Get chargers assigned to the client
         const assignedChargers = await chargerCollection.find({ assigned_client_id: client_id }).toArray();
 
         if (!assignedChargers.length) {
-            return { totalCount: 0, offlineChargers: [], message: "No chargers assigned to this client" };
+            return res.status(200).json({ status: 'Success', totalCount: 0, message: "No chargers assigned to this client" });
         }
 
-        // Extract charger IDs
         const chargerIds = assignedChargers.map(charger => charger.charger_id);
         console.log("Charger IDs assigned to client:", chargerIds);
 
-        // Get the current time in UTC and calculate one hour ago
         const currentTime = new Date();
         const oneHourAgo = new Date(currentTime.getTime() - (1 * 60 * 60 * 1000));
 
-        // Fetch offline chargers from charger_status table
+        // Find offline chargers
         const offlineChargers = await statusCollection.find({
             charger_id: { $in: chargerIds },
-            timestamp: { $lt: oneHourAgo }, // Not modified in the last 1 hour
-            // error_code: "NoError"
+            timestamp: { $lt: oneHourAgo }, // Last updated before 1 hour
+            // error_code is not checked here, because offline chargers might have any status
         }).toArray();
 
         const totalCount = offlineChargers.length;
 
         if (totalCount === 0) {
-            return { totalCount, offlineChargers: [], message: "No offline chargers found" };
+            return res.status(200).json({ status: 'Success', totalCount, message: "No offline chargers found" });
         }
 
-        return { totalCount, offlineChargers };
+        return res.status(200).json({ status: 'Success', totalCount, data: offlineChargers });
+
     } catch (error) {
-        console.error(`Error fetching offline charger details: ${error}`);
-        throw new Error('Error fetching offline charger details');
+        console.error('Error in FetchOfflineCharger:', error);
+        return res.status(500).json({ status: 'Failed', message: 'Failed to fetch offline chargers' });
     }
 }
 
 // Fetch Faulty Chargers Function
-async function FetchFaultsCharger(client_id) {
+async function FetchFaultsCharger(req, res) {
     try {
-        const db = await database.connectToDatabase();
+        const { client_id } = req.body;
 
+        if (!client_id) {
+            return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+        }
+
+        console.log("Fetching faulty chargers for client_id:", client_id);
+
+        const db = await database.connectToDatabase();
         const chargerCollection = db.collection("charger_details");
         const statusCollection = db.collection("charger_status");
 
-        // Get charger IDs assigned to the given client_id
+        // Get charger IDs assigned to the client
         const assignedChargers = await chargerCollection.find({ assigned_client_id: client_id }).toArray();
 
         if (!assignedChargers.length) {
-            return { totalCount: 0, faultyChargers: [], message: "No chargers assigned to this client" };
+            return res.status(200).json({ status: 'Success', totalCount: 0, message: "No chargers assigned to this client" });
         }
 
-        // Extract charger IDs
         const chargerIds = assignedChargers.map(charger => charger.charger_id);
         console.log("Charger IDs assigned to client:", chargerIds);
 
-        // Get current time
         const currentTime = new Date();
-        // Calculate time 1 hour ago
         const oneHourAgo = new Date(currentTime.getTime() - (1 * 60 * 60 * 1000));
 
-        // Fetch faulty chargers from charger_status table
+        // Find faulty chargers
         const faultyChargers = await statusCollection.find({
-            timestamp: { $gte: oneHourAgo },  // Modified within the last 1 hour
             charger_id: { $in: chargerIds },
-            error_code: { $ne: "NoError" } // Find all chargers where error_code is NOT "NoError"
+            timestamp: { $gte: oneHourAgo }, // Modified within the last 1 hour
+            error_code: { $ne: "NoError" }   // error_code not equal to "NoError"
         }).toArray();
 
         const totalCount = faultyChargers.length;
 
         if (totalCount === 0) {
-            return { totalCount, faultyChargers: [], message: "No faulty chargers found" };
+            return res.status(200).json({ status: 'Success', totalCount, message: "No faulty chargers found" });
         }
 
-        return { totalCount, faultyChargers };
+        return res.status(200).json({ status: 'Success', totalCount, data: faultyChargers });
+
     } catch (error) {
-        console.error(`Error fetching faulty charger details: ${error}`);
-        throw new Error('Error fetching faulty charger details');
+        console.error('Error in FetchFaultsCharger:', error);
+        return res.status(500).json({ status: 'Failed', message: 'Failed to fetch faulty chargers' });
     }
 }
 
 // Fetch Charger Total Energy Function
-async function FetchChargerTotalEnergy(client_id) {
+async function FetchChargerTotalEnergy(req, res) {
     try {
+        const { client_id } = req.body;
+
+        if (!client_id) {
+            return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+        }
+
+        console.log("Fetching total energy for client_id:", client_id);
+
         const db = await database.connectToDatabase();
         const chargerCollection = db.collection("charger_details");
         const sessionCollection = db.collection("device_session_details");
 
-        // Get charger IDs assigned to the given client_id
         const assignedChargers = await chargerCollection.find({ assigned_client_id: client_id }).toArray();
 
         if (!assignedChargers.length) {
-            return {
-                totalEnergyConsumed: 0,
-                CO2_from_EV: 0,
-                CO2_from_ICE: 0,
-                CO2_Savings: 0,
-                daytodaytotalEnergyConsumed: [],
-                weeklyTotalEnergyConsumed: [],
-                monthlyTotalEnergyConsumed: [],
-                yearlyTotalEnergyConsumed: [],
-                message: "No chargers assigned to this reseller"
-            };
+            return res.status(200).json({
+                status: 'Success',
+                ChargerTotalEnergy: {
+                    totalEnergyConsumed: 0,
+                    CO2_from_EV: 0,
+                    CO2_from_ICE: 0,
+                    CO2_Savings: 0,
+                    daytodaytotalEnergyConsumed: [],
+                    weeklyTotalEnergyConsumed: [],
+                    monthlyTotalEnergyConsumed: [],
+                    yearlyTotalEnergyConsumed: [],
+                    message: "No chargers assigned to this reseller"
+                }
+            });
         }
 
-        // Extract charger IDs
         const chargerIds = assignedChargers.map(charger => charger.charger_id);
         console.log("Charger IDs assigned to reseller:", chargerIds);
 
-        // Aggregation Stages
         const matchStage = {
             $match: {
                 start_time: { $ne: null },
@@ -259,133 +288,94 @@ async function FetchChargerTotalEnergy(client_id) {
             }
         };
 
-        // Daily Aggregation
-        const resultDayToDay = await sessionCollection.aggregate([
+        const daytodaytotalEnergyConsumed = (await sessionCollection.aggregate([
             matchStage, addFieldsStage,
-            {
-                $group: {
-                    _id: { $dateToString: { format: "%d/%m/%Y", date: "$start_time" } },
-                    day2daytotalEnergyConsumed: { $sum: "$unit_consummed" }
-                }
-            },
+            { $group: { _id: { $dateToString: { format: "%d/%m/%Y", date: "$start_time" } }, day2daytotalEnergyConsumed: { $sum: "$unit_consummed" } } },
             { $sort: { "_id": -1 } }
-        ]).toArray();
+        ]).toArray()).map(entry => ({
+            date: entry._id,
+            totalEnergyConsumed: entry.day2daytotalEnergyConsumed
+        }));
 
-        const daytodaytotalEnergyConsumed = resultDayToDay
-            .filter(entry => entry._id !== null) // Remove entries where date is null
-            .map(entry => ({
-                date: entry._id,
-                totalEnergyConsumed: entry.day2daytotalEnergyConsumed
-            }));
-
-        // Weekly Aggregation
-        const weeklyResult = await sessionCollection.aggregate([
+        const weeklyTotalEnergyConsumed = (await sessionCollection.aggregate([
             matchStage, addFieldsStage,
-            {
-                $group: {
-                    _id: { year: { $year: "$start_time" }, week: { $isoWeek: "$start_time" } },
-                    totalEnergyConsumed: { $sum: "$unit_consummed" }
-                }
-            },
+            { $group: { _id: { year: { $year: "$start_time" }, week: { $isoWeek: "$start_time" } }, totalEnergyConsumed: { $sum: "$unit_consummed" } } },
             { $sort: { "_id.year": -1, "_id.week": -1 } }
-        ]).toArray();
-
-        const weeklyTotalEnergyConsumed = weeklyResult.map(entry => ({
+        ]).toArray()).map(entry => ({
             week: `Week ${entry._id.week} of ${entry._id.year}`,
             totalEnergyConsumed: entry.totalEnergyConsumed || 0
         }));
 
-        // Monthly Aggregation
-        const monthlyResult = await sessionCollection.aggregate([
+        const monthlyTotalEnergyConsumed = (await sessionCollection.aggregate([
             matchStage, addFieldsStage,
-            {
-                $group: {
-                    _id: { year: { $year: "$start_time" }, month: { $month: "$start_time" } },
-                    totalEnergyConsumed: { $sum: "$unit_consummed" }
-                }
-            },
+            { $group: { _id: { year: { $year: "$start_time" }, month: { $month: "$start_time" } }, totalEnergyConsumed: { $sum: "$unit_consummed" } } },
             { $sort: { "_id.year": -1, "_id.month": -1 } }
-        ]).toArray();
-
-        const monthlyTotalEnergyConsumed = monthlyResult.map(entry => ({
+        ]).toArray()).map(entry => ({
             month: `${entry._id.year}-${String(entry._id.month).padStart(2, "0")}`,
             totalEnergyConsumed: entry.totalEnergyConsumed || 0
         }));
 
-        // Yearly Aggregation (Remove null values)
-        const yearlyResult = await sessionCollection.aggregate([
+        const yearlyTotalEnergyConsumed = (await sessionCollection.aggregate([
             matchStage, addFieldsStage,
-            {
-                $group: {
-                    _id: { year: { $year: "$start_time" } },
-                    totalEnergyConsumed: { $sum: "$unit_consummed" }
-                }
-            },
-            { $match: { "_id.year": { $ne: null } } }, // Remove null years
+            { $group: { _id: { year: { $year: "$start_time" } }, totalEnergyConsumed: { $sum: "$unit_consummed" } } },
+            { $match: { "_id.year": { $ne: null } } },
             { $sort: { "_id.year": -1 } }
-        ]).toArray();
-
-        const yearlyTotalEnergyConsumed = yearlyResult.map(entry => ({
+        ]).toArray()).map(entry => ({
             year: entry._id.year,
             totalEnergyConsumed: entry.totalEnergyConsumed || 0
         }));
 
-        // Aggregate total energy from sessionCollection
         const totalResult = await sessionCollection.aggregate([
             matchStage,
-            {
-                $group: {
-                    _id: null,
-                    totalEnergyConsumed: { $sum: { $toDouble: "$unit_consummed" } }
-                }
-            }
+            { $group: { _id: null, totalEnergyConsumed: { $sum: { $toDouble: "$unit_consummed" } } } }
         ]).toArray();
 
         const totalEnergyConsumed = totalResult.length > 0 ? totalResult[0].totalEnergyConsumed : 0;
 
-        // Constants
-        const EV_EFFICIENCY = 6.5; // km per kWh
-        const EV_CO2_PER_KWH = 0.02; // kg CO2 per kWh
-        const ICE_CO2_PER_KM = 0.35; // kg CO2 per km
+        const EV_EFFICIENCY = 6.5;
+        const EV_CO2_PER_KWH = 0.02;
+        const ICE_CO2_PER_KM = 0.35;
 
-        //  Calculate Distance Driven by EV
         const distanceDrivenByEV = totalEnergyConsumed / EV_EFFICIENCY;
-
-        //  Calculate CO2 Emissions from ICE Vehicle
         const CO2_from_ICE = distanceDrivenByEV * ICE_CO2_PER_KM;
-
-        //  Calculate CO2 Emissions from EV
         const CO2_from_EV = totalEnergyConsumed * EV_CO2_PER_KWH;
-
-        // Step 4: Calculate CO2 Savings
         const CO2_Savings = CO2_from_ICE - CO2_from_EV;
 
-        return {
-            daytodaytotalEnergyConsumed,
-            weeklyTotalEnergyConsumed,
-            monthlyTotalEnergyConsumed,
-            yearlyTotalEnergyConsumed,
-            totalEnergyConsumed,
-            CO2_from_EV,
-            CO2_from_ICE,
-            CO2_Savings
-        };
+        res.status(200).json({
+            status: 'Success',
+            ChargerTotalEnergy: {
+                daytodaytotalEnergyConsumed,
+                weeklyTotalEnergyConsumed,
+                monthlyTotalEnergyConsumed,
+                yearlyTotalEnergyConsumed,
+                totalEnergyConsumed,
+                CO2_from_EV,
+                CO2_from_ICE,
+                CO2_Savings
+            }
+        });
 
     } catch (error) {
-        console.error(`Error fetching Charger Total Energy details: ${error}`);
-        throw new Error('Error fetching Charger Total Energy details');
+        console.error('Error in FetchChargerTotalEnergy:', error);
+        res.status(500).json({ status: 'Failed', message: 'Failed to fetch charger total energy' });
     }
 }
 
 // Fetch Total Charger Charging Sessions for a Specific client
-async function FetchTotalChargersSession(client_id) {
+async function FetchTotalChargersSession(req, res) {
     try {
+        const { client_id } = req.body; // Get client_id from request body
+
+        if (!client_id) {
+            return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+        }
+
         console.log("Connecting to the database...");
         const db = await database.connectToDatabase();
 
         if (!db) {
             console.error("Database connection failed!");
-            throw new Error("Database connection failed");
+            return res.status(500).json({ status: 'Failed', message: 'Database connection failed' });
         }
 
         const chargerCollection = db.collection("charger_details");
@@ -396,7 +386,7 @@ async function FetchTotalChargersSession(client_id) {
 
         if (chargers.length === 0) {
             console.log("No chargers found for client_id:", client_id);
-            return { totalCount: 0 };
+            return res.status(404).json({ status: 'Failed', message: 'No chargers found for this client' });
         }
 
         // Extract charger IDs
@@ -405,29 +395,37 @@ async function FetchTotalChargersSession(client_id) {
         // Count total sessions where charger_id matches the found chargers
         const totalCount = await sessionCollection.countDocuments({ charger_id: { $in: chargerIds } });
 
-        return { totalCount };
+        return res.status(200).json({ status: 'Success', totalCount });
     } catch (error) {
         console.error(`Error fetching charger session count: ${error}`);
-        throw new Error('Error fetching charger session count');
+        return res.status(500).json({ status: 'Failed', message: 'Failed to fetch charger session count' });
     }
 }
 
 // Fetch Total Associations, and App Users for a Specific client
-async function FetchTotalUsers(client_id) {
+async function FetchTotalUsers(req, res) {
     try {
+        const { client_id } = req.body; // Get client_id from request body
+
+        if (!client_id) {
+            return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+        }
+
         const db = await database.connectToDatabase();
-        const usersCollection = db.collection("users");
 
         if (!db) {
             console.error("Database connection failed!");
-            throw new Error("Database connection failed");
+            return res.status(500).json({ status: 'Failed', message: 'Database connection failed' });
         }
+
+        const usersCollection = db.collection("users");
 
         // Fetch users assigned to this reseller
         const users = await usersCollection.find({ client_id: client_id }).toArray();
 
-        if (!users.length) {
-            return { clientsCount: 0, associationsCount: 0, appUsersCount: 0 };
+        if (users.length === 0) {
+            console.log("No users found for client_id:", client_id);
+            return res.status(404).json({ status: 'Failed', message: 'No users found for this client' });
         }
 
         // Count Associations (client_id and association_id exist)
@@ -436,21 +434,29 @@ async function FetchTotalUsers(client_id) {
         // Count App Users (role_id = 5)
         const appUsersCount = users.filter(user => user.role_id === 5).length;
 
-        return {
-            associationsCount,
-            appUsersCount
-        };
+        return res.status(200).json({
+            status: 'Success',
+            totalCounts: {
+                associationsCount,
+                appUsersCount
+            }
+        });
     } catch (error) {
         console.error(`Error fetching user counts: ${error}`);
-        throw new Error('Error fetching user counts');
+        return res.status(500).json({ status: 'Failed', message: 'Failed to fetch total associations, and app users' });
     }
 }
 
 // 3.Manage Device
 // FetchAllocatedCharger
-async function FetchAllocatedCharger(req) {
+async function FetchAllocatedCharger(req, res) {
     try {
         const { client_id } = req.body;
+
+        if (!client_id) {
+            return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+        }
+
         const db = await database.connectToDatabase();
         const devicesCollection = db.collection("charger_details");
         const configCollection = db.collection("socket_gun_config");
@@ -523,10 +529,14 @@ async function FetchAllocatedCharger(req) {
             });
         }
 
-        return results; // Only return data, don't send response
+        if (results.length === 0) {
+            return res.status(404).json({ status: 'Failed', message: 'No allocated chargers found for this client' });
+        }
+
+        return res.status(200).json({ status: 'Success', data: results });
     } catch (error) {
-        console.error(`Error fetching chargers: ${error}`);
-        throw new Error('Failed to fetch chargers');
+        console.error(`Error fetching allocated chargers: ${error}`);
+        return res.status(500).json({ status: 'Failed', message: 'Failed to fetch allocated chargers' });
     }
 }
  
@@ -536,39 +546,53 @@ async function DeActivateOrActivateCharger(req, res) {
 
     // Validate input
     if (!modified_by || !charger_id || typeof status !== 'boolean') {
-        throw new Error('Username, chargerID, and Status (boolean) are required');
+        return res.status(400).json({ status: 'Failed', message: 'Username, chargerID, and Status (boolean) are required' });
     }
 
-    const db = await database.connectToDatabase();
-    const devicesCollection = db.collection("charger_details");
+    try {
+        const db = await database.connectToDatabase();
+        const devicesCollection = db.collection("charger_details");
 
-    // Check if the charger exists
-    const existingCharger = await devicesCollection.findOne({ charger_id: charger_id });
-    if (!existingCharger) {
-        throw new Error('chargerID not found');
-    }
-
-    // Perform the update
-    const updateResult = await devicesCollection.updateOne(
-        { charger_id: charger_id },
-        {
-            $set: {
-                status: status,
-                modified_by: modified_by,
-                modified_date: new Date()
-            }
+        // Check if the charger exists
+        const existingCharger = await devicesCollection.findOne({ charger_id: charger_id });
+        if (!existingCharger) {
+            return res.status(404).json({ status: 'Failed', message: 'chargerID not found' });
         }
-    );
 
-    if (updateResult.matchedCount === 0) {
-        throw new Error('Failed to update charger');
+        // Perform the update
+        const updateResult = await devicesCollection.updateOne(
+            { charger_id: charger_id },
+            {
+                $set: {
+                    status: status,
+                    modified_by: modified_by,
+                    modified_date: new Date()
+                }
+            }
+        );
+
+        if (updateResult.matchedCount === 0) {
+            return res.status(500).json({ status: 'Failed', message: 'Failed to update charger' });
+        }
+
+        return res.status(200).json({ status: 'Success', message: 'Charger updated successfully' });
+    } catch (error) {
+        console.error('Error in DeActivateOrActivateCharger controller:', error);
+        logger.error(error);
+        return res.status(500).json({ status: 'Error', message: 'Something went wrong while updating charger' });
     }
 }
 
-// FetchUnAllocatedCharger
-async function FetchUnAllocatedCharger(req) {
+// Controller FetchUnAllocatedCharger
+async function FetchUnAllocatedCharger(req, res) {
+    const { client_id } = req.body;
+
+    // Validate input
+    if (!client_id) {
+        return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+    }
+
     try {
-        const { client_id } = req.body;
         const db = await database.connectToDatabase();
         const devicesCollection = db.collection("charger_details");
         const configCollection = db.collection("socket_gun_config");
@@ -576,24 +600,24 @@ async function FetchUnAllocatedCharger(req) {
         // Aggregation to fetch unallocated chargers with no association assigned
         const chargersWithoutAssociations = await devicesCollection.aggregate([
             {
-                $match: { assigned_association_id: null, assigned_client_id: client_id } // Find chargers with no assigned associations
+                $match: { assigned_association_id: null, assigned_client_id: client_id }
             },
             {
                 $lookup: {
-                    from: 'association_details', // Collection name for association details
+                    from: 'association_details',
                     localField: 'assigned_association_id',
-                    foreignField: 'association_id', // Assuming association_id is the field name in association_details
+                    foreignField: 'association_id',
                     as: 'associationDetails'
                 }
             },
             {
                 $addFields: {
-                    association_name: { $arrayElemAt: ['$associationDetails.association_name', 0] } // Include the association name, if any (but won't exist here)
+                    association_name: { $arrayElemAt: ['$associationDetails.association_name', 0] }
                 }
             },
             {
                 $project: {
-                    associationDetails: 0 // Exclude the full associationDetails object
+                    associationDetails: 0
                 }
             }
         ]).toArray();
@@ -606,13 +630,11 @@ async function FetchUnAllocatedCharger(req) {
             // Fetch corresponding socket/gun configuration
             const config = await configCollection.findOne({ charger_id: chargerID });
 
-            let connectorDetails = []; // Initialize as an array
+            let connectorDetails = [];
 
             if (config) {
-                // Loop over connector configurations dynamically
                 let connectorIndex = 1;
                 while (config[`connector_${connectorIndex}_type`] !== undefined) {
-                    // Map connector types: 1 -> "Socket", 2 -> "Gun"
                     let connectorTypeValue;
                     if (config[`connector_${connectorIndex}_type`] === 1) {
                         connectorTypeValue = "Socket";
@@ -620,121 +642,146 @@ async function FetchUnAllocatedCharger(req) {
                         connectorTypeValue = "Gun";
                     }
 
-                    // Push connector details to the array
                     connectorDetails.push({
                         connector_type: connectorTypeValue || config[`connector_${connectorIndex}_type`],
                         connector_type_name: config[`connector_${connectorIndex}_type_name`]
                     });
 
-                    connectorIndex++; // Move to the next connector
+                    connectorIndex++;
                 }
             }
 
-            // If there are no connector details, the charger will have an empty connector_details array
             results.push({
                 ...charger,
                 connector_details: connectorDetails.length > 0 ? connectorDetails : null
             });
         }
 
-        return results; // Only return data, don't send response
+        return res.status(200).json({ status: 'Success', data: results });
     } catch (error) {
-        console.error(`Error fetching chargers: ${error}`);
-        throw new Error('Failed to fetch chargers'); // Throw error, handle in route
+        console.error('Error in FetchUnAllocatedCharger controller:', error);
+        return res.status(500).json({ status: 'Error', message: 'Failed to fetch unallocated chargers' });
     }
 }
 
-//FetchAssociationUserToAssginCharger
-async function FetchAssociationUserToAssginCharger(req) {
+// Controller FetchAssociationUserToAssginCharger
+async function FetchAssociationUserToAssginCharger(req, res) {
+    const { client_id } = req.body;
+
+    // Validate input
+    if (!client_id) {
+        return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+    }
+
     try {
-        const { client_id } = req.body;
         const db = await database.connectToDatabase();
         const associationCollection = db.collection("association_details");
 
         const users = await associationCollection.find({ client_id: parseInt(client_id), status: true }).toArray();
 
-        return users;
+        if (users.length === 0) {
+            return res.status(404).json({ status: 'Failed', message: 'No users found for the given client_id' });
+        }
+
+        return res.status(200).json({ status: 'Success', data: users });
 
     } catch (error) {
-        console.error(`Error fetching client details: ${error}`);
-        logger.error(`Error fetching client details: ${error}`);
-        throw new Error('Error fetching client details');
+        console.error('Error in FetchAssociationUserToAssginCharger controller:', error);
+        logger.error('Error in FetchAssociationUserToAssginCharger controller:', error);
+        return res.status(500).json({ status: 'Error', message: 'Failed to fetch users' });
     }
 }
 
-//FetchUnAllocatedChargerToAssgin
-async function FetchUnAllocatedChargerToAssgin(req) {
+// Controller FetchUnAllocatedChargerToAssgin
+async function FetchUnAllocatedChargerToAssgin(req, res) {
+    const { client_id } = req.body;
+
+    // Validate input
+    if (!client_id) {
+        return res.status(400).json({ status: 'Failed', message: 'client_id is required' });
+    }
+
     try {
-        const { client_id } = req.body
         const db = await database.connectToDatabase();
         const devicesCollection = db.collection("charger_details");
 
         const chargers = await devicesCollection.find({ assigned_association_id: null, assigned_client_id: client_id, status: true }).toArray();
 
-        return chargers; // Only return data, don't send response
+        if (chargers.length === 0) {
+            return res.status(404).json({ status: 'Failed', message: 'No unallocated chargers found for the given client_id' });
+        }
+
+        return res.status(200).json({ status: 'Success', data: chargers });
+
     } catch (error) {
-        console.error(`Error fetching chargers: ${error}`);
-        throw new Error('Failed to fetch chargers'); // Throw error, handle in route
+        console.error('Error in FetchUnAllocatedChargerToAssgin controller:', error);
+        logger.error('Error in FetchUnAllocatedChargerToAssgin controller:', error);
+        return res.status(500).json({ status: 'Error', message: 'Failed to fetch unallocated chargers' });
     }
 }
 
 // Controller AssginChargerToAssociation
-async function AssginChargerToAssociation(req) {
+async function AssginChargerToAssociation(req, res) {
     const { association_id, charger_id, client_commission, modified_by } = req.body;
 
     // Validate required fields
     if (!association_id || !charger_id || !modified_by || !client_commission) {
-        throw new Error('Association ID, Charger ID(s), client_commission, and Modified By are required');
+        return res.status(400).json({ status: 'Failed', message: 'Association ID, Charger ID(s), client_commission, and Modified By are required' });
     }
 
-    const db = await database.connectToDatabase();
-    const devicesCollection = db.collection("charger_details");
+    try {
+        const db = await database.connectToDatabase();
+        const devicesCollection = db.collection("charger_details");
 
-    // Ensure charger_id is treated as an array
-    const chargerIdsArray = Array.isArray(charger_id) ? charger_id : [charger_id];
+        // Ensure charger_id is treated as an array
+        const chargerIdsArray = Array.isArray(charger_id) ? charger_id : [charger_id];
 
-    // Check if all the chargers exist
-    const existingChargers = await devicesCollection.find({
-        charger_id: { $in: chargerIdsArray }
-    }).toArray();
+        // Check if all the chargers exist
+        const existingChargers = await devicesCollection.find({
+            charger_id: { $in: chargerIdsArray }
+        }).toArray();
 
-    if (existingChargers.length !== chargerIdsArray.length) {
-        throw new Error('One or more chargers not found');
-    }
-
-    // Update chargers
-    const result = await devicesCollection.updateMany(
-        { charger_id: { $in: chargerIdsArray } },
-        {
-            $set: {
-                assigned_association_id: association_id,
-                client_commission: client_commission,
-                assigned_association_date: new Date(),
-                modified_date: new Date(),
-                modified_by
-            }
+        if (existingChargers.length !== chargerIdsArray.length) {
+            return res.status(404).json({ status: 'Failed', message: 'One or more chargers not found' });
         }
-    );
 
-    if (result.modifiedCount === 0) {
-        throw new Error('Failed to assign chargers to association');
+        // Update chargers
+        const result = await devicesCollection.updateMany(
+            { charger_id: { $in: chargerIdsArray } },
+            {
+                $set: {
+                    assigned_association_id: association_id,
+                    client_commission: client_commission,
+                    assigned_association_date: new Date(),
+                    modified_date: new Date(),
+                    modified_by
+                }
+            }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(500).json({ status: 'Failed', message: 'Failed to assign chargers to association' });
+        }
+
+        return res.status(200).json({ status: 'Success', message: 'Chargers Successfully Assigned' });
+
+    } catch (error) {
+        console.error('Error in AssginChargerToAssociation controller:', error);
+        return res.status(500).json({ status: 'Error', message: error.message || 'Failed to assign charger to association' });
     }
-
-    return { status: "Success", message: "Chargers Successfully Assigned" };
 }
 
 // 4.Manage Association
-//FetchAssociationUser
-async function FetchAssociationUser(req) {
+// Controller FetchAssociationUser
+async function FetchAssociationUser(req, res) {
     try {
         const { client_id } = req.body;
 
         if (!client_id) {
-            return {
-                success: false,
-                status: 400,
+            return res.status(400).json({
+                status: 'Failed',
                 message: 'Client ID is required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -743,11 +790,10 @@ async function FetchAssociationUser(req) {
         const users = await associationCollection.find({ client_id: parseInt(client_id) }).toArray();
 
         if (users.length === 0) {
-            return {
-                success: false,
-                status: 404,
+            return res.status(404).json({
+                status: 'Failed',
                 message: 'No association found for the provided client_id'
-            };
+            });
         }
 
         const reseller_ids = users.map(user => user.reseller_id);
@@ -771,29 +817,31 @@ async function FetchAssociationUser(req) {
             client_name: clientMap[user.client_id] || 'Unknown Client'
         }));
 
-        return {
-            success: true,
+        return res.status(200).json({
+            status: 'Success',
             data: result
-        };
+        });
 
     } catch (error) {
-        logger.error(`Error in FetchAssociationUser: ${error}`);
-        throw new Error('Database error while fetching association users');
+        console.error('Error in FetchAssociationUser controller:', error);
+        return res.status(500).json({
+            status: 'Error',
+            message: 'Database error while fetching association users'
+        });
     }
 }
 
-// FetchChargerDetailsWithSession
-async function FetchChargerDetailsWithSession(req) {
+// Controller FetchChargerDetailsWithSession
+async function FetchChargerDetailsWithSession(req, res) {
     try {
         const { association_id } = req.body;
 
         // Validate association_id
         if (!association_id) {
-            return {
-                success: false,
-                status: 400,
+            return res.status(400).json({
+                status: 'Failed',
                 message: 'Association ID is required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -845,25 +893,23 @@ async function FetchChargerDetailsWithSession(req) {
         ]).toArray();
 
         if (!result || result.length === 0) {
-            return {
-                success: false,
-                status: 404,
+            return res.status(404).json({
+                status: 'Failed',
                 message: 'No chargers found for the specified Association ID'
-            };
+            });
         }
 
-        return {
-            success: true,
+        return res.status(200).json({
+            status: 'Success',
             data: result
-        };
+        });
 
     } catch (error) {
         console.error(`Error in FetchChargerDetailsWithSession: ${error}`);
-        return {
-            success: false,
-            status: 500,
+        return res.status(500).json({
+            status: 'Error',
             message: 'Failed to fetch charger details with session'
-        };
+        });
     }
 }
 
@@ -943,8 +989,8 @@ async function CreateUserAutomatic(role_id, client_id, reseller_id, association_
     }
 }
 
-//CreateAssociationUser
-async function CreateAssociationUser(body) {
+// Controller CreateAssociationUser
+async function CreateAssociationUser(req, res) {
     try {
         const {
             reseller_id,
@@ -954,14 +1000,14 @@ async function CreateAssociationUser(body) {
             association_email_id,
             association_address,
             created_by
-        } = body;
+        } = req.body;
 
         // Validate required fields
         if (!association_name || !association_phone_no || !association_email_id || !association_address || !created_by || !reseller_id || !client_id) {
-            return {
-                success: false,
+            return res.status(400).json({
+                status: 'Failure',
                 message: 'Reseller ID, Client ID, Association Name, Phone Number, Email ID, Address, and Created By are required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -974,11 +1020,17 @@ async function CreateAssociationUser(body) {
         const associationRole = await roleCollection.findOne({ role_id });
 
         if (!associationRole) {
-            return { success: false, message: "Association role not found in system." };
+            return res.status(404).json({
+                status: 'Failure',
+                message: "Association role not found in system."
+            });
         }
 
         if (associationRole.status === false) {
-            return { success: false, message: "Association role is deactivated. Cannot create association & user." };
+            return res.status(400).json({
+                status: 'Failure',
+                message: "Association role is deactivated. Cannot create association & user."
+            });
         }
 
         // Check for duplicate name/email
@@ -990,7 +1042,10 @@ async function CreateAssociationUser(body) {
         });
 
         if (existingAssociation) {
-            return { success: false, message: 'Association with this Association name / Email ID already exists' };
+            return res.status(400).json({
+                status: 'Failure',
+                message: 'Association with this Association name / Email ID already exists'
+            });
         }
 
         // Generate new association ID
@@ -1015,7 +1070,10 @@ async function CreateAssociationUser(body) {
         });
 
         if (!result.acknowledged) {
-            return { success: false, message: 'Failed to create association' };
+            return res.status(500).json({
+                status: 'Failure',
+                message: 'Failed to create association'
+            });
         }
 
         console.log(`Association created: ID ${newAssociationId}`);
@@ -1033,19 +1091,28 @@ async function CreateAssociationUser(body) {
         );
 
         if (!userCreationResult.success) {
-            return { success: true, message: 'Association created. But user creation failed: ' + userCreationResult.message };
+            return res.status(200).json({
+                status: 'Success',
+                message: 'Association created. But user creation failed: ' + userCreationResult.message
+            });
         }
 
-        return { success: true, message: 'Association and user created successfully' };
+        return res.status(200).json({
+            status: 'Success',
+            message: 'Association and user created successfully'
+        });
 
     } catch (error) {
         console.error("CreateAssociationUser error:", error);
-        return { success: false, message: error.message };
+        return res.status(500).json({
+            status: 'Error',
+            message: 'Internal Server Error'
+        });
     }
 }
 
-//UpdateAssociationUser
-async function UpdateAssociationUser(body) {
+// Controller UpdateAssociationUser
+async function UpdateAssociationUser(req, res) {
     try {
         const {
             association_id,
@@ -1055,14 +1122,14 @@ async function UpdateAssociationUser(body) {
             association_wallet,
             modified_by,
             status
-        } = body;
+        } = req.body;
 
         // Validate required fields
         if (!association_id || !association_name || !association_wallet || !association_phone_no || !association_address || !modified_by) {
-            return {
-                success: false,
+            return res.status(400).json({
+                status: 'Failure',
                 message: 'Association ID, Association Name, Phone Number, Wallet, Address, and Modified By are required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -1071,7 +1138,10 @@ async function UpdateAssociationUser(body) {
         // Check if the association exists
         const existingAssociation = await associationCollection.findOne({ association_id });
         if (!existingAssociation) {
-            return { success: false, message: 'Association not found' };
+            return res.status(404).json({
+                status: 'Failure',
+                message: 'Association not found'
+            });
         }
 
         // Prepare update data
@@ -1095,27 +1165,41 @@ async function UpdateAssociationUser(body) {
         );
 
         if (result.modifiedCount > 0) {
-            return { success: true, message: 'Association updated successfully' };
+            return res.status(200).json({
+                status: 'Success',
+                message: 'Association updated successfully'
+            });
         } else {
-            return { success: false, message: 'No changes made or failed to update association' };
+            return res.status(400).json({
+                status: 'Failure',
+                message: 'No changes made or failed to update association'
+            });
         }
 
     } catch (error) {
         console.error("Function Error - UpdateAssociationUser:", error);
-        return { success: false, message: error.message || 'Error updating association' };
+        return res.status(500).json({
+            status: 'Error',
+            message: 'Internal Server Error'
+        });
     }
 }
 
-// Update commossion
-async function updateCommission(req) {
+// Controller UpdateClientCommission
+async function UpdateClientCommission(req, res) {
     try {
         const { chargerID, client_commission, modified_by } = req.body;
+
+        if (!chargerID || client_commission === undefined || !modified_by) {
+            return res.status(400).json({
+                status: 'Failure',
+                message: 'Commission update fields are not available'
+            });
+        }
+
         const db = await database.connectToDatabase();
         const ChargerCollection = db.collection("charger_details");
 
-        if (!chargerID || client_commission === undefined || !modified_by) {
-            throw new Error(`Commission update fields are not available`);
-        }
         const where = { charger_id: chargerID };
         const update = {
             $set: {
@@ -1128,29 +1212,37 @@ async function updateCommission(req) {
         const result = await ChargerCollection.updateOne(where, update);
 
         if (result.modifiedCount === 0) {
-            throw new Error(`Record not found to update client commission`);
+            return res.status(404).json({
+                status: 'Failure',
+                message: 'Record not found to update client commission'
+            });
         }
 
-        return true;
+        return res.status(200).json({
+            status: 'Success',
+            message: 'Commission updated successfully'
+        });
 
     } catch (error) {
-        logger.error(`Error in update commission: ${error}`);
-        throw new Error(error.message)
+        console.error('Error in update commission:', error);
+        return res.status(500).json({
+            status: 'Error',
+            message: 'Internal Server Error'
+        });
     }
 }
 
 // 5.Manage User
-//FetchUser
-async function FetchUser(req) {
+// Controller FetchUsers
+async function FetchUsers(req, res) {
     try {
         const { client_id } = req.body;
 
         if (!client_id) {
-            return {
-                success: false,
-                status: 409,
+            return res.status(409).json({
+                status: 'Failed',
                 message: 'Client ID is required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -1187,26 +1279,29 @@ async function FetchUser(req) {
             association_name: associationMap.get(user.association_id) || null
         }));
 
-        return {
-            success: true,
-            result: usersWithDetails
-        };
+        return res.status(200).json({
+            status: 'Success',
+            data: usersWithDetails
+        });
 
     } catch (error) {
-        logger.error(`Error in FetchUser controller: ${error}`);
-        throw new Error('Database error occurred while fetching users');
+        console.error('Error in FetchUsers controller:', error);
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Database error occurred while fetching users'
+        });
     }
 }
 
-//FetchSpecificUserRoleForSelection
-async function FetchSpecificUserRoleForSelection() {
+// Controller FetchSpecificUserRoleForSelection
+async function FetchSpecificUserRoleForSelection(req, res) {
     try {
         const db = await database.connectToDatabase();
         const usersCollection = db.collection("user_roles");
 
         // Query to fetch all reseller_id and reseller_name
         const roles = await usersCollection.find(
-            { role_id: { $in: [4] }, status: true }, // Filter to fetch role_id 1 and 2
+            { role_id: { $in: [4] }, status: true }, // Filter to fetch role_id 4
             {
                 projection: {
                     role_id: 1,
@@ -1215,34 +1310,49 @@ async function FetchSpecificUserRoleForSelection() {
                 }
             }
         ).toArray();
-        // Return the users data
-        return roles;
+
+        if (roles.length === 0) {
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'No roles found for the selection'
+            });
+        }
+
+        return res.status(200).json({
+            status: 'Success',
+            data: roles
+        });
+
     } catch (error) {
-        logger.error(`Error fetching users: ${error}`);
-        throw new Error('Error fetching users');
+        console.error('Error fetching specific user role:', error);
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal server error occurred while fetching roles'
+        });
     }
 }
 
-// FetchAssociationForSelection
-async function FetchAssociationForSelection(req) {
+// Controller FetchAssociationForSelection
+async function FetchAssociationForSelection(req, res) {
     try {
         const { client_id } = req.body;
 
+        // Validate client_id
         if (!client_id) {
-            return {
-                success: false,
-                status: 409,
+            return res.status(409).json({
+                status: 'Failed',
                 message: 'Client ID is required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
         const associationsCollection = db.collection("association_details");
         const usersCollection = db.collection("users");
 
+        // Fetch associations that the user does not have
         const userAssociationIds = await usersCollection.distinct("association_id");
 
-        const resellers = await associationsCollection.find(
+        const associations = await associationsCollection.find(
             {
                 status: true,
                 client_id: client_id,
@@ -1257,20 +1367,29 @@ async function FetchAssociationForSelection(req) {
             }
         ).toArray();
 
-        return {
-            success: true,
-            result: resellers
-        };
+        if (associations.length === 0) {
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'No associations found for the provided client ID'
+            });
+        }
+
+        return res.status(200).json({
+            status: 'Success',
+            data: associations
+        });
 
     } catch (error) {
         console.error('Error in FetchAssociationForSelection controller:', error);
-        logger.error(error);
-        throw new Error('Database query failed while fetching association details');
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal server error occurred while fetching association details'
+        });
     }
 }
 
-//CreateUser
-async function CreateUser(req) {
+// Controller CreateUser
+async function CreateUser(req, res) {
     try {
         const {
             role_id,
@@ -1284,27 +1403,41 @@ async function CreateUser(req) {
             created_by
         } = req.body;
 
+        // Validate required fields
         if (!username || !role_id || !email_id || !password || !created_by || !reseller_id || !client_id || !association_id) {
-            return { success: false, status: 400, message: 'Username, Role ID, Email, Password, Created By, Reseller ID, Client ID, and Association ID are required' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'Username, Role ID, Email, Password, Created By, Reseller ID, Client ID, and Association ID are required'
+            });
         }
 
         const db = await database.connectToDatabase();
         const Users = db.collection("users");
         const UserRole = db.collection("user_roles");
 
+        // Check if the role_id exists
         const existingRole = await UserRole.findOne({ role_id });
         if (!existingRole) {
-            return { success: false, status: 400, message: 'Invalid Role ID' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'Invalid Role ID'
+            });
         }
 
+        // Check for duplicate email under the same role
         const duplicateEmailWithRole = await Users.findOne({ role_id, email_id });
         if (duplicateEmailWithRole) {
-            return { success: false, status: 409, message: 'This email is already registered under the same role' };
+            return res.status(409).json({
+                status: 'Failed',
+                message: 'This email is already registered under the same role'
+            });
         }
 
+        // Generate new user_id based on the last user
         const lastUser = await Users.find().sort({ user_id: -1 }).limit(1).toArray();
         const newUserId = lastUser.length > 0 ? lastUser[0].user_id + 1 : 1;
 
+        // Insert the new user data
         const insertResult = await Users.insertOne({
             role_id,
             reseller_id,
@@ -1332,39 +1465,52 @@ async function CreateUser(req) {
         });
 
         if (insertResult.insertedId) {
-            return { success: true };
+            return res.status(200).json({
+                status: 'Success',
+                message: 'New user created successfully'
+            });
         } else {
-            return { success: false, status: 500, message: 'User creation failed' };
+            return res.status(500).json({
+                status: 'Failed',
+                message: 'User creation failed'
+            });
         }
 
     } catch (error) {
         console.error('Controller Error in CreateUser:', error);
-        logger.error(error);
-        return { success: false, status: 500, message: 'Internal Server Error' };
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal Server Error'
+        });
     }
 }
 
-// Update User
-async function UpdateUser(req) {
+// Controller UpdateUser
+async function UpdateUser(req, res) {
     try {
         const { user_id, username, phone_no, password, wallet_bal, modified_by, status } = req.body;
 
+        // Validate required fields
         if (!user_id || !username || !password || !modified_by) {
-            return {
-                success: false,
-                status: 400,
+            return res.status(400).json({
+                status: 'Failed',
                 message: 'User ID, Username, Password, and Modified By are required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
         const Users = db.collection("users");
 
+        // Check if the user exists
         const existingUser = await Users.findOne({ user_id });
         if (!existingUser) {
-            return { success: false, status: 404, message: 'User not found' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'User not found'
+            });
         }
 
+        // Update user details
         const updateResult = await Users.updateOne(
             { user_id },
             {
@@ -1381,21 +1527,30 @@ async function UpdateUser(req) {
         );
 
         if (updateResult.matchedCount === 0) {
-            return { success: false, status: 500, message: 'Failed to update user' };
+            return res.status(500).json({
+                status: 'Failed',
+                message: 'Failed to update user'
+            });
         }
 
-        return { success: true };
+        // Return success response
+        return res.status(200).json({
+            status: 'Success',
+            message: 'User updated successfully'
+        });
 
     } catch (error) {
         console.error('Controller Error in UpdateUser:', error);
-        logger.error(error);
-        return { success: false, status: 500, message: 'Internal Server Error' };
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal Server Error'
+        });
     }
 }
 
 // 6.Withdrawal
-// saveUserBankDetails
-async function saveUserBankDetails(req) {
+// Controller saveUserBankDetails
+async function saveUserBankDetails(req, res) {
     try {
         const {
             accountHolderName,
@@ -1408,7 +1563,10 @@ async function saveUserBankDetails(req) {
 
         // Validate the input
         if (!accountHolderName || !bankName || !accountNumber || !ifscNumber || !created_by || !user_id) {
-            return { status: 400, message: 'All bank details are required' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'All bank details are required'
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -1416,16 +1574,21 @@ async function saveUserBankDetails(req) {
         const usersCollection = db.collection("users");
 
         // Check if the user exists
-        const existingUser = await usersCollection.findOne({ user_id: user_id });
+        const existingUser = await usersCollection.findOne({ user_id });
         if (!existingUser) {
-            return { status: 404, message: 'User not found' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'User not found'
+            });
         }
 
         // Check if bank details already exist for the user
         const existingUserBankDetails = await BankDetails.findOne({ user_id });
-
         if (existingUserBankDetails) {
-            return { status: 400, message: 'User already has bank details registered' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'User already has bank details registered'
+            });
         }
 
         // Insert new bank details
@@ -1442,22 +1605,30 @@ async function saveUserBankDetails(req) {
             status: true
         });
 
-        return { status: 201, message: 'Bank details saved successfully' };
+        return res.status(201).json({
+            status: 'Success',
+            message: 'Bank details saved successfully'
+        });
 
     } catch (error) {
         console.error('Controller Error in saveUserBankDetails:', error);
-        logger.error(error);
-        return { status: 500, message: 'Internal Server Error' };
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal Server Error'
+        });
     }
 }
 
-// fetchUserBankDetails
-async function fetchUserBankDetails(req) {
+// Controller fetchUserBankDetails
+async function fetchUserBankDetails(req, res) {
     try {
         const { user_id } = req.body;
 
         if (!user_id) {
-            return { status: 400, message: 'User ID is required' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'User ID is required'
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -1467,31 +1638,45 @@ async function fetchUserBankDetails(req) {
         const user = await Users.findOne({ user_id });
 
         if (!user) {
-            return { status: 404, message: 'No user found' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'No user found'
+            });
         }
 
         const bankDetails = await BankDetails.findOne({ user_id });
 
         if (!bankDetails) {
-            return { status: 404, message: 'No bank details found for this user' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'No bank details found for this user'
+            });
         }
 
-        return { status: 200, data: bankDetails };
+        return res.status(200).json({
+            status: 'Success',
+            data: bankDetails
+        });
 
     } catch (error) {
         console.error('Controller Error in fetchUserBankDetails:', error);
-        logger.error(error);
-        return { status: 500, message: 'Internal Server Error' };
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal Server Error'
+        });
     }
 }
 
-// updateUserBankDetailsconst 
-async function updateUserBankDetails(req) {
+// Controller updateUserBankDetails
+async function updateUserBankDetails(req, res) {
     try {
         const { _id, user_id, accountHolderName, bankName, accountNumber, ifscNumber, modified_by } = req.body;
 
         if (!_id || !user_id || !accountNumber) {
-            return { status: 400, message: 'User ID, Account Number, and Bank ID are required' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'User ID, Account Number, and Bank ID are required'
+            });
         }
 
         const objectId = new ObjectId(_id);
@@ -1502,12 +1687,18 @@ async function updateUserBankDetails(req) {
 
         const existingUser = await Users.findOne({ user_id });
         if (!existingUser) {
-            return { status: 404, message: 'User not found' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'User not found'
+            });
         }
 
         const existingBankDetails = await BankDetails.findOne({ _id: objectId });
         if (!existingBankDetails) {
-            return { status: 404, message: 'Bank details not found' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'Bank details not found'
+            });
         }
 
         const updateFields = {
@@ -1525,21 +1716,36 @@ async function updateUserBankDetails(req) {
         );
 
         if (result.modifiedCount === 0) {
-            return { status: 400, message: 'No changes made to bank details' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'No changes made to bank details'
+            });
         }
 
-        return { status: 200, message: 'Bank details updated successfully' };
+        return res.status(200).json({
+            status: 'Success',
+            message: 'Bank details updated successfully'
+        });
 
     } catch (error) {
         console.error('Controller Error in updateUserBankDetails:', error);
-        logger.error(error);
-        return { status: 500, message: 'Internal Server Error' };
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal Server Error'
+        });
     }
 }
 
 // Function to ApplyWithdrawal
-async function ApplyWithdrawal(user_id, withdrawalAmount, accountHolderName, accountNumber, bankName, withdrawal_req_by, ifscNumber) {
+const ApplyWithdrawal = async (req, res) => {
+    const { user_id, withdrawalAmount, accountHolderName, accountNumber, bankName, withdrawal_req_by, ifscNumber } = req.body;
+
     try {
+        // Validate required fields
+        if (!user_id || !withdrawalAmount || !accountHolderName || !accountNumber || !bankName || !withdrawal_req_by || !ifscNumber) {
+            return res.status(400).json({ status: 'Failed', message: 'Missing required fields' });
+        }
+
         const db = await database.connectToDatabase();
         const usersCollection = db.collection("users");
         const clientCollection = db.collection("client_details");
@@ -1548,25 +1754,25 @@ async function ApplyWithdrawal(user_id, withdrawalAmount, accountHolderName, acc
 
         // Check if user exists
         const user = await usersCollection.findOne({ user_id });
-        if (!user) return { status: 'Failed', message: 'User not found' };
+        if (!user) return res.status(404).json({ status: 'Failed', message: 'User not found' });
 
         // Check if client exists
         const client = await clientCollection.findOne({ client_id: user.client_id });
-        if (!client) return { status: 'Failed', message: 'Client not found' };
+        if (!client) return res.status(404).json({ status: 'Failed', message: 'Client not found' });
 
         // Check if bank details exist
         const bankDetails = await bankDetailsCollection.findOne({ user_id });
-        if (!bankDetails) return { status: 'Failed', message: 'No bank details found for this user' };
+        if (!bankDetails) return res.status(404).json({ status: 'Failed', message: 'No bank details found for this user' });
 
         // Check if the user has any pending or in-progress withdrawal requests
         const existingWithdrawals = await withdrawalCollection.find({ user_id }).toArray();
         const hasPendingWithdrawal = existingWithdrawals.some(w => w.withdrawal_approved_status !== "Rejected" && w.withdrawal_approved_status !== "Completed");
 
         if (hasPendingWithdrawal) {
-            return {
+            return res.status(400).json({
                 status: 'Failed',
                 message: 'Withdrawal already in process or pending. Request again after payment.'
-            };
+            });
         }
 
         // Validate withdrawal amount and commission (2% deduction)
@@ -1574,7 +1780,7 @@ async function ApplyWithdrawal(user_id, withdrawalAmount, accountHolderName, acc
         const totalAmountAfterCommission = withdrawalAmount - commissionAmount;
 
         if (totalAmountAfterCommission <= 0) {
-            return { status: 'Failed', message: 'Invalid withdrawal amount after commission deduction.' };
+            return res.status(400).json({ status: 'Failed', message: 'Invalid withdrawal amount after commission deduction.' });
         }
 
         // Create withdrawal request
@@ -1598,16 +1804,24 @@ async function ApplyWithdrawal(user_id, withdrawalAmount, accountHolderName, acc
 
         await withdrawalCollection.insertOne(withdrawalData);
 
-        return { status: 'Success', message: 'Withdrawal request submitted successfully. Your payment will be processed soon.' };
+        return res.status(200).json({ status: 'Success', message: 'Withdrawal request submitted successfully. Your payment will be processed soon.' });
+
     } catch (error) {
         console.error('Error processing withdrawal request:', error);
-        return { status: 'Failed', message: 'Error processing withdrawal request' };
+        return res.status(500).json({ status: 'Failed', message: 'Error processing withdrawal request' });
     }
-}
+};
 
 // Function to fetch payment request details
-async function FetchPaymentRequest(user_id) {
+const FetchPaymentRequest = async (req, res) => {
+    const { user_id } = req.body; // Get user_id from request body
+
     try {
+        // Validate required fields
+        if (!user_id) {
+            return res.status(400).json({ status: 'Failed', message: 'user_id is required' });
+        }
+
         const db = await database.connectToDatabase();
         const usersCollection = db.collection("users");
         const clientCollection = db.collection("client_details");
@@ -1615,7 +1829,7 @@ async function FetchPaymentRequest(user_id) {
 
         // Fetch user details
         const user = await usersCollection.findOne({ user_id });
-        if (!user) return { status: 'Failed', message: 'User not found' };
+        if (!user) return res.status(404).json({ status: 'Failed', message: 'User not found' });
 
         // If user has a client_id, fetch client details
         let clientData = null;
@@ -1627,41 +1841,49 @@ async function FetchPaymentRequest(user_id) {
         const withdrawalDetails = await withdrawalCollection.find({ user_id }).toArray();
 
         // Return all the fetched data
-        return {
+        return res.status(200).json({
             status: 'Success',
             user,
             clientData,
             withdrawalDetails
-        };
+        });
+
     } catch (error) {
-        console.error(`Error fetching payment request details: ${error}`);
-        return { status: 'Failed', message: 'Error fetching payment request details' };
+        console.error('Error in FetchPaymentRequest:', error);
+        return res.status(500).json({ status: 'Failed', message: 'Error fetching payment request details' });
     }
-}
+};
 
 // Function to fetch payment request details with unread notification count
-async function FetchPaymentNotification(user_id) {
+const FetchPaymentNotification = async (req, res) => {
+    const { user_id } = req.body; // Get user_id from request body
+
     try {
+        // Validate required fields
+        if (!user_id) {
+            return res.status(400).json({ status: 'Failed', message: 'user_id is required' });
+        }
+
         const db = await database.connectToDatabase();
         const withdrawalCollection = db.collection("withdrawal_details");
         const usersCollection = db.collection("users");
 
         // Ensure user_id is a number (if stored as a number in DB)
         if (typeof user_id !== "number") {
-            return { status: 'Failed', message: 'Invalid user_id' };
+            return res.status(400).json({ status: 'Failed', message: 'Invalid user_id' });
         }
 
         // Fetch user details
         const user = await usersCollection.findOne({ user_id });
         if (!user) {
-            return { status: 'Failed', message: 'User not found' };
+            return res.status(404).json({ status: 'Failed', message: 'User not found' });
         }
 
         // Fetch all withdrawal details related to user_id
         const withdrawalDetails = await withdrawalCollection.find({ user_id }).toArray();
 
         if (withdrawalDetails.length === 0) {
-            return { status: 'Failed', message: 'No withdrawal requests found' };
+            return res.status(404).json({ status: 'Failed', message: 'No withdrawal requests found' });
         }
 
         // Count unread notifications
@@ -1689,16 +1911,28 @@ async function FetchPaymentNotification(user_id) {
                 withdrawal_notification,
             };
         }));
-        return results;
+
+        return res.status(200).json({
+            status: 'Success',
+            data: results
+        });
+
     } catch (error) {
         console.error('Error fetching payment notification:', error);
-        return { status: 'Failed', message: 'Error fetching payment notification' };
+        return res.status(500).json({ status: 'Failed', message: 'Error fetching payment notification' });
     }
-}
+};
 
 // Function to MarkNotificationRead
-async function MarkNotificationRead(_id, rca_admin_notification_status) {
+const MarkNotificationRead = async (req, res) => {
+    const { _id, rca_admin_notification_status } = req.body;
+
     try {
+        // Validate required fields
+        if (!_id || !rca_admin_notification_status) {
+            return res.status(400).json({ status: 'Failed', message: 'Missing required fields' });
+        }
+
         // Connect to the database
         const db = await database.connectToDatabase();
         const withdrawalCollection = db.collection("withdrawal_details");
@@ -1711,7 +1945,7 @@ async function MarkNotificationRead(_id, rca_admin_notification_status) {
 
         // Check if it's already marked as "read"
         if (withdrawal.rca_admin_notification_status === "read") {
-            return { status: 'Failed', message: 'Notification already marked as read' };
+            return res.status(400).json({ status: 'Failed', message: 'Notification already marked as read' });
         }
 
         // Prepare update fields
@@ -1727,91 +1961,27 @@ async function MarkNotificationRead(_id, rca_admin_notification_status) {
 
         // Check if the update was successful
         if (updateResult.modifiedCount > 0) {
-            return { status: 'Success', message: 'Mark notification read successfully' };
+            return res.status(200).json({ status: 'Success', message: 'Notification marked as read successfully' });
         } else {
-            return { status: 'Failed', message: 'No mark notification read failed' };
+            return res.status(400).json({ status: 'Failed', message: 'Failed to mark notification read' });
         }
 
     } catch (error) {
         console.error('Error in MarkNotificationRead function:', error);
-        return { status: 'Failed', message: `Internal server error: ${error.message}` };
+        return res.status(500).json({ status: 'Failed', message: `Internal server error: ${error.message}` });
     }
-}
-
-// Route to fetch specific charger revenue list
-async function FetchSpecificChargerRevenue(client_id) {
-    try {
-        const db = await database.connectToDatabase();
-        if (!db) {
-            return { status: "Error", message: "Database connection failed" };
-        }
-
-        const chargerCollection = db.collection("charger_details");
-        const sessionCollection = db.collection("device_session_details");
-        const associationCollection = db.collection("association_details");
-
-        // Convert client_id to Integer (to match MongoDB data type)
-        const clientId = parseInt(client_id);
-
-        // Fetch chargers assigned to this client
-        const chargers = await chargerCollection.find({ assigned_client_id: clientId }).toArray();
-        console.log("Chargers found:", chargers);
-
-        if (!chargers.length) {
-            return { status: "Success", message: "No chargers found for this client", revenueData: [], TotalChargerRevenue: "0.000" };
-        }
-
-        let TotalChargerRevenue = 0; // Initialize total revenue
-
-        const revenueData = await Promise.all(chargers.map(async (charger) => {
-            // Fetch association email based on assigned_association_id
-            const association = await associationCollection.findOne({ association_id: charger.assigned_association_id });
-            const association_email_id = association?.association_email_id || null;
-
-            // Fetch session revenue details
-            const sessions = await sessionCollection.find({
-                charger_id: charger.charger_id,
-                start_time: { $ne: null },
-                stop_time: { $ne: null }
-            }).toArray();
-
-            // Calculate revenue for this charger
-            const Revenue = sessions.reduce((sum, session) => {
-                return sum + parseFloat(session.client_commission || 0);
-            }, 0);
-
-            // Add this charger's revenue to total revenue
-            TotalChargerRevenue += Revenue;
-
-            return {
-                charger_id: charger.charger_id,
-                association_email_id,
-                Revenue: Revenue.toFixed(3)
-            };
-        }));
-
-        return {
-            status: "Success",
-            revenueData,
-            TotalChargerRevenue: TotalChargerRevenue.toFixed(3) // Return total revenue across all chargers
-        };
-    } catch (error) {
-        console.error(`Error fetching specific charger revenue: ${error.message}`);
-        return { status: "Error", message: "Error fetching specific charger revenue" };
-    }
-}
+};
 
 // FetchCommissionAmtClient
-async function FetchCommissionAmtClient(req) {
+const FetchCommissionAmtClient = async (req, res) => {
     const { user_id } = req.body;
 
     try {
         if (!user_id) {
-            return {
-                success: false,
-                status: 400,
+            return res.status(400).json({
+                status: 'Failed',
                 message: 'User ID is required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -1821,73 +1991,86 @@ async function FetchCommissionAmtClient(req) {
         const user = await usersCollection.findOne({ user_id });
 
         if (!user) {
-            return {
-                success: false,
-                status: 404,
+            return res.status(404).json({
+                status: 'Failed',
                 message: 'User not found'
-            };
+            });
         }
 
         const clientId = user.client_id;
 
         if (!clientId) {
-            return {
-                success: false,
-                status: 404,
+            return res.status(404).json({
+                status: 'Failed',
                 message: 'Client ID not found for this user'
-            };
+            });
         }
 
         const client = await clientsCollection.findOne({ client_id: clientId });
 
         if (!client) {
-            return {
-                success: false,
-                status: 404,
+            return res.status(404).json({
+                status: 'Failed',
                 message: 'Client not found'
-            };
+            });
         }
 
-        return {
-            success: true,
+        return res.status(200).json({
+            status: 'Success',
             data: client.client_wallet || 0
-        };
+        });
 
     } catch (error) {
-        logger.error(`Error in FetchCommissionAmtClient controller: ${error}`);
-        throw new Error('Database error while fetching client commission amount');
+        console.error(`Error in FetchCommissionAmtClient controller: ${error}`);
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Database error while fetching client commission amount'
+        });
     }
-}
+};
 
 // 7.Manage Device & Revenue Report Controller
 // FetchReportDevice
-async function FetchReportDevice(req) {
+const FetchReportDevice = async (req, res) => {
     try {
         const { client_id } = req.body;
 
         if (!client_id) {
-            return { success: false, message: "Client ID is required." };
+            return res.status(400).json({
+                status: 'Failed',
+                message: "Client ID is required."
+            });
         }
 
         const db = await database.connectToDatabase();
         const devicesCollection = db.collection("charger_details");
 
-        // Fetch chargers that belong to the specified reseller_id
+        // Fetch chargers that belong to the specified client_id
         const chargers = await devicesCollection.find({ assigned_client_id: client_id }).toArray();
 
-        // Validation: Check if chargers exist for the reseller_id
+        // Validation: Check if chargers exist for the client_id
         if (chargers.length === 0) {
-            return { success: false, message: "No chargers found for this Client ID." };
+            return res.status(404).json({
+                status: 'Failed',
+                message: "No chargers found for this Client ID."
+            });
         }
 
-        return chargers;
+        return res.status(200).json({
+            status: 'Success',
+            data: chargers
+        });
 
     } catch (error) {
         console.error(`Error fetching chargers: ${error}`);
-        return { success: false, message: "Failed to fetch chargers." };
+        return res.status(500).json({
+            status: 'Failed',
+            message: "Failed to fetch chargers."
+        });
     }
-}
+};
 
+// Validation fo device reports
 function validateAndConvertDates(from_date, to_date) {
     // Regular expression to match YYYY-MM-DD format
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -1912,15 +2095,17 @@ function validateAndConvertDates(from_date, to_date) {
     return { fromDate, toDate, status: 200 };
 }
 
-// downloadDeviceReport
-async function downloadDeviceReport(req) {
+// DeviceReport
+async function DeviceReport(req, res) {
     try {
         const { from_date, to_date, device_id } = req.body;
 
         // Input validation
         if (!from_date || !to_date || !device_id) {
-            console.log('Missing required parameters in request');
-            return { status: 400, message: 'from_date, to_date, and device_id are required!' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'from_date, to_date, and device_id are required!'
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -1928,7 +2113,10 @@ async function downloadDeviceReport(req) {
 
         const validateDate = validateAndConvertDates(from_date, to_date);
         if (validateDate.status !== 200) {
-            return { status: validateDate.status, message: validateDate.message };
+            return res.status(validateDate.status).json({
+                status: 'Failed',
+                message: validateDate.message
+            });
         }
 
         // Fetch session details
@@ -1941,7 +2129,10 @@ async function downloadDeviceReport(req) {
         }).sort({ stop_time: -1 }).toArray();
 
         if (!sessions || sessions.length === 0) {
-            return { status: 404, message: 'No device report found for the given period and device ID!' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'No device report found for the given period and device ID!'
+            });
         }
 
         // Calculating totals
@@ -1964,16 +2155,61 @@ async function downloadDeviceReport(req) {
         };
 
         console.log('Device Report data fetched successfully');
-        return { status: 200, data: responseData };
+        return res.status(200).json({
+            status: 'Success',
+            data: responseData
+        });
 
     } catch (error) {
-        console.error('Error in downloadDeviceReport:', error);
-        return { status: 500, message: 'Internal Server Error' };
+        console.error('Error in DeviceReport:', error);
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal Server Error'
+        });
     }
 }
 
 // Route to fetch specific charger revenue list
-async function FetchSpecificChargerRevenue(client_id) {
+async function FetchSpecificChargerRevenue(req, res) {
+    try {
+        const { client_id } = req.body;
+
+        // Validate client_id input
+        if (!client_id) {
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'client_id is required'
+            });
+        }
+
+        // Fetch both revenueData and TotalChargerRevenue
+        const { revenueData, TotalChargerRevenue, status, message } = await fetchRevenueData(client_id);
+
+        if (status !== "Success") {
+            return res.status(500).json({
+                status: 'Failed',
+                message: message || 'Failed to fetch specific charger revenue'
+            });
+        }
+
+        // Successful response with data
+        res.status(200).json({
+            status: "Success",
+            revenueData,
+            TotalChargerRevenue
+        });
+
+    } catch (error) {
+        console.error('Error in FetchSpecificChargerRevenue route:', error);
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Unexpected server error'
+        });
+    }
+}
+
+// Helper function to fetch the revenue data
+async function fetchRevenueData(client_id) {
     try {
         const db = await database.connectToDatabase();
         if (!db) {
@@ -1989,7 +2225,6 @@ async function FetchSpecificChargerRevenue(client_id) {
 
         // Fetch chargers assigned to this client
         const chargers = await chargerCollection.find({ assigned_client_id: clientId }).toArray();
-        console.log("Chargers found:", chargers);
 
         if (!chargers.length) {
             return { status: "Success", message: "No chargers found for this client", revenueData: [], TotalChargerRevenue: "0.000" };
@@ -2029,6 +2264,7 @@ async function FetchSpecificChargerRevenue(client_id) {
             revenueData,
             TotalChargerRevenue: TotalChargerRevenue.toFixed(3) // Return total revenue across all chargers
         };
+
     } catch (error) {
         console.error(`Error fetching specific charger revenue: ${error.message}`);
         return { status: "Error", message: "Error fetching specific charger revenue" };
@@ -2036,11 +2272,21 @@ async function FetchSpecificChargerRevenue(client_id) {
 }
 
 // Route to fetch charger list with all cost with revenue
-async function FetchChargerListWithAllCostWithRevenue(client_id) {
+async function FetchChargerListWithAllCostWithRevenue(req, res) {
     try {
+        const { client_id } = req.body;
+
+        // Validate client_id input
+        if (!client_id) {
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'client_id is required'
+            });
+        }
+
         const db = await database.connectToDatabase();
         if (!db) {
-            return { status: "Error", message: "Database connection failed" };
+            return res.status(500).json({ status: "Error", message: "Database connection failed" });
         }
 
         const chargerCollection = db.collection("charger_details");
@@ -2052,10 +2298,13 @@ async function FetchChargerListWithAllCostWithRevenue(client_id) {
 
         // Fetch chargers assigned to this client
         const chargers = await chargerCollection.find({ assigned_client_id: clientId }).toArray();
-        console.log("Chargers found:", chargers);
 
         if (!chargers.length) {
-            return { status: "Success", message: "No chargers found for this client", revenueData: [], TotalChargerRevenue: "0.000" };
+            return res.status(404).json({
+                status: "Success",
+                message: "No chargers found for this client",
+                revenueData: []
+            });
         }
 
         const revenueData = await Promise.all(chargers.map(async (charger) => {
@@ -2081,26 +2330,31 @@ async function FetchChargerListWithAllCostWithRevenue(client_id) {
             };
         }));
 
-        return {
+        // Success response
+        return res.status(200).json({
             status: "Success",
             revenueData,
-        };
+        });
+
     } catch (error) {
-        console.error(`Error fetching specific charger revenue: ${error.message}`);
-        return { status: "Error", message: "Error fetching specific charger revenue" };
+        console.error(`Error in FetchChargerListWithAllCostWithRevenue: ${error.message}`);
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Failed to fetch charger list with all cost and revenue'
+        });
     }
 }
 
 // 8.Profile Controller
 //FetchUserProfile
-async function FetchUserProfile(req) {
+async function FetchUserProfile(req, res) {
     const { user_id } = req.body;
 
     try {
         const db = await database.connectToDatabase();
         const usersCollection = db.collection("users");
 
-        // Aggregation pipeline to join users and reseller_details collections
+        // Aggregation pipeline to join users and client_details collections
         const result = await usersCollection.aggregate([
             { $match: { user_id: parseInt(user_id) } },
             {
@@ -2137,27 +2391,40 @@ async function FetchUserProfile(req) {
         ]).toArray();
 
         if (result.length === 0) {
-            return { status: 404, message: 'User not found' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'User not found'
+            });
         }
 
         const userProfile = result[0];
 
-        return { status: 200, data: userProfile };
+        // Success response
+        return res.status(200).json({
+            status: 'Success',
+            data: userProfile
+        });
 
     } catch (error) {
-        logger.error(`Error fetching user: ${error}`);
-        return { status: 500, message: 'Internal Server Error' };
+        console.error('Error in FetchUserProfile:', error);
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal Server Error'
+        });
     }
 }
 
-// Controller UpdateUserProfile
-async function UpdateUserProfile(req) {
+// Controller Update User Profile
+async function UpdateUserProfile(req, res) {
     const { user_id, username, phone_no, password } = req.body;
 
     try {
         // Validate the input
         if (!user_id || !username || !phone_no || !password) {
-            return { status: 'Failed', code: 400, message: 'User ID, Username, Phone Number, and Password are required' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'User ID, Username, Phone Number, and Password are required'
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -2166,7 +2433,10 @@ async function UpdateUserProfile(req) {
         // Check if user exists
         const existingUser = await usersCollection.findOne({ user_id });
         if (!existingUser) {
-            return { status: 'Failed', code: 404, message: 'User not found' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'User not found'
+            });
         }
 
         // Update user
@@ -2184,26 +2454,37 @@ async function UpdateUserProfile(req) {
         );
 
         if (updateResult.matchedCount === 0) {
-            return { status: 'Failed', code: 500, message: 'Failed to update user profile' };
+            return res.status(500).json({
+                status: 'Failed',
+                message: 'Failed to update user profile'
+            });
         }
 
-        return { status: 'Success' };
+        return res.status(200).json({
+            status: 'Success',
+            message: 'User profile updated successfully'
+        });
 
     } catch (error) {
         console.error('Controller Error:', error);
-        logger.error(`Error updating user profile: ${error}`);
-        return { status: 'Failed', code: 500, message: 'Internal Server Error' };
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal Server Error'
+        });
     }
 }
 
-//UpdateClientProfile
-async function UpdateClientProfile(req) {
+// Controller Update Client Profile
+async function UpdateClientProfile(req, res) {
     const { client_id, modified_by, client_phone_no, client_address } = req.body;
 
     try {
         // Validate required fields
         if (!client_id || !modified_by || !client_phone_no || !client_address) {
-            return { status: 'Failed', code: 400, message: 'Client ID, modified_by, phone number, and client address are required' };
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'Client ID, modified_by, phone number, and client address are required'
+            });
         }
 
         const db = await database.connectToDatabase();
@@ -2222,27 +2503,38 @@ async function UpdateClientProfile(req) {
         );
 
         if (updateResult.matchedCount === 0) {
-            return { status: 'Failed', code: 404, message: 'Client not found' };
+            return res.status(404).json({
+                status: 'Failed',
+                message: 'Client not found'
+            });
         }
 
         if (updateResult.modifiedCount === 0) {
-            return { status: 'Failed', code: 500, message: 'Failed to update client profile' };
+            return res.status(500).json({
+                status: 'Failed',
+                message: 'Failed to update client profile'
+            });
         }
 
-        return { status: 'Success' };
+        return res.status(200).json({
+            status: 'Success',
+            message: 'Client profile updated successfully'
+        });
 
     } catch (error) {
         console.error('Controller Error:', error);
-        logger.error(`Error updating client profile: ${error}`);
-        return { status: 'Failed', code: 500, message: 'Internal Server Error' };
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Internal Server Error'
+        });
     }
 }
 
 module.exports = {
     authenticate, FetchTotalCharger, FetchOnlineCharger, FetchOfflineCharger, FetchFaultsCharger, FetchChargerTotalEnergy, FetchTotalChargersSession, FetchTotalUsers,
     FetchAllocatedCharger, DeActivateOrActivateCharger, FetchUnAllocatedCharger, FetchAssociationUserToAssginCharger, FetchUnAllocatedChargerToAssgin, AssginChargerToAssociation,
-    FetchAssociationUser, FetchChargerDetailsWithSession, CreateAssociationUser, UpdateAssociationUser, updateCommission,
-    FetchUser, FetchSpecificUserRoleForSelection, FetchAssociationForSelection, CreateUser, UpdateUser,
+    FetchAssociationUser, FetchChargerDetailsWithSession, CreateAssociationUser, UpdateAssociationUser, UpdateClientCommission,
+    FetchUsers, FetchSpecificUserRoleForSelection, FetchAssociationForSelection, CreateUser, UpdateUser,
     saveUserBankDetails, fetchUserBankDetails, updateUserBankDetails, ApplyWithdrawal, FetchPaymentRequest, FetchPaymentNotification, MarkNotificationRead, FetchCommissionAmtClient, 
-    FetchReportDevice, downloadDeviceReport, FetchSpecificChargerRevenue, FetchChargerListWithAllCostWithRevenue, FetchUserProfile, UpdateUserProfile, UpdateClientProfile,
+    FetchReportDevice, DeviceReport, FetchSpecificChargerRevenue, FetchChargerListWithAllCostWithRevenue, FetchUserProfile, UpdateUserProfile, UpdateClientProfile,
 };

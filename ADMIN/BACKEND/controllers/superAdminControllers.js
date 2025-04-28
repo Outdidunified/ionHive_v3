@@ -21,7 +21,7 @@ const authenticate = async (req, res) => {
 
         // Check if user exists with the given email
         if (!user) {
-            return res.status(401).json({ message: 'Invalid email address' });
+            return res.status(401).json({ message: 'Invalid email address or user is deactivated' });
         }
 
         // Check if password is correct
