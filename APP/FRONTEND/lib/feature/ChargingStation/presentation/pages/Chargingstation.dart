@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ionhive/feature/ChargingStation/presentation/controllers/Chargingstation_controllers.dart';
 import 'package:ionhive/feature/ChargingStation/presentation/widgets/Chargingstationwidget.dart';
 import 'package:ionhive/feature/more/presentation/pages/help&support/presentation/pages/contact%20us.dart';
@@ -29,143 +30,246 @@ class ChargingStationPage extends StatelessWidget {
     final network = station['network'] ?? 'Unknown Network';
     final availability = station['availability'] ?? 'Unknown';
     final chargerType = station['charger_type'] ?? 'Unknown';
-    final chargerDetails = station['charger_details'] as List? ?? [];
+    final latitude = station['latitude'] ?? 0.0; // Default to 0 if not provided
+    final longitude = station['longitude'] ?? 0.0; // Default to 0 if not provided
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // Content
-          Column(
-            children: [
-              Image.asset(
-                'assets/Image/ionHive.png',
-                width: screenWidth,
-                height: screenHeight * 0.25, // 25% of screen height
-                fit: BoxFit.cover,
-              ),
-              // Header Section
-              StationHeader(
-                locationId: locationId,
-                stationAddress: stationAddress,
-                network: network,
-                chargerType: chargerType,
-                availability: availability,
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.all(screenWidth * 0.04), // 4% of screen width
-                  children: [
-                    if (chargerDetails.isNotEmpty) ...[
-                      for (int i = 0; i < chargerDetails.length; i++)
-                        ChargerCard(
-                          title: '${stationAddress} ${i + 1}',
-                          power: '${chargerDetails[i]['max_power']}W',
-                          price: '₹ ${i == 0 ? '24' : '21'}/kWh',
-                          lastUsed: '24/04/2025',
-                          sessions: i == 0 ? '1k+' : null,
-                          connectors: [
-                            ConnectorInfo(
-                              name: chargerDetails[i]['model'] ?? 'Unknown',
-                              type: chargerDetails[i]['type'] ?? 'Unknown',
-                              power: '${chargerDetails[i]['max_power'] ?? 'N/A'}W',
-                            ),
-                          ],
+      body: GetBuilder<ChargingStationController>(
+        init: controller,
+        builder: (_) => Stack(
+          children: [
+            // Content
+            Column(
+              children: [
+                Image.asset(
+                  'assets/Image/ionHive.png',
+                  width: screenWidth,
+                  height: screenHeight * 0.25,
+                  fit: BoxFit.cover,
+                ),
+                // Header Section
+                StationHeader(
+                  locationId: locationId,
+                  stationAddress: stationAddress,
+                  network: network,
+                  chargerType: chargerType,
+                  availability: availability,
+                ),
+                Divider(
+                  color: Colors.grey.shade400,
+                  thickness: screenHeight * 0.0005,
+                  height: screenHeight * 0.01,
+                  indent: screenWidth * 0.03,
+                  endIndent: screenWidth * 0.03,
+                ),
+                Expanded(
+                  child: Obx(() {
+                    print('Rebuilding IndexedStack with tab index: ${controller.selectedTabIndex.value}');
+                    return IndexedStack(
+                      index: controller.selectedTabIndex.value,
+                      children: [
+                        // Charger Tab Content
+                        Obx(() {
+                          if (controller.isLoading.value) {
+                            return const ShimmerLoading();
+                          }
+                          return ListView(
+                            padding: EdgeInsets.all(screenWidth * 0.04),
+                            children: [
+                              if (controller.chargerDetails.isNotEmpty)
+                                ...controller.chargerDetails.asMap().entries.map((entry) {
+                                  final i = entry.key;
+                                  final detail = entry.value;
+                                  return Column(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => controller.toggleChargerDetails(i),
+                                        child: ChargerCard(
+                                          title: '${detail['address']} ${i + 1}',
+                                          power: '${detail['max_power']}W',
+                                          price: '₹ ${i == 0 ? '24' : '21'}/kWh',
+                                          lastUsed: '24/04/2025',
+                                          sessions: i == 0 ? '1k+' : null,
+                                          vendor: detail['vendor'] ?? 'Unknown',
+                                          chargerId: detail['charger_id'] ?? 'N/A',
+                                          chargerType: detail['charger_type'] ?? 'N/A',
+                                          connectors: (detail['connectors'] as List<dynamic>).map((connector) {
+                                            return ConnectorInfo(
+                                              name: connector['connector_id'].toString(),
+                                              type: connector['connector_type'].toString(),
+                                              power: '${detail['max_power'] ?? 'N/A'}W',
+                                              status: connector['charger_status'] ?? ' - ',
+                                            );
+                                          }).toList(),
+                                          isExpanded: controller.expandedChargerIndex.value == i,
+                                          index: i, // Pass the index
+                                        ),
+                                      ),
+                                      SizedBox(height: screenHeight * 0.02),
+                                    ],
+                                  );
+                                })
+                              else ...[
+                                SizedBox(height: screenHeight * 0.2),
+                                Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Image.asset(
+                                        'assets/icons/saved_device.png',
+                                        width: screenWidth * 0.1,
+                                        height: screenWidth * 0.1,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(height: screenHeight * 0.02),
+                                      Text(
+                                        'There are no chargers available in this station',
+                                        style: TextStyle(
+                                          fontSize: screenWidth * 0.045,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                              SizedBox(height: screenHeight * 0.02),
+                            ],
+                          );
+                        }),
+                        // Details Tab Content (Google Map)
+                        Container(
+                          padding: EdgeInsets.all(screenWidth * 0.04),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Station Location',
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.045,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: screenHeight * 0.02),
+                              Container(
+                                height: screenHeight * 0.4,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey.shade300),
+                                  borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                                  child: GoogleMap(
+                                    initialCameraPosition: CameraPosition(
+                                      target: LatLng(latitude, longitude),
+                                      zoom: 15,
+                                    ),
+                                    markers: {
+                                      Marker(
+                                        markerId: MarkerId('station'),
+                                        position: LatLng(latitude, longitude),
+                                        infoWindow: InfoWindow(
+                                          title: stationAddress,
+                                        ),
+                                      ),
+                                    },
+                                    onMapCreated: (GoogleMapController controller) {
+                                      print('Google Map created');
+                                    },
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: screenHeight * 0.02),
+                              Text(
+                                'Address: $stationAddress',
+                                style: TextStyle(fontSize: screenWidth * 0.035),
+                              ),
+                            ],
+                          ),
                         ),
-                    ] else ...[
-                      ChargerCard(
-                        title: '${stationAddress} 1',
-                        power: '150kW',
-                        price: '₹ 24/kWh',
-                        lastUsed: '24/04/2025',
-                        sessions: '1k+',
-                        connectors: const [
-                          ConnectorInfo(name: 'Connector Gun 1', type: 'CCS-2', power: '150kW'),
-                          ConnectorInfo(name: 'Connector Gun 2', type: 'CCS-2', power: '30kW'),
-                        ],
-                      ),
-                      SizedBox(height: screenHeight * 0.02), // 2% of screen height
-                      ChargerCard(
-                        title: '${stationAddress} 2',
-                        power: '60kW',
-                        price: '₹ 21/kWh',
-                        lastUsed: '24/04/2025',
-                        connectors: const [],
-                      ),
-                    ],
-                    SizedBox(height: screenHeight * 0.02), // 2% of screen height
-                  ],
+                        // Reviews Tab Content (Disabled Navigation)
+                        Center(
+                          child: Text(
+                            'Reviews feature coming soon!',
+                            style: TextStyle(fontSize: screenWidth * 0.04, color: Colors.grey),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
                 ),
-              ),
-            ],
-          ),
-          // Back Button
-          Positioned(
-            top: screenHeight * 0.05, // 5% of screen height
-            left: screenWidth * 0.04, // 4% of screen width
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: EdgeInsets.all(screenWidth * 0.02), // 2% of screen width
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Colors.white,
-                  size: screenWidth * 0.04, // 4% of screen width
+              ],
+            ),
+            // Back Button
+            Positioned(
+              top: screenHeight * 0.05,
+              left: screenWidth * 0.04,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: EdgeInsets.all(screenWidth * 0.02),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.white,
+                    size: screenWidth * 0.04,
+                  ),
                 ),
               ),
             ),
-          ),
-          // Help Icon
-          Positioned(
-            top: screenHeight * 0.05, // 5% of screen height
-            right: screenWidth * 0.15, // 15% of screen width
-            child: GestureDetector(
-              onTap: () {
-                Get.to(() => ContactUs(), transition: Transition.rightToLeft);
-              },
-              child: Container(
-                padding: EdgeInsets.all(screenWidth * 0.02), // 2% of screen width
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Image.asset(
-                  'assets/icons/Help1.png',
-                  color: Colors.white,
-                  height: screenWidth * 0.04, // 4% of screen width
-                ),
-              ),
-            ),
-          ),
-          // More Options
-          Positioned(
-            top: screenHeight * 0.05, // 5% of screen height
-            right: screenWidth * 0.04, // 4% of screen width
-            child: GestureDetector(
-              onTapDown: (TapDownDetails details) {
-                final tapPosition = details.globalPosition;
-                controller.showMoreOptionsPopup(context, tapPosition, stationId);
-              },
-              child: Container(
-                height: screenWidth * 0.08, // 8% of screen width
-                width: screenWidth * 0.08, // 8% of screen width
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.more_vert,
-                  color: Colors.white,
-                  size: screenWidth * 0.04, // 4% of screen width
+            // Help Icon
+            Positioned(
+              top: screenHeight * 0.05,
+              right: screenWidth * 0.15,
+              child: GestureDetector(
+                onTap: () {
+                  Get.to(() => ContactUs(), transition: Transition.rightToLeft);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(screenWidth * 0.02),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Image.asset(
+                    'assets/icons/Help1.png',
+                    color: Colors.white,
+                    height: screenWidth * 0.04,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+            // More Options
+            Positioned(
+              top: screenHeight * 0.05,
+              right: screenWidth * 0.04,
+              child: GestureDetector(
+                onTapDown: (TapDownDetails details) {
+                  final tapPosition = details.globalPosition;
+                  controller.showMoreOptionsPopup(context, tapPosition, stationId);
+                },
+                child: Container(
+                  height: screenWidth * 0.08,
+                  width: screenWidth * 0.08,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.more_vert,
+                    color: Colors.white,
+                    size: screenWidth * 0.04,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
