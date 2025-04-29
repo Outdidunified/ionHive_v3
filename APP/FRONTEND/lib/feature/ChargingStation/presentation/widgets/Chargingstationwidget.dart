@@ -216,7 +216,7 @@ class StationHeader extends StatelessWidget {
                 Text(
                   '• 24 Hours',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black,
                     fontSize: screenWidth * 0.035,
                   ),
                 ),
@@ -504,13 +504,19 @@ class ChargerCard extends StatelessWidget {
                       return isVisible
                           ? Padding(
                         padding: const EdgeInsets.only(bottom: 6.0),
-                        child: _buildConnectorCard(
-                          context,
-                          title: 'Connector ${connector.name}',
-                          status: connector.status,
-                          type: connector.type,
-                          power: connector.power,
-                          width: width,
+                        child: GestureDetector(
+                          onTap: () {
+                            controller.setSelectedConnector(index, connectorIndex);
+                          },
+                          child: _buildConnectorCard(
+                            context,
+                            title: 'Connector ${connector.name}',
+                            status: connector.status,
+                            type: connector.type,
+                            power: connector.power,
+                            width: width,
+                            isSelected: controller.chargerDetails[index]['selectedConnectorIndex'] == connectorIndex,
+                          ),
                         ),
                       )
                           : const SizedBox.shrink();
@@ -528,11 +534,9 @@ class ChargerCard extends StatelessWidget {
                     onTap: () {
                       if (!controller.isToggling) {
                         controller.isToggling = true;
-                        print(
-                            'Toggling connector details for index $index (before)');
+                        print('Toggling connector details for index $index (before)');
                         controller.toggleConnectorDetails(index);
-                        print(
-                            'Toggling connector details for index $index (after), state: ${controller.expandedConnectorIndices[index]}');
+                        print('Toggling connector details for index $index (after), state: ${controller.expandedConnectorIndices[index]}');
                         Future.delayed(const Duration(milliseconds: 300), () {
                           controller.isToggling = false;
                           controller.update(['connectors', 'viewMoreButton']);
@@ -542,8 +546,7 @@ class ChargerCard extends StatelessWidget {
                     child: GetBuilder<ChargingStationController>(
                       id: 'viewMoreButton',
                       builder: (controller) {
-                        final isExpanded =
-                            controller.expandedConnectorIndices[index] ?? false;
+                        final isExpanded = controller.expandedConnectorIndices[index] ?? false;
                         return Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 8.0, horizontal: 16.0),
@@ -551,9 +554,7 @@ class ChargerCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                isExpanded
-                                    ? 'View less connectors'
-                                    : 'View more connectors',
+                                isExpanded ? 'View less connectors' : 'View more connectors',
                                 style: TextStyle(
                                   color: Colors.blue,
                                   fontSize: width * 0.035,
@@ -562,9 +563,7 @@ class ChargerCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Icon(
-                                isExpanded
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
+                                isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                                 color: Colors.blue,
                                 size: width * 0.04,
                               ),
@@ -627,6 +626,7 @@ class ChargerCard extends StatelessWidget {
         required String type,
         required String power,
         required double width,
+        bool isSelected = false,
       }) {
     final theme = Theme.of(context);
     final bool isDarkTheme = theme.brightness == Brightness.dark;
@@ -636,8 +636,8 @@ class ChargerCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
-          color: theme.dividerColor,
-          width: 0.2,
+          color: isSelected ? Colors.blue : theme.dividerColor,
+          width: isSelected ? 2.0 : 0.2,
         ),
       ),
       elevation: 0.5,
@@ -710,8 +710,7 @@ class ChargerCard extends StatelessWidget {
                     Text(
                       power,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color:
-                        theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                         fontSize: width * 0.028,
                       ),
                     ),
@@ -748,12 +747,8 @@ class ShimmerLoading extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Shimmer.fromColors(
-      baseColor: theme.brightness == Brightness.dark
-          ? Colors.grey[700]!
-          : Colors.grey[300]!,
-      highlightColor: theme.brightness == Brightness.dark
-          ? Colors.grey[600]!
-          : Colors.grey[100]!,
+      baseColor: theme.brightness == Brightness.dark ? Colors.grey[700]! : Colors.grey[300]!,
+      highlightColor: theme.brightness == Brightness.dark ? Colors.grey[600]! : Colors.grey[100]!,
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
@@ -929,96 +924,6 @@ class ShimmerLoading extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class ChargingStationPage extends StatelessWidget {
-  final ChargingStationController controller =
-  Get.put(ChargingStationController());
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    return Scaffold(
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const ShimmerLoading();
-        }
-        return ListView(
-          padding: EdgeInsets.all(screenWidth * 0.04),
-          children: [
-            StationHeader(
-              locationId: "Station 1",
-              stationAddress:
-              "67/1, KG Halli, D' Souza Layout, Ashok Nagar, Bengaluru, Karnataka 560002, India",
-              network: "Outdid",
-              chargerType: "AC",
-              availability: "Open 24/7",
-            ),
-            if (controller.chargerDetails.isNotEmpty)
-              ...controller.chargerDetails.asMap().entries.map((entry) {
-                final i = entry.key;
-                final detail = entry.value;
-                return Column(
-                  children: [
-                    ChargerCard(
-                      title: '${detail['address']} ${i + 1}',
-                      power: '${detail['max_power']}W',
-                      price: '₹ ${i == 0 ? '24' : '21'}/kWh',
-                      lastUsed: '24/04/2025',
-                      sessions: i == 0 ? '1k+' : null,
-                      vendor: detail['vendor'] ?? 'Unknown',
-                      chargerId: detail['charger_id'] ?? 'N/A',
-                      chargerType: detail['charger_type'] ?? 'N/A',
-                      connectors: (detail['connectors'] as List<dynamic>)
-                          .map((connector) {
-                        return ConnectorInfo(
-                          name: connector['connector_id'].toString(),
-                          type: connector['connector_type'].toString(),
-                          power: '${detail['max_power'] ?? 'N/A'}W',
-                          status: connector['charger_status'] ?? ' - ',
-                        );
-                      }).toList(),
-                      isExpanded: controller.expandedChargerIndex.value == i,
-                      index: i,
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                  ],
-                );
-              })
-            else ...[
-              SizedBox(height: screenHeight * 0.2),
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/icons/saved_device.png',
-                      width: screenWidth * 0.1,
-                      height: screenWidth * 0.1,
-                      color: Colors.grey,
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                    Text(
-                      'There are no chargers available in this station',
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.045,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            SizedBox(height: screenHeight * 0.02),
-          ],
-        );
-      }),
     );
   }
 }

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/feature/landing_page.dart';
 import 'package:ionhive/feature/landing_page_controller.dart';
+import 'package:ionhive/feature/ChargingStation/presentation/controllers/Chargingstation_controllers.dart';
+import 'package:ionhive/feature/Chargingpage/presentation/pages/Chargingpage.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/presentation/pages/Saved_Device/presentation/controllers/saved_device_controllers.dart';
 import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class SavedDevicepage extends StatelessWidget {
   final int userId;
@@ -23,7 +26,11 @@ class SavedDevicepage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bool isDarkTheme = theme.brightness == Brightness.dark;
-    final SavedDeviceControllers controller = Get.put(SavedDeviceControllers());
+    final SavedDeviceControllers savedController = Get.put(SavedDeviceControllers());
+    final ChargingStationController chargingController = Get.put(ChargingStationController());
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
@@ -47,130 +54,202 @@ class SavedDevicepage extends StatelessWidget {
         ),
       ),
       backgroundColor: isDarkTheme ? const Color(0xFF121212) : Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Obx(() {
-          if (controller.isLoading.value) {
-            return const LoadingIndicator();
-          } else if (controller.errorMessage.value.isNotEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/icons/error-history.png',
-                    width: 200,
-                    height: 200,
-                    color: isDarkTheme ? Colors.white : null,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Obx(() {
+              if (savedController.isLoading.value) {
+                return const LoadingIndicator();
+              } else if (savedController.errorMessage.value.isNotEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: isDarkTheme ? Colors.white70 : Colors.grey,
-                        size: 14,
+                      Image.asset(
+                        'assets/icons/error-history.png',
+                        width: 200,
+                        height: 200,
+                        color: isDarkTheme ? Colors.white : null,
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: isDarkTheme ? Colors.white70 : Colors.grey,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Couldn't reach server",
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontSize: 12,
+                              color: isDarkTheme ? Colors.white70 : Colors.grey[700],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              } else if (savedController.savedDevices.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/icons/save_device.png',
+                        width: screenWidth * 0.3,
+                        height: screenWidth * 0.3,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.devices_other,
+                            size: 60,
+                            color: isDarkTheme ? Colors.white70 : Colors.grey[600],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
                       Text(
-                        "Couldn't reach server",
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontSize: 12,
-                          color:
-                              isDarkTheme ? Colors.white70 : Colors.grey[700],
+                        'No Saved Devices',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isDarkTheme ? Colors.white : Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Text(
+                          'You haven’t saved any devices yet. Start exploring devices and save your favorites to access them quickly!',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isDarkTheme ? Colors.white70 : Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.to(
+                                () => LandingPage(),
+                            transition: Transition.rightToLeft,
+                            duration: const Duration(milliseconds: 300),
+                          );
+                          final LandingPageController landingController =
+                          Get.find<LandingPageController>();
+                          landingController.clearPageIndex();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                        ),
+                        child: Text(
+                          'Explore Devices',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-            );
-          } else if (controller.savedDevices.isEmpty) {
-            final screenWidth = MediaQuery.of(context).size.width;
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/icons/save_device.png', // Replace with actual device icon asset
-                    width: screenWidth * 0.3,
-                    height: screenWidth * 0.3,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.devices_other,
-                        size: 60,
-                        color: isDarkTheme ? Colors.white70 : Colors.grey[600],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'No Saved Devices',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: isDarkTheme ? Colors.white : Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Text(
-                      'You haven’t saved any devices yet. Start exploring devices and save your favorites to access them quickly!',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDarkTheme ? Colors.white70 : Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.to(
-                        () => LandingPage(),
-                        transition: Transition.rightToLeft,
-                        duration: const Duration(milliseconds: 300),
-                      );
-                      final LandingPageController landingController =
-                          Get.find<LandingPageController>();
-                      landingController.clearPageIndex();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
-                      ),
-                    ),
-                    child: Text(
-                      'Explore Devices',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          } else {
-            return ListView.builder(
-              itemCount: controller.savedDevices.length,
-              itemBuilder: (context, index) {
-                final device = controller.savedDevices[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: DeviceCard(device: device),
                 );
-              },
-            );
-          }
-        }),
+              } else {
+                return ListView.builder(
+                  itemCount: savedController.savedDevices.length,
+                  itemBuilder: (context, index) {
+                    final device = savedController.savedDevices[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: DeviceCard(
+                        device: device,
+                        userId: userId,
+                        emailId: emailId,
+                        token: token,
+                        controller: chargingController,
+                        savedController: savedController,
+                        index: index,
+                      ),
+                    );
+                  },
+                );
+              }
+            }),
+          ),
+          // "Charge Now" Button
+          Obx(() {
+            if (savedController.selectedConnector['connectorIndex'] != -1) {
+              final chargerId = savedController.selectedConnector['chargerId'];
+              final selectedDevice = savedController.savedDevices
+                  .firstWhere((device) => device['charger_id'].toString() == chargerId);
+              final connectorIndex = savedController.selectedConnector['connectorIndex'];
+              final connector = (selectedDevice['connectors'] as List<dynamic>)[connectorIndex];
+              return Positioned(
+                left: 0,
+                right: 0,
+                bottom: screenHeight * 0.02,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.to(() => Chargingpage(
+                          chargerId: selectedDevice['charger_id'],
+                          chargerDetails: selectedDevice,
+                          connectorId: connector['connector_id'].toString(),
+                          connectorDetails: {
+                            'type': connector['connector_type'] == 1 ? 'Socket' : 'Gun',
+                            'power': selectedDevice['max_power'] ?? 'N/A',
+                            'status': connector['charger_status'] ?? ' - ',
+                          },
+                        ));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.015),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'Charge Now',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenWidth * 0.045,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+        ],
       ),
     );
   }
@@ -178,13 +257,34 @@ class SavedDevicepage extends StatelessWidget {
 
 class DeviceCard extends StatelessWidget {
   final Map<String, dynamic> device;
+  final int userId;
+  final String emailId;
+  final String token;
+  final ChargingStationController controller;
+  final SavedDeviceControllers savedController;
+  final int index;
 
-  const DeviceCard({super.key, required this.device});
+  const DeviceCard({
+    super.key,
+    required this.device,
+    required this.userId,
+    required this.emailId,
+    required this.token,
+    required this.controller,
+    required this.savedController,
+    required this.index,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final width = MediaQuery.of(context).size.width;
+    final RxBool isRemoving = false.obs;
+
+    // Get all connectors as a single list
+    final List<Map<String, dynamic>> connectors = (device['connectors'] as List<dynamic>? ?? [])
+        .map((connector) => connector as Map<String, dynamic>)
+        .toList();
 
     return Card(
       shape: RoundedRectangleBorder(
@@ -205,7 +305,6 @@ class DeviceCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// Title and info section
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,7 +321,7 @@ class DeviceCard extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            'Last used: ${device['last_used'] ?? 'N/A'}',
+                            'Last used: ${device['last_used']}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: Colors.grey[600],
                               fontSize: width * 0.028,
@@ -257,45 +356,163 @@ class DeviceCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                Obx(() => GestureDetector(
+                  onTap: isRemoving.value
+                      ? null
+                      : () async {
+                    final chargerId = device['charger_id']?.toString();
+                    if (chargerId != null && chargerId.isNotEmpty) {
+                      try {
+                        isRemoving.value = true;
+                        print('Attempting to remove charger: $chargerId');
+                        await controller.Removedevice(
+                          userId,
+                          emailId,
+                          token,
+                          chargerId,
+                        );
+                        print('Successfully removed charger: $chargerId');
 
-                /// Favorite Icon
-                Icon(
-                  Icons.favorite,
-                  color: Colors.redAccent,
-                  size: width * 0.055,
-                ),
+                        // Find and remove the specific device by chargerId
+                        final deviceIndex = savedController.savedDevices
+                            .indexWhere((d) => d['charger_id'] == chargerId);
+                        if (deviceIndex != -1) {
+                          savedController.savedDevices.removeAt(deviceIndex);
+                          savedController.update();
+                        }
+                      } catch (e) {
+                        print("Error removing charger: $e");
+                        CustomSnackbar.showError(
+                          message: e.toString().contains("Exception:")
+                              ? e.toString().split("Exception:")[1].trim()
+                              : "Failed to remove device",
+                        );
+                      } finally {
+                        isRemoving.value = false;
+                      }
+                    } else {
+                      print("Invalid chargerId: $chargerId");
+                      CustomSnackbar.showError(
+                        message: "Invalid charger ID",
+                      );
+                    }
+                  },
+                  child: isRemoving.value
+                      ? SizedBox(
+                    width: width * 0.055,
+                    height: width * 0.055,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.redAccent,
+                    ),
+                  )
+                      : Icon(
+                    Icons.favorite,
+                    color: Colors.redAccent,
+                    size: width * 0.055,
+                  ),
+                )),
               ],
             ),
-
             const SizedBox(height: 8),
             Divider(
               thickness: 0.2,
               color: Colors.grey,
               height: 8,
             ),
-
-            /// Connector Cards (only two)
             const SizedBox(height: 6),
-            if (device['connectors'] != null &&
-                (device['connectors'] as List).isNotEmpty)
-              _buildConnectorCard(
-                context,
-                title: 'Connector ${device['connectors'][0]['connector_id']}',
-                status: device['connectors'][0]['charger_status'] ?? 'Unknown',
-                type: device['connectors'][0]['connector_type_name'] ?? 'N/A',
-                power: '${device['max_power'] ?? 'N/A'}',
-                width: width,
+            /// Connector Cards with Show More/Show Less
+            if (connectors.isNotEmpty)
+              GetBuilder<SavedDeviceControllers>(
+                id: 'connectors',
+                builder: (savedController) {
+                  return Column(
+                    children: connectors.asMap().entries.map((entry) {
+                      final connectorIndex = entry.key;
+                      final connector = entry.value;
+                      final chargerId = device['charger_id'].toString();
+                      final isSelected = savedController.selectedConnector['chargerId'] == chargerId &&
+                          savedController.selectedConnector['connectorIndex'] == connectorIndex;
+                      final isVisible = connectorIndex < 2 ||
+                          (savedController.expandedConnectorIndices[index] ?? false);
+                      return isVisible
+                          ? Padding(
+                        padding: const EdgeInsets.only(bottom: 6.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            savedController.setSelectedConnector(chargerId, connectorIndex);
+                          },
+                          child: _buildConnectorCard(
+                            context,
+                            title: 'Connector ${connectorIndex + 1}',
+                            status: connector['charger_status'] ?? 'Unknown',
+                            type: connector['connector_type'] == 1 ? 'Socket' : 'Gun',
+                            power: device['max_power'] ?? 'N/A',
+                            width: width,
+                            isSelected: isSelected,
+                          ),
+                        ),
+                      )
+                          : const SizedBox.shrink();
+                    }).toList(),
+                  );
+                },
               ),
-            const SizedBox(height: 6),
-            if (device['connectors'] != null &&
-                (device['connectors'] as List).length > 1)
-              _buildConnectorCard(
-                context,
-                title: 'Connector ${device['connectors'][1]['connector_id']}',
-                status: device['connectors'][1]['charger_status'] ?? 'Unknown',
-                type: device['connectors'][1]['connector_type_name'] ?? 'N/A',
-                power: '${device['max_power'] ?? 'N/A'}',
-                width: width,
+            if (connectors.length > 2)
+              Padding(
+                padding: const EdgeInsets.only(top: 6.0),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () {
+                      if (!savedController.isToggling) {
+                        savedController.isToggling = true;
+                        print('Toggling connector details for index $index (before)');
+                        savedController.toggleConnectorDetails(index);
+                        print('Toggling connector details for index $index (after), state: ${savedController.expandedConnectorIndices[index]}');
+                        Future.delayed(const Duration(milliseconds: 300), () {
+                          savedController.isToggling = false;
+                          savedController.update(['connectors', 'viewMoreButton']);
+                        });
+                      }
+                    },
+                    child: GetBuilder<SavedDeviceControllers>(
+                      id: 'viewMoreButton',
+                      builder: (savedController) {
+                        final isExpanded =
+                            savedController.expandedConnectorIndices[index] ?? false;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                isExpanded
+                                    ? 'View less connectors'
+                                    : 'View more connectors',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontSize: width * 0.035,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                isExpanded
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
+                                color: Colors.blue,
+                                size: width * 0.04,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ),
           ],
         ),
@@ -318,7 +535,7 @@ class DeviceCard extends StatelessWidget {
       case 'finishing':
         return Colors.purple[600]!;
       default:
-        return Colors.black; // Default color for unknown statuses
+        return Colors.black;
     }
   }
 
@@ -337,18 +554,19 @@ class DeviceCard extends StatelessWidget {
       case 'finishing':
         return Icons.done_all;
       default:
-        return Icons.help_outline; // Default icon for unknown statuses
+        return Icons.help_outline;
     }
   }
 
   Widget _buildConnectorCard(
-    BuildContext context, {
-    required String title,
-    required String status,
-    required String type,
-    required String power,
-    required double width,
-  }) {
+      BuildContext context, {
+        required String title,
+        required String status,
+        required String type,
+        required String power,
+        required double width,
+        bool isSelected = false,
+      }) {
     final theme = Theme.of(context);
     final bool isDarkTheme = theme.brightness == Brightness.dark;
 
@@ -357,8 +575,8 @@ class DeviceCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
-          color: theme.dividerColor, // Use theme divider color for consistency
-          width: 0.2,
+          color: isSelected ? Colors.blue : theme.dividerColor,
+          width: isSelected ? 2.0 : 0.2,
         ),
       ),
       elevation: 0.5,
@@ -366,7 +584,6 @@ class DeviceCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
         child: Row(
           children: [
-            /// Left Section
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,21 +618,19 @@ class DeviceCard extends StatelessWidget {
                 ],
               ),
             ),
-
-            /// Right Section
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (type.toLowerCase() == 'gun')
+                if (type.toLowerCase() == 'socket')
                   Image.asset(
-                    'assets/icons/charger_gun1.png',
+                    'assets/icons/wall-socket.png',
                     width: 22,
                     height: 22,
                     color: isDarkTheme ? Colors.white : const Color(0xFF0A1F44),
                   )
-                else if (type.toLowerCase() == 'socket')
+                else if (type.toLowerCase() == 'gun')
                   Image.asset(
-                    'assets/icons/wall-socket.png',
+                    'assets/icons/charger_gun1.png',
                     width: 22,
                     height: 22,
                     color: isDarkTheme ? Colors.white : const Color(0xFF0A1F44),
@@ -434,8 +649,7 @@ class DeviceCard extends StatelessWidget {
                     Text(
                       power,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color
-                            ?.withOpacity(0.6), // Use theme color
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                         fontSize: width * 0.028,
                       ),
                     ),

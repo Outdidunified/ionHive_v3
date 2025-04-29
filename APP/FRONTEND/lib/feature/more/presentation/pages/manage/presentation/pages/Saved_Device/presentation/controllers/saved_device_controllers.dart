@@ -12,6 +12,16 @@ class SavedDeviceControllers extends GetxController {
       <Map<String, dynamic>>[].obs;
   final RxString errorMessage = ''.obs;
 
+  // Add state for expanded connectors
+  final Map<int, bool> expandedConnectorIndices = {};
+  bool isToggling = false;
+
+  // Track the single selected connector across all devices
+  final RxMap<String, dynamic> selectedConnector = <String, dynamic>{
+    'chargerId': '',
+    'connectorIndex': -1,
+  }.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -28,16 +38,14 @@ class SavedDeviceControllers extends GetxController {
 
     try {
       final response =
-          await _savedDeviceRepoistory.fetchprofile(userId, emailId, authToken);
+      await _savedDeviceRepoistory.fetchprofile(userId, emailId, authToken);
       if (response.success) {
         if (response.saveddevice != null) {
-          // Process favChargersDetails into savedDevices
           final chargerDetails = response.saveddevice as List<dynamic>? ?? [];
           if (chargerDetails.isNotEmpty) {
             savedDevices.assignAll(chargerDetails.map((charger) {
               final connectors =
-                  (charger['connectors'] as List<dynamic>?)?.take(2).toList() ??
-                      [];
+                  (charger['connectors'] as List<dynamic>?)?.toList() ?? [];
               return {
                 'charger_id': charger['charger_id'],
                 'model': charger['model'],
@@ -47,17 +55,14 @@ class SavedDeviceControllers extends GetxController {
                 'landmark': charger['landmark'],
                 'unit_price': charger['unit_price'],
                 'connectors': connectors,
-                'last_used':
-                    '10/04/2025', // Placeholder; replace with actual data if available
-                'max_power': '${charger['max_power']}W', // Example formatting
+                'last_used': charger['last_used'] ?? 'N/A',
+                'max_power': '${charger['max_power']}W',
               };
             }).toList());
           } else {
-            // Empty list is a valid response, not an error
             savedDevices.clear();
           }
         } else {
-          // Empty list is a valid response, not an error
           savedDevices.clear();
         }
       } else {
@@ -69,6 +74,30 @@ class SavedDeviceControllers extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void toggleConnectorDetails(int index) {
+    expandedConnectorIndices[index] = !(expandedConnectorIndices[index] ?? false);
+    update(['connectors', 'viewMoreButton']);
+  }
+
+  void setSelectedConnector(String chargerId, int connectorIndex) {
+    if (selectedConnector['chargerId'] == chargerId &&
+        selectedConnector['connectorIndex'] == connectorIndex) {
+      // Unselect if re-tapped
+      selectedConnector.value = {
+        'chargerId': '',
+        'connectorIndex': -1,
+      };
+    } else {
+      // Select the new connector and deselect any previous selection
+      selectedConnector.value = {
+        'chargerId': chargerId,
+        'connectorIndex': connectorIndex,
+      };
+    }
+    selectedConnector.refresh(); // Notify listeners of the change
+    update(['connectors']);
   }
 
   @override

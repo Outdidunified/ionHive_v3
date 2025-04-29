@@ -23,6 +23,7 @@ class ChargingStationController extends GetxController {
   bool isToggling = false;
   final SavedDeviceControllers _savedDeviceController = Get.put(SavedDeviceControllers());
   final sessionController = Get.find<SessionController>();
+  final RxInt selectedConnectorIndex = (-1).obs; // Track globally selected connector index
 
   @override
   void onInit() {
@@ -170,7 +171,15 @@ $mapUrl
         locationId,
       );
       await Future.delayed(const Duration(seconds: 2));
-      chargerDetails.value = response.specificchargers;
+      // Initialize selectedConnectorIndex for each charger
+      final updatedChargerDetails = response.specificchargers.map((charger) {
+        if (charger is Map<String, dynamic> && !charger.containsKey('selectedConnectorIndex')) {
+          charger['selectedConnectorIndex'] = -1;
+        }
+        return charger;
+      }).toList();
+      chargerDetails.value = updatedChargerDetails; // Assign new list to trigger reactivity
+      selectedConnectorIndex.value = -1; // Reset global selection
       CustomSnackbar.showSuccess(
         message: response.message ?? "Charger details fetched successfully",
       );
@@ -290,5 +299,26 @@ $mapUrl
       _popupMenu = null;
       _isPopupShown = false;
     }
+  }
+
+  // Method to set the selected connector with toggle behavior
+  void setSelectedConnector(int chargerIndex, int connectorIndex) {
+    final currentSelection = chargerDetails[chargerIndex]['selectedConnectorIndex'];
+    final updatedDetails = chargerDetails.map((charger) {
+      if (charger is Map<String, dynamic>) {
+        charger['selectedConnectorIndex'] = -1; // Reset all
+      }
+      return charger;
+    }).toList();
+    if (currentSelection == connectorIndex) {
+      // If re-tapping the same connector, unselect it
+      updatedDetails[chargerIndex]['selectedConnectorIndex'] = -1;
+    } else {
+      // Otherwise, select the new connector
+      updatedDetails[chargerIndex]['selectedConnectorIndex'] = connectorIndex;
+    }
+    chargerDetails.value = updatedDetails; // Reassign to trigger reactivity
+    selectedConnectorIndex.value = updatedDetails[chargerIndex]['selectedConnectorIndex']; // Update global state
+    update(['connectors']); // Ensure UI updates
   }
 }
