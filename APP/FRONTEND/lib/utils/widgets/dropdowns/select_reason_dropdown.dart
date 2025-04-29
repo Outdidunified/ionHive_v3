@@ -7,11 +7,11 @@ class SelectReasonDropdown extends StatefulWidget {
   final RxString otherReason;
 
   const SelectReasonDropdown({
-    Key? key,
+    super.key,
     required this.reasons,
     required this.selectedReason,
     required this.otherReason,
-  }) : super(key: key);
+  });
 
   @override
   State<SelectReasonDropdown> createState() => _SelectReasonDropdownState();

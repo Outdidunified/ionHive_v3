@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -17,7 +16,7 @@ import '../controllers/navigation_helper.dart';
 
 class HomeController extends GetxController with WidgetsBindingObserver {
   final markers = <Marker>{}.obs;
-  final isLoading = true.obs;
+  final isLoading = false.obs;
   final zoomLevel = 16.5.obs;
   final currentPosition = const LatLng(12.9716, 77.5946).obs;
   final isLocationFetched = false.obs;
@@ -27,8 +26,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   PageController? stationPageController;
   SessionController? _sessionController;
 
-  // Store the selected location marker data to persist it
   Marker? _selectedLocationMarker;
+  DateTime? _lastFetchTime;
 
   SessionController get sessionController {
     if (_sessionController == null) {
@@ -63,27 +62,35 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     loadMapStyles();
 
     _loadCustomIcons().then((_) {
-      loadChargerMarkers();
+      if (isLocationFetched.value) {
+        loadChargerMarkers();
+      }
     });
 
     mapControllerCompleter.future.then((controller) {
       mapController = controller;
       applyMapStyle();
-      _checkLocationPermissionAndFetch();
+      if (!isLocationFetched.value) {
+        _checkLocationPermissionAndFetch();
+      }
     });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _checkLocationPermissionOnResume();
+      if (_lastFetchTime == null ||
+          DateTime.now().difference(_lastFetchTime!).inMinutes > 5) {
+        _checkLocationPermissionOnResume();
+      }
     }
   }
 
   Future<void> _checkLocationPermissionOnResume() async {
     try {
       final permissionStatus = await Permission.locationWhenInUse.status;
-      if (permissionStatus == PermissionStatus.granted) {
+      if (permissionStatus == PermissionStatus.granted &&
+          !isLocationFetched.value) {
         await getCurrentLocation();
       }
     } catch (e) {
@@ -118,8 +125,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         'assets/icons/slocation.png',
       );
 
-      debugPrint(
-          'All custom icons loaded successfully, including customer.png and slocation.png');
+      debugPrint('All custom icons loaded successfully');
     } catch (e) {
       debugPrint('Error loading custom icons: $e');
       _locationIcon =
@@ -212,6 +218,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
       currentPosition.value = LatLng(position.latitude, position.longitude);
       isLocationFetched.value = true;
+      _lastFetchTime = DateTime.now();
 
       await fetchNearbyChargers();
       loadChargerMarkers();
@@ -238,6 +245,17 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           message: 'Could not get your location. Please try again later.',
         );
       }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> refreshData() async {
+    debugPrint('Manually refreshing data...');
+    isLoading.value = true;
+    try {
+      await getCurrentLocation();
+      await fetchNearbyChargers();
     } finally {
       isLoading.value = false;
     }
@@ -285,13 +303,11 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   void loadChargerMarkers() {
     debugPrint('Loading charger markers...');
 
-    // Preserve the selected location marker if it exists
     final selectedLocationMarker = markers.firstWhere(
       (marker) => marker.markerId.value == 'selectedLocation',
       orElse: () => Marker(markerId: MarkerId('not_found')),
     );
 
-    // Clear existing markers
     markers.clear();
 
     BitmapDescriptor chargerIcon;
@@ -344,7 +360,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       ));
     }
 
-    // Add the current location marker
     markers.add(Marker(
       markerId: const MarkerId('currentLocation'),
       position: currentPosition.value,
@@ -353,14 +368,12 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       zIndex: 2,
     ));
 
-    // Re-add the selected location marker if it existed
     if (selectedLocationMarker.markerId.value != 'not_found') {
       markers.add(selectedLocationMarker);
       debugPrint('Preserved selectedLocation marker: $selectedLocationMarker');
     } else if (_selectedLocationMarker != null) {
       markers.add(_selectedLocationMarker!);
-      debugPrint(
-          'Restored selectedLocation marker from stored data: $_selectedLocationMarker');
+      debugPrint('Restored selectedLocation marker: $_selectedLocationMarker');
     }
 
     debugPrint('Loaded ${markers.length} markers');
@@ -491,24 +504,24 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   Future<void> zoomToCurrentLocation() async {
     debugPrint('Zooming to current location...');
-
-    final permissionStatus = await Permission.locationWhenInUse.status;
-    if (permissionStatus != PermissionStatus.granted) {
-      debugPrint('Location permission not granted, requesting...');
-      final requestStatus = await Permission.locationWhenInUse.request();
-      if (requestStatus != PermissionStatus.granted) {
-        CustomSnackbar.showPermissionRequest(
-          message:
-              'Location permission is needed to locate nearby charging stations',
-          onOpenSettings: () async {
-            await openAppSettings();
-          },
-        );
-        return;
-      }
-    }
-
+    isLoading.value = true; // Show loading indicator
     try {
+      final permissionStatus = await Permission.locationWhenInUse.status;
+      if (permissionStatus != PermissionStatus.granted) {
+        debugPrint('Location permission not granted, requesting...');
+        final requestStatus = await Permission.locationWhenInUse.request();
+        if (requestStatus != PermissionStatus.granted) {
+          CustomSnackbar.showPermissionRequest(
+            message:
+                'Location permission is needed to locate nearby charging stations',
+            onOpenSettings: () async {
+              await openAppSettings();
+            },
+          );
+          return;
+        }
+      }
+
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 5),
@@ -518,31 +531,30 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           'Updated position: ${position.latitude}, ${position.longitude}');
       currentPosition.value = LatLng(position.latitude, position.longitude);
       isLocationFetched.value = true;
+      _lastFetchTime = DateTime.now();
 
-      // Remove any existing selected location marker if it's a current location marker
-      // This prevents duplicate current location markers
       markers
           .removeWhere((marker) => marker.markerId.value == 'selectedLocation');
       _selectedLocationMarker = null;
 
       await fetchNearbyChargers();
-
       loadChargerMarkers();
       markers.refresh();
 
       if (mapController != null) {
         final zoomValue = 19.0;
         debugPrint('Animating camera to zoom level: $zoomValue');
-
         await mapController!.animateCamera(
           CameraUpdate.newLatLngZoom(currentPosition.value, zoomValue),
         );
       } else {
         debugPrint('Map controller is null, cannot zoom to current location');
+        CustomSnackbar.showError(
+          message: 'Map not ready, please try again.',
+        );
       }
     } catch (e) {
       debugPrint('Error getting location: $e');
-
       if (e is LocationServiceDisabledException) {
         CustomSnackbar.showPermissionRequest(
           message:
@@ -556,6 +568,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           message: 'Could not get your location. Please try again later.',
         );
       }
+    } finally {
+      isLoading.value = false; // Hide loading indicator
     }
   }
 
@@ -575,7 +589,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       return;
     }
 
-    // Use provided coordinates if available, otherwise fall back to currentPosition
     final fetchLat = latitude ?? currentPosition.value.latitude;
     final fetchLng = longitude ?? currentPosition.value.longitude;
 
@@ -615,7 +628,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                   continue;
                 }
 
-                // Calculate distance from the selected or current location
                 final distance = Geolocator.distanceBetween(
                   fetchLat,
                   fetchLng,
@@ -626,7 +638,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                 chargers.add({
                   "id": station['station_id'].toString(),
                   "station_id": station['station_id'],
-                  "saved_station":station['saved_station'],
+                  "saved_station": station['saved_station'],
                   "position": LatLng(lat, lng),
                   "name":
                       "${station['location_id'] ?? ''} | ${station['station_address'] ?? 'Unknown Location'}",
@@ -673,7 +685,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                   continue;
                 }
 
-                // Calculate distance from the selected or current location
                 final distance = Geolocator.distanceBetween(
                   fetchLat,
                   fetchLng,
@@ -707,11 +718,12 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       } else {
         debugPrint("Fetch failed: ${fetchResponseModel.message}");
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint("Error fetching nearby chargers: $e");
       CustomSnackbar.showError(message: 'Error: $e');
     } finally {
       isLoading.value = false;
+      _lastFetchTime = DateTime.now();
     }
   }
 
@@ -859,7 +871,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                   style: TextStyle(
                     fontSize: 13,
                     color: isDark ? Colors.grey[400] : Colors.grey[700],
-
                   ),
                 ),
               ),
@@ -900,7 +911,10 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                       Get.back();
                       NavigationHelper.navigateToStation(station);
                     },
-                    icon: const Icon(Icons.directions,color: Colors.white,),
+                    icon: const Icon(
+                      Icons.directions,
+                      color: Colors.white,
+                    ),
                     label: const Text('Navigate'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green[700],
@@ -918,8 +932,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                     onPressed: () {
                       Get.back();
                       Get.to(() => ChargingStationPage(station: station));
-
-
                     },
                     icon: const Icon(Icons.info_outline),
                     label: const Text('Details'),
@@ -982,12 +994,10 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
     final position = LatLng(latitude, longitude);
 
-    // Remove any existing selected location marker
     markers
         .removeWhere((marker) => marker.markerId.value == 'selectedLocation');
     debugPrint('Removed any previous selectedLocation marker');
 
-    // Create the new marker based on whether it's the current location
     final newMarker = Marker(
       markerId: const MarkerId('selectedLocation'),
       position: position,
@@ -1001,15 +1011,12 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     );
     debugPrint('Created new marker: $newMarker');
 
-    // Store the marker to persist it
     _selectedLocationMarker = newMarker;
     debugPrint('Stored selectedLocation marker in _selectedLocationMarker');
 
-    // Add the marker to the set
     markers.add(newMarker);
     debugPrint('Added marker to markers set, total markers: ${markers.length}');
 
-    // Verify the marker is in the set
     final addedMarker = markers.firstWhere(
       (marker) => marker.markerId.value == 'selectedLocation',
       orElse: () => Marker(markerId: MarkerId('not_found')),
@@ -1020,7 +1027,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       debugPrint('Marker successfully verified in the set');
     }
 
-    // Ensure the map controller exists and animate to the location
     if (mapController == null) {
       debugPrint('Error: Map controller is null, cannot animate camera');
       CustomSnackbar.showError(message: 'Map not ready, please try again.');
@@ -1039,11 +1045,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           message: 'Failed to move map to selected location.');
     }
 
-    // Fetch nearby chargers around the selected location
-    debugPrint('Fetching nearby chargers around selected location...');
     await fetchNearbyChargers(latitude: latitude, longitude: longitude);
+    _lastFetchTime = DateTime.now();
 
-    // Force a refresh to ensure the marker is displayed
     markers.refresh();
     debugPrint('Markers refreshed, forcing UI update');
   }
@@ -1091,7 +1095,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     mapController = null;
     stationPageController?.dispose();
     stationPageController = null;
-    _selectedLocationMarker = null; // Clear stored marker on close
     super.onClose();
   }
 }

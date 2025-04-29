@@ -12,9 +12,15 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final HomeController controller = Get.put(HomeController());
+    // Use Get.put with a check to persist controller
+    HomeController controller;
+    try {
+      controller = Get.find<HomeController>();
+    } catch (e) {
+      controller = Get.put(HomeController(), permanent: true);
+    }
 
-    // Update theme after frame to ensure context is available
+    // Update theme after frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final isDark = Theme.of(context).brightness == Brightness.dark;
       if (controller.isDarkMode.value != isDark) {
@@ -29,12 +35,12 @@ class HomePage extends StatelessWidget {
           return false;
         } else {
           final shouldExit =
-          await controller.showExitConfirmationDialog(context);
+              await controller.showExitConfirmationDialog(context);
           return shouldExit;
         }
       },
       child: Obx(
-            () => LoadingOverlay(
+        () => LoadingOverlay(
           isLoading: controller.isLoading.value,
           opacity: 0.7,
           child: Scaffold(
@@ -57,6 +63,11 @@ class HomePage extends StatelessWidget {
                   left: 0,
                   right: 0,
                   child: _buildStationCardsList(controller, context),
+                ),
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 80,
+                  right: 16,
+                  child: _buildRefreshButton(context, controller),
                 ),
               ],
             ),
@@ -83,9 +94,12 @@ class HomePage extends StatelessWidget {
               controller.loadMapStyles().then((_) {
                 Future.delayed(const Duration(milliseconds: 300), () {
                   controller.applyMapStyle();
-                  controller.getCurrentLocation().then((_) {
-                    controller.fetchNearbyChargers();
-                  });
+                  // Only fetch if location isn't cached
+                  if (!controller.isLocationFetched.value) {
+                    controller.getCurrentLocation().then((_) {
+                      controller.fetchNearbyChargers();
+                    });
+                  }
                 });
               });
             });
@@ -238,7 +252,7 @@ class HomePage extends StatelessWidget {
         final result = await Navigator.of(context).push(
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
-             SearchPage(),
+                SearchPage(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               const begin = Offset(-1.0, 0.0);
@@ -246,7 +260,7 @@ class HomePage extends StatelessWidget {
               const curve = Curves.easeInOut;
 
               var tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
               var offsetAnimation = animation.drive(tween);
 
               return SlideTransition(
@@ -259,23 +273,16 @@ class HomePage extends StatelessWidget {
         );
 
         if (result != null && result is Map<String, dynamic>) {
-          // Check if this is a Charger ID search
           if (result['isChargerId'] == true) {
             final String chargerId = result['chargerId'] ?? '';
             if (chargerId.isNotEmpty) {
-              // Handle charger ID search - you might want to search for this charger in your database
               Get.snackbar(
                 'Searching for Charger',
                 'Looking for charger ID: $chargerId',
                 snackPosition: SnackPosition.BOTTOM,
               );
-
-              // Here you would typically call a method to search for the charger
-              // controller.searchForChargerId(chargerId);
             }
-          }
-          // Handle location search
-          else if (result.containsKey('latitude') &&
+          } else if (result.containsKey('latitude') &&
               result.containsKey('longitude')) {
             final String name = result['name'] ?? 'Selected Location';
             final double latitude = result['latitude'];
@@ -295,9 +302,9 @@ class HomePage extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             border: isDarkTheme
                 ? Border.all(
-              color: Colors.grey.withOpacity(0.3),
-              width: 0.8,
-            )
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 0.8,
+                  )
                 : null,
             boxShadow: [
               BoxShadow(
@@ -375,6 +382,39 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  Widget _buildRefreshButton(BuildContext context, HomeController controller) {
+    final isDarkTheme = controller.isDarkMode.value;
+
+    return Container(
+      height: 50,
+      width: 50,
+      decoration: BoxDecoration(
+        color: isDarkTheme
+            ? Colors.green[800]
+            : const Color.fromARGB(255, 185, 227, 185),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDarkTheme ? 0.3 : 0.1),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: Icon(
+          Icons.refresh,
+          color: isDarkTheme
+              ? const Color.fromARGB(255, 185, 227, 185)
+              : Colors.green[800],
+        ),
+        onPressed: () {
+          controller.refreshData();
+        },
+      ),
+    );
+  }
+
   Widget _buildStationCardsList(
       HomeController controller, BuildContext context) {
     final isDarkTheme = controller.isDarkMode.value;
@@ -390,7 +430,7 @@ class HomePage extends StatelessWidget {
       final verySmallScreen = screenWidth < 320 || screenHeight < 500;
 
       return Container(
-        height: verySmallScreen ? 155 : (isSmallScreen ? 150 : 170),
+        height: verySmallScreen ? 170 : (isSmallScreen ? 165 : 185),
         decoration: BoxDecoration(
           color: isDarkTheme
               ? Colors.black.withOpacity(0.7)
@@ -411,7 +451,7 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 0),
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -439,73 +479,73 @@ class HomePage extends StatelessWidget {
             Expanded(
               child: controller.chargers.isEmpty
                   ? Center(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 0.2,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    color: isDarkTheme
-                        ? Colors.black.withOpacity(0.7)
-                        : Colors.white.withOpacity(0.9),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'No Charging Stations available in this location',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              )
-                  : Column(
-                children: [
-                  Expanded(
-                    child: PageView.builder(
-                      controller: controller.stationPageController ??=
-                          PageController(
-                            viewportFraction: 0.85,
-                            initialPage:
-                            controller.selectedChargerIndex.value,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.grey,
+                            width: 0.2,
                           ),
-                      padEnds: false,
-                      physics: const BouncingScrollPhysics(),
-                      onPageChanged: (index) {
-                        controller.animateToCharger(index);
-                      },
-                      itemCount: controller.chargers.length,
-                      itemBuilder: (context, index) {
-                        final station = controller.chargers[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 12),
-                          child: StationCard(
-                            station: station,
-                            isDarkTheme: isDarkTheme,
-                            onTap: () {
-                              controller.showStationDetails(station);
-                              if (controller.mapController != null) {
-                                final position =
-                                station['position'] as LatLng;
-                                controller.mapController!.animateCamera(
-                                  CameraUpdate.newLatLngZoom(
-                                      position, 18.0),
-                                );
-                              }
+                          borderRadius: BorderRadius.circular(16),
+                          color: isDarkTheme
+                              ? Colors.black.withOpacity(0.7)
+                              : Colors.white.withOpacity(0.9),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'No Charging Stations available in this location',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        Expanded(
+                          child: PageView.builder(
+                            controller: controller.stationPageController ??=
+                                PageController(
+                              viewportFraction: 0.85,
+                              initialPage:
+                                  controller.selectedChargerIndex.value,
+                            ),
+                            padEnds: false,
+                            physics: const BouncingScrollPhysics(),
+                            onPageChanged: (index) {
+                              controller.animateToCharger(index);
+                            },
+                            itemCount: controller.chargers.length,
+                            itemBuilder: (context, index) {
+                              final station = controller.chargers[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: StationCard(
+                                  station: station,
+                                  isDarkTheme: isDarkTheme,
+                                  onTap: () {
+                                    controller.showStationDetails(station);
+                                    if (controller.mapController != null) {
+                                      final position =
+                                          station['position'] as LatLng;
+                                      controller.mapController!.animateCamera(
+                                        CameraUpdate.newLatLngZoom(
+                                            position, 18.0),
+                                      );
+                                    }
+                                  },
+                                ),
+                              );
                             },
                           ),
-                        );
-                      },
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),

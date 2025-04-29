@@ -36,7 +36,7 @@ class ConnectivityController extends GetxController {
 
       // Only perform navigation if GetX is properly initialized and has a valid context
       if (Get.context == null) {
-        print('GetX context not available, skipping navigation');
+        debugPrint('GetX context not available, skipping navigation');
         return;
       }
 
@@ -45,7 +45,7 @@ class ConnectivityController extends GetxController {
         // This will throw an error if navigation is not possible
         final _ = Get.currentRoute;
       } catch (e) {
-        print('GetX navigation not ready: $e');
+        debugPrint('GetX navigation not ready: $e');
         return;
       }
 
@@ -65,7 +65,7 @@ class ConnectivityController extends GetxController {
             Get.toNamed('/noInternet');
           }
         } catch (e) {
-          print('Navigation error: $e');
+          debugPrint('Navigation error: $e');
         }
       } else if (wasConnected != isConnected.value) {
         // Only navigate if connection status actually changed
@@ -77,7 +77,7 @@ class ConnectivityController extends GetxController {
             Get.offNamed(lastRoute!);
           }
         } catch (e) {
-          print('Navigation error: $e');
+          debugPrint('Navigation error: $e');
         }
       }
     });

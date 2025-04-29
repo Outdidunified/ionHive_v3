@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -7,41 +9,47 @@ import 'package:ionhive/feature/Chargingpage/presentation/pages/Chargingpage.dar
 import 'package:ionhive/feature/more/presentation/pages/help&support/presentation/pages/contact%20us.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// ignore: must_be_immutable
 class ChargingStationPage extends StatelessWidget {
   final Map<String, dynamic> station;
-  final ChargingStationController controller = Get.put(ChargingStationController());
+  final ChargingStationController controller =
+      Get.put(ChargingStationController());
 
   // Controller to manage the Google Map
   GoogleMapController? _mapController;
 
   ChargingStationPage({super.key, required this.station}) {
     controller.setStation(station);
-    // Set the initial tab to "Details" (index 1) when the page loads
-    if (controller.selectedTabIndex.value != 1) {
-      controller.selectedTabIndex.value = 1;
+    // Set the initial tab to "Charger" (index 0) when the page loads
+    if (controller.selectedTabIndex.value != 0) {
+      controller.selectedTabIndex.value = 0;
     }
   }
 
   // Function to launch Google Maps for directions
   Future<void> _launchDirections(double latitude, double longitude) async {
-    final url = 'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude';
+    final url =
+        'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude';
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
-      print('Could not launch directions URL: $url');
+      debugPrint('Could not launch directions URL: $url');
       Get.snackbar('Error', 'Could not open directions in map app');
     }
   }
 
   // Function to share the location
-  Future<void> _shareLocation(double latitude, double longitude, String address) async {
-    final url = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+  Future<void> _shareLocation(
+      double latitude, double longitude, String address) async {
+    final url =
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
     final shareText = 'Check out this charging station at $address: $url';
-    final uri = Uri.parse('mailto:?subject=Charging Station Location&body=$shareText');
+    final uri =
+        Uri.parse('mailto:?subject=Charging Station Location&body=$shareText');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
-      print('Could not launch share URL: $uri');
+      debugPrint('Could not launch share URL: $uri');
       Get.snackbar('Error', 'Could not share location');
     }
   }
@@ -51,23 +59,23 @@ class ChargingStationPage extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
-    print('station: $station');
+    debugPrint('station: $station');
 
     // Safely access controller.station, assuming it's an Rx object
     final controllerStation = controller.station is Rx
-        ? (controller.station as Rx<Map<String, dynamic>>).value ?? {}
+        ? (controller.station as Rx<Map<String, dynamic>>).value
         : controller.station ?? {};
-    print('Controller station after setStation: $controllerStation');
+    debugPrint('Controller station after setStation: $controllerStation');
 
     // Extract station details
     final stationId = station['station_id'] ?? 'Unknown station_id';
-    print('station_id: $stationId');
+    debugPrint('station_id: $stationId');
     final savedStation = station['saved_station'] ?? 'Unknown saved_station';
-    print('saved_station: $savedStation');
+    debugPrint('saved_station: $savedStation');
     final locationId = station['location_id'] ?? 'Unknown location';
-    print('location_id: $locationId');
+    debugPrint('location_id: $locationId');
     final stationAddress = station['station_address'] ?? 'Unknown Address';
-    print('station_address: $stationAddress');
+    debugPrint('station_address: $stationAddress');
     final network = station['network'] ?? 'Unknown Network';
     final availability = station['availability'] ?? 'Unknown';
     final chargerType = station['charger_type'] ?? 'Unknown';
@@ -82,11 +90,12 @@ class ChargingStationPage extends StatelessWidget {
         }
       }
     } catch (e) {
-      print('Error extracting position: $e');
+      debugPrint('Error extracting position: $e');
     }
-    final bool areCoordinatesValid = (latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180);
-
-
+    final bool areCoordinatesValid = (latitude >= -90 &&
+        latitude <= 90 &&
+        longitude >= -180 &&
+        longitude <= 180);
 
     return Scaffold(
       body: Stack(
@@ -117,7 +126,8 @@ class ChargingStationPage extends StatelessWidget {
               ),
               Expanded(
                 child: Obx(() {
-                  print('Rebuilding IndexedStack with tab index: ${controller.selectedTabIndex.value}');
+                  debugPrint(
+                      'Rebuilding IndexedStack with tab index: ${controller.selectedTabIndex.value}');
                   return IndexedStack(
                     index: controller.selectedTabIndex.value,
                     children: [
@@ -130,13 +140,17 @@ class ChargingStationPage extends StatelessWidget {
                           padding: EdgeInsets.all(screenWidth * 0.04),
                           children: [
                             if (controller.chargerDetails.isNotEmpty)
-                              ...controller.chargerDetails.asMap().entries.map((entry) {
+                              ...controller.chargerDetails
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
                                 final i = entry.key;
                                 final detail = entry.value;
                                 return Column(
                                   children: [
                                     GestureDetector(
-                                      onTap: () => controller.toggleChargerDetails(i),
+                                      onTap: () =>
+                                          controller.toggleChargerDetails(i),
                                       child: ChargerCard(
                                         title: '${detail['address']} ${i + 1}',
                                         power: '${detail['max_power']}W',
@@ -144,17 +158,28 @@ class ChargingStationPage extends StatelessWidget {
                                         lastUsed: '24/04/2025',
                                         sessions: i == 0 ? '1k+' : null,
                                         vendor: detail['vendor'] ?? 'Unknown',
-                                        chargerId: detail['charger_id'] ?? 'N/A',
-                                        chargerType: detail['charger_type'] ?? 'N/A',
-                                        connectors: (detail['connectors'] as List<dynamic>).map((connector) {
+                                        chargerId:
+                                            detail['charger_id'] ?? 'N/A',
+                                        chargerType:
+                                            detail['charger_type'] ?? 'N/A',
+                                        connectors: (detail['connectors']
+                                                as List<dynamic>)
+                                            .map((connector) {
                                           return ConnectorInfo(
-                                            name: connector['connector_id'].toString(),
-                                            type: connector['connector_type'].toString(),
-                                            power: '${detail['max_power'] ?? 'N/A'}W',
-                                            status: connector['charger_status'] ?? ' - ',
+                                            name: connector['connector_id']
+                                                .toString(),
+                                            type: connector['connector_type']
+                                                .toString(),
+                                            power:
+                                                '${detail['max_power'] ?? 'N/A'}W',
+                                            status:
+                                                connector['charger_status'] ??
+                                                    ' - ',
                                           );
                                         }).toList(),
-                                        isExpanded: controller.expandedChargerIndex.value == i,
+                                        isExpanded: controller
+                                                .expandedChargerIndex.value ==
+                                            i,
                                         index: i,
                                       ),
                                     ),
@@ -210,75 +235,100 @@ class ChargingStationPage extends StatelessWidget {
                               height: screenHeight * 0.4,
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                                borderRadius:
+                                    BorderRadius.circular(screenWidth * 0.02),
                               ),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(screenWidth * 0.02),
+                                borderRadius:
+                                    BorderRadius.circular(screenWidth * 0.02),
                                 child: areCoordinatesValid
                                     ? GoogleMap(
-                                  initialCameraPosition: CameraPosition(
-                                    target: LatLng(latitude, longitude),
-                                    zoom: 15,
-                                  ),
-                                  markers: {
-                                    Marker(
-                                      markerId: const MarkerId('station'),
-                                      position: LatLng(latitude, longitude),
-                                      infoWindow: InfoWindow(
-                                        title: stationAddress,
-                                        snippet: 'Tap for actions',
-                                        onTap: () {
-                                          showModalBottomSheet(
-                                            context: context,
-                                            builder: (context) => Container(
-                                              padding: EdgeInsets.all(screenWidth * 0.04),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  ListTile(
-                                                    leading: Icon(Icons.directions, color: Colors.blue),
-                                                    title: Text('Get Directions'),
-                                                    onTap: () {
-                                                      Navigator.pop(context);
-                                                      _launchDirections(latitude, longitude);
-                                                    },
+                                        initialCameraPosition: CameraPosition(
+                                          target: LatLng(latitude, longitude),
+                                          zoom: 15,
+                                        ),
+                                        markers: {
+                                          Marker(
+                                            markerId: const MarkerId('station'),
+                                            position:
+                                                LatLng(latitude, longitude),
+                                            infoWindow: InfoWindow(
+                                              title: stationAddress,
+                                              snippet: 'Tap for actions',
+                                              onTap: () {
+                                                showModalBottomSheet(
+                                                  context: context,
+                                                  builder: (context) =>
+                                                      Container(
+                                                    padding: EdgeInsets.all(
+                                                        screenWidth * 0.04),
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        ListTile(
+                                                          leading: Icon(
+                                                              Icons.directions,
+                                                              color:
+                                                                  Colors.blue),
+                                                          title: Text(
+                                                              'Get Directions'),
+                                                          onTap: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                            _launchDirections(
+                                                                latitude,
+                                                                longitude);
+                                                          },
+                                                        ),
+                                                        ListTile(
+                                                          leading: Icon(
+                                                              Icons.share,
+                                                              color:
+                                                                  Colors.green),
+                                                          title: Text(
+                                                              'Share Location'),
+                                                          onTap: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                            _shareLocation(
+                                                                latitude,
+                                                                longitude,
+                                                                stationAddress);
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
-                                                  ListTile(
-                                                    leading: Icon(Icons.share, color: Colors.green),
-                                                    title: Text('Share Location'),
-                                                    onTap: () {
-                                                      Navigator.pop(context);
-                                                      _shareLocation(latitude, longitude, stationAddress);
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
+                                                );
+                                              },
                                             ),
-                                          );
+                                            onTap: () {
+                                              _mapController
+                                                  ?.showMarkerInfoWindow(
+                                                      const MarkerId(
+                                                          'station'));
+                                            },
+                                          ),
                                         },
-                                      ),
-                                      onTap: () {
-                                        _mapController?.showMarkerInfoWindow(const MarkerId('station'));
-                                      },
-                                    ),
-                                  },
-                                  onMapCreated: (GoogleMapController mapController) {
-                                    print('Google Map created');
-                                    _mapController = mapController;
-                                    mapController.showMarkerInfoWindow(const MarkerId('station'));
-                                  },
-                                )
+                                        onMapCreated: (GoogleMapController
+                                            mapController) {
+                                          debugPrint('Google Map created');
+                                          _mapController = mapController;
+                                          mapController.showMarkerInfoWindow(
+                                              const MarkerId('station'));
+                                        },
+                                      )
                                     : Center(
-                                  child: Text(
-                                    'Invalid coordinates for this station',
-                                    style: TextStyle(
-                                      fontSize: screenWidth * 0.04,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
+                                        child: Text(
+                                          'Invalid coordinates for this station',
+                                          style: TextStyle(
+                                            fontSize: screenWidth * 0.04,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
                               ),
-
                             ),
                             SizedBox(height: screenHeight * 0.02),
                             Text(
@@ -292,7 +342,8 @@ class ChargingStationPage extends StatelessWidget {
                       Center(
                         child: Text(
                           'Reviews feature coming soon!',
-                          style: TextStyle(fontSize: screenWidth * 0.04, color: Colors.grey),
+                          style: TextStyle(
+                              fontSize: screenWidth * 0.04, color: Colors.grey),
                         ),
                       ),
                     ],
@@ -350,7 +401,8 @@ class ChargingStationPage extends StatelessWidget {
             child: GestureDetector(
               onTapDown: (TapDownDetails details) {
                 final tapPosition = details.globalPosition;
-                controller.showMoreOptionsPopup(context, tapPosition, stationId);
+                controller.showMoreOptionsPopup(
+                    context, tapPosition, stationId);
               },
               child: Container(
                 height: screenWidth * 0.08,
@@ -375,11 +427,12 @@ class ChargingStationPage extends StatelessWidget {
                 .where((entry) => entry.value['selectedConnectorIndex'] != -1)
                 .firstOrNull;
             // Hide button if on Details tab (index 1)
-            if (selectedConnector != null && controller.selectedTabIndex.value != 1) {
-              final chargerIndex = selectedConnector.key;
+            if (selectedConnector != null &&
+                controller.selectedTabIndex.value != 1) {
               final charger = selectedConnector.value;
               final connectorIndex = charger['selectedConnectorIndex'];
-              final connector = (charger['connectors'] as List<dynamic>)[connectorIndex];
+              final connector =
+                  (charger['connectors'] as List<dynamic>)[connectorIndex];
               return Positioned(
                 left: 0,
                 right: 0,
@@ -401,20 +454,22 @@ class ChargingStationPage extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         Get.to(() => Chargingpage(
-                          chargerId: charger['charger_id'],
-                          chargerDetails: charger,
-                          connectorId: connector['connector_id'].toString(),
-                          connectorDetails: {
-                            'type': connector['connector_type'].toString(),
-                            'power': charger['max_power']?.toString() ?? 'N/A',
-                            'status': connector['charger_status'] ?? ' - ',
-                          },
-                        ));
+                              chargerId: charger['charger_id'],
+                              chargerDetails: charger,
+                              connectorId: connector['connector_id'].toString(),
+                              connectorDetails: {
+                                'type': connector['connector_type'].toString(),
+                                'power':
+                                    charger['max_power']?.toString() ?? 'N/A',
+                                'status': connector['charger_status'] ?? ' - ',
+                              },
+                            ));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.015),
+                        padding: EdgeInsets.symmetric(
+                            vertical: screenHeight * 0.015),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),

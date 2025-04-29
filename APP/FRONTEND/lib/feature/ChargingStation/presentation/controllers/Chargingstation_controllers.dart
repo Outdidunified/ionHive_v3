@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
@@ -21,14 +23,16 @@ class ChargingStationController extends GetxController {
   final RxList<dynamic> chargerDetails = RxList<dynamic>([]);
   Map<int, bool> expandedConnectorIndices = {};
   bool isToggling = false;
-  final SavedDeviceControllers _savedDeviceController = Get.put(SavedDeviceControllers());
+  final SavedDeviceControllers _savedDeviceController =
+      Get.put(SavedDeviceControllers());
   final sessionController = Get.find<SessionController>();
-  final RxInt selectedConnectorIndex = (-1).obs; // Track globally selected connector index
+  final RxInt selectedConnectorIndex =
+      (-1).obs; // Track globally selected connector index
 
   @override
   void onInit() {
     super.onInit();
-    print('Controller initialized');
+    debugPrint('Controller initialized');
     expandedConnectorIndices = {};
     ever(chargerDetails, (_) {
       expandedConnectorIndices = {};
@@ -48,7 +52,7 @@ class ChargingStationController extends GetxController {
   }
 
   void setStation(Map<String, dynamic> stationData) {
-    print('Setting station: $stationData');
+    debugPrint('Setting station: $stationData');
     station = stationData;
     final stationId = station?['station_id'];
     final isSaved = station?['saved_station'] == true;
@@ -68,9 +72,9 @@ class ChargingStationController extends GetxController {
         station!['station_id'],
         station!['location_id'].toString(),
       ).then((_) {
-        print('Charger details fetched: $chargerDetails');
+        debugPrint('Charger details fetched: $chargerDetails');
       }).catchError((e) {
-        print('Error fetching charger details: $e');
+        debugPrint('Error fetching charger details: $e');
       });
     }
   }
@@ -78,7 +82,8 @@ class ChargingStationController extends GetxController {
   bool isStationSaved(int stationId) => _savedStations[stationId] ?? false;
 
   bool isChargerSaved(String chargerId) {
-    return _savedDeviceController.savedDevices.any((device) => device['charger_id'].toString() == chargerId) ||
+    return _savedDeviceController.savedDevices
+            .any((device) => device['charger_id'].toString() == chargerId) ||
         (_savedChargers[chargerId] ?? false);
   }
 
@@ -86,7 +91,8 @@ class ChargingStationController extends GetxController {
     _savedStations[stationId] = isSaved;
   }
 
-  Future<void> saveStation(int userId, String emailId, String authToken, int stationId) async {
+  Future<void> saveStation(
+      int userId, String emailId, String authToken, int stationId) async {
     try {
       final response = await _chargingStationsRepo.savestations(
         userId,
@@ -96,9 +102,7 @@ class ChargingStationController extends GetxController {
         true,
       );
       _savedStations[stationId] = true;
-      CustomSnackbar.showSuccess(
-        message: response.message ?? "Station saved successfully",
-      );
+      CustomSnackbar.showSuccess(message: response.message);
       await _fetchInitialSavedDevices();
     } catch (e) {
       CustomSnackbar.showError(
@@ -106,11 +110,12 @@ class ChargingStationController extends GetxController {
             ? e.toString().split("Exception:")[1].trim()
             : "Failed to save station",
       );
-      throw e;
+      rethrow;
     }
   }
 
-  Future<void> removeStation(int userId, String emailId, String authToken, int stationId) async {
+  Future<void> removeStation(
+      int userId, String emailId, String authToken, int stationId) async {
     try {
       final response = await _chargingStationsRepo.Removestations(
         userId,
@@ -121,7 +126,7 @@ class ChargingStationController extends GetxController {
       );
       _savedStations[stationId] = false;
       CustomSnackbar.showSuccess(
-        message: response.message ?? "Station removed from saved",
+        message: response.message,
       );
       await _fetchInitialSavedDevices();
     } catch (e) {
@@ -130,7 +135,7 @@ class ChargingStationController extends GetxController {
             ? e.toString().split("Exception:")[1].trim()
             : "Failed to remove station",
       );
-      throw e;
+      rethrow;
     }
   }
 
@@ -145,7 +150,8 @@ class ChargingStationController extends GetxController {
     String chargerType = station!['charger_type'] ?? 'Unknown Type';
     double latitude = station!['position']?.latitude ?? 0.0;
     double longitude = station!['position']?.longitude ?? 0.0;
-    String mapUrl = "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude";
+    String mapUrl =
+        "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude";
     String shareText = '''
 Charging Station: $stationName
 📍 Address: $address
@@ -159,9 +165,11 @@ $mapUrl
     Share.share(shareText);
   }
 
-  Future<void> fetchspecificchargers(int userId, String emailId, String authToken, int stationId, String locationId) async {
+  Future<void> fetchspecificchargers(int userId, String emailId,
+      String authToken, int stationId, String locationId) async {
     isLoading.value = true;
-    print('Calling fetchspecificchargers with stationId: $stationId, locationId: $locationId');
+    debugPrint(
+        'Calling fetchspecificchargers with stationId: $stationId, locationId: $locationId');
     try {
       final response = await _chargingStationsRepo.FetchspecificChargers(
         userId,
@@ -173,15 +181,17 @@ $mapUrl
       await Future.delayed(const Duration(seconds: 2));
       // Initialize selectedConnectorIndex for each charger
       final updatedChargerDetails = response.specificchargers.map((charger) {
-        if (charger is Map<String, dynamic> && !charger.containsKey('selectedConnectorIndex')) {
+        if (charger is Map<String, dynamic> &&
+            !charger.containsKey('selectedConnectorIndex')) {
           charger['selectedConnectorIndex'] = -1;
         }
         return charger;
       }).toList();
-      chargerDetails.value = updatedChargerDetails; // Assign new list to trigger reactivity
+      chargerDetails.value =
+          updatedChargerDetails; // Assign new list to trigger reactivity
       selectedConnectorIndex.value = -1; // Reset global selection
       CustomSnackbar.showSuccess(
-        message: response.message ?? "Charger details fetched successfully",
+        message: response.message,
       );
     } catch (e) {
       CustomSnackbar.showError(
@@ -189,13 +199,14 @@ $mapUrl
             ? e.toString().split("Exception:")[1].trim()
             : "Failed to fetch charger details",
       );
-      throw e;
+      rethrow;
     } finally {
       isLoading.value = false;
     }
   }
 
-  void showMoreOptionsPopup(BuildContext context, Offset position, int stationId) {
+  void showMoreOptionsPopup(
+      BuildContext context, Offset position, int stationId) {
     final authToken = sessionController.token.value;
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
@@ -226,7 +237,8 @@ $mapUrl
   }
 
   void toggleChargerDetails(int index) {
-    expandedChargerIndex.value = expandedChargerIndex.value == index ? -1 : index;
+    expandedChargerIndex.value =
+        expandedChargerIndex.value == index ? -1 : index;
   }
 
   void toggleConnectorDetails(int index) {
@@ -234,16 +246,19 @@ $mapUrl
     final currentState = newIndices[index] ?? false;
     newIndices[index] = !currentState;
     expandedConnectorIndices = newIndices;
-    print('Toggling connector details for index $index, new state: ${expandedConnectorIndices[index]}');
+    debugPrint(
+        'Toggling connector details for index $index, new state: ${expandedConnectorIndices[index]}');
     update(['connectors', 'viewMoreButton']);
   }
 
   void onTabTapped(int index) {
-    print('Switching to tab index: $index, current value: ${selectedTabIndex.value}');
+    debugPrint(
+        'Switching to tab index: $index, current value: ${selectedTabIndex.value}');
     selectedTabIndex.value = index;
   }
 
-  Future<void> Savedevice(int userId, String emailId, String authToken, String chargerId) async {
+  Future<void> Savedevice(
+      int userId, String emailId, String authToken, String chargerId) async {
     try {
       final response = await _chargingStationsRepo.savedevices(
         userId,
@@ -254,7 +269,7 @@ $mapUrl
       );
       _savedChargers[chargerId] = true;
       CustomSnackbar.showSuccess(
-        message: response.message ?? "Device saved successfully",
+        message: response.message,
       );
       await _fetchInitialSavedDevices();
       update();
@@ -264,11 +279,12 @@ $mapUrl
             ? e.toString().split("Exception:")[1].trim()
             : "Failed to save device",
       );
-      print("Error saving device: $e");
+      debugPrint("Error saving device: $e");
     }
   }
 
-  Future<void> Removedevice(int userId, String emailId, String authToken, String chargerId) async {
+  Future<void> Removedevice(
+      int userId, String emailId, String authToken, String chargerId) async {
     try {
       final response = await _chargingStationsRepo.Removescharger(
         userId,
@@ -279,7 +295,7 @@ $mapUrl
       );
       _savedChargers[chargerId] = false;
       CustomSnackbar.showSuccess(
-        message: response.message ?? "Device removed successfully",
+        message: response.message,
       );
       await _fetchInitialSavedDevices();
       update();
@@ -289,7 +305,7 @@ $mapUrl
             ? e.toString().split("Exception:")[1].trim()
             : "Failed to remove device",
       );
-      print("Error removing device: $e");
+      debugPrint("Error removing device: $e");
     }
   }
 
@@ -303,7 +319,8 @@ $mapUrl
 
   // Method to set the selected connector with toggle behavior
   void setSelectedConnector(int chargerIndex, int connectorIndex) {
-    final currentSelection = chargerDetails[chargerIndex]['selectedConnectorIndex'];
+    final currentSelection =
+        chargerDetails[chargerIndex]['selectedConnectorIndex'];
     final updatedDetails = chargerDetails.map((charger) {
       if (charger is Map<String, dynamic>) {
         charger['selectedConnectorIndex'] = -1; // Reset all
@@ -318,7 +335,8 @@ $mapUrl
       updatedDetails[chargerIndex]['selectedConnectorIndex'] = connectorIndex;
     }
     chargerDetails.value = updatedDetails; // Reassign to trigger reactivity
-    selectedConnectorIndex.value = updatedDetails[chargerIndex]['selectedConnectorIndex']; // Update global state
+    selectedConnectorIndex.value = updatedDetails[chargerIndex]
+        ['selectedConnectorIndex']; // Update global state
     update(['connectors']); // Ensure UI updates
   }
 }

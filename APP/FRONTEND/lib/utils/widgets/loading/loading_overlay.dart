@@ -1,29 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
-import 'package:ionhive/utils/debug/build_guard.dart';
 
-/// A transparent overlay that displays a loading indicator on top of the current page.
-///
-/// This widget creates a semi-transparent background that covers the entire screen
-/// and displays a loading indicator in the center, allowing the user to see the
-/// content behind the loading indicator.
 class LoadingOverlay extends StatelessWidget {
-  /// Whether the loading overlay is visible.
   final bool isLoading;
-
-  /// The child widget to display behind the loading overlay.
   final Widget child;
-
-  /// The color of the loading indicator. If null, uses the primary color from the theme.
   final Color? loadingColor;
-
-  /// The size of the loading indicator. Default is 50.0.
   final double loadingSize;
-
-  /// The opacity of the background overlay. Default is 0.5.
   final double opacity;
 
-  /// Creates a loading overlay with a semi-transparent background.
   const LoadingOverlay({
     super.key,
     required this.isLoading,
@@ -35,10 +19,13 @@ class LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Store the loading state locally to avoid accessing it multiple times
-    // which could potentially change during build
     final bool currentlyLoading = isLoading;
+    final theme = Theme.of(context);
 
+// Set overlay color based on theme
+    final overlayColor = theme.brightness == Brightness.dark
+        ? Colors.black.withOpacity(0.7)
+        : Colors.white.withOpacity(0.7);
     return Stack(
       children: [
         // The main content
@@ -48,7 +35,7 @@ class LoadingOverlay extends StatelessWidget {
         if (currentlyLoading)
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(opacity),
+              color: overlayColor,
               child: Center(
                 child: LoadingIndicator(
                   color: loadingColor,

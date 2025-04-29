@@ -518,28 +518,7 @@ class AddCreditsPage extends StatelessWidget {
             );
           }),
         ),
-        Positioned(
-          top: -20,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(0.3),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.account_balance_wallet,
-              color: theme.colorScheme.onPrimary,
-              size: 24,
-            ),
-          ),
-        ),
+
       ],
     );
   }

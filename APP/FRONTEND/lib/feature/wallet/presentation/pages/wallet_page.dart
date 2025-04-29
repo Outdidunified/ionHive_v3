@@ -46,7 +46,7 @@ class WalletPage extends StatelessWidget {
                     const SizedBox(height: 20),
                     _buildSectionTitle('Options', theme),
                     const SizedBox(height: 12),
-                    _buildOptionsRow(theme),
+                    _buildOptionsRow(theme, context),
                     const SizedBox(height: 20),
                     _buildSectionTitle('Progress', theme),
                     const SizedBox(height: 12),
@@ -82,11 +82,21 @@ class WalletPage extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            'Hii $greeting!\n$username This your wallet',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$greeting! $username',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "Your EV, your control, your wallet.",
+                style: theme.textTheme.bodyMedium, // normal weight, not bold
+              ),
+            ],
           ),
         ),
         IconButton(
@@ -448,7 +458,7 @@ class WalletPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOptionsRow(ThemeData theme) {
+  Widget _buildOptionsRow(ThemeData theme, BuildContext context) {
     // Use theme-based colors for the option cards
     final primaryLight = theme.colorScheme.primary.withOpacity(0.15);
     final secondaryLight = theme.colorScheme.secondary.withOpacity(0.15);
@@ -457,97 +467,149 @@ class WalletPage extends StatelessWidget {
         : theme.colorScheme.primary.withOpacity(0.1);
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildOptionCard(
-            Icons.credit_card, 'Add Credits', 'To wallet', primaryLight, theme),
-        _buildOptionCard(Icons.receipt_long, 'Transaction', 'History',
-            secondaryLight, theme),
-        _buildOptionCard(
-            Icons.payments, 'Withdraw', 'To bank', tertiaryLight, theme),
+        Flexible(
+          child: _buildOptionCard(
+            Icons.credit_card,
+            'Add Credits',
+            'To wallet',
+            primaryLight,
+            theme,
+            context,
+          ),
+        ),
+        Flexible(
+          child: _buildOptionCard(
+            Icons.receipt_long,
+            'Transaction',
+            'History',
+            secondaryLight,
+            theme,
+            context,
+          ),
+        ),
+        Flexible(
+          child: _buildOptionCard(
+            Icons.payments,
+            'Withdraw',
+            'To bank',
+            tertiaryLight,
+            theme,
+            context,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildOptionCard(IconData icon, String title, String subtitle,
-      Color color, ThemeData theme) {
+  Widget _buildOptionCard(
+    IconData icon,
+    String title,
+    String subtitle,
+    Color color,
+    ThemeData theme,
+    BuildContext context,
+  ) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     bool showCornerTag = title == 'Withdraw';
+    final sessionController =
+        Get.find<SessionController>(); // Access session controller
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          if (title == 'Add Credits') {
-            Get.to(() => AddCreditsPage(),
-                transition: Transition.rightToLeft,
-                duration: const Duration(milliseconds: 300));
-          } else if (title == 'Transaction') {
-            final userId = sessionController.userId.value;
-            final username = sessionController.username.value;
-            final emailId = sessionController.emailId.value;
-            final token = sessionController.token.value;
+    return GestureDetector(
+      onTap: () {
+        if (title == 'Add Credits') {
+          Get.to(
+            () => AddCreditsPage(),
+            transition: Transition.rightToLeft,
+            duration: const Duration(milliseconds: 300),
+          );
+        } else if (title == 'Transaction') {
+          final userId = sessionController.userId.value;
+          final username = sessionController.username.value;
+          final emailId = sessionController.emailId.value;
+          final token = sessionController.token.value;
 
-            Get.to(
-              () => PaymentHistoryPage(
-                userId: userId,
-                username: username,
-                emailId: emailId,
-                token: token,
-              ),
-              transition: Transition.rightToLeft,
-              duration: const Duration(milliseconds: 300),
-            );
-          }
-        },
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: theme.cardColor,
-                    child: Icon(
-                      icon,
-                      size: 20,
-                      color: theme.colorScheme.primary,
-                    ),
+          Get.to(
+            () => PaymentHistoryPage(
+              userId: userId,
+              username: username,
+              emailId: emailId,
+              token: token,
+            ),
+            transition: Transition.rightToLeft,
+            duration: const Duration(milliseconds: 300),
+          );
+        }
+      },
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            margin: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.01), // 4px on 400px screen
+            padding: EdgeInsets.all(screenWidth * 0.03), // 12px on 400px screen
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(
+                  screenWidth * 0.04), // 16px on 400px screen
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: screenWidth * 0.045, // 18px on 400px screen
+                  backgroundColor: theme.cardColor,
+                  child: Icon(
+                    icon,
+                    size: screenWidth * 0.05, // 20px on 400px screen
+                    color: theme.colorScheme.primary,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    title,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
-                    ),
-                  ),
-                ],
+                ),
+                SizedBox(height: screenHeight * 0.01), // 8px on 800px height
+                Text(
+                  title,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: screenWidth * 0.035, // 14px on 400px screen
+                      ) ??
+                      TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: screenWidth * 0.035,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                        color:
+                            theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                        fontSize: screenWidth * 0.03, // 12px on 400px screen
+                      ) ??
+                      TextStyle(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        fontSize: screenWidth * 0.03,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          // Positioned Corner Tag
+          if (showCornerTag)
+            Positioned(
+              top: -screenWidth * 0.0125, // -5px on 400px screen
+              right: screenWidth * 0.01, // 4px on 400px screen
+              child: CornerTag(
+                label: 'Soon!',
+                isCapitative: false,
+                isDarkTheme: theme.brightness == Brightness.dark,
               ),
             ),
-
-            // 👉 Positioned Corner Tag
-            if (showCornerTag)
-              Positioned(
-                top: -7,
-                right: 25,
-                child: CornerTag(
-                  label: 'Soon!',
-                  isCapitative: false,
-                  isDarkTheme: theme.brightness == Brightness.dark,
-                ),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }

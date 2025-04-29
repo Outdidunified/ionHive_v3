@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
@@ -238,7 +240,7 @@ class TabBarHeader extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     final ChargingStationController controller =
-    Get.find<ChargingStationController>();
+        Get.find<ChargingStationController>();
 
     return Obx(() {
       return Row(
@@ -246,7 +248,7 @@ class TabBarHeader extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () {
-              print('Tapping Charger tab');
+              debugPrint('Tapping Charger tab');
               controller.onTabTapped(0);
             },
             child: TabHeaderItem(
@@ -256,7 +258,7 @@ class TabBarHeader extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              print('Tapping Details tab');
+              debugPrint('Tapping Details tab');
               controller.onTabTapped(1);
             },
             child: TabHeaderItem(
@@ -266,7 +268,7 @@ class TabBarHeader extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              print('Tapping Reviews tab (no action)');
+              debugPrint('Tapping Reviews tab (no action)');
             },
             child: Stack(
               clipBehavior: Clip.none,
@@ -495,30 +497,36 @@ class ChargerCard extends StatelessWidget {
               GetBuilder<ChargingStationController>(
                 id: 'connectors',
                 builder: (controller) {
+                  // Ensure expanded state is preserved
+                  final isExpandedState =
+                      controller.expandedConnectorIndices[index] ?? false;
                   return Column(
                     children: connectors.asMap().entries.map((entry) {
                       final connectorIndex = entry.key;
                       final connector = entry.value;
-                      final isVisible = connectorIndex < 2 ||
-                          (controller.expandedConnectorIndices[index] ?? false);
+                      // Show all connectors if expanded, otherwise limit to 2
+                      final isVisible = isExpandedState || connectorIndex < 2;
                       return isVisible
                           ? Padding(
-                        padding: const EdgeInsets.only(bottom: 6.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            controller.setSelectedConnector(index, connectorIndex);
-                          },
-                          child: _buildConnectorCard(
-                            context,
-                            title: 'Connector ${connector.name}',
-                            status: connector.status,
-                            type: connector.type,
-                            power: connector.power,
-                            width: width,
-                            isSelected: controller.chargerDetails[index]['selectedConnectorIndex'] == connectorIndex,
-                          ),
-                        ),
-                      )
+                              padding: const EdgeInsets.only(bottom: 6.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  controller.setSelectedConnector(
+                                      index, connectorIndex);
+                                },
+                                child: _buildConnectorCard(
+                                  context,
+                                  title: 'Connector ${connector.name}',
+                                  status: connector.status,
+                                  type: connector.type,
+                                  power: connector.power,
+                                  width: width,
+                                  isSelected: controller.chargerDetails[index]
+                                          ['selectedConnectorIndex'] ==
+                                      connectorIndex,
+                                ),
+                              ),
+                            )
                           : const SizedBox.shrink();
                     }).toList(),
                   );
@@ -534,9 +542,11 @@ class ChargerCard extends StatelessWidget {
                     onTap: () {
                       if (!controller.isToggling) {
                         controller.isToggling = true;
-                        print('Toggling connector details for index $index (before)');
+                        debugPrint(
+                            'Toggling connector details for index $index (before)');
                         controller.toggleConnectorDetails(index);
-                        print('Toggling connector details for index $index (after), state: ${controller.expandedConnectorIndices[index]}');
+                        debugPrint(
+                            'Toggling connector details for index $index (after), state: ${controller.expandedConnectorIndices[index]}');
                         Future.delayed(const Duration(milliseconds: 300), () {
                           controller.isToggling = false;
                           controller.update(['connectors', 'viewMoreButton']);
@@ -546,7 +556,8 @@ class ChargerCard extends StatelessWidget {
                     child: GetBuilder<ChargingStationController>(
                       id: 'viewMoreButton',
                       builder: (controller) {
-                        final isExpanded = controller.expandedConnectorIndices[index] ?? false;
+                        final isExpanded =
+                            controller.expandedConnectorIndices[index] ?? false;
                         return Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 8.0, horizontal: 16.0),
@@ -554,7 +565,9 @@ class ChargerCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                isExpanded ? 'View less connectors' : 'View more connectors',
+                                isExpanded
+                                    ? 'View less connectors'
+                                    : 'View more connectors',
                                 style: TextStyle(
                                   color: Colors.blue,
                                   fontSize: width * 0.035,
@@ -563,7 +576,9 @@ class ChargerCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Icon(
-                                isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                isExpanded
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
                                 color: Colors.blue,
                                 size: width * 0.04,
                               ),
@@ -620,14 +635,14 @@ class ChargerCard extends StatelessWidget {
   }
 
   Widget _buildConnectorCard(
-      BuildContext context, {
-        required String title,
-        required String status,
-        required String type,
-        required String power,
-        required double width,
-        bool isSelected = false,
-      }) {
+    BuildContext context, {
+    required String title,
+    required String status,
+    required String type,
+    required String power,
+    required double width,
+    bool isSelected = false,
+  }) {
     final theme = Theme.of(context);
     final bool isDarkTheme = theme.brightness == Brightness.dark;
 
@@ -710,7 +725,8 @@ class ChargerCard extends StatelessWidget {
                     Text(
                       power,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                        color:
+                            theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                         fontSize: width * 0.028,
                       ),
                     ),
@@ -747,8 +763,12 @@ class ShimmerLoading extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Shimmer.fromColors(
-      baseColor: theme.brightness == Brightness.dark ? Colors.grey[700]! : Colors.grey[300]!,
-      highlightColor: theme.brightness == Brightness.dark ? Colors.grey[600]! : Colors.grey[100]!,
+      baseColor: theme.brightness == Brightness.dark
+          ? Colors.grey[700]!
+          : Colors.grey[300]!,
+      highlightColor: theme.brightness == Brightness.dark
+          ? Colors.grey[600]!
+          : Colors.grey[100]!,
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
@@ -763,7 +783,7 @@ class ShimmerLoading extends StatelessWidget {
   }
 
   Widget _buildCardLoading(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 

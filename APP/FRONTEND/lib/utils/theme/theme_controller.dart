@@ -4,7 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ionhive/utils/theme/themes.dart';
 
 class ThemeController extends GetxController {
+  // ignore: constant_identifier_names
   static const String THEME_MODE_KEY = 'theme_mode';
+  // ignore: constant_identifier_names
   static const String PRIMARY_COLOR_KEY = 'primary_color';
 
   // Observable variables

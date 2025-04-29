@@ -1,5 +1,6 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class Chargingpage extends StatelessWidget {
   final String chargerId;
@@ -7,7 +8,7 @@ class Chargingpage extends StatelessWidget {
   final String connectorId;
   final Map<String, dynamic> connectorDetails;
 
-  Chargingpage({
+  const Chargingpage({
     super.key,
     required this.chargerId,
     required this.chargerDetails,
