@@ -482,14 +482,14 @@ const fetchStartedAt = async (req, res) => {
 
 // END CHARGING SESSION
 const endChargingSession = async (req, res) => {
-    const { charger_id, connector_id } = req.body;
+    const { charger_id, connector_id, email_id } = req.body;
 
     try {
         // Validate input types
-        if (typeof charger_id !== 'string' || !Number.isInteger(Number(connector_id))) {
+        if (typeof charger_id !== 'string' || !Number.isInteger(Number(connector_id)) || typeof email_id !== 'string') {
             return res.status(400).json({
                 error: true,
-                message: 'Invalid input types: charger_id must be a string, connector_id must be an integer.'
+                message: 'Invalid input types: charger_id must be a string, connector_id must be an integer, and email_id must be a string.'
             });
         }
 
@@ -500,6 +500,7 @@ const endChargingSession = async (req, res) => {
                 message: 'Database connection failed. Please try again later.',
             });
         }
+
         const chargerDetailsCollection = db.collection('charger_details');
         const chargerStatusCollection = db.collection('charger_status');
 
@@ -514,18 +515,27 @@ const endChargingSession = async (req, res) => {
             });
         }
 
+        const connectorField = `current_or_active_user_for_connector_${connector_id}`;
+        const chargerDetails = await chargerDetailsCollection.findOne({ charger_id });
+
+        if (!chargerDetails) {
+            logger.loggerWarn(`ChargerID: ${charger_id} - Charger details not found!`);
+            return res.status(404).json({
+                error: true,
+                message: `ChargerID - ${charger_id} not found in charger_details`
+            });
+        }
+
+        // Check if the current user matches the email_id provided
+        if (chargerDetails[connectorField] !== email_id) {
+            logger.loggerWarn(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - The email does not match the active user.`);
+            return res.status(400).json({
+                error: true,
+                message: 'The provided email does not match the active user for this connector.'
+            });
+        }
+
         if (chargerStatus.charger_status === 'Finishing') {
-            const connectorField = `current_or_active_user_for_connector_${connector_id}`;
-            const chargerDetails = await chargerDetailsCollection.findOne({ charger_id });
-
-            if (!chargerDetails) {
-                logger.loggerWarn(`ChargerID: ${charger_id} - Charger details not found!`);
-                return res.status(404).json({
-                    error: true,
-                    message: `ChargerID - ${charger_id} not found in charger_details`
-                });
-            }
-
             if (chargerDetails[connectorField] === null) {
                 logger.loggerSuccess(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - The charging session is already ended.`);
                 return res.status(200).json({
@@ -554,21 +564,8 @@ const endChargingSession = async (req, res) => {
             }
         }
 
-        // Check if the status is one of the acceptable statuses
+        // If the status is one of the acceptable ones, proceed with ending the session
         if (['Available', 'Faulted', 'Unavailable'].includes(chargerStatus.charger_status)) {
-            const connectorField = `current_or_active_user_for_connector_${connector_id}`;
-
-            // Check the current value of the connector field
-            const chargerDetails = await chargerDetailsCollection.findOne({ charger_id });
-
-            if (!chargerDetails) {
-                logger.loggerWarn(`ChargerID: ${charger_id} - Charger details not found!`);
-                return res.status(404).json({
-                    error: true,
-                    message: `ChargerID - ${charger_id} not found in charger_details`
-                });
-            }
-
             if (chargerDetails[connectorField] === null) {
                 logger.loggerSuccess(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - The charging session is already ended.`);
                 return res.status(200).json({
@@ -611,6 +608,7 @@ const endChargingSession = async (req, res) => {
         });
     }
 };
+
 
 // GET UPDATED CHARGING DETAILS
 const getUpdatedChargingDetails = async (req, res) => {

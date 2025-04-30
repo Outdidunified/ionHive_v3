@@ -194,6 +194,7 @@ const fetchSavedStations = async (req, res) => {
                             station_id: stationId,
                             location_id: favStation.location_id,
                             status: favStation.status,
+                            saved_station: true, // Indicate this is a saved station
                             missing_data: true
                         };
                     }
@@ -201,7 +202,8 @@ const fetchSavedStations = async (req, res) => {
                     // Return complete station data with favorite status
                     return {
                         ...stationData,
-                        status: favStation.status // Keep the favorite status
+                        status: favStation.status, // Keep the favorite status
+                        saved_station: true // Indicate this is a saved station
                     };
                 } catch (error) {
                     logger.loggerError(`Error fetching data for station ${favStation.station_id}: ${error.message}`);
@@ -209,6 +211,7 @@ const fetchSavedStations = async (req, res) => {
                         station_id: favStation.station_id,
                         location_id: favStation.location_id,
                         status: favStation.status,
+                        saved_station: true, // Indicate this is a saved station
                         error: true
                     };
                 }
@@ -463,9 +466,23 @@ const updateConnectorUser = async (req, res) => {
     try {
         const { charger_id, email_id, user_id, connector_id } = req.body;
 
+        if (
+            !charger_id || typeof charger_id !== 'string' ||
+            !email_id || typeof email_id !== 'string' ||
+            typeof user_id !== 'number' || user_id <= 0 ||
+            typeof connector_id !== 'number' || connector_id <= 0
+        ) {
+            logger.loggerWarn('Invalid or missing fields.');
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid or missing fields. Required: charger_id (string), email_id (string), user_id (positive number), connector_id (positive number)'
+            });
+        }
+
         if (!db) {
             logger.loggerError('Database connection failed.');
             return res.status(500).json({
+                error: true,
                 message: 'Database connection failed. Please try again later.'
             });
         }
@@ -474,35 +491,39 @@ const updateConnectorUser = async (req, res) => {
         const usersCollection = db.collection('users');
         const socketGunConfigCollection = db.collection('socket_gun_config');
         const chargerStatusCollection = db.collection('charger_status');
-        // const financeDetailsCollection = db.collection('finance_details');
         const financeDetailsCollection = db.collection('financeDetails');
 
         const chargerDetails = await evDetailsCollection.findOne({ charger_id: charger_id, status: true });
-        const socketGunConfig = await socketGunConfigCollection.findOne({ charger_id: charger_id });
+        if (!chargerDetails) {
+            logger.loggerWarn('Charger details not found.');
+            return res.status(404).json({ error: true, message: 'Charger not found or is inactive.' });
+        }
 
+        const socketGunConfig = await socketGunConfigCollection.findOne({ charger_id: charger_id });
 
         const connectorField = `current_or_active_user_for_connector_${connector_id}`;
         if (!chargerDetails.hasOwnProperty(connectorField)) {
-            const errorMessage = 'Invalid connector ID!';
-            return res.status(400).json({ message: errorMessage });
+            logger.loggerWarn("Invalid connector ID!");
+            return res.status(400).json({ error: true, message: 'Invalid connector ID!' });
         }
 
         if (chargerDetails[connectorField] && email_id !== chargerDetails[connectorField]) {
-            const errorMessage = 'Connector is already in use!';
-            return res.status(400).json({ message: errorMessage });
+            logger.loggerWarn("Connector is already in use!");
+            return res.status(400).json({ error: true, message: 'Connector is already in use!' });
         }
 
         const userRecord = await usersCollection.findOne({ user_id: user_id });
-
-
-
-        const walletBalance = userRecord.wallet_bal;
-        const minBal = 2;
-        if (walletBalance === undefined || isNaN(walletBalance) || walletBalance < minBal) {
-            const errorMessage = `Your wallet balance is not enough to charge (minimum ${minBal} Rs required)`;
-            return res.status(400).json({ message: errorMessage });
+        if (!userRecord) {
+            logger.loggerWarn('User not found.');
+            return res.status(404).json({ error: true, message: 'User not found.' });
         }
 
+        const walletBalance = userRecord.wallet_bal;
+        const minBal = 100;
+        if (walletBalance === undefined || isNaN(walletBalance) || walletBalance < minBal) {
+            logger.loggerWarn(`Your wallet balance is not enough to charge (minimum ${minBal} Rs required)`);
+            return res.status(400).json({ error: true, message: `Your wallet balance is not enough to charge (minimum ${minBal} Rs required)` });
+        }
 
         // Update the user field in the chargerDetails
         let currect_user = {};
@@ -514,12 +535,10 @@ const updateConnectorUser = async (req, res) => {
             const fetchChargerStatus = await chargerStatusCollection.findOne({ charger_id: charger_id, connector_id: connector_id, connector_type: 1 });
 
             if (fetchChargerStatus && fetchChargerStatus.charger_status !== 'Charging' && fetchChargerStatus.charger_status !== 'Preparing') {
-
                 const result = await sendPreparingStatus(wsConnections, charger_id, connector_id);
-
                 if (!result) {
-                    const errorMessage = 'Device not connected to the server';
-                    return res.status(500).json({ message: errorMessage });
+                    logger.loggerInfo('Device not connected to the server');
+                    return res.status(500).json({ error: true, message: 'Device not connected to the server' });
                 }
             }
         }
@@ -529,51 +548,52 @@ const updateConnectorUser = async (req, res) => {
             { $set: currect_user }
         );
 
-        if (updateResult.modifiedCount !== 1) {
-            logger.loggerWarn('Failed to update current_or_active username for the connector');
+        if (updateResult.matchedCount === 0) {
+            logger.loggerWarn('No matching document found to update.');
+        } else if (updateResult.modifiedCount === 0) {
+            logger.loggerInfo('Connector user already set to the provided email.');
+        } else {
+            logger.loggerInfo('Connector user updated successfully.');
         }
 
+        if (!chargerDetails.finance_id) {
+            logger.loggerWarn('No finance_id found in chargerDetails.');
+        } else {
+            const financeRecord = await financeDetailsCollection.findOne({ finance_id: chargerDetails.finance_id });
 
-        const financeRecord = await financeDetailsCollection.findOne({ finance_id: chargerDetails.finance_id });
+            if (!financeRecord) {
+                logger.loggerWarn(`Finance details for finance_id ${chargerDetails.finance_id} not found.`);
+            } else {
+                const EB_fee = parseFloat(financeRecord.eb_charge || 0) + parseFloat(financeRecord.margin || 0);
+                const additionalCharges = [
+                    parseFloat(financeRecord.parking_fee || 0),
+                    parseFloat(financeRecord.convenience_fee || 0),
+                    parseFloat(financeRecord.station_fee || 0),
+                    parseFloat(financeRecord.processing_fee || 0),
+                    parseFloat(financeRecord.service_fee || 0)
+                ];
+                const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + charge, 0);
+                const TotalEBPrice = (EB_fee + totalAdditionalCharges);
 
-        if (!financeRecord) {
-            throw new Error(`Finance details for finance_id ${chargerDetails.finance_id} not found.`);
+                const gstPercentage = financeRecord.gst || 0;
+                const gstAmount = (TotalEBPrice * gstPercentage) / 100;
+                const totalPrice = TotalEBPrice + gstAmount;
+                const roundedTotalPrice = Math.round(totalPrice * 100) / 100;
+
+                return res.status(200).json({
+                    error: false,
+                    message: 'Success',
+                    unitPrice: roundedTotalPrice
+                });
+            }
         }
-
-
-        const EB_fee = parseFloat(financeRecord.eb_charge) + parseFloat(financeRecord.margin);
-
-        // List of additional charges (excluding GST)
-        const additionalCharges = [
-            parseFloat(financeRecord.parking_fee),     // Parking fee
-            parseFloat(financeRecord.convenience_fee), // Convenience fee
-            parseFloat(financeRecord.station_fee),     // Station fee
-            parseFloat(financeRecord.processing_fee),  // Processing fee
-            parseFloat(financeRecord.service_fee)      // Service fee
-        ];
-
-        // Calculate total additional charges (sum of all charges except GST)
-        const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + (charge || 0), 0);
-
-        // Calculate the base price (including additional charges per unit)
-        const TotalEBPrice = (EB_fee + totalAdditionalCharges);
-
-        // Apply GST on the total amount
-        const gstPercentage = financeRecord.gst;
-        const gstAmount = (TotalEBPrice * gstPercentage) / 100;
-
-        // Final price after adding GST
-        const totalPrice = TotalEBPrice + gstAmount;
-
-        // Respond with the charger details
-        res.status(200).json({ message: 'Success', unitPrice: totalPrice.toFixed(2) });
 
     } catch (error) {
         logger.loggerError('Error updating connector user:', error);
-        const errorMessage = 'Internal Server Error';
-        return res.status(500).json({ message: errorMessage });
+        return res.status(500).json({ error: true, message: 'Internal Server Error' });
     }
 };
+
 
 // Helper function to send preparing status
 async function sendPreparingStatus(wsConnections, charger_id, connector_id) {

@@ -406,5 +406,5 @@ module.exports = {
     fetchChargingSessionHistoryFilter,
     fetchChargingSessionDetails,
     // DOWNLOAD CHARGING HISTORYx
-    DownloadChargingSessionDetails
+    DownloadChargingSessionDetails,
 };
