@@ -7,17 +7,22 @@ class Chargingpage extends StatelessWidget {
   final Map<String, dynamic> chargerDetails;
   final String connectorId;
   final Map<String, dynamic> connectorDetails;
+  final double unitPrice;
 
   const Chargingpage({
     super.key,
     required this.chargerId,
     required this.chargerDetails,
+    this.unitPrice = 0.0,
     required this.connectorId,
     required this.connectorDetails,
   });
 
   @override
   Widget build(BuildContext context) {
+    print('charging details: $chargerDetails');
+    print('Connector details: $connectorDetails');
+    print('Unitprice: $unitPrice');
     return Scaffold(
       body: Center(
         child: Column(
@@ -27,9 +32,11 @@ class Chargingpage extends StatelessWidget {
             Text('Vendor: ${chargerDetails['vendor'] ?? 'Unknown'}'),
             Text('Power: ${chargerDetails['max_power'] ?? 'N/A'}W'),
             Text('Connector ID: $connectorId'),
-            Text('Type: ${connectorDetails['type'] == '1' ? 'Socket' : 'Gun'}'),
-            Text('Power: ${connectorDetails['power']}'),
-            Text('Status: ${connectorDetails['status']}'),
+            Text(
+                'Type: ${connectorDetails['connector_type'] == 1 ? 'Socket' : 'Gun'}'),
+            Text('Status: ${connectorDetails['charger_status'] ?? 'Unknown'}'),
+            if (unitPrice > 0)
+              Text('Unit Price: ₹${unitPrice.toStringAsFixed(2)}/kWh'),
           ],
         ),
       ),

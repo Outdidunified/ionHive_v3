@@ -463,6 +463,7 @@ class ChargingStationPage extends StatelessWidget {
                                     charger['max_power']?.toString() ?? 'N/A',
                                 'status': connector['charger_status'] ?? ' - ',
                               },
+                            unitPrice: 0,
                             ));
                       },
                       style: ElevatedButton.styleFrom(

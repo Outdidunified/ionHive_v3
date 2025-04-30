@@ -22,6 +22,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.CALL_PHONE"/>
 
+    <!--camera-->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+
 
 
     <application

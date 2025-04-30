@@ -13,6 +13,7 @@ import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../controllers/navigation_helper.dart';
+import 'package:ionhive/feature/home/presentation/pages/qrscanner/presentation/pages/qr_scannerpage.dart';
 
 class HomeController extends GetxController with WidgetsBindingObserver {
   final markers = <Marker>{}.obs;
@@ -1077,15 +1078,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           ),
         ) ??
         false;
-  }
-
-  void handleQrScannerPress() {
-    debugPrint('QR scanner pressed');
-    Get.snackbar(
-      'QR Scanner',
-      'QR Scanner functionality will be implemented here',
-      snackPosition: SnackPosition.BOTTOM,
-    );
   }
 
   @override

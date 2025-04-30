@@ -224,6 +224,7 @@ class SavedDevicepage extends StatelessWidget {
                             'power': selectedDevice['max_power'] ?? 'N/A',
                             'status': connector['charger_status'] ?? ' - ',
                           },
+                          unitPrice: 0,
                         ));
                       },
                       style: ElevatedButton.styleFrom(

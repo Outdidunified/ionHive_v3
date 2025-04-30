@@ -6,6 +6,7 @@ import 'package:ionhive/feature/home/presentation/widgets/station_card.dart';
 import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
 import 'package:ionhive/utils/debug/build_guard.dart';
 import '../controllers/home_controller.dart';
+import 'qrscanner/presentation/pages/qr_scannerpage.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -377,7 +378,10 @@ class HomePage extends StatelessWidget {
               ? const Color.fromARGB(255, 185, 227, 185)
               : Colors.green[800],
         ),
-        onPressed: controller.handleQrScannerPress,
+        onPressed: () {
+          Get.to(() => const QrScannerpage(), transition: Transition.leftToRight);
+        },
+
       ),
     );
   }

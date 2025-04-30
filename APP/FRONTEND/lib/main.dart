@@ -12,7 +12,7 @@ import 'package:ionhive/utils/theme/themes.dart'; // App theme
 import 'package:ionhive/utils/theme/theme_controller.dart'; // Theme controller
 import 'package:ionhive/core/controllers/connectivity_controller.dart'; // Add the ConnectivityController
 import 'package:flutter/services.dart';
-
+import 'package:ionhive/feature/home/presentation/pages/qrscanner/presentation/pages/qr_scannerpage.dart';
 import 'feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart'; // Add this import for controlling orientation
 
 void main() async {
@@ -95,6 +95,8 @@ class IonHive extends StatelessWidget {
             GetPage(
                 name: '/noInternet',
                 page: () => NoInternetScreen()), // Add route
+            GetPage(name: '/qr-scanner', page: () => const QrScannerpage()),
+
           ],
         ));
   }
