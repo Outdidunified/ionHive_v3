@@ -10,7 +10,7 @@ class SessionHistoryControllers extends GetxController {
   final Fetchtotalsessioncountrep _fetchtotalsessioncountrep =
       Fetchtotalsessioncountrep();
   final SessionController sessionController = Get.find<SessionController>();
-
+  final RxBool isArrowVisible = true.obs;
   final RxBool isLoading = false.obs;
   final RxBool hasInitialData = false.obs;
   final RxBool hasError = false.obs;
@@ -39,6 +39,10 @@ class SessionHistoryControllers extends GetxController {
         hasInitialData.value = false;
       }
     });
+  }
+
+  void hideArrow() {
+    isArrowVisible.value = false;
   }
 
   Future<void> fetchtotalsessions() async {
@@ -193,6 +197,28 @@ class SessionHistoryControllers extends GetxController {
       debugPrint('Error downloading session details: $e');
       CustomSnackbar.showError(
           message: "Issue downloading session details. Try again later.");
+    }
+  }
+
+  Future<void> downloadInvoice(
+      {required String sessionId, required String chargerId}) async {
+    final authToken = sessionController.token.value;
+    final emailId = sessionController.emailId.value;
+
+    try {
+      isLoading.value = true;
+      await _fetchtotalsessioncountrep.downloadinvoice(
+        emailId,
+        int.parse(sessionId),
+        authToken,
+        chargerId,
+      );
+    } catch (e) {
+      debugPrint('Error downloading invoice: $e');
+      CustomSnackbar.showError(
+          message: "Issue downloading invoice. Try again later.");
+    } finally {
+      isLoading.value = false;
     }
   }
 

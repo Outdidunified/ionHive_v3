@@ -52,4 +52,27 @@ class Fetchtotalsessioncountrep {
       throw Exception('Error downloading file: $e');
     }
   }
+
+  Future<void> downloadinvoice(String? emailId, int session_id,
+      String authToken, String charger_id) async {
+    try {
+      final http.Response response = await _api.downloadinvoice(
+          emailId, session_id, authToken, charger_id);
+
+      if (response.statusCode == 200 &&
+          response.headers['content-type']?.contains('application/pdf') ==
+              true) {
+        final directory = await getApplicationDocumentsDirectory();
+        final filePath = '${directory.path}/ChargingInvoice_$emailId.pdf';
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+        await OpenFile.open(filePath);
+      } else {
+        throw Exception(
+            'Failed to download file: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error downloading file: $e');
+    }
+  }
 }

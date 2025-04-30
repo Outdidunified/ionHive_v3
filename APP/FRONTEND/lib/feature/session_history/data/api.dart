@@ -129,4 +129,47 @@ class Sessionhistoryapicalls {
       throw HttpException(500, '$e');
     }
   }
+
+  Future<http.Response> downloadinvoice(String? emailId, int session_id,
+      String authToken, String charger_id) async {
+    final url = Sessionurl.downloadinvoice;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+          'email_id': emailId,
+          'session_id': session_id,
+          "charger_id": charger_id
+        }),
+      );
+
+      // For PDF downloads, we need to return the raw response
+      // instead of processing it with _handleResponse
+      if (response.statusCode == 200) {
+        return response;
+      } else {
+        // If not successful, throw an exception
+        final data = jsonDecode(response.body);
+        debugPrint(
+            'Error downloading PDF: ${response.statusCode}, body: $data');
+        throw HttpException(
+          response.statusCode,
+          data['message'] ?? _getDefaultErrorMessage(response.statusCode),
+        );
+      }
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
 }

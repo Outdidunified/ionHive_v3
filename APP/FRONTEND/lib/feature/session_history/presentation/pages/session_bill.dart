@@ -2,20 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:ionhive/feature/more/presentation/pages/help&support/presentation/pages/contact%20us.dart';
-
-class SessionBillController extends GetxController {
-  final RxBool isArrowVisible = true.obs;
-
-  void hideArrow() {
-    isArrowVisible.value = false;
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
-    debugPrint("SessionBillController: Controller closed");
-  }
-}
+import 'package:ionhive/feature/session_history/presentation/controllers/session_history_controllers.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class SessionBill extends StatelessWidget {
   final Map<String, dynamic> session;
@@ -123,10 +111,7 @@ class SessionBill extends StatelessWidget {
     );
   }
 
-  void scrollToUsageReport(SessionBillController controller) {
-    // Hide arrow via controller
-    controller.hideArrow();
-
+  void scrollToUsageReport(SessionHistoryControllers controller) {
     // Scroll to usage report
     final BuildContext? context = usageReportKey.currentContext;
     if (context != null) {
@@ -143,8 +128,9 @@ class SessionBill extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context).size;
     final theme = Theme.of(context);
-    final SessionBillController controller =
-        Get.put(SessionBillController(), tag: 'session_bill_${session['_id']}');
+    final SessionHistoryControllers controller = Get.put(
+        SessionHistoryControllers(),
+        tag: 'session_bill_${session['_id']}');
 
     // ValueNotifier for tap animation
     final tapAnimation = ValueNotifier<double>(1.0);
@@ -624,10 +610,33 @@ class SessionBill extends StatelessWidget {
                                         ),
                                       ),
                                       ElevatedButton.icon(
-                                        onPressed: onShare ??
-                                            () {
-                                              // Placeholder for download invoice action
-                                            },
+                                        onPressed: controller.isLoading.value
+                                            ? null
+                                            : () async {
+                                                final sessionId =
+                                                    session['session_id']
+                                                            ?.toString() ??
+                                                        '';
+                                                final chargerId =
+                                                    session['charger_id']
+                                                            ?.toString() ??
+                                                        '';
+
+                                                if (sessionId.isEmpty ||
+                                                    chargerId.isEmpty) {
+                                                  CustomSnackbar.showError(
+                                                    message:
+                                                        "Missing session or charger information",
+                                                  );
+                                                  return;
+                                                }
+
+                                                await controller
+                                                    .downloadInvoice(
+                                                  sessionId: sessionId,
+                                                  chargerId: chargerId,
+                                                );
+                                              },
                                         icon: Icon(
                                           Icons.download,
                                           color: theme.colorScheme.primary,

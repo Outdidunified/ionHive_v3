@@ -6,6 +6,7 @@ import 'package:ionhive/core/splash_screen.dart';
 import 'package:ionhive/feature/auth/presentation/pages/GettingStarted%20page.dart';
 import 'package:ionhive/feature/auth/presentation/pages/login_page.dart'; // Login Page
 import 'package:ionhive/feature/home/presentation/controllers/home_controller.dart';
+import 'package:ionhive/feature/home/presentation/pages/search/presentation/controllers/search_controllers.dart';
 import 'package:ionhive/feature/landing_page.dart'; // Landing Page
 import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/utils/theme/themes.dart'; // App theme
@@ -43,6 +44,8 @@ void main() async {
   Get.put(SessionController()); // Ensure it is available globally
   Get.put(ConnectivityController());
   Get.put(VehicleController());
+  Get.put(SearchpageController());
+
 
   runApp(const IonHive());
 }

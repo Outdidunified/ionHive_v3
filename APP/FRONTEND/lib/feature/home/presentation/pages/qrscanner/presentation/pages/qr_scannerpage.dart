@@ -12,21 +12,6 @@ class QrScannerpage extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final scanAreaSize = size.width * 0.7;
 
-    controller.scannedCode.listen((value) {
-      if (value.isNotEmpty) {
-        showModalBottomSheet(
-          context: context,
-          isDismissible: false,
-          isScrollControlled: true,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          backgroundColor: Colors.white,
-          builder: (_) => _buildScannedBottomSheet(controller),
-        );
-      }
-    });
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -44,33 +29,35 @@ class QrScannerpage extends StatelessWidget {
     );
   }
 
-  Widget _buildScannerView(QrScannerController controller, double scanAreaSize) {
+  Widget _buildScannerView(
+      QrScannerController controller, double scanAreaSize) {
     return Obx(() => controller.isScanning.value
         ? MobileScanner(
-      controller: controller.scannerController,
-      onDetect: (capture) {
-        final List<Barcode> barcodes = capture.barcodes;
-        if (barcodes.isNotEmpty && barcodes[0].rawValue != null) {
-          controller.handleScannedCode(barcodes[0].rawValue!);
-        }
-      },
-    )
+            controller: controller.scannerController,
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              if (barcodes.isNotEmpty && barcodes[0].rawValue != null) {
+                controller.handleScannedCode(barcodes[0]
+                    .rawValue!); // Scanned code is directly handled here
+              }
+            },
+          )
         : Center(
-      child: Container(
-        width: scanAreaSize,
-        height: scanAreaSize,
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Center(
-          child: Text(
-            'Scanning paused',
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-        ),
-      ),
-    ));
+            child: Container(
+              width: scanAreaSize,
+              height: scanAreaSize,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Center(
+                child: Text(
+                  'Scanning paused',
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+              ),
+            ),
+          ));
   }
 
   Widget _buildPermissionDeniedView(QrScannerController controller) {
@@ -113,9 +100,12 @@ class QrScannerpage extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned(top: 5, left: 0, child: _buildCorner(true, true)),
-                  Positioned(top: 0, right: 0, child: _buildCorner(true, false)),
-                  Positioned(bottom: 0, left: 0, child: _buildCorner(false, true)),
-                  Positioned(bottom: 0, right: 0, child: _buildCorner(false, false)),
+                  Positioned(
+                      top: 0, right: 0, child: _buildCorner(true, false)),
+                  Positioned(
+                      bottom: 0, left: 0, child: _buildCorner(false, true)),
+                  Positioned(
+                      bottom: 0, right: 0, child: _buildCorner(false, false)),
                 ],
               ),
             ),
@@ -146,10 +136,18 @@ class QrScannerpage extends StatelessWidget {
       height: 20,
       decoration: BoxDecoration(
         border: Border(
-          top: isTop ? const BorderSide(color: Colors.blue, width: 4) : BorderSide.none,
-          bottom: !isTop ? const BorderSide(color: Colors.blue, width: 4) : BorderSide.none,
-          left: isLeft ? const BorderSide(color: Colors.blue, width: 4) : BorderSide.none,
-          right: !isLeft ? const BorderSide(color: Colors.blue, width: 4) : BorderSide.none,
+          top: isTop
+              ? const BorderSide(color: Colors.blue, width: 4)
+              : BorderSide.none,
+          bottom: !isTop
+              ? const BorderSide(color: Colors.blue, width: 4)
+              : BorderSide.none,
+          left: isLeft
+              ? const BorderSide(color: Colors.blue, width: 4)
+              : BorderSide.none,
+          right: !isLeft
+              ? const BorderSide(color: Colors.blue, width: 4)
+              : BorderSide.none,
         ),
       ),
     );
@@ -175,21 +173,24 @@ class QrScannerpage extends StatelessWidget {
           ),
           const Text(
             'Scan QR Code',
-            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Obx(() => Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: IconButton(
-              icon: Icon(
-                controller.isFlashlightOn.value ? Icons.flash_on : Icons.flash_off,
-                color: Colors.white,
-              ),
-              onPressed: () => controller.toggleFlashlight(),
-            ),
-          )),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    controller.isFlashlightOn.value
+                        ? Icons.flash_on
+                        : Icons.flash_off,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => controller.toggleFlashlight(),
+                ),
+              )),
         ],
       ),
     );
@@ -204,76 +205,26 @@ class QrScannerpage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Obx(() => ElevatedButton.icon(
-            onPressed: () {
-              if (controller.isScanning.value) {
-                controller.pauseScanning();
-              } else {
-                controller.resumeScanning();
-              }
-            },
-            icon: Icon(controller.isScanning.value ? Icons.pause : Icons.play_arrow),
-            label: Text(controller.isScanning.value ? 'Pause' : 'Resume'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            ),
-          )),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScannedBottomSheet(QrScannerController controller) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.check_circle, color: Colors.green, size: 64),
-          const SizedBox(height: 16),
-          const Text(
-            'QR Code Scanned',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            controller.scannedCode.value,
-            style: const TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton.icon(
                 onPressed: () {
-                  controller.resumeScanning();
-                  controller.scannedCode.value = '';
-                  Get.back(); // Close the sheet
+                  if (controller.isScanning.value) {
+                    controller.pauseScanning();
+                  } else {
+                    controller.resumeScanning();
+                  }
                 },
-                icon: const Icon(Icons.qr_code_scanner),
-                label: const Text('Scan Again'),
+                icon: Icon(controller.isScanning.value
+                    ? Icons.pause
+                    : Icons.play_arrow),
+                label: Text(controller.isScanning.value ? 'Pause' : 'Resume'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
                 ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Get.back(); // Close the sheet
-                  Get.back(result: controller.scannedCode.value); // Return the result
-                },
-                icon: const Icon(Icons.check),
-                label: const Text('Confirm'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
-          ),
+              )),
         ],
       ),
     );

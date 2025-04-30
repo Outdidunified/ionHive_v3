@@ -9,4 +9,7 @@ class Sessionurl {
 
   static final String downloadChargingSessionDetails =
       '${iOnHiveCore.baseUrl}/session/downloadChargingSessionDetails';
+
+  static final String downloadinvoice =
+      '${iOnHiveCore.baseUrl}/session/downloadInvoice';
 }
