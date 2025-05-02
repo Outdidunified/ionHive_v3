@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/feature/home/presentation/pages/qrscanner/presentation/controllers/qr_controller.dart';
@@ -18,142 +19,96 @@ class QrScannerpage extends StatelessWidget {
         child: Stack(
           children: [
             Obx(() => controller.hasPermission.value
-                ? _buildScannerView(controller, scanAreaSize)
-                : _buildPermissionDeniedView(controller)),
-            _buildOverlay(size, scanAreaSize),
-            _buildTopBar(controller),
-            _buildBottomControls(controller),
+                ? _buildScanner(controller)
+                : _buildPermissionView(controller)),
+            _buildBlurOverlay(size, scanAreaSize),
+            _buildTopBar(),
+            _buildControls(controller),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildScannerView(
-      QrScannerController controller, double scanAreaSize) {
+  Widget _buildScanner(QrScannerController controller) {
     return Obx(() => controller.isScanning.value
         ? MobileScanner(
             controller: controller.scannerController,
             onDetect: (capture) {
-              final List<Barcode> barcodes = capture.barcodes;
-              if (barcodes.isNotEmpty && barcodes[0].rawValue != null) {
-                controller.handleScannedCode(barcodes[0]
-                    .rawValue!); // Scanned code is directly handled here
-              }
+              final code = capture.barcodes.firstOrNull?.rawValue;
+              if (code != null) controller.handleScannedCode(code);
             },
           )
-        : Center(
-            child: Container(
-              width: scanAreaSize,
-              height: scanAreaSize,
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Center(
-                child: Text(
-                  'Scanning paused',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
-              ),
-            ),
-          ));
+        : const SizedBox.shrink());
   }
 
-  Widget _buildPermissionDeniedView(QrScannerController controller) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.add_circle, color: Colors.white, size: 64),
-          const SizedBox(height: 16),
-          const Text(
-            'Camera permission is required',
-            style: TextStyle(color: Colors.white, fontSize: 18),
+  Widget _buildBlurOverlay(Size size, double scanAreaSize) {
+    return Stack(
+      children: [
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+        ),
+        Center(
+          child: Container(
+            width: scanAreaSize,
+            height: scanAreaSize,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white, width: 2),
+            ),
+            child: Stack(
+              children: [
+                _buildGlowCorner(Alignment.topLeft),
+                _buildGlowCorner(Alignment.topRight),
+                _buildGlowCorner(Alignment.bottomLeft),
+                _buildGlowCorner(Alignment.bottomRight),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => controller.checkCameraPermission(),
-            child: const Text('Grant Permission'),
+        ),
+        Positioned(
+          top: 50,
+          left: 0,
+          right: 0,
+          child: const Center(
+            child: Text(
+              'Align QR code inside the box',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildOverlay(Size size, double scanAreaSize) {
-    return SizedBox(
-      width: size.width,
-      height: size.height,
-      child: Stack(
-        children: [
-          Container(color: Colors.black.withOpacity(0.5)),
-          Center(
-            child: Container(
-              width: scanAreaSize,
-              height: scanAreaSize,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 2),
-                borderRadius: BorderRadius.circular(16),
-                color: Colors.transparent,
-              ),
-              child: Stack(
-                children: [
-                  Positioned(top: 5, left: 0, child: _buildCorner(true, true)),
-                  Positioned(
-                      top: 0, right: 0, child: _buildCorner(true, false)),
-                  Positioned(
-                      bottom: 0, left: 0, child: _buildCorner(false, true)),
-                  Positioned(
-                      bottom: 0, right: 0, child: _buildCorner(false, false)),
-                ],
-              ),
-            ),
+  Widget _buildGlowCorner(Alignment alignment) {
+    return Align(
+      alignment: alignment,
+      child: Container(
+        width: 25,
+        height: 25,
+        decoration: BoxDecoration(
+          border: Border(
+            top: alignment.y < 0
+                ? const BorderSide(color: Colors.cyanAccent, width: 3)
+                : BorderSide.none,
+            bottom: alignment.y > 0
+                ? const BorderSide(color: Colors.cyanAccent, width: 3)
+                : BorderSide.none,
+            left: alignment.x < 0
+                ? const BorderSide(color: Colors.cyanAccent, width: 3)
+                : BorderSide.none,
+            right: alignment.x > 0
+                ? const BorderSide(color: Colors.cyanAccent, width: 3)
+                : BorderSide.none,
           ),
-          Positioned(
-            bottom: size.height * 0.25,
-            left: 0,
-            right: 0,
-            child: const Center(
-              child: Text(
-                'Align Your Charger QR code within the frame',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCorner(bool isTop, bool isLeft) {
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        border: Border(
-          top: isTop
-              ? const BorderSide(color: Colors.blue, width: 4)
-              : BorderSide.none,
-          bottom: !isTop
-              ? const BorderSide(color: Colors.blue, width: 4)
-              : BorderSide.none,
-          left: isLeft
-              ? const BorderSide(color: Colors.blue, width: 4)
-              : BorderSide.none,
-          right: !isLeft
-              ? const BorderSide(color: Colors.blue, width: 4)
-              : BorderSide.none,
         ),
       ),
     );
   }
 
-  Widget _buildTopBar(QrScannerController controller) {
+  Widget _buildTopBar() {
     return Positioned(
       top: 16,
       left: 16,
@@ -161,11 +116,8 @@ class QrScannerpage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(30),
-            ),
+          CircleAvatar(
+            backgroundColor: Colors.black.withOpacity(0.6),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Get.back(),
@@ -174,57 +126,72 @@ class QrScannerpage extends StatelessWidget {
           const Text(
             'Scan QR Code',
             style: TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           ),
-          Obx(() => Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    controller.isFlashlightOn.value
-                        ? Icons.flash_on
-                        : Icons.flash_off,
-                    color: Colors.white,
-                  ),
-                  onPressed: () => controller.toggleFlashlight(),
-                ),
-              )),
+          const SizedBox(width: 48), // Space holder to balance center
         ],
       ),
     );
   }
 
-  Widget _buildBottomControls(QrScannerController controller) {
+  Widget _buildControls(QrScannerController controller) {
     return Positioned(
-      bottom: 32,
+      bottom: 48,
       left: 0,
       right: 0,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Obx(() => ElevatedButton.icon(
-                onPressed: () {
-                  if (controller.isScanning.value) {
-                    controller.pauseScanning();
-                  } else {
-                    controller.resumeScanning();
-                  }
-                },
-                icon: Icon(controller.isScanning.value
+      child: Obx(() => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildControlButton(
+                icon: controller.isFlashlightOn.value
+                    ? Icons.flash_on
+                    : Icons.flash_off,
+                onPressed: () => controller.toggleFlashlight(),
+              ),
+              const SizedBox(width: 24),
+              _buildControlButton(
+                icon: controller.isScanning.value
                     ? Icons.pause
-                    : Icons.play_arrow),
-                label: Text(controller.isScanning.value ? 'Pause' : 'Resume'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
-                ),
-              )),
+                    : Icons.play_arrow,
+                onPressed: () {
+                  controller.isScanning.value
+                      ? controller.pauseScanning()
+                      : controller.resumeScanning();
+                },
+              ),
+            ],
+          )),
+    );
+  }
+
+  Widget _buildControlButton(
+      {required IconData icon, required VoidCallback onPressed}) {
+    return CircleAvatar(
+      radius: 28,
+      backgroundColor: Colors.blueAccent,
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white),
+        onPressed: onPressed,
+      ),
+    );
+  }
+
+  Widget _buildPermissionView(QrScannerController controller) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.camera_alt, color: Colors.white, size: 64),
+          const SizedBox(height: 16),
+          const Text(
+            'Camera permission required',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => controller.checkCameraPermission(),
+            child: const Text('Grant Permission'),
+          ),
         ],
       ),
     );

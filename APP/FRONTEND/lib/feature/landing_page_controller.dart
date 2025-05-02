@@ -17,7 +17,7 @@ class LandingPageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Don't initialize the controller here, let the getter handle it
+    debugPrint('Initializing PageController');
   }
 
   void changePage(int index) {
@@ -44,4 +44,6 @@ class LandingPageController extends GetxController {
     _pageController = null;
     super.onClose();
   }
+
+
 }

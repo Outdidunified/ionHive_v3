@@ -573,7 +573,7 @@ class SearchpageController extends GetxController {
         }
 
         Get.to(
-          () => Chargingpage(
+          () => ChargingPage(
             chargerId: chargerId,
             chargerDetails: chargerData,
             connectorId: connectorId.toString(),
