@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ionhive/feature/home/presentation/pages/search/presentation/controllers/search_controllers.dart';
 import 'package:ionhive/feature/landing_page.dart';
 import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/feature/ChargingStation/presentation/controllers/Chargingstation_controllers.dart';
@@ -28,6 +29,7 @@ class SavedDevicepage extends StatelessWidget {
     final bool isDarkTheme = theme.brightness == Brightness.dark;
     final SavedDeviceControllers savedController = Get.put(SavedDeviceControllers());
     final ChargingStationController chargingController = Get.put(ChargingStationController());
+    final searchpageController = Get.find<SearchpageController>();
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -195,6 +197,7 @@ class SavedDevicepage extends StatelessWidget {
                   .firstWhere((device) => device['charger_id'].toString() == chargerId);
               final connectorIndex = savedController.selectedConnector['connectorIndex'];
               final connector = (selectedDevice['connectors'] as List<dynamic>)[connectorIndex];
+
               return Positioned(
                 left: 0,
                 right: 0,
@@ -215,17 +218,20 @@ class SavedDevicepage extends StatelessWidget {
                     ),
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.to(() => Chargingpage(
-                          chargerId: selectedDevice['charger_id'],
-                          chargerDetails: selectedDevice,
-                          connectorId: connector['connector_id'].toString(),
-                          connectorDetails: {
-                            'type': connector['connector_type'] == 1 ? 'Socket' : 'Gun',
-                            'power': selectedDevice['max_power'] ?? 'N/A',
-                            'status': connector['charger_status'] ?? ' - ',
-                          },
-                          unitPrice: 0,
-                        ));
+                        // Make sure you have valid data before calling the controller method
+                        if (selectedDevice != null && connector != null) {
+                          searchpageController.handleStartCharging(
+                            chargerId: selectedDevice['charger_id'],
+                            chargerDetails: selectedDevice,
+                            selectedConnectorId: connector['connector_id'].toString(),
+                            connectorDetailsMap: {
+                              'type': connector['connector_type'].toString(),
+                              'status': connector['charger_status'] ?? ' - ',
+                            },
+                          );
+                        } else {
+                          print("Charger or Connector data is missing");
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,

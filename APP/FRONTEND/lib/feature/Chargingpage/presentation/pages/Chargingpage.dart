@@ -34,7 +34,7 @@ class Chargingpage extends StatelessWidget {
             Text('Connector ID: $connectorId'),
             Text(
                 'Type: ${connectorDetails['connector_type'] == 1 ? 'Socket' : 'Gun'}'),
-            Text('Status: ${connectorDetails['charger_status'] ?? 'Unknown'}'),
+            Text('Status: ${connectorDetails['status'] ?? 'Unknown'}'),
             if (unitPrice > 0)
               Text('Unit Price: ₹${unitPrice.toStringAsFixed(2)}/kWh'),
           ],

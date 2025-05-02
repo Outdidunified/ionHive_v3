@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ionhive/feature/ChargingStation/presentation/controllers/Chargingstation_controllers.dart';
 import 'package:ionhive/feature/ChargingStation/presentation/widgets/Chargingstationwidget.dart';
 import 'package:ionhive/feature/Chargingpage/presentation/pages/Chargingpage.dart';
+import 'package:ionhive/feature/home/presentation/pages/search/presentation/controllers/search_controllers.dart';
 import 'package:ionhive/feature/more/presentation/pages/help&support/presentation/pages/contact%20us.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -14,6 +15,8 @@ class ChargingStationPage extends StatelessWidget {
   final Map<String, dynamic> station;
   final ChargingStationController controller =
       Get.put(ChargingStationController());
+  final searchpageController = Get.find<SearchpageController>();
+
 
   // Controller to manage the Google Map
   GoogleMapController? _mapController;
@@ -453,24 +456,26 @@ class ChargingStationPage extends StatelessWidget {
                     ),
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.to(() => Chargingpage(
-                              chargerId: charger['charger_id'],
-                              chargerDetails: charger,
-                              connectorId: connector['connector_id'].toString(),
-                              connectorDetails: {
-                                'type': connector['connector_type'].toString(),
-                                'power':
-                                    charger['max_power']?.toString() ?? 'N/A',
-                                'status': connector['charger_status'] ?? ' - ',
-                              },
-                            unitPrice: 0,
-                            ));
+                        // Make sure you have valid data before calling the controller method
+                        if (charger != null && connector != null) {
+                          searchpageController.handleStartCharging(
+                            chargerId: charger['charger_id'],
+                            chargerDetails: charger,
+                            selectedConnectorId: connector['connector_id'].toString(),
+                            connectorDetailsMap: {
+                              'type': connector['connector_type'].toString(),
+                              'power': charger['max_power']?.toString() ?? 'N/A',
+                              'status': connector['charger_status'] ?? ' - ',
+                            },
+                          );
+                        } else {
+                          print("Charger or Connector data is missing");
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
-                        padding: EdgeInsets.symmetric(
-                            vertical: screenHeight * 0.015),
+                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.015),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -484,6 +489,7 @@ class ChargingStationPage extends StatelessWidget {
                         ),
                       ),
                     ),
+
                   ),
                 ),
               );

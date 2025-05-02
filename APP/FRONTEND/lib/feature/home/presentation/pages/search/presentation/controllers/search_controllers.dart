@@ -260,97 +260,40 @@ class SearchpageController extends GetxController {
             ),
             const SizedBox(height: 16),
             Obx(() => SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: selectedConnectorId.value == null
-                    ? null
-                    : () => handleStartCharging(
-                  chargerId: chargerId,
-                  chargerDetails: chargerDetails,
-                  connectorDetailsMap: connectorDetailsMap,
-                  selectedConnectorId: selectedConnectorId,
-                  isLoading: isLoading,
-                ),
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(
-                    isLoading.value || selectedConnectorId.value == null
-                        ? Colors.grey
-                        : Colors.green,
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: selectedConnectorId.value == null
+                        ? null
+                        : () => handleStartCharging(
+                              chargerId: chargerId,
+                              chargerDetails: chargerDetails,
+                              connectorDetailsMap: connectorDetailsMap,
+                              selectedConnectorId: selectedConnectorId,
+                              isLoading: isLoading,
+                            ),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                        isLoading.value || selectedConnectorId.value == null
+                            ? Colors.grey
+                            : Colors.green,
+                      ),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
+                    ),
+                    child: Obx(() => Text(
+                          isLoading.value
+                              ? 'Processing...'
+                              : (selectedConnectorId.value == null
+                                  ? 'Select Connector'
+                                  : 'Charge Now'),
+                          style: const TextStyle(fontSize: 16),
+                        )),
                   ),
-                  foregroundColor: MaterialStateProperty.all(Colors.white),
-                ),
-                child: Obx(() => Text(
-                  isLoading.value
-                      ? 'Processing...'
-                      : (selectedConnectorId.value == null
-                      ? 'Select Connector'
-                      : 'Charge Now'),
-                  style: const TextStyle(fontSize: 16),
-                )),
-              ),
-            ))
-
-
+                ))
           ],
         ),
       ),
     );
   }
-
-  Future<void> handleStartCharging({
-   chargerId,
-   chargerDetails,
-    connectorDetailsMap,
-  selectedConnectorId,
-   isLoading,
-  }) async {
-    isLoading.value = true;
-    try {
-      final authToken = sessionController.token.value;
-      final userId = sessionController.userId.value;
-      final emailId = sessionController.emailId.value;
-
-      final response = await qrscannerRepo.updateconnectorstocharging(
-        userId,
-        emailId,
-        authToken,
-        chargerId,
-        selectedConnectorId!.value!,
-      );
-
-      if (response.error == false) {
-        print("Unit Price: ${response.unitPrice}");
-
-        CustomSnackbar.showSuccess(
-          message: 'Charging started with Connector ${selectedConnectorId.value}',
-          duration: const Duration(seconds: 3),
-        );
-
-        await Future.delayed(const Duration(seconds: 3));
-        Get.back();
-
-        Get.to(
-              () => Chargingpage(
-            chargerId: chargerId,
-            chargerDetails: chargerDetails.value!.toJson(),
-            connectorId: selectedConnectorId.value!.toString(),
-            connectorDetails: connectorDetailsMap[selectedConnectorId.value!]!.toJson(),
-            unitPrice: response.unitPrice,
-          ),
-          transition: Transition.rightToLeft,
-        );
-      }
-    } catch (e) {
-      CustomSnackbar.showError(
-        message: 'Failed to start charging: $e',
-        duration: const Duration(seconds: 3),
-      );
-      print('cerror: $e');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
 
   // Helper method to get status color
   Color _getStatusColor(String status) {
@@ -552,6 +495,107 @@ class SearchpageController extends GetxController {
         message: 'Could not fetch coordinates for $location',
         duration: const Duration(seconds: 3), // <-- Set duration here
       );
+    }
+  }
+
+  // Add the handleStartCharging method for ChargingStationPage
+  Future<void> handleStartCharging({
+    required String chargerId,
+    required dynamic chargerDetails,
+    required dynamic selectedConnectorId,
+    required dynamic connectorDetailsMap,
+    RxBool? isLoading,
+  }) async {
+    // Use the local isLoading if provided, otherwise use the controller's isLoading
+    final loadingState = isLoading ?? this.isLoading;
+    loadingState.value = true;
+
+    try {
+      final authToken = sessionController.token.value;
+      final userId = sessionController.userId.value;
+      final emailId = sessionController.emailId.value;
+
+      // Handle different types of selectedConnectorId
+      int connectorId;
+      if (selectedConnectorId is RxInt || selectedConnectorId is RxnInt) {
+        connectorId = selectedConnectorId.value;
+      } else if (selectedConnectorId is String) {
+        connectorId = int.parse(selectedConnectorId);
+      } else if (selectedConnectorId is int) {
+        connectorId = selectedConnectorId;
+      } else {
+        throw Exception(
+            'Invalid connector ID type: ${selectedConnectorId.runtimeType}');
+      }
+
+      final response = await qrscannerRepo.updateconnectorstocharging(
+        userId,
+        emailId,
+        authToken,
+        chargerId,
+        connectorId,
+      );
+
+      if (response.error == false) {
+        print("Unit Price: ${response.unitPrice}");
+
+        CustomSnackbar.showSuccess(
+          message: 'Charging started with Connector $connectorId',
+          duration: const Duration(seconds: 3),
+        );
+
+        await Future.delayed(const Duration(seconds: 3));
+        Get.back();
+
+        // Create a map for connector details if it's not already a map
+        Map<String, dynamic> connDetails;
+        if (connectorDetailsMap is Map<String, dynamic>) {
+          connDetails = connectorDetailsMap;
+        } else {
+          connDetails = {
+            'connector_type': 1,
+            'power': 'N/A',
+            'charger_status': 'Unknown',
+          };
+        }
+
+        // Create a map for charger details if it's not already a map
+        Map<String, dynamic> chargerData;
+        if (chargerDetails is Map<String, dynamic>) {
+          chargerData = chargerDetails;
+        } else if (chargerDetails is Charger) {
+          chargerData = chargerDetails.toJson();
+        } else {
+          chargerData = {
+            'vendor': 'Unknown',
+            'max_power': 'N/A',
+          };
+        }
+
+        Get.to(
+          () => Chargingpage(
+            chargerId: chargerId,
+            chargerDetails: chargerData,
+            connectorId: connectorId.toString(),
+            connectorDetails: connDetails,
+            unitPrice: response.unitPrice,
+          ),
+          transition: Transition.rightToLeft,
+        );
+      } else {
+        CustomSnackbar.showError(
+          message: 'Failed to start charging: ${response.message}',
+          duration: const Duration(seconds: 3),
+        );
+      }
+    } catch (e) {
+      CustomSnackbar.showError(
+        message: 'Failed to start charging: $e',
+        duration: const Duration(seconds: 3),
+      );
+      print('Charging error: $e');
+    } finally {
+      loadingState.value = false;
     }
   }
 }
