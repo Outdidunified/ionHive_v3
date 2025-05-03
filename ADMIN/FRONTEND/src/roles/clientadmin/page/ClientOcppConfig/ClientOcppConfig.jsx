@@ -6,11 +6,10 @@ import InputField from '../../../../utils/InputField';
 
 const ClientOccpConfig = ({ userInfo, handleLogout }) => {
     const {
-        chargerId, setChargerId,
-        commandsLibrary, setCommandsLibrary,
-        selectedCommand, setSelectedCommand,
-        response, setResponse,
-        getActionPayloadCalled,
+        chargerId,
+        commandsLibrary, 
+        selectedCommand, 
+        response, 
         reservationId, setReservationId,
         connectorId, setConnectorId,
         availabilityType, setAvailabilityType,
@@ -46,7 +45,7 @@ const ClientOccpConfig = ({ userInfo, handleLogout }) => {
         addUpdateList, setAddUpdateList,
         deleteList, setDeleteList,
         sendEmptyListWhenFull, setSendEmptyListWhenFull,
-        errorMessage, setErrorMessage,
+        errorMessage, 
         handleClearCache, handleRemoteStartTransaction,
         filterType, setFilterType,
         clearChargingProfileConnectorId, setClearChargingProfileConnectorId,
@@ -65,7 +64,7 @@ const ClientOccpConfig = ({ userInfo, handleLogout }) => {
         url, setUrl,
         chargerids, setChargerids,
         faultParametersConfig, setFaultParametersConfig,
-        maxCurrent, SetMaxCurrent, getActionPayload,
+        maxCurrent, SetMaxCurrent,
         onCommandClick, handleCancelReservation, handleChangeAvailability,
         handleChangeConfiguration, handleClearChargingProfile,
         handleDataTransferCustom,
@@ -82,7 +81,6 @@ const ClientOccpConfig = ({ userInfo, handleLogout }) => {
         handleUpdateFirmware,
         handleSendLocalList,
         handleSetChargingProfile,
-        onSendCommand,
         handleChargerIdChange, loading
     } = useClientOccpConfig(userInfo)
 

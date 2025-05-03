@@ -3,15 +3,15 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useOutputTypeConfig from '../../hooks/OutputTypeConfig/OutputTypeConfigHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 
 const OutputTypeConfig = ({ userInfo, handleLogout }) => {
     const {
         loading,
         error,
-        posts, 
-        initialOutputTypeConfig, 
+        posts,
+        initialOutputTypeConfig,
         handleSearchInputChange,
         closeAddModal,
         modalAddStyle,
@@ -19,14 +19,14 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
         add_OutputType,
         addOutputTypeConfig,
         handleModel,
-        dataItem, 
+        dataItem,
         closeEditModal, modalEditStyle,
         theadBackgroundColor,
         theadfixed, theadsticky, handleEditOutputTypeConfig,
         handleAddAddOutputTypeConfig, output_type_name,
         setEditOutputTypeConfig, editOutputTypeConfig, changeDeActivate,
         changeActivate, setOutputTypeConfig,
-        isUpdating,isloading
+        isUpdating, isloading
 
 
 
@@ -93,7 +93,7 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '150px' }}>Type Name</span>
                                                                     </div>
-                                                                    <InputField  placeholder="Output Type Name" maxLength={12} value={add_OutputTypeConfig}
+                                                                    <InputField placeholder="Output Type Name" maxLength={12} value={add_OutputTypeConfig}
                                                                         onChange={(e) => {
                                                                             const value = e.target.value;
                                                                             // Use a regex to allow only letters and numbers
@@ -102,11 +102,11 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                         required />                                                                </div>
                                                             </div>
 
-                                                            <LoadingButton
+                                                            <ReusableButton
                                                                 type="submit"
                                                                 loading={isloading}
                                                                 disabled={isloading}
-                                                            >Add</LoadingButton>
+                                                            >Add</ReusableButton>
 
                                                         </div>
                                                     </form>
@@ -127,13 +127,13 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '180px' }}>Type</span>
                                                                     </div>
-                                                                    <InputField  placeholder="Output Type" style={{ width: '200px' }} value={dataItem?.output_type || ''} readOnly />
+                                                                    <InputField placeholder="Output Type" style={{ width: '200px' }} value={dataItem?.output_type || ''} readOnly />
                                                                 </div>
                                                                 <div className="input-group">
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '180px' }}>Type Name</span>
                                                                     </div>
-                                                                    <InputField  placeholder="Output Type Name" maxLength={12} style={{ width: '200px' }} value={output_type_name}
+                                                                    <InputField placeholder="Output Type Name" maxLength={12} style={{ width: '200px' }} value={output_type_name}
                                                                         onChange={(e) => {
                                                                             const value = e.target.value;
                                                                             // Use a regex to allow only letters and numbers
@@ -143,15 +143,15 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                         required />
                                                                 </div>
                                                             </div>
-                                                          
 
-                                                            <LoadingButton
+
+                                                            <ReusableButton
                                                                 type="submit"
                                                                 loading={isUpdating}
                                                                 disabled={output_type_name === initialOutputTypeConfig || isUpdating}
                                                             >
                                                                 Update
-                                                            </LoadingButton>
+                                                            </ReusableButton>
 
                                                         </div>
                                                     </form>
@@ -180,7 +180,7 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <InputField  placeholder="Search by Output Type/Name" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange} />
+                                                            <InputField placeholder="Search by Output Type/Name" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange} />
                                                         </div>
                                                     </div>
                                                 </div>

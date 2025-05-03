@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useProfile from '../../hooks/Profile/ProfileHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const Profile = ({ userInfo, handleLogout }) => {
     const {
@@ -106,11 +106,11 @@ const Profile = ({ userInfo, handleLogout }) => {
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}<br />
 
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             loading={loading}
                                                             disabled={loading || !userModified}>
-                                                        Update</LoadingButton>
+                                                            Update</ReusableButton>
                                                     </form>
                                                 </div>
                                             </div>

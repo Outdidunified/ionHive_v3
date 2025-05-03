@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import axiosInstance from '../../../../utils/utils';
+import { showErrorAlert,showSuccessAlert } from '../../../../utils/alert';
 
 const useCreateFinance = (userInfo) => {
     const navigate = useNavigate();
@@ -11,32 +11,8 @@ const useCreateFinance = (userInfo) => {
     });
     
     const [errorMessage, setErrorMessage] = useState('');
-    
-   // Validation Function
-    // const validateNumberInput = (value, min, max) => {
-    //     value = value.replace(/[^0-9.]/g, ''); // Allow only numbers and one decimal point
-    //     const parts = value.split('.');
-
-    //     if (parts.length > 2) {
-    //         value = parts[0] + '.' + parts[1]; // Prevent multiple decimal points
-    //     } else if (parts.length === 2 && parts[1].length > 2) {
-    //         value = parts[0] + '.' + parts[1].slice(0, 2); // Limit to two decimal places
-    //     }
-
-    //     value = value.replace(/^0+(\d)/, '$1'); // Remove leading zeros properly
-
-    //     const numericValue = parseFloat(value);
-
-    //     if (isNaN(numericValue) || numericValue < min || numericValue > max) {
-    //         return { value, isValid: false };
-    //     }
-    //     return { value, isValid: true };
-    // };
-
-    // State to track touched fields
-    //const [touchedFields, setTouchedFields] = useState({});
-
-    // Handle Input Change
+    const [loading,setLoading]=useState(false)
+   
     const handleInputChange = (e, field) => {
         let min = 0, max = Infinity;
         let errorLabel = ""; 
@@ -94,6 +70,7 @@ const useCreateFinance = (userInfo) => {
         setErrorMessage(''); // Clear any previous errors
 
         try {
+            setLoading(true);
             const formattedFinanceData = {
                 association_id: userInfo.association_id,
                 gst: newFinance.gst || "0",
@@ -109,20 +86,18 @@ const useCreateFinance = (userInfo) => {
 
             await axiosInstance.post('/associationadmin/createFinance', formattedFinanceData);
 
-            Swal.fire({
-                position: 'center',
-                icon: 'success',
-                title: 'Finance created successfully',
-                showConfirmButton: false,
-                timer: 1500
-            });
+            showSuccessAlert('Finance created successfully'); // Show success alert using the helper
 
             goBack();
         } catch (error) {
             console.error('Error creating finance:', error);
+            showErrorAlert('Error', 'Failed to create finance. Please try again.'); // Show error alert using the helper
             setErrorMessage('Failed to create finance. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
+
 
     // back page
     const goBack = () => {
@@ -136,7 +111,7 @@ const useCreateFinance = (userInfo) => {
         setErrorMessage,
         handleInputChange,
         createFinance,
-        goBack
+        goBack,loading
     }}
 
     export default useCreateFinance; 

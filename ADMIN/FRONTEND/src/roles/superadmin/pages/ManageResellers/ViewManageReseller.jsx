@@ -8,25 +8,25 @@ import { useNavigate } from 'react-router-dom';
 const ViewManageReseller = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
 
-  const {
-    newUser,
-    formatTimestamp,
-  } = useViewManageReseller();
+    const {
+        newUser,
+        formatTimestamp,
+    } = useViewManageReseller();
 
-  const handleBack = () => {
-    navigate('/superadmin/ManageReseller');
-  };
+    const handleBack = () => {
+        navigate('/superadmin/ManageReseller');
+    };
 
-  const handleEditReseller = () => {
-    navigate('/superadmin/EditManageReseller', { state: { newUser } });
-  };
+    const handleEditReseller = () => {
+        navigate('/superadmin/EditManageReseller', { state: { newUser } });
+    };
 
     return (
         <div className='container-scroller'>
             {/* Header */}
             <Header userInfo={userInfo} handleLogout={handleLogout} />
             <div className="container-fluid page-body-wrapper">
-               {/* Sidebar */}
+                {/* Sidebar */}
                 <Sidebar />
                 <div className="main-panel">
                     <div className="content-wrapper">
@@ -38,7 +38,7 @@ const ViewManageReseller = ({ userInfo, handleLogout }) => {
                                     </div>
                                     <div className="col-12 col-xl-4">
                                         <div className="justify-content-end d-flex">
-                                            <button type="button" className="btn btn-outline-primary btn-icon-text" onClick={() => handleEditReseller(newUser)} style={{marginRight:'10px'}}><i className="mdi mdi-pencil btn-icon-prepend"></i>Edit</button>
+                                            <button type="button" className="btn btn-outline-primary btn-icon-text" onClick={() => handleEditReseller(newUser)} style={{ marginRight: '10px' }}><i className="mdi mdi-pencil btn-icon-prepend"></i>Edit</button>
                                             <button type="button" className="btn btn-success" onClick={handleBack}>Back</button>
                                         </div>
                                     </div>
@@ -53,8 +53,8 @@ const ViewManageReseller = ({ userInfo, handleLogout }) => {
                                             <div className="col-md-12 grid-margin">
                                                 <div className="row">
                                                     <div className="col-12 col-xl-12">
-                                                        <div style={{textAlign:'center'}}>
-                                                            <h4 className="card-title" style={{paddingTop:'10px'}}>Reseller Details</h4>
+                                                        <div style={{ textAlign: 'center' }}>
+                                                            <h4 className="card-title" style={{ paddingTop: '10px' }}>Reseller Details</h4>
                                                             <hr></hr>
                                                         </div>
                                                     </div>
@@ -112,7 +112,7 @@ const ViewManageReseller = ({ userInfo, handleLogout }) => {
                                                     <div className="row col-12 col-xl-12 viewDataCss">
                                                         <div className="col-md-4">
                                                             <div className="form-group row">
-                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Status: <span style={{ fontWeight: 'normal' }}>{newUser.status===true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</span></div>
+                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Status: <span style={{ fontWeight: 'normal' }}>{newUser.status === true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</span></div>
                                                             </div>
                                                         </div>
                                                     </div>

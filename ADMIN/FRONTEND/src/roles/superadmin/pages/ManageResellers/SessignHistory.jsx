@@ -6,17 +6,17 @@ import { useNavigate } from 'react-router-dom';
 import useSessionHistory from '../../hooks/ManageReseller/SessionHistoryHooks';
 import InputField from '../../../../utils/InputField';
 const SessionHistory = ({ userInfo, handleLogout }) => {
-  const navigate = useNavigate();
-  const {
-    posts,
-    handleSearchInputChange,
-    formatTimestamp,
-    dataItem,
-  } = useSessionHistory();
+    const navigate = useNavigate();
+    const {
+        posts,
+        handleSearchInputChange,
+        formatTimestamp,
+        dataItem,
+    } = useSessionHistory();
 
-  const backManageReseller = () => {
-    navigate('/superadmin/AssignCharger', { state: { dataItem } });
-  };
+    const backManageReseller = () => {
+        navigate('/superadmin/AssignCharger', { state: { dataItem } });
+    };
 
     return (
         <div className='container-scroller'>
@@ -56,12 +56,12 @@ const SessionHistory = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <InputField 
-                                                                placeholder="Search user or charger id" 
-                                                                ariaLabel="search" 
-                                                                ariadescribedby="search" 
-                                                                autoComplete="off" 
-                                                                onChange={handleSearchInputChange} 
+                                                            <InputField
+                                                                placeholder="Search user or charger id"
+                                                                ariaLabel="search"
+                                                                ariadescribedby="search"
+                                                                autoComplete="off"
+                                                                onChange={handleSearchInputChange}
                                                             />
                                                         </div>
                                                     </div>

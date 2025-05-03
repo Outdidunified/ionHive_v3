@@ -3,28 +3,28 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import Swal from 'sweetalert2';
 import useEditManageDevice from '../../hooks/ManageDevice/EditManageDeviceHooks';
+import InputField from '../../../../utils/InputField';
+import { Links } from 'react-router-dom';
+import ReusableButton from '../../../../utils/ReusableButton';
 
 const EditManageDevice = ({ userInfo, handleLogout }) => {
    const {
-    dataItem,
         latitude,longitude,
         setLatitude,setLongitude,
-        landmark,setLandmark,
+        setLandmark,
         tempLandmark,setTempLandmark,
         address, setAddress,
         wifiUsername, setWifiUsername,
         wifiPassword, setWifiPassword,
-        selectStatus, setSelectedStatus,
+        selectStatus,
         isLocationModalOpen, setIsLocationModalOpen,
         tempLat, setTempLat,
         tempLong, setTempLong,
         tempAddress, setTempAddress,
-        initialValues, setInitialValues,
         isModified,handleStatusChange,
         backManageDevice,
-        editBackManageDevice,
         editManageDevice,
-        isLocationModified
+        isLocationModified,isLoading
    }=useEditManageDevice(userInfo)
     
 
@@ -104,9 +104,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
             <div className="col-md-4">
                 <div className="form-group">
                     <label className="labelInput">WiFi Username</label>
-                    <input
-                        type="text"
-                        className="form-control"
+                    <InputField
                         value={wifiUsername}
                         maxLength={25}
                         onChange={(e) => setWifiUsername(e.target.value)}
@@ -118,9 +116,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
             <div className="col-md-4">
                 <div className="form-group">
                     <label className="labelInput">WiFi Password</label>
-                    <input
-                        type="text"
-                        className="form-control"
+                    <InputField
                         value={wifiPassword}
                         maxLength={15}
                         onChange={(e) => setWifiPassword(e.target.value.replace(/\s/g, ''))}
@@ -129,9 +125,12 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
             </div>
         </div>
     </div>
-    <div style={{ textAlign: 'center', padding: '15px' }}>
+    {/* <div style={{ textAlign: 'center', padding: '15px' }}>
                                                             <button type="submit" className="btn btn-primary mr-2" disabled={!isModified}>Update</button>
-                                                        </div>
+       
+       </div> */}
+       <ReusableButton type="submit"
+       loading={isLoading} disabled={!isModified}>Update</ReusableButton>
 </form>
 {isLocationModalOpen && (
     <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
@@ -152,9 +151,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                     <div className="d-flex justify-content-center">
                         <div style={{ width: '45%', marginRight: '10px' }}>
                             <label>Latitude</label>
-                            <input
-                                type="text"
-                                className="form-control"
+                            <InputField
                                 value={tempLat}
                                 onChange={(e) => {
                                     setTempLat(e.target.value.replace(/[^0-9.-]/g, ''));
@@ -164,9 +161,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                         </div>
                         <div style={{ width: '45%' }}>
                             <label>Longitude</label>
-                            <input
-                                type="text"
-                                className="form-control"
+                            <InputField
                                 value={tempLong}
                                 onChange={(e) => {
                                     setTempLong(e.target.value.replace(/[^0-9.-]/g, ''));
@@ -246,9 +241,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
 <div className="d-flex justify-content-center pt-2">
     <div style={{ width: '80%' }}>
         <label>Landmark</label>
-        <input
-            type="text"
-            className="form-control"
+        <InputField
             value={tempLandmark}
             onChange={(e) => setTempLandmark(e.target.value)}
         />

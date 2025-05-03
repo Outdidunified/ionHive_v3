@@ -1,6 +1,6 @@
 import React from 'react';
 
-const LoadingButton = ({
+const ReusableButton = ({
   type = 'button',
   onClick,
   disabled = false,
@@ -23,4 +23,4 @@ const LoadingButton = ({
   );
 };
 
-export default LoadingButton;
+export default ReusableButton;

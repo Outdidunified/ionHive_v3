@@ -7,11 +7,12 @@ const useManagefinance = (userInfo) => {
     const [financeDetails, setFinanceDetails] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const fetchUsersCalled = useRef(false); 
-
+    const [loading,setLoading]=useState(true)
     console.log(financeDetails);
     // fetch finance details
     const fetchFinanceDetails = useCallback(async () => {
         try {
+            setLoading(true)
             const response = await axiosInstance.post('/associationadmin/fetchFinance', {
                 association_id: userInfo.association_id
             });
@@ -26,6 +27,8 @@ const useManagefinance = (userInfo) => {
         } catch (error) {
             console.error('Error fetching finance:', error);
             setFinanceDetails([]);
+        }finally{
+            setLoading(false)
         }
     }, [userInfo.association_id]);
 
@@ -67,6 +70,6 @@ const useManagefinance = (userInfo) => {
         fetchFinanceDetails,
         handleSearch,
         filteredFinanceDetails,
-        handleView,navigateToCreateUser
+        handleView,navigateToCreateUser,loading
     }}
     export default useManagefinance;

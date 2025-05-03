@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../../../../utils/utils';
-import Swal from 'sweetalert2';
+import {showSuccessAlert,showErrorAlert} from '../../../../utils/alert';
 
 const useEditManageUsers = (userInfo) => {
     const location = useLocation();
@@ -11,7 +11,7 @@ const useEditManageUsers = (userInfo) => {
 
     const [errorMessage, setErrorMessage] = useState('');
     const [selectStatus, setSelectedStatus] = useState(dataItem.status ? 'true' : 'false');
-
+    const [isloading,setIsLoading]=useState(false)
     // Edit manage device
     const [username, setUsername] = useState(dataItem?.username || '');
     const [password, setPassword] = useState(dataItem?.password || '');
@@ -43,9 +43,10 @@ const useEditManageUsers = (userInfo) => {
     };
 
     // Update manage user
+
     const editManageUser = async (e) => {
         e.preventDefault();
-
+    
         // Validate phone number
         const phoneRegex = /^\d{10}$/;
         if (!phone_no) {
@@ -56,7 +57,7 @@ const useEditManageUsers = (userInfo) => {
             setErrorMessage('Oops! Phone must be a 10-digit number.');
             return;
         }
-  
+    
         // Validate password
         const passwordRegex = /^\d{4}$/;
         if (!password) {
@@ -67,41 +68,35 @@ const useEditManageUsers = (userInfo) => {
             setErrorMessage('Oops! Password must be a 4-digit number.');
             return;
         }
-
+    
         try {
+            setIsLoading(true);
+    
             const updatedUser = {
                 user_id: dataItem.user_id,
-                username: username,
+                username,
                 phone_no: parseInt(phone_no),
                 password: parseInt(password),
                 status: selectStatus === 'true',
                 modified_by: userInfo.email_id,
             };
-            const response = await axiosInstance.post('/associationadmin/UpdateUser', 
-              updatedUser);
-
-            if (response.status==200) {
-                Swal.fire({
-                    title: 'User updated successfully',
-                    icon: 'success',
-                });
+    
+            const response = await axiosInstance.post('/associationadmin/UpdateUser', updatedUser);
+    
+            if (response.status === 200) {
+                showSuccessAlert('User updated successfully', 'User details have been updated.');
                 backManageUser();
             } else {
-                const responseData = response.data
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Failed to update user, ' + responseData.message,
-                    icon: 'error',
-                });
+                const responseData = response.data;
+                showErrorAlert('Error', 'Failed to update user, ' + responseData.message);
             }
         } catch (error) {
-            Swal.fire({
-                title: 'Error',
-                text: 'An error occurred while updating the user',
-                icon: 'error',
-            });
+            showErrorAlert('Error', 'An error occurred while updating the user');
+        } finally {
+            setIsLoading(false);
         }
     };
+    
 
     useEffect(() => {
         // Update initial values if dataItem changes
@@ -125,6 +120,6 @@ const useEditManageUsers = (userInfo) => {
         phone_no,setPhoneNumber,
         initialValues,setInitialValues,isModified,
         handleStatusChange,backManageUser,editManageUser,
-        goBack
+        goBack,isloading
     }}
     export default useEditManageUsers;

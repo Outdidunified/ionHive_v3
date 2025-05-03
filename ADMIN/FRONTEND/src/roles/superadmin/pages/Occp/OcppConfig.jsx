@@ -6,86 +6,86 @@ import InputField from '../../../../utils/InputField';
 
 
 const OcppConfig = ({ userInfo, handleLogout }) => {
-   const {
-    chargerId,setChargerId,commandsLibrary,setCommandsLibrary,selectedCommand,setSelectedCommand,
-response,setResponse,
-getActionPayloadCalled,
-reservationId, setReservationId,connectorId, setConnectorId,
-availabilityType, setAvailabilityType,keyType, setKeyType,
-configKey, setConfigKey,customConfigKey, setCustomConfigKey,
-value, setValue,vendorId, setVendorId,
-messageId, setMessageId,
-data, setData,
-loading,
-customKeys, setCustomKeys,
-location, setLocation,
-retries, setRetries,
-retryInterval, setRetryInterval,
-startTime, setStartTime,
-stopTime, setStopTime,
-connectorIds, setConnectorIds,
-idTag, setIdTag,
-transaction, setTransaction,
-reserveConnectorId, setReserveConnectorId,
-expiryDate, setExpiryDate,
-reserveIdTag, setReserveIdTag,
-resetType, setResetType,
-triggerMessage, setTriggerMessage,
-triggerConnectorId, setTriggerConnectorId,
-unlockConnectorConnectorId, setUnlockConnectorConnectorId,
-locationUpdatdeFirmware,setLocationUpdatdeFirmware,
-retriesUpdatdeFirmware,setRetriesUpdatdeFirmware,
-retryIntervalUpdatdeFirmware,setRetryIntervalUpdatdeFirmware,
-retrieveDate, setRetrieveDate,
-listVersion, setListVersion,
-updateType, setUpdateType,
-addUpdateList, setAddUpdateList,
-deleteList, setDeleteList,
-sendEmptyListWhenFull, setSendEmptyListWhenFull,
-errorMessage, setErrorMessage,
-filterType, setFilterType,
-clearChargingProfileConnectorId,
-setClearChargingProfileConnectorId,
-stackLevel,setStackLevel,
-chargingProfilePurpose, setChargingProfilePurpose,
-clearChargingProfileID, setClearChargingProfileID,
-getCompositeScheduleConnectorId, setGetCompositeScheduleConnectorId,
-duration, setDuration,
-chargingRateUnit, setChargingRateUnit,
-setChargingProfileConnectorID, setSetChargingProfileConnectorID,
-chargingProfileId, setChargingProfileId,
-keyTypeData, setKeyTypeData,
-command, setCommand,
-ip, setIp,
-port, setPort,
-url, setUrl,
-chargerids, setChargerids,
-faultParametersConfig, setFaultParametersConfig,
-maxCurrent, SetMaxCurrent,
-onCommandClick,
-handleCancelReservation,
-handleChangeAvailability,
-handleChangeConfiguration,
-handleClearCache,
-handleClearChargingProfile,
-handleDataTransferCustom,
-handleDataTransfer,
-handleGetCompositeSchedule,
-handleSelectAll,
-handleGetConfiguration,
-handleGetDiagnostics,
-handleGetLocalListVersion,
-handleRemoteStartTransaction,
-handleRemoteStopTransaction,
-handleReserveNow,
-handleReset,
-handleTriggerMessage,
-handleUnlockConnector,
-handleUpdateFirmware,
-handleSendLocalList,
-handleSetChargingProfile,
-handleChargerIdChange
-   }=useOcppConfig(userInfo);
+    const {
+        chargerId, setChargerId, commandsLibrary, setCommandsLibrary, selectedCommand, setSelectedCommand,
+        response, setResponse,
+        getActionPayloadCalled,
+        reservationId, setReservationId, connectorId, setConnectorId,
+        availabilityType, setAvailabilityType, keyType, setKeyType,
+        configKey, setConfigKey, customConfigKey, setCustomConfigKey,
+        value, setValue, vendorId, setVendorId,
+        messageId, setMessageId,
+        data, setData,
+        loading,
+        customKeys, setCustomKeys,
+        location, setLocation,
+        retries, setRetries,
+        retryInterval, setRetryInterval,
+        startTime, setStartTime,
+        stopTime, setStopTime,
+        connectorIds, setConnectorIds,
+        idTag, setIdTag,
+        transaction, setTransaction,
+        reserveConnectorId, setReserveConnectorId,
+        expiryDate, setExpiryDate,
+        reserveIdTag, setReserveIdTag,
+        resetType, setResetType,
+        triggerMessage, setTriggerMessage,
+        triggerConnectorId, setTriggerConnectorId,
+        unlockConnectorConnectorId, setUnlockConnectorConnectorId,
+        locationUpdatdeFirmware, setLocationUpdatdeFirmware,
+        retriesUpdatdeFirmware, setRetriesUpdatdeFirmware,
+        retryIntervalUpdatdeFirmware, setRetryIntervalUpdatdeFirmware,
+        retrieveDate, setRetrieveDate,
+        listVersion, setListVersion,
+        updateType, setUpdateType,
+        addUpdateList, setAddUpdateList,
+        deleteList, setDeleteList,
+        sendEmptyListWhenFull, setSendEmptyListWhenFull,
+        errorMessage,
+        filterType, setFilterType,
+        clearChargingProfileConnectorId,
+        setClearChargingProfileConnectorId,
+        stackLevel, setStackLevel,
+        chargingProfilePurpose, setChargingProfilePurpose,
+        clearChargingProfileID, setClearChargingProfileID,
+        getCompositeScheduleConnectorId, setGetCompositeScheduleConnectorId,
+        duration, setDuration,
+        chargingRateUnit, setChargingRateUnit,
+        setChargingProfileConnectorID, setSetChargingProfileConnectorID,
+        chargingProfileId, setChargingProfileId,
+        keyTypeData, setKeyTypeData,
+        command, setCommand,
+        ip, setIp,
+        port, setPort,
+        url, setUrl,
+        chargerids, setChargerids,
+        faultParametersConfig, setFaultParametersConfig,
+        maxCurrent, SetMaxCurrent,
+        onCommandClick,
+        handleCancelReservation,
+        handleChangeAvailability,
+        handleChangeConfiguration,
+        handleClearCache,
+        handleClearChargingProfile,
+        handleDataTransferCustom,
+        handleDataTransfer,
+        handleGetCompositeSchedule,
+        handleSelectAll,
+        handleGetConfiguration,
+        handleGetDiagnostics,
+        handleGetLocalListVersion,
+        handleRemoteStartTransaction,
+        handleRemoteStopTransaction,
+        handleReserveNow,
+        handleReset,
+        handleTriggerMessage,
+        handleUnlockConnector,
+        handleUpdateFirmware,
+        handleSendLocalList,
+        handleSetChargingProfile,
+        handleChargerIdChange
+    } = useOcppConfig(userInfo);
 
     return (
         <div className='container-scroller'>
@@ -93,7 +93,7 @@ handleChargerIdChange
             <Header userInfo={userInfo} handleLogout={handleLogout} />
             <div className="container-fluid page-body-wrapper">
                 {/* Sidebar */}
-                <Sidebar/>
+                <Sidebar />
                 <div className="main-panel">
                     <div className="content-wrapper">
                         <div className="row">
@@ -114,51 +114,51 @@ handleChargerIdChange
                             <div className="col-lg-12 grid-margin stretch-card">
                                 <div className="card">
                                     <div className="card-body">
-                                        <div className="row" style={{height:'50px'}}>
+                                        <div className="row" style={{ height: '50px' }}>
                                             <div className="col-md-12 grid-margin">
                                                 <div className="row">
                                                     <div className="col-4 col-xl-8">
-                                                        <div style={{fontSize:'20px', paddingTop:'10px'}}><span style={{ fontWeight: 'bold' }}><span style={{color:'#57B657'}}>OCPP</span> Configuration</span></div> 
+                                                        <div style={{ fontSize: '20px', paddingTop: '10px' }}><span style={{ fontWeight: 'bold' }}><span style={{ color: '#57B657' }}>OCPP</span> Configuration</span></div>
                                                     </div>
                                                     <div className="col-8 col-xl-4">
                                                         <div className="input-group">
-                                                            <InputField  style={{borderRadius: '10px 0 10px 0', borderColor:'#57B657'}} placeholder="Charger ID" ariaLabel="search" ariadescribedby="search" autoComplete="off" value={chargerId} onChange={handleChargerIdChange} required/>
+                                                            <InputField style={{ borderRadius: '10px 0 10px 0', borderColor: '#57B657' }} placeholder="Charger ID" ariaLabel="search" ariadescribedby="search" autoComplete="off" value={chargerId} onChange={handleChargerIdChange} required />
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="row" style={{ textAlign: 'center' }}>
-    <div className="col-md-12">
-        <div className="card-body">
-            <h4 style={{ textAlign: 'center', marginBottom: '0px' }}>
-                <span style={{ fontWeight: 'bold' }}>Commands</span>
-            </h4>
-            <div className="template-demo">
-                {loading ? (
-                    <div className="d-flex justify-content-center align-items-center" style={{ height: '100px' }}>
-                        <div className="spinner" role="status">
-                            
-                        </div>
-                    </div>
-                ) : commandsLibrary.length > 0 ? (
-                    commandsLibrary.map((command, index) => (
-                        <button
-                            key={index}
-                            type="button"
-                            className={`btn ${selectedCommand === command.action ? "btn-primary" : "btn-outline-primary"}`}
-                            onClick={() => onCommandClick(index)}
-                        >
-                            {command.action}
-                        </button>
-                    ))
-                ) : (
-                    <p className="text-center">No commands available</p>
-                )}
-            </div>
-        </div>
-    </div>
-</div>
+                                            <div className="col-md-12">
+                                                <div className="card-body">
+                                                    <h4 style={{ textAlign: 'center', marginBottom: '0px' }}>
+                                                        <span style={{ fontWeight: 'bold' }}>Commands</span>
+                                                    </h4>
+                                                    <div className="template-demo">
+                                                        {loading ? (
+                                                            <div className="d-flex justify-content-center align-items-center" style={{ height: '100px' }}>
+                                                                <div className="spinner" role="status">
+
+                                                                </div>
+                                                            </div>
+                                                        ) : commandsLibrary.length > 0 ? (
+                                                            commandsLibrary.map((command, index) => (
+                                                                <button
+                                                                    key={index}
+                                                                    type="button"
+                                                                    className={`btn ${selectedCommand === command.action ? "btn-primary" : "btn-outline-primary"}`}
+                                                                    onClick={() => onCommandClick(index)}
+                                                                >
+                                                                    {command.action}
+                                                                </button>
+                                                            ))
+                                                        ) : (
+                                                            <p className="text-center">No commands available</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
                                         {selectedCommand === "CancelReservation" && (
                                             <div className="row">
@@ -167,8 +167,8 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleCancelReservation}>
                                                             <div className="form-group">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>ID of the Existing Reservation:</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={reservationId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setReservationId(sanitizedValue); }} required autoComplete="off"/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>ID of the Existing Reservation:</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={reservationId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setReservationId(sanitizedValue); }} required autoComplete="off" />
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -179,9 +179,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -196,11 +196,11 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleChangeAvailability}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID (integer):</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="If empty, 0 = charge point as a whole" style={{ height: '30px' }} autoComplete="off" value={connectorId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setConnectorId(sanitizedValue);}}/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Connector ID (integer):</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="If empty, 0 = charge point as a whole" style={{ height: '30px' }} autoComplete="off" value={connectorId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setConnectorId(sanitizedValue); }} />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Availability Type:</label>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Availability Type:</label>
                                                                 <select className="form-control" style={{ height: '31px' }} value={availabilityType} onChange={(e) => setAvailabilityType(e.target.value)}>
                                                                     <option >-- Select --</option>
                                                                     <option value="INOPERATIVE">INOPERATIVE</option>
@@ -216,9 +216,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -233,7 +233,7 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleChangeConfiguration}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="keyType" style={{marginBottom:'0px'}}>Key Type:</label>
+                                                                <label htmlFor="keyType" style={{ marginBottom: '0px' }}>Key Type:</label>
                                                                 <select className="form-control" style={{ height: '31px' }} id="keyType" value={keyType} onChange={(e) => setKeyType(e.target.value)}>
                                                                     <option >-- Select --</option>
                                                                     <option value="Predefined">Predefined</option>
@@ -278,13 +278,13 @@ handleChargerIdChange
                                                             </div>
 
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="customConfigKey" style={{marginBottom:'0px'}}>Custom Configuration Key:</label>
-                                                                <InputField  id="customConfigKey" style={{ height: '30px' }} value={customConfigKey} onChange={(e) => setCustomConfigKey(e.target.value)} disabled={keyType !== 'Custom'}/>
+                                                                <label htmlFor="customConfigKey" style={{ marginBottom: '0px' }}>Custom Configuration Key:</label>
+                                                                <InputField id="customConfigKey" style={{ height: '30px' }} value={customConfigKey} onChange={(e) => setCustomConfigKey(e.target.value)} disabled={keyType !== 'Custom'} />
                                                             </div>
 
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="value" style={{marginBottom:'0px'}}>Value:</label>
-                                                                <InputField  id="value" style={{ height: '30px' }} value={value} onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setValue(numericValue);}}/>
+                                                                <label htmlFor="value" style={{ marginBottom: '0px' }}>Value:</label>
+                                                                <InputField id="value" style={{ height: '30px' }} value={value} onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setValue(numericValue); }} />
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -295,9 +295,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -311,7 +311,7 @@ handleChargerIdChange
                                                     <div className="card-body">
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleClearCache}>
-                                                            <div style={{ display: 'flex',justifyContent: 'center'}}>
+                                                            <div style={{ display: 'flex', justifyContent: 'center' }}>
                                                                 <h5 className="card-description">No parameters required.</h5>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
@@ -323,9 +323,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -350,17 +350,17 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="chargingProfileId" style={{ marginBottom: '0px' }}>Charging Profile ID:</label>
-                                                                <InputField  id="chargingProfileId" style={{ height: '30px' }} autoComplete="off" value={clearChargingProfileID}
+                                                                <InputField id="chargingProfileId" style={{ height: '30px' }} autoComplete="off" value={clearChargingProfileID}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
                                                                         setClearChargingProfileID(sanitizedValue);
-                                                                    }}/>
+                                                                    }} />
                                                             </div>
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="connectorId" style={{ marginBottom: '0px' }}>Connector ID (integer):</label>
-                                                                <InputField  id="connectorId" placeholder="0 = charge point as a whole. Leave empty to not set." style={{ height: '30px' }} autoComplete="off" value={clearChargingProfileConnectorId}
+                                                                <InputField id="connectorId" placeholder="0 = charge point as a whole. Leave empty to not set." style={{ height: '30px' }} autoComplete="off" value={clearChargingProfileConnectorId}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -381,7 +381,7 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="stackLevel" style={{ marginBottom: '0px' }}>Stack Level (integer):</label>
-                                                                <InputField  id="stackLevel" style={{ height: '30px' }} autoComplete="off" value={stackLevel}
+                                                                <InputField id="stackLevel" style={{ height: '30px' }} autoComplete="off" value={stackLevel}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -420,120 +420,120 @@ handleChargerIdChange
                                                 <div className="col-md-6">
                                                     <div className="card-body">
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
-                                                            <div className="form-group paddingInput">
-                                                                <label htmlFor="keyType" style={{marginBottom:'0px'}}>Key Type:</label>
-                                                                <select className="form-control" style={{ height: '31px' }} value={keyTypeData} onChange={(e) => setKeyTypeData(e.target.value)}>
-                                                                    <option >-- Select --</option>
-                                                                    <option value="Predefined">Predefined</option>
-                                                                    <option value="Custom">Custom</option>
-                                                                </select>
-                                                            </div>
-                                                            {keyTypeData === "Custom" && (
-                                                                <>
-                                                                    <form className="forms-sample" onSubmit={handleDataTransferCustom}>
-                                                                        <div className="form-group paddingInput">
-                                                                            <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Vendor ID (String):</label>
-                                                                            <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={vendorId}
-                                                                                onChange={(e) => {
-                                                                                    const value = e.target.value;
-                                                                                    // Allow only alphabetic characters
-                                                                                    if (/^[A-Za-z]*$/.test(value)) {
-                                                                                    setVendorId(value);
-                                                                                    }
-                                                                                }} 
-                                                                                // onChange={(e) => setVendorId(e.target.value)} 
-                                                                                autoComplete="off" required
-                                                                            />
-                                                                        </div>
-                                                                        <div className="form-group paddingInput">
-                                                                            <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Message ID (String):</label>
-                                                                            <InputField id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} autoComplete="off" value={messageId} onChange={(e) => setMessageId(e.target.value)}/>
-                                                                        </div>
-                                                                        <div className="form-group paddingInput">
-                                                                            <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Data (Text):</label>
-                                                                            <textarea type="text" className="form-control" id="exampleInputUsername1" placeholder="optional" autoComplete="off" value={data} onChange={(e) => setData(e.target.value)}/>
-                                                                        </div>
-                                                              
-                                                                        {errorMessage && <p className="text-danger">{errorMessage}</p>}
-                                                                        <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
-                                                                            <button type="submit" className="btn btn-primary mr-2">Perform</button>
-                                                                        </div>
-                                                                    </form>
-                                                                </>
-                                                            )}
-                                                            {keyTypeData === "Predefined" && (
-                                                                <form className="forms-sample" onSubmit={handleDataTransfer}>
+                                                        <div className="form-group paddingInput">
+                                                            <label htmlFor="keyType" style={{ marginBottom: '0px' }}>Key Type:</label>
+                                                            <select className="form-control" style={{ height: '31px' }} value={keyTypeData} onChange={(e) => setKeyTypeData(e.target.value)}>
+                                                                <option >-- Select --</option>
+                                                                <option value="Predefined">Predefined</option>
+                                                                <option value="Custom">Custom</option>
+                                                            </select>
+                                                        </div>
+                                                        {keyTypeData === "Custom" && (
+                                                            <>
+                                                                <form className="forms-sample" onSubmit={handleDataTransferCustom}>
                                                                     <div className="form-group paddingInput">
-                                                                        <label htmlFor="keyType" style={{marginBottom:'0px'}}>List of commands:</label>
-                                                                        <select className="form-control" style={{ height: '31px' }} value={command} onChange={(e) => setCommand(e.target.value)}>
-                                                                            <option >-- Select --</option>
-                                                                            <option value="SetServerIpPortURL">Set Server IP Port URL</option>
-                                                                            <option value="SetChargerID">Set Charger ID</option>
-                                                                            <option value="RCONF">Read Charger Configuration</option>
-                                                                            <option value="HWVER">Get Hardware Version</option>
-                                                                            <option value="GET_CSQ">Get Signal Quality</option>
-                                                                            <option value="FWVER">Get Firmware Version</option>
-                                                                            <option value="STARTOTA">Update Firmware</option>
-                                                                            <option value="RESTART">Restart Charger</option>
-                                                                            <option value="GET_TV">Get Fault Parameters Config</option>
-                                                                            <option value="SetFaultParametersConfig">Set Fault Parameters Config</option>
-                                                                            <option value="CALIBENB">Auto Calibration Enabling</option>
-                                                                            <option value="SetMaxCurrent">Set Max Current</option>
-                                                                        </select>
+                                                                        <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Vendor ID (String):</label>
+                                                                        <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={vendorId}
+                                                                            onChange={(e) => {
+                                                                                const value = e.target.value;
+                                                                                // Allow only alphabetic characters
+                                                                                if (/^[A-Za-z]*$/.test(value)) {
+                                                                                    setVendorId(value);
+                                                                                }
+                                                                            }}
+                                                                            // onChange={(e) => setVendorId(e.target.value)} 
+                                                                            autoComplete="off" required
+                                                                        />
                                                                     </div>
-                                                            
-                                                                    {keyTypeData === "Predefined" && command === "SetServerIpPortURL" && (
-                                                                        <div className="form-group paddingInput">
-                                                                            <div className="row">
-                                                                                <div className="col-md-6">
-                                                                                    <label htmlFor="keyType" style={{marginBottom:'0px'}}>IP</label>
-                                                                                    <InputField  placeholder="IP" style={{ height: '30px' }} autoComplete="off" value={ip} onChange={(e) => setIp(e.target.value)} required/>
-                                                                                </div> 
-                                                                                <div className="col-md-6">
-                                                                                    <label htmlFor="keyType" style={{marginBottom:'0px'}}>PORT</label>
-                                                                                    <InputField placeholder="PORT" style={{ height: '30px' }} autoComplete="off" value={port} onChange={(e) => setPort(e.target.value)} required/>
-                                                                                </div>
-                                                                            </div>
-                                                                                                                                                    
-                                                                            <label htmlFor="keyType" style={{marginBottom:'0px'}}>URL</label>
-                                                                            <InputField  placeholder="URL" style={{ height: '30px' }} value={url} onChange={(e) => setUrl(e.target.value)} autoComplete="off"/>
-                                                                        </div>
-                                                                    )}
+                                                                    <div className="form-group paddingInput">
+                                                                        <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Message ID (String):</label>
+                                                                        <InputField id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} autoComplete="off" value={messageId} onChange={(e) => setMessageId(e.target.value)} />
+                                                                    </div>
+                                                                    <div className="form-group paddingInput">
+                                                                        <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Data (Text):</label>
+                                                                        <textarea type="text" className="form-control" id="exampleInputUsername1" placeholder="optional" autoComplete="off" value={data} onChange={(e) => setData(e.target.value)} />
+                                                                    </div>
 
-                                                                    {keyTypeData === "Predefined" && command === "SetChargerID" && (
-                                                                        <div className="form-group paddingInput">
-                                                                            <label htmlFor="keyType" style={{marginBottom:'0px'}}>Charger ID</label>
-                                                                            <InputField  placeholder="Charger ID" style={{ height: '30px' }} autoComplete="off" value={chargerids} onChange={(e) => setChargerids(e.target.value)} required/>
-                                                                        </div>
-                                                                    )}
-                                                                   
-                                                                    {keyTypeData === "Predefined" && command === "SetFaultParametersConfig" && (
-                                                                        <div className="form-group paddingInput">
-                                                                            <label htmlFor="keyType" style={{marginBottom:'0px'}}>Set Fault Parameters Config</label>
-                                                                            <InputField  placeholder="Set Fault Parameters Config" style={{ height: '30px' }} autoComplete="off" value={faultParametersConfig} onChange={(e) => setFaultParametersConfig(e.target.value)} required/>
-                                                                        </div>
-                                                                    )}
-
-                                                                    {keyTypeData === "Predefined" && command === "SetMaxCurrent" && (
-                                                                        <div className="form-group paddingInput">
-                                                                            <label htmlFor="keyType" style={{marginBottom:'0px'}}>Set Max Current</label>
-                                                                            <InputField placeholder="Set Max Current" style={{ height: '30px'}} autoComplete="off" value={maxCurrent} onChange={(e) => SetMaxCurrent(e.target.value)} required/>
-                                                                        </div>
-                                                                    )}
-                                
                                                                     {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                                     <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
                                                                         <button type="submit" className="btn btn-primary mr-2">Perform</button>
                                                                     </div>
                                                                 </form>
-                                                            )}
+                                                            </>
+                                                        )}
+                                                        {keyTypeData === "Predefined" && (
+                                                            <form className="forms-sample" onSubmit={handleDataTransfer}>
+                                                                <div className="form-group paddingInput">
+                                                                    <label htmlFor="keyType" style={{ marginBottom: '0px' }}>List of commands:</label>
+                                                                    <select className="form-control" style={{ height: '31px' }} value={command} onChange={(e) => setCommand(e.target.value)}>
+                                                                        <option >-- Select --</option>
+                                                                        <option value="SetServerIpPortURL">Set Server IP Port URL</option>
+                                                                        <option value="SetChargerID">Set Charger ID</option>
+                                                                        <option value="RCONF">Read Charger Configuration</option>
+                                                                        <option value="HWVER">Get Hardware Version</option>
+                                                                        <option value="GET_CSQ">Get Signal Quality</option>
+                                                                        <option value="FWVER">Get Firmware Version</option>
+                                                                        <option value="STARTOTA">Update Firmware</option>
+                                                                        <option value="RESTART">Restart Charger</option>
+                                                                        <option value="GET_TV">Get Fault Parameters Config</option>
+                                                                        <option value="SetFaultParametersConfig">Set Fault Parameters Config</option>
+                                                                        <option value="CALIBENB">Auto Calibration Enabling</option>
+                                                                        <option value="SetMaxCurrent">Set Max Current</option>
+                                                                    </select>
+                                                                </div>
+
+                                                                {keyTypeData === "Predefined" && command === "SetServerIpPortURL" && (
+                                                                    <div className="form-group paddingInput">
+                                                                        <div className="row">
+                                                                            <div className="col-md-6">
+                                                                                <label htmlFor="keyType" style={{ marginBottom: '0px' }}>IP</label>
+                                                                                <InputField placeholder="IP" style={{ height: '30px' }} autoComplete="off" value={ip} onChange={(e) => setIp(e.target.value)} required />
+                                                                            </div>
+                                                                            <div className="col-md-6">
+                                                                                <label htmlFor="keyType" style={{ marginBottom: '0px' }}>PORT</label>
+                                                                                <InputField placeholder="PORT" style={{ height: '30px' }} autoComplete="off" value={port} onChange={(e) => setPort(e.target.value)} required />
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <label htmlFor="keyType" style={{ marginBottom: '0px' }}>URL</label>
+                                                                        <InputField placeholder="URL" style={{ height: '30px' }} value={url} onChange={(e) => setUrl(e.target.value)} autoComplete="off" />
+                                                                    </div>
+                                                                )}
+
+                                                                {keyTypeData === "Predefined" && command === "SetChargerID" && (
+                                                                    <div className="form-group paddingInput">
+                                                                        <label htmlFor="keyType" style={{ marginBottom: '0px' }}>Charger ID</label>
+                                                                        <InputField placeholder="Charger ID" style={{ height: '30px' }} autoComplete="off" value={chargerids} onChange={(e) => setChargerids(e.target.value)} required />
+                                                                    </div>
+                                                                )}
+
+                                                                {keyTypeData === "Predefined" && command === "SetFaultParametersConfig" && (
+                                                                    <div className="form-group paddingInput">
+                                                                        <label htmlFor="keyType" style={{ marginBottom: '0px' }}>Set Fault Parameters Config</label>
+                                                                        <InputField placeholder="Set Fault Parameters Config" style={{ height: '30px' }} autoComplete="off" value={faultParametersConfig} onChange={(e) => setFaultParametersConfig(e.target.value)} required />
+                                                                    </div>
+                                                                )}
+
+                                                                {keyTypeData === "Predefined" && command === "SetMaxCurrent" && (
+                                                                    <div className="form-group paddingInput">
+                                                                        <label htmlFor="keyType" style={{ marginBottom: '0px' }}>Set Max Current</label>
+                                                                        <InputField placeholder="Set Max Current" style={{ height: '30px' }} autoComplete="off" value={maxCurrent} onChange={(e) => SetMaxCurrent(e.target.value)} required />
+                                                                    </div>
+                                                                )}
+
+                                                                {errorMessage && <p className="text-danger">{errorMessage}</p>}
+                                                                <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
+                                                                    <button type="submit" className="btn btn-primary mr-2">Perform</button>
+                                                                </div>
+                                                            </form>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -549,7 +549,7 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleGetCompositeSchedule}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="connectorId" style={{ marginBottom: '0px' }}>Connector ID (integer):</label>
-                                                                <InputField  id="connectorId" placeholder="0 = charge point as a whole." style={{ height: '30px' }} autoComplete="off" value={getCompositeScheduleConnectorId}
+                                                                <InputField id="connectorId" placeholder="0 = charge point as a whole." style={{ height: '30px' }} autoComplete="off" value={getCompositeScheduleConnectorId}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -560,7 +560,7 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="stackLevel" style={{ marginBottom: '0px' }}>Duration (in seconds):</label>
-                                                                <InputField  id="stackLevel" style={{ height: '30px' }} autoComplete="off" value={duration}
+                                                                <InputField id="stackLevel" style={{ height: '30px' }} autoComplete="off" value={duration}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -613,7 +613,7 @@ handleChargerIdChange
                                                                     <InputField type="button" value="Select All" onClick={() => handleSelectAll(true)} style={{ marginRight: '10px' }} />
                                                                     <InputField type="button" value="Select None" onClick={() => handleSelectAll(false)} />
                                                                 </div>
-                                                                
+
                                                                 <div className="info">
                                                                     <b>Info:</b> If none selected, the charge point returns a list of <b>all</b> configuration settings.
                                                                 </div>
@@ -669,8 +669,8 @@ handleChargerIdChange
                                                             </div>
 
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Custom Configuration Keys:</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="optional comma separated list" style={{ height: '30px' }} autoComplete="off" value={customKeys} onChange={(e) => setCustomKeys(e.target.value)}/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Custom Configuration Keys:</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="optional comma separated list" style={{ height: '30px' }} autoComplete="off" value={customKeys} onChange={(e) => setCustomKeys(e.target.value)} />
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -681,9 +681,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -698,26 +698,26 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleGetDiagnostics}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Location (directory URI):</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={location} onChange={(e) => setLocation(e.target.value)} required autoComplete="off"/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Location (directory URI):</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} value={location} onChange={(e) => setLocation(e.target.value)} required autoComplete="off" />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Retries (integer):</label>
-                                                                <InputField id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={retries} 
-                                                                onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setRetries(numericValue);}} autoComplete="off"/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Retries (integer):</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={retries}
+                                                                    onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setRetries(numericValue); }} autoComplete="off" />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Retry Interval (integer):</label>
-                                                                <InputField id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={retryInterval} 
-                                                                onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setRetryInterval(numericValue);}} autoComplete="off"/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Retry Interval (integer):</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={retryInterval}
+                                                                    onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setRetryInterval(numericValue); }} autoComplete="off" />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Start Date/Time:</label>
-                                                                <InputField type="datetime-local" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={startTime} onChange={(e) => setStartTime(e.target.value)} autoComplete="off"/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Start Date/Time:</label>
+                                                                <InputField type="datetime-local" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={startTime} onChange={(e) => setStartTime(e.target.value)} autoComplete="off" />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Stop Date/Time:</label>
-                                                                <InputField type="datetime-local"  id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={stopTime} onChange={(e) => setStopTime(e.target.value)} autoComplete="off"/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Stop Date/Time:</label>
+                                                                <InputField type="datetime-local" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={stopTime} onChange={(e) => setStopTime(e.target.value)} autoComplete="off" />
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -728,9 +728,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -744,7 +744,7 @@ handleChargerIdChange
                                                     <div className="card-body">
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleGetLocalListVersion}>
-                                                            <div style={{ display: 'flex',justifyContent: 'center'}}>
+                                                            <div style={{ display: 'flex', justifyContent: 'center' }}>
                                                                 <h5 className="card-description">No parameters required.</h5>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
@@ -756,9 +756,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -773,13 +773,13 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleRemoteStartTransaction}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID:</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={connectorIds} 
-                                                                onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setConnectorIds(numericValue);}}/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Connector ID:</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={connectorIds}
+                                                                    onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setConnectorIds(numericValue); }} />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>OCPP ID Tag:</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={idTag} onChange={(e) => setIdTag(e.target.value)}/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>OCPP ID Tag:</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={idTag} onChange={(e) => setIdTag(e.target.value)} />
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -790,9 +790,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -807,9 +807,9 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleRemoteStopTransaction}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>ID of the Active Transaction:</label>
-                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" requiredvalue={transaction} 
-                                                                onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setTransaction(numericValue);}}/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>ID of the Active Transaction:</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" requiredvalue={transaction}
+                                                                    onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setTransaction(numericValue); }} />
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -820,9 +820,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -837,17 +837,17 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleReserveNow}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID:</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={reserveConnectorId} 
-                                                                onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setReserveConnectorId(numericValue);}} required/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Connector ID:</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={reserveConnectorId}
+                                                                    onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setReserveConnectorId(numericValue); }} required />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Expiry Date/Time:</label>
-                                                                <InputField type="datetime-local"  id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} required/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Expiry Date/Time:</label>
+                                                                <InputField type="datetime-local" id="exampleInputUsername1" placeholder="optional" style={{ height: '30px' }} value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} required />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>OCPP ID Tag:</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={reserveIdTag} onChange={(e) => setReserveIdTag(e.target.value)}/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>OCPP ID Tag:</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={reserveIdTag} onChange={(e) => setReserveIdTag(e.target.value)} />
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -858,9 +858,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -875,7 +875,7 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleReset}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Reset Type:</label>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Reset Type:</label>
                                                                 <select className="form-control" style={{ height: '31px' }} value={resetType} onChange={(e) => setResetType(e.target.value)}>
                                                                     <option >-- Select --</option>
                                                                     <option value="HARD">HARD</option>
@@ -891,9 +891,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -908,15 +908,15 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleSendLocalList}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Hash (String):	Optional, omitted for now</label>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Hash (String):	Optional, omitted for now</label>
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>List Version (integer):</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} required autoComplete="off"
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>List Version (integer):</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} required autoComplete="off"
                                                                     value={listVersion} onChange={(e) => setListVersion(e.target.value.replace(/[^0-9]/g, ''))} />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Update Type:</label>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Update Type:</label>
                                                                 <select className="form-control" style={{ height: '31px' }} value={updateType} onChange={(e) => setUpdateType(e.target.value)}>
                                                                     <option >-- Select --</option>
                                                                     <option value="FULL">FULL</option>
@@ -925,7 +925,7 @@ handleChargerIdChange
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="addUpdateList" style={{ marginBottom: '0px' }}>Add/Update List:</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={addUpdateList} onChange={(e) => setAddUpdateList(e.target.value)} />
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" value={addUpdateList} onChange={(e) => setAddUpdateList(e.target.value)} />
                                                             </div>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="addUpdateList" style={{ marginBottom: '0px' }}>Delete List:</label>
@@ -934,11 +934,11 @@ handleChargerIdChange
                                                             <div className="form-group paddingInput" style={{ display: 'flex', alignItems: 'center' }}>
                                                                 <label htmlFor="sendEmptyListWhenFull" style={{ marginBottom: '0px', marginRight: '10px' }}>Send empty list?:</label>
                                                                 <InputField id="sendEmptyListWhenFull" name="sendEmptyListWhenFull" type="checkbox" value="true"
-                                                                style={{ marginRight: '10px' }} checked={sendEmptyListWhenFull} onChange={(e) => setSendEmptyListWhenFull(e.target.checked)} />
+                                                                    style={{ marginRight: '10px' }} checked={sendEmptyListWhenFull} onChange={(e) => setSendEmptyListWhenFull(e.target.checked)} />
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>If selected and the update type is FULL, an empty list will be sent.
-                                                                As a result, the charge point will remove all idTags from its list.	</label>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>If selected and the update type is FULL, an empty list will be sent.
+                                                                    As a result, the charge point will remove all idTags from its list.	</label>
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -949,9 +949,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -967,7 +967,7 @@ handleChargerIdChange
                                                         <form className="forms-sample" onSubmit={handleSetChargingProfile}>
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="connectorId" style={{ marginBottom: '0px' }}>Charging Profile ID:</label>
-                                                                <InputField  id="connectorId" placeholder="" style={{ height: '30px' }} autoComplete="off" value={chargingProfileId}
+                                                                <InputField id="connectorId" placeholder="" style={{ height: '30px' }} autoComplete="off" value={chargingProfileId}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -978,7 +978,7 @@ handleChargerIdChange
 
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="stackLevel" style={{ marginBottom: '0px' }}>Connector ID (integer):</label>
-                                                                <InputField  id="stackLevel" style={{ height: '30px' }} placeholder="0 = charge point as a whole." autoComplete="off" value={setChargingProfileConnectorID}
+                                                                <InputField id="stackLevel" style={{ height: '30px' }} placeholder="0 = charge point as a whole." autoComplete="off" value={setChargingProfileConnectorID}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value;
                                                                         const sanitizedValue = value.replace(/[^0-9]/g, '');
@@ -1019,7 +1019,7 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleTriggerMessage}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Trigger Message:</label>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Trigger Message:</label>
                                                                 <select className="form-control" style={{ height: '31px' }} value={triggerMessage} onChange={(e) => setTriggerMessage(e.target.value)}>
                                                                     <option >-- Select --</option>
                                                                     <option value="BootNotification">BootNotification</option>
@@ -1031,8 +1031,8 @@ handleChargerIdChange
                                                                 </select>
                                                             </div>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID (integer):</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="If empty, charge point as a whole" style={{ height: '30px' }} autoComplete="off" value={triggerConnectorId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setTriggerConnectorId(sanitizedValue);}}/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Connector ID (integer):</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="If empty, charge point as a whole" style={{ height: '30px' }} autoComplete="off" value={triggerConnectorId} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setTriggerConnectorId(sanitizedValue); }} />
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -1043,9 +1043,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -1060,9 +1060,9 @@ handleChargerIdChange
                                                         <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Parameters</h4>
                                                         <form className="forms-sample" onSubmit={handleUnlockConnector}>
                                                             <div className="form-group paddingInput">
-                                                                <label htmlFor="exampleInputUsername1" style={{marginBottom:'0px'}}>Connector ID:</label>
-                                                                <InputField  id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" required value={unlockConnectorConnectorId} 
-                                                                onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setUnlockConnectorConnectorId(numericValue);}}/>
+                                                                <label htmlFor="exampleInputUsername1" style={{ marginBottom: '0px' }}>Connector ID:</label>
+                                                                <InputField id="exampleInputUsername1" placeholder="" style={{ height: '30px' }} autoComplete="off" required value={unlockConnectorConnectorId}
+                                                                    onChange={(e) => { const numericValue = e.target.value.replace(/[^0-9]/g, ''); setUnlockConnectorConnectorId(numericValue); }} />
                                                             </div>
                                                             {errorMessage && <p className="text-danger">{errorMessage}</p>}
                                                             <div style={{ padding: '10px', display: 'flex', justifyContent: 'center' }}>
@@ -1073,9 +1073,9 @@ handleChargerIdChange
                                                 </div>
                                                 <div className="col-md-6">
                                                     <div className="card-body">
-                                                        <h4 className="card-title" style={{color:'rgb(233 30 157)'}}>Command Response</h4>
+                                                        <h4 className="card-title" style={{ color: 'rgb(233 30 157)' }}>Command Response</h4>
                                                         {response ? (
-                                                            <textarea style={{ border: 'none', outline: 'none', background:'none', width: '100%', backgroundColor:'#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22"/>
+                                                            <textarea style={{ border: 'none', outline: 'none', background: 'none', width: '100%', backgroundColor: '#f5f7ff' }} value={response ? JSON.stringify(response, null, 2) : ""} readOnly rows="22" />
                                                         ) : (
                                                             <p className="card-description">No command response available</p>
                                                         )}
@@ -1118,7 +1118,7 @@ handleChargerIdChange
                                                             <div className="form-group paddingInput">
                                                                 <label htmlFor="retryIntervalInput" style={{ marginBottom: '0px' }}>Retry Interval (integer):</label>
                                                                 <InputField
-                                                                  
+
                                                                     id="retryIntervalInput"
                                                                     placeholder="optional"
                                                                     style={{ height: '30px' }}
@@ -1174,10 +1174,10 @@ handleChargerIdChange
                     </div>
                     {/* Footer */}
                     <Footer />
-                </div>         
-            </div>    
+                </div>
+            </div>
         </div>
     );
-};  
-                 
+};
+
 export default OcppConfig

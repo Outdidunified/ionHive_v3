@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-
+import axiosInstance from '../../../utils/utils';
 const Header = ({ handleLogout, userInfo }) => {
   const [showNotificationBox, setShowNotificationBox] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
@@ -16,11 +15,11 @@ const Header = ({ handleLogout, userInfo }) => {
     if (isFetching.current) return;
     isFetching.current = true;
 
-    if (!userInfo?.data?.user_id) return;
+    if (!userInfo?.user_id) return;
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/FetchPaymentNotification`, {
-        user_id: userInfo.data.user_id,
+      const response = await axiosInstance.post('/associationadmin/FetchPaymentNotification', {
+        user_id: userInfo.user_id,
       });
 
       if (response.data.status === "Success") {
@@ -39,7 +38,7 @@ const Header = ({ handleLogout, userInfo }) => {
   };
 
   useEffect(() => {
-    if (userInfo?.data?.user_id) fetchNotifications();
+    if (userInfo?.user_id) fetchNotifications();
     // eslint-disable-next-line
   }, [userInfo]);
 
@@ -59,7 +58,7 @@ const Header = ({ handleLogout, userInfo }) => {
   
       setNotificationCount((prevCount) => Math.max(prevCount - 1, 0));
   
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/associationadmin/MarkNotificationRead`, {
+      const response = await axiosInstance.post('/associationadmin/MarkNotificationRead', {
         _id: notificationId,
         rca_admin_notification_status: 'read'
       });

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import axiosInstance from '../../../../utils/utils';
+import {showSuccessAlert,showErrorAlert} from '../../../../utils/alert';
 
 const useEditFinance = (userInfo) => {
     const navigate = useNavigate();
@@ -19,7 +19,7 @@ const useEditFinance = (userInfo) => {
     const [station_fee, setStationFee] = useState(dataItems?.station_fee || '');
     const [status, setStatus] = useState(dataItems?.status ? 'true' : 'false');
     const [errorMessage, setErrorMessage] = useState('');
-
+    const [loading,setLoading]=useState(false)
     const [initialValues] = useState({
         eb_charge: dataItems?.eb_charge || '',
         gst: dataItems?.gst || '',
@@ -108,21 +108,22 @@ const useEditFinance = (userInfo) => {
         setStatus(e.target.value);
     };
 
+
     const updateFinanceDetails = async (e) => {
         e.preventDefault();
-
+    
         if (isNaN(eb_charge) || eb_charge < 5) {
             setErrorMessage("EB charge must be at least ₹5.");
             return;
         }
-
+    
         if (isNaN(gst) || gst < 5 || gst > 50) {
             setErrorMessage("GST must be between 5% and 50%.");
             return;
         }
-
+    
         setErrorMessage('');
-
+    
         const formattedFinanceData = {
             _id: dataItems._id,
             finance_id: dataItems.finance_id,
@@ -138,39 +139,25 @@ const useEditFinance = (userInfo) => {
             modified_by: userInfo.email_id,
             status: status === 'true',
         };
-
+    
         try {
+            setLoading(true);
             const response = await axiosInstance.post('/associationadmin/updateFinance', formattedFinanceData);
-
+    
             if (response.data.status === 'Success') {
-                Swal.fire({
-                    position: "center",
-                    icon: "success",
-                    title: "Finance details updated successfully",
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+                showSuccessAlert('Finance details updated successfully'); // Use success alert helper
                 navigate('/associationadmin/ManageFinance');
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error updating finance details',
-                    text: response.data.message,
-                    timer: 2000,
-                    timerProgressBar: true
-                });
+                showErrorAlert('Error updating finance details', response.data.message); // Use error alert helper
             }
         } catch (error) {
             console.error('Error updating finance details:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error updating finance details',
-                text: 'Please try again later.',
-                timer: 2000,
-                timerProgressBar: true
-            });
+            showErrorAlert('Error updating finance details', 'Please try again later.'); // Use error alert helper
+        } finally {
+            setLoading(false);
         }
     };
+    
 
     const goBack = () => navigate(-1);
 
@@ -194,6 +181,6 @@ const useEditFinance = (userInfo) => {
         handleGSTChange,
         handleOtherChargesChange,
         handleStatusChange,
-        updateFinanceDetails,goBack,gst, setGst
+        updateFinanceDetails,goBack,gst, setGst,loading
     }}
 export default useEditFinance;

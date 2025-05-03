@@ -7,42 +7,30 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Lege
 import Chart from 'react-apexcharts';
 import useDashboard from '../../hooks/Dashboard/DashboardHooks';
 
-
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
-
-
-
 
 const Dashboard = ({ userInfo, handleLogout }) => {
   const {
-    totalChargers, setTotalChargers,
-    availableChargers, setAvailableChargers,
-    faultedChargers, setFaultedChargers,
-    offlineChargers, setOfflineChargers,
-    totalsession,setTotalSession,
-    scrollIndex,setScrollIndex,visibleBars,
+    totalChargers,
+    availableChargers, 
+    faultedChargers, 
+    offlineChargers,
+    totalsession,
+    scrollIndex,setScrollIndex,
+    visibleBars,
     containerRef,
-    hover, setHover,
+    setHover,
     totalChargersRef,
     onlineChargersRef,
-    faultedChargersRef,
-    offlineChargersRef,
-    selectedCharger,setSelectedCharger,
-    isModalOpen,setIsModalOpen,
-    totalCount, setTotalCounts,
-    chargersData, setChargersData,
-    energyData, setEnergyData,
-    viewMode, setViewMode,
-    fetchData,getChartData,
-    scrollLeft,scrollRight,handleChargerClick
-  }=useDashboard(userInfo);
-
-
-
-
-
-
-
+faultedChargersRef,
+offlineChargersRef,
+selectedCharger,
+handleChargerClick,
+scrollRight,
+scrollLeft,
+getChartData,isModalOpen,setIsModalOpen,
+fetchData,energyData,viewMode, setViewMode,chargersData
+  }=useDashboard(userInfo)
 
     return (
         <div className="container-scroller" style={{ background: '#f4f7fb' }}>
@@ -69,75 +57,23 @@ const Dashboard = ({ userInfo, handleLogout }) => {
                         </div>
                         <div className="row d-flex justify-content-center">
                             <div className="col-md-6 mb-3 d-flex justify-content-center">
-                                <div className="card p-4 text-center shadow-lg" style={{
-                                    background: 'white',
-                                    color: '#000',
-                                    borderRadius: '15px',
-                                    width: '100%',
-                                    maxWidth: '100%',
-                                    height: 'auto',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                                    boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.2)',
-                                    position: 'relative',
-                                }} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
-                                    <h2 className="font-weight-bold" style={{
-                                        fontSize: '1.1rem',
-                                        textTransform: 'uppercase',
-                                        marginBottom: '8px',
-                                        fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                                        letterSpacing: '1px',
-                                    }}>
+                            <div className="card p-4 text-center shadow-lg card-custom-box" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+                                    <h2 className="title-energy-consumed">
                                         EV ENERGY CONSUMED
                                     </h2>
-                                    <p style={{
-                                        fontSize: '1rem',
-                                        fontWeight: 'lighter',
-                                        marginTop: '3px',
-                                        fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                                        marginBottom: '12px',
-                                    }}>
+                                    <p className="description">
                                         Insights into energy consumption and environmental impact of EV chargers.
                                     </p>
 
                                     <div className="row" style={{ width: '100%', flexWrap: 'wrap' }}>
                                         {/* CO2 Savings Block */}
-                                        <div className="col-12 col-md-6 d-flex align-items-center mb-3" style={{
-                                            justifyContent: 'center',
-                                            padding: '25px',
-                                            position: 'relative',
-                                            transform: 'scale(1)',
-                                            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                                        }} onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'scale(1.05)';
-                                            e.currentTarget.style.boxShadow = '0px 10px 40px rgba(0, 0, 0, 0.4)';
-                                        }} onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'scale(1)';
-                                            e.currentTarget.style.boxShadow = 'none';
-                                        }}>
+                                        <div className="col-12 col-md-6 d-flex align-items-center mb-3 co2-savings-block">
                                             <div className="d-flex flex-column align-items-center">
-                                                <i className="fa fa-leaf" style={{
-                                                    fontSize: '4rem',
-                                                    color: '#28a745',
-                                                    marginBottom: '15px',
-                                                }}></i>
-                                                <p style={{
-                                                    fontSize: '1.3rem',
-                                                    fontWeight: 'bold',
-                                                    marginTop: '5px',
-                                                    color: '#000',
-                                                }}>
+                                                <i className="fa fa-leaf co2-icon"></i>
+                                                <p className="co2-savings-text">
                                                     {(energyData && energyData.CO2_Savings !== undefined) ? energyData.CO2_Savings.toFixed(2) : '0.00'} kg
                                                 </p>
-                                                <p style={{
-                                                    fontSize: '1.5rem',
-                                                    fontWeight: 'bold',
-                                                    color: '#FF9800',
-                                                    letterSpacing: '1px',
-                                                }}>
+                                                <p className="co2-savings-title">
                                                     CO<sub>2</sub> Savings
                                                 </p>
                                             </div>
@@ -146,63 +82,45 @@ const Dashboard = ({ userInfo, handleLogout }) => {
                                         {/* Other 3 Blocks on the Right Side */}
                                         <div className="col-12 col-md-6 d-flex flex-column justify-content-between" style={{ height: 'auto' }}>
                                             {/* Total Energy Consumed Block */}
-                                            <div className="d-flex align-items-center mb-3" style={{ height: 'auto' }}>
-                                                <div className="icon-circle" style={{
-                                                    backgroundColor: '#007BFF',
-                                                    color: '#fff',
-                                                    borderRadius: '50%',
-                                                    padding: '12px',
-                                                    marginRight: '10px',
-                                                }}>
+                                            <div className="d-flex align-items-center mb-3 energy-block">
+                                                <div className="icon-circle">
                                                     <i className="fa fa-bolt" style={{ fontSize: '1.0rem' }}></i>
                                                 </div>
                                                 <div className="d-flex flex-column">
-                                                    <p style={{ fontSize: '1rem', color: '#FF9800' }}>
+                                                    <p className="energy-text">
                                                         Total Energy Consumed
                                                     </p>
-                                                    <p style={{ fontSize: '1rem', color: '#000', lineHeight: '1.2', textAlign: 'left' }}>
+                                                    <p className="energy-value">
                                                         {(energyData && energyData.totalEnergyConsumed !== undefined) ? energyData.totalEnergyConsumed.toFixed(2) : '0.00'} kWh
                                                     </p>
                                                 </div>
                                             </div>
 
                                             {/* CO2 from EV Block */}
-                                            <div className="d-flex align-items-center mb-3" style={{ height: 'auto' }}>
-                                                <div className="icon-circle" style={{
-                                                    backgroundColor: '#FFC107',
-                                                    color: '#fff',
-                                                    borderRadius: '50%',
-                                                    padding: '12px',
-                                                    marginRight: '10px',
-                                                }}>
+                                            <div className="d-flex align-items-center mb-3 co2-from-ev-block">
+                                                <div className="icon-circle car">
                                                     <i className="fa fa-car" style={{ fontSize: '1.0rem' }}></i>
                                                 </div>
                                                 <div className="d-flex flex-column">
-                                                    <p style={{ fontSize: '1rem', color: '#FF9800' }}>
+                                                    <p className="energy-text">
                                                         CO<sub>2</sub> from EV
                                                     </p>
-                                                    <p style={{ fontSize: '1rem', color: '#000', lineHeight: '1.2', textAlign: 'left' }}>
+                                                    <p className="energy-value">
                                                         {(energyData && energyData.CO2_from_EV !== undefined) ? energyData.CO2_from_EV.toFixed(2) : '0.00'} kg
                                                     </p>
                                                 </div>
                                             </div>
 
                                             {/* CO2 from ICE Block */}
-                                            <div className="d-flex align-items-center mb-3" style={{ height: 'auto' }}>
-                                                <div className="icon-circle" style={{
-                                                    backgroundColor: '#F44336',
-                                                    color: '#fff',
-                                                    borderRadius: '50%',
-                                                    padding: '12px',
-                                                    marginRight: '10px',
-                                                }}>
+                                            <div className="d-flex align-items-center mb-3 co2-from-ice-block">
+                                                <div className="icon-circle fire">
                                                     <i className="fa fa-fire" style={{ fontSize: '1.0rem' }}></i>
                                                 </div>
                                                 <div className="d-flex flex-column">
-                                                    <p style={{ fontSize: '1rem', color: '#FF9800' }}>
+                                                    <p className="energy-text">
                                                         CO<sub>2</sub> from ICE
                                                     </p>
-                                                    <p style={{ fontSize: '1rem', color: '#000', lineHeight: '1.2', textAlign: 'left' }}>
+                                                    <p className="energy-value">
                                                         {(energyData && energyData.CO2_from_ICE !== undefined) ? energyData.CO2_from_ICE.toFixed(2) : '0.00'} kg
                                                     </p>
                                                 </div>
@@ -296,224 +214,140 @@ const Dashboard = ({ userInfo, handleLogout }) => {
 
                             {/* Chargers Data Tables */}
                             <div className="col-md-12 mt-4">
-                                <div className="row mb-4" style={{ marginBottom: '20px' }}>
-                                    {/* First Row: Chargers Overview & Energy Consumed */}
-                                    <div className="col-md-4">
-                                        <div className="card p-3 shadow-sm" style={{
-                                            borderRadius: '15px',
-                                            boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.1)',
-                                            width: '100%',
-                                            height: '350px',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center',
-                                            alignItems: 'center'
-                                        }}>
-                                            <h5 className="font-weight-normal mb-3" style={{
-                                                color: '#4CAF50',
-                                                textTransform: 'uppercase',
-                                                fontSize: '18px',
-                                                textAlign: 'center',
-                                                letterSpacing: '1px',
-                                            }}>
-                                                Chargers Overview
-                                            </h5>
-
-                                            <div style={{ width: '100%', height: '230px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                                {availableChargers === 0 && faultedChargers === 0 && offlineChargers === 0 ? (
-                                                    <p style={{
-                                                        color: '#999',
-                                                        fontSize: '16px',
-                                                        textAlign: 'center',
-                                                        fontWeight: 'normal'
-                                                    }}>
-                                                        No Data Available
-                                                    </p>
-                                                ) : (
-                                                    <Chart
-                                                        options={{
-                                                            chart: { type: 'pie' },
-                                                            labels: ['Online Chargers', 'Faulted Chargers', 'Offline Chargers'],
-                                                            colors: ['#4CAF50', '#FF9800', '#F44336'],
-                                                            legend: { position: 'bottom' }
-                                                        }}
-                                                        series={[availableChargers, faultedChargers, offlineChargers]}
-                                                        type="pie"
-                                                        width="290"
-                                                        height="220px"
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div className="col-md-8">
-                                        <div className="card p-3 shadow-sm" style={{ borderRadius: '15px', width: '100%', height: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                                            <h5 className="text-center text-uppercase" style={{ color: '#FF6347', fontSize: '18px', marginBottom: '15px' }}>
-                                                Total Energy Consumed
-                                            </h5>
-
-                                            {/* Buttons to switch between weekly/monthly/yearly */}
-                                            <div style={{ textAlign: 'center', marginBottom: '15px' }}>
-                                                <button
-                                                    onClick={() => { setViewMode('weekly'); setScrollIndex(0); }}
-                                                    style={{
-                                                        margin: '0 10px',
-                                                        padding: '8px 18px',
-                                                        backgroundColor: viewMode === 'weekly' ? '#1e7e34' : '#34d058', // Dark green for active
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '5px',
-                                                        fontSize: '14px',
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.3s ease',
-                                                    }}
-                                                >
-                                                    Weekly
-                                                </button>
-                                                <button
-                                                    onClick={() => { setViewMode('monthly'); setScrollIndex(0); }}
-                                                    style={{
-                                                        margin: '0 10px',
-                                                        padding: '8px 18px',
-                                                        backgroundColor: viewMode === 'monthly' ? '#1e7e34' : '#34d058', // Dark green for active
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '5px',
-                                                        fontSize: '14px',
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.3s ease',
-                                                    }}
-                                                >
-                                                    Monthly
-                                                </button>
-                                                <button
-                                                    onClick={() => { setViewMode('yearly'); setScrollIndex(0); }}
-                                                    style={{
-                                                        margin: '0 10px',
-                                                        padding: '8px 18px',
-                                                        backgroundColor: viewMode === 'yearly' ? '#1e7e34' : '#34d058', // Dark green for active
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '5px',
-                                                        fontSize: '14px',
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.3s ease',
-                                                    }}
-                                                >
-                                                    Yearly
-                                                </button>
-                                            </div>
-
-
-                                            <div style={{ display: 'flex', alignItems: 'center', height: '270px', justifyContent: 'space-between' }}>
-                                                <button
-                                                    onClick={scrollLeft}
-                                                    disabled={scrollIndex === 0}
-                                                    style={{
-                                                        fontSize: '18px',  // Smaller font size for the button
-                                                        padding: '6px 12px',  // Smaller padding for a more compact button
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.3s ease',
-                                                        border: 'none',
-                                                        backgroundColor: '#ddd',
-                                                        borderRadius: '50%',
-                                                    }}
-                                                >
-                                                    &lt;
-                                                </button>
-
-                                                {/* Scrollable Chart */}
-                                                <div
-                                                    ref={containerRef}
-                                                    style={{
-                                                        overflowX: 'auto',
-                                                        whiteSpace: 'nowrap',
-                                                        width: '85%',  // Reduce width to make it fit better within the container
-                                                        display: 'flex',
-                                                        justifyContent: 'center',
-                                                        height: '100%',
-                                                        marginBottom: '15px', // Add some space below the chart
-                                                    }}
-                                                >
-                                                    {getChartData() ? (
-                                                        <div style={{ width: `${visibleBars * 90}px`, height: '97%' }}>
-                                                            <Bar
-                                                                data={getChartData()}
-                                                                options={{
-                                                                    responsive: true,
-                                                                    maintainAspectRatio: false,
-                                                                    plugins: {
-                                                                        tooltip: {
-                                                                            callbacks: {
-                                                                                label: (tooltipItem) => `${tooltipItem.raw} kWh`,
-                                                                            },
-                                                                        },
-                                                                        legend: { display: false },
-                                                                    },
-                                                                    scales: {
-                                                                        x: {
-                                                                            grid: { display: false },
-                                                                            ticks: {
-                                                                                autoSkip: true,
-                                                                                maxTicksLimit: 10,
-                                                                                font: { size: 10 },  // Set the font size of the x-axis labels
-                                                                            }
-                                                                        },
-                                                                        y: {
-                                                                            beginAtZero: true,
-                                                                            ticks: {
-                                                                                max: Math.max(...getChartData().datasets[0].data) + 10
-                                                                            }
-                                                                        },
-                                                                    },
-                                                                    elements: {
-                                                                        bar: {
-                                                                            borderRadius: 5,
-                                                                            barThickness: 8,  // Increased thickness of bars
-                                                                            categoryPercentage: 0.3,  // Adjusted category width
-                                                                            barPercentage: 0.7,      // Increased bar width within category
-                                                                        }
-                                                                    },
-                                                                    backgroundColor: '#007BFF',  // Blue color for the bars
-                                                                    borderColor: '#007BFF',      // Blue border color for the bars
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    ) : (
-                                                        <p>No data available.</p>
-                                                    )}
-                                                </div>
-
-                                                <button
-                                                    onClick={scrollRight}
-                                                    disabled={scrollIndex + visibleBars >= energyData[`${viewMode}EnergyConsumed`].length}
-                                                    style={{
-                                                        fontSize: '18px',  // Smaller font size for the button
-                                                        padding: '6px 12px',  // Smaller padding for a more compact button
-                                                        cursor: 'pointer',
-                                                        transition: 'all 0.3s ease',
-                                                        border: 'none',
-                                                        backgroundColor: '#ddd',
-                                                        borderRadius: '50%',
-                                                    }}
-                                                >
-                                                    &gt;
-                                                </button>
-                                            </div>
-                                        </div>
-
-
-                                    </div>
-
-
-
-
-
-
-
-                                </div>
+                              <div className="row mb-4 card-container">
+                                                             {/* First Row: Chargers Overview & Energy Consumed */}
+                                                             <div className="col-md-4">
+                                                             <div className="card p-3 shadow-sm card-custom">
+                                                                 <h5 className="font-weight-normal mb-3 title-chargers-overview">
+                                                                     Chargers Overview
+                                                                 </h5>
+                                                         
+                                                                 <div className="chart-container">
+                                                                     {availableChargers === 0 && faultedChargers === 0 && offlineChargers === 0 ? (
+                                                                         <p className="no-data-message">
+                                                                             No Data Available
+                                                                         </p>
+                                                                     ) : (
+                                                                         <Chart
+                                                                             options={{
+                                                                                 chart: { type: 'pie' },
+                                                                                 labels: ['Online Chargers', 'Faulted Chargers', 'Offline Chargers'],
+                                                                                 colors: ['#4CAF50', '#FF9800', '#F44336'],
+                                                                                 legend: { position: 'bottom' }
+                                                                             }}
+                                                                             series={[availableChargers, faultedChargers, offlineChargers]}
+                                                                             type="pie"
+                                                                             width="290"
+                                                                             height="240px"
+                                                                         />
+                                                                     )}
+                                                                 </div>
+                                                             </div>
+                                                         </div>
+                                                         
+                                                         
+                                                             <div className="col-md-8">
+                                                                 <div className="card p-3 shadow-sm card-custom-energy">
+                                                                     <h5 className="title-energy-consumed-title">
+                                                                         Total Energy Consumed
+                                                                     </h5>
+                                                         
+                                                                     {/* Buttons to switch between weekly/monthly/yearly */}
+                                                                     <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+                                                                         <button
+                                                                             onClick={() => { setViewMode('weekly'); setScrollIndex(0); }}
+                                                                             className={`button-custom ${viewMode === 'weekly' ? 'button-weekly-active' : 'button-weekly-inactive'}`}
+                                                                         >
+                                                                             Weekly
+                                                                         </button>
+                                                                         <button
+                                                                             onClick={() => { setViewMode('monthly'); setScrollIndex(0); }}
+                                                                             className={`button-custom ${viewMode === 'monthly' ? 'button-weekly-active' : 'button-weekly-inactive'}`}
+                                                                         >
+                                                                             Monthly
+                                                                         </button>
+                                                                         <button
+                                                                             onClick={() => { setViewMode('yearly'); setScrollIndex(0); }}
+                                                                             className={`button-custom ${viewMode === 'yearly' ? 'button-weekly-active' : 'button-weekly-inactive'}`}
+                                                                         >
+                                                                             Yearly
+                                                                         </button>
+                                                                     </div>
+                                                         
+                                                                     <div style={{ display: 'flex', alignItems: 'center', height: '270px', justifyContent: 'space-between' }}>
+                                                                         <button
+                                                                             onClick={scrollLeft}
+                                                                             disabled={scrollIndex === 0}
+                                                                             className={`button-left-right ${scrollIndex === 0 ? 'button-disabled' : 'button-enabled'}`}
+                                                                         >
+                                                                             &lt;
+                                                                         </button>
+                                                         
+                                                                         {/* Scrollable Chart */}
+                                                                         <div
+                                                                             ref={containerRef}
+                                                                             className="chart-container"
+                                                                         >
+                                                                             {getChartData() ? (
+                                                                                 <div style={{ width: '80%', height: '97%' }}>
+                                                                                 <Bar
+                                                                                         data={getChartData()}
+                                                                                         options={{
+                                                                                             responsive: true,
+                                                                                             maintainAspectRatio: false,
+                                                                                             plugins: {
+                                                                                                 tooltip: {
+                                                                                                     callbacks: {
+                                                                                                         label: (tooltipItem) => `${tooltipItem.raw} kWh`,
+                                                                                                     },
+                                                                                                 },
+                                                                                                 legend: { display: false },
+                                                                                             },
+                                                                                             scales: {
+                                                                                                 x: {
+                                                                                                     grid: { display: false },
+                                                                                                     ticks: {
+                                                                                                         autoSkip: true,
+                                                                                                         maxTicksLimit: 10,
+                                                                                                         font: { size: 10 },  // Set the font size of the x-axis labels
+                                                                                                     }
+                                                                                                 },
+                                                                                                 y: {
+                                                                                                     beginAtZero: true,
+                                                                                                     ticks: {
+                                                                                                         max: Math.max(...getChartData().datasets[0].data) + 10
+                                                                                                     }
+                                                                                                 },
+                                                                                             },
+                                                                                             elements: {
+                                                                                                 bar: {
+                                                                                                     borderRadius: 5,
+                                                                                                     barThickness: 8,  // Increased thickness of bars
+                                                                                                     categoryPercentage: 0.3,  // Adjusted category width
+                                                                                                     barPercentage: 0.7,      // Increased bar width within category
+                                                                                                 }
+                                                                                             },
+                                                                                             backgroundColor: '#007BFF',  // Blue color for the bars
+                                                                                             borderColor: '#007BFF',      // Blue border color for the bars
+                                                                                         }}
+                                                                                     />
+                                                                                 </div>
+                                                                             ) : (
+                                                                                 <p>No data available.</p>
+                                                                             )}
+                                                                         </div>
+                                                         
+                                                                         <button
+                                                                             onClick={scrollRight}
+                                                                             disabled={scrollIndex + visibleBars >= energyData[`${viewMode}EnergyConsumed`].length}
+                                                                             className={`button-left-right ${scrollIndex + visibleBars >= energyData[`${viewMode}EnergyConsumed`].length ? 'button-disabled' : 'button-enabled'}`}
+                                                                         >
+                                                                             &gt;
+                                                                         </button>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
 
 
                                 <div className="row">

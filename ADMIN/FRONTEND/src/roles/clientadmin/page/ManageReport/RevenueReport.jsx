@@ -7,9 +7,7 @@ import InputField from '../../../../utils/InputField';
 const RevenueReport = ({ userInfo, handleLogout }) => {
     const {
 
-        firstTableData,
         totalRevenue,
-        secondTableData,
         filteredFirstTableData,
         filteredSecondTableData,
         firstTableSearchQuery,

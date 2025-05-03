@@ -21,7 +21,6 @@ const useDashboard = (userInfo) => {
 
 
     const [totalCounts, setTotalCounts] = useState({
-        resellersCount: 0,
         clientsCount: 0,
         associatinsCount: 0,
         appUsersCount: 0
@@ -84,11 +83,9 @@ const useDashboard = (userInfo) => {
                 client_id: userInfo.client_id,
             });
 
-            const { resellersCount, clientsCount, associationsCount, appUsersCount } = res.data.TotalCounts;
+            const {associationsCount, appUsersCount } = res.data.totalCounts;
 
             setTotalCounts({
-                resellersCount,
-                clientsCount,
                 associationsCount,
                 appUsersCount,
             });

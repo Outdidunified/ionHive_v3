@@ -5,7 +5,7 @@ import useViewUnalloc from '../../hooks/ManageDevice/ViewUnAllocatedDeviceHooks'
 
 const ViewUnalloc = ({ userInfo, handleLogout }) => {
    const {
-    newDevice,setNewDevice,
+    newDevice,
         formatTimestamp,goBack
    }=useViewUnalloc(userInfo)
     return (

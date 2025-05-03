@@ -2,29 +2,21 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAssigneddevass from '../../hooks/ManageAssociation/AssignedDeviceAssociationHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const Assigneddevass = ({ userInfo, handleLogout }) => {
     const {
         searchQuery,
         filteredData,
-        originalData,
         errorMessage,
         setErrorMessage,
-        setOriginalData,
-        setFilteredData,
-        setSearchQuery,
-        fetchChargerDetails,
         handleSearch,
         goBack,
         navsessionhistory,
-        initialClientCommission, setInitialClientCommission,
-        showEditForm, setShowEditForm,
-        dataItem, setEditDataItem, handleEditUser,
         closeEditModal, modalEditStyle,
-        theadBackgroundColor, setTheadBackgroundColor,
-        theadsticky, setTheadsticky,
-        theadfixed, setTheadfixed,
+        theadBackgroundColor,
+        theadsticky,
+        theadfixed, 
         handleEditCommission,
         editUserRole,
         isUpdateButtonEnabled, client_commission, setEditClientComm, isEdit, isLoading
@@ -111,11 +103,11 @@ const Assigneddevass = ({ userInfo, handleLogout }) => {
                                         </div>
                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
-                                        <LoadingButton
+                                        <ReusableButton
                                             type="submit"
                                             disabled={!isUpdateButtonEnabled}
                                             loading={isEdit}
-                                        >Update</LoadingButton>
+                                        >Update</ReusableButton>
 
 
                                     </div>

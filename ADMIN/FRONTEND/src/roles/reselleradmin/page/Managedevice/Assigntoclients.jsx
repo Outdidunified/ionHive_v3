@@ -3,7 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useAssigntoclients from '../../hooks/ManageDevice/AssigntoClientsHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 
 const Assigntoclients = ({ userInfo, handleLogout }) => {
@@ -185,12 +185,12 @@ const Assigntoclients = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             disabled={isSubmitting}
                                                             loading={isSubmitting}>
                                                             Submit
-                                                        </LoadingButton>
+                                                        </ReusableButton>
 
                                                     </form>
                                                 </div>

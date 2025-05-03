@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAssignedDevicesClient from '../../hooks/ManageClient/AssignedDevicesClientHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const AssignedDevicesClient = ({ userInfo, handleLogout }) => {
     const {
@@ -97,11 +97,11 @@ const AssignedDevicesClient = ({ userInfo, handleLogout }) => {
                                         </div>
                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
-                                        <LoadingButton
+                                        <ReusableButton
                                             type="submit"
                                             loading={isUpdating}
                                             disabled={!isUpdateButtonEnabled || isUpdating}
-                                        >Update</LoadingButton>
+                                        >Update</ReusableButton>
 
                                     </div>
                                 </form>

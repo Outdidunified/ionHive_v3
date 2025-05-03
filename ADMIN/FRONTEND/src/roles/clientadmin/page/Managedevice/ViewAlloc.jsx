@@ -5,7 +5,7 @@ import useViewAlloc from '../../hooks/ManageDevice/ViewAllocatedDeviceHooks';
 
 const ViewAlloc = ({ userInfo, handleLogout }) => {
    const {
-    newDevice,setNewDevice,goBack,formatTimestamp
+    newDevice,goBack,formatTimestamp
 
    }=useViewAlloc(userInfo)
 

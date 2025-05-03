@@ -2,8 +2,9 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useEditAllocatedDevice from '../../hooks/ManageDevice/EditAllocManageDeviceHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
+
 const EditAllocatedDevice = ({ userInfo, handleLogout }) => {
     const {
         backManageDevice,
@@ -97,7 +98,7 @@ const EditAllocatedDevice = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Vendor</label>
                                                                     <div className="col-sm-12">
-                                                                        <InputField  placeholder="Vendor" value={vendor} maxLength={20} onChange={(e) => { const value = e.target.value; let sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setVendor(sanitizedValue); }} required />
+                                                                        <InputField placeholder="Vendor" value={vendor} maxLength={20} onChange={(e) => { const value = e.target.value; let sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setVendor(sanitizedValue); }} required />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -296,13 +297,13 @@ const EditAllocatedDevice = ({ userInfo, handleLogout }) => {
 
 
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             loading={loading}
                                                             disabled={!isFormModified}
                                                         >
                                                             Update
-                                                        </LoadingButton>
+                                                        </ReusableButton>
 
 
                                                     </form>

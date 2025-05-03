@@ -7,12 +7,10 @@ import InputField from '../../../../utils/InputField';
 const Unallocateddevice = ({ userInfo, handleLogout }) => {
   const {
     unallocatedChargers,
-    setUnallocatedChargers,
-    searchQuery, setSearchQuery,
+    searchQuery, 
     handleSearch,
     filterChargers,
     navigateToViewChargerDetails,
-    fetchUnAllocatedChargerDetailsCalled, fetchUnAllocatedChargerDetails,
     handleAssignAssociation, loading
   } = useUnallocateddevice(userInfo)
   return (

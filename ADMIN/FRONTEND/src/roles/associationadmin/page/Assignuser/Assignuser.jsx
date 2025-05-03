@@ -2,19 +2,16 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useAssignuser from '../../hooks/Assignuser/Assignuserhooks';
+import InputField from '../../../../utils/InputField';
 
 
 const Assignuser = ({ userInfo, handleLogout }) => {
   const {
-    usersToUnassign, setUsersToUnassign,
-    originalUsersToUnassign,setOriginalUsersToUnassign,
+    usersToUnassign,
     loading,
-    setLoading,
-    error,setError,
+    error,
     email_id,setAssEmail,
-    errorMessage2,setErrorMessage2,
-    fetchUsersToUnassignCalled,
-    fetchUsersToUnassign,
+    errorMessage2,
     handleSelectRemove,handleSearchInputChange,
     handleAssuserSubmits,handleViewAssignTagID  }=useAssignuser(userInfo)
   return (
@@ -53,7 +50,7 @@ const Assignuser = ({ userInfo, handleLogout }) => {
                         <div className="card-body">
                           <form onSubmit={handleAssuserSubmits} className="form-inline d-flex justify-content-center align-items-center w-100">
                             <label htmlFor="emailId" className="mr-2">Email ID</label>
-                            <input type="email" className="form-control mb-2 mr-sm-2" id="emailId" placeholder="Enter Email ID" value={email_id} 
+                            <InputField type="email" className="form-control mb-2 mr-sm-2" id="emailId" placeholder="Enter Email ID" value={email_id} 
                               onChange={(e) => {
                                 const value = e.target.value;
                                 const noSpaces = value.replace(/\s/g, '');
@@ -92,7 +89,7 @@ const Assignuser = ({ userInfo, handleLogout }) => {
                                   <i className="icon-search"></i>
                                 </span>
                               </div>
-                              <input type="text" className="form-control" placeholder="Search now" aria-label="search" aria-describedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
+                              <InputField placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
                             </div>
                           </div>
                         </div>

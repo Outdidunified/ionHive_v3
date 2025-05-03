@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useCreateass from '../../hooks/ManageAssociation/createassociationHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 
 const Createass = ({ userInfo, handleLogout }) => {
@@ -12,7 +12,7 @@ const Createass = ({ userInfo, handleLogout }) => {
         loading,
         Goback,
         addClientUser, setNewUser,
-        setErrorMessage
+        
 
     } = useCreateass(userInfo)
     return (
@@ -121,11 +121,11 @@ const Createass = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             disabled={loading}
                                                             loading={loading}
-                                                        >Add</LoadingButton>                                               </form>
+                                                        >Add</ReusableButton>                                               </form>
                                                 </div>
                                             </div>
                                         </div>

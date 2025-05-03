@@ -2,28 +2,26 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useManageDevice from '../../hooks/ManageDevice/ManageDeviceHooks';
+import InputField from '../../../../utils/InputField';
+import ReusableButton from '../../../../utils/ReusableButton';
 
 const ManageDevice = ({ userInfo, handleLogout }) => {    
   const {
-    data, setData,
-    loading,setLoading,
-    error, setError,
-    filteredData,
-    posts, setPosts,
-    fetchMangeCalled,
+    data,
+    loading,
+    error,
+    posts, 
     handleViewManageDevice,
-    FetchAllocatedCharger,
     handleSearchInputChange,
     changeDeActivate,
     changeActivate,
-    showModal, setShowModal,
+    showModal, 
     selectedChargerDitails,
-    setSelectedChargerDitails,
-    selectedFinanceId,setSelectedFinanceId,
-    financeOptions,setFinanceOptions,
-    isEdited,setIsEdited,fetchFinanceDetails,
+    selectedFinanceId,
+    financeOptions,
+    isEdited,isloading,
     openFinanceModal,handleFinanceChange,
-    closeModal,handleSubmit
+    closeModal,handleSubmit,
   }=useManageDevice(userInfo);
     
     
@@ -63,7 +61,7 @@ const ManageDevice = ({ userInfo, handleLogout }) => {
                                                                 <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" aria-label="search" aria-describedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
+                                                            <InputField  placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -87,7 +85,7 @@ const ManageDevice = ({ userInfo, handleLogout }) => {
                                                                     <div className="col-md-6">
                                                                         <div className="form-group">
                                                                             <label className="col-form-label">Charger ID</label>
-                                                                            <input type="text" className="form-control" value={selectedChargerDitails.charger_id} readOnly />
+                                                                            <InputField value={selectedChargerDitails.charger_id} readOnly />
                                                                         </div>
                                                                     </div>
                                                                     <div className="col-md-6">
@@ -108,14 +106,17 @@ const ManageDevice = ({ userInfo, handleLogout }) => {
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <div style={{ textAlign: "center", padding: "15px" }}>
-                                                                    <button type="submit" className="btn btn-primary mr-2" disabled={!isEdited}>
-                                                                    {(selectedChargerDitails.finance_id && financeOptions.some(item => item.finance_id === selectedChargerDitails.finance_id))
+                                                                <ReusableButton 
+  type="submit" 
+  loading={isloading} 
+  disabled={!isEdited}
+>
+  {(selectedChargerDitails.finance_id && financeOptions.some(item => item.finance_id === selectedChargerDitails.finance_id))
     ? "ReAssign"
     : "Assign"}
-
-                                                                    </button>
-                                                                </div>
+</ReusableButton>
+      
+                                                                
                                                             </form>
                                                         </div>
                                                     </div>
@@ -123,74 +124,83 @@ const ManageDevice = ({ userInfo, handleLogout }) => {
                                             </div>
                                         )}
 
-                                        <div className="table-responsive" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                                            <table className="table table-striped">
-                                                <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                                    <tr> 
-                                                        <th>Sl.No</th>
-                                                        <th>Charger ID</th>
-                                                        <th>Charger Model</th>
-                                                        <th>Client Commission</th>
-                                                        <th>Per Unit Price</th>
-                                                        <th>Charger Accessibility</th>
-                                                        <th>Assign Finance</th>
-                                                        <th>Option</th>
-                                                        <th>Status</th>
-                                                        <th>Active/DeActive</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody style={{textAlign:'center'}}>
-                                                    {loading ? (
-                                                        <tr>
-                                                        <td colSpan="9" style={{ marginTop: '50px', textAlign: 'center' }}>Loading...</td>
-                                                        </tr>
-                                                    ) : error ? (
-                                                        <tr>
-                                                        <td colSpan="9" style={{ marginTop: '50px', textAlign: 'center' }}>Error: {error}</td>
-                                                        </tr>
-                                                    ) : (
-                                                        Array.isArray(posts) && posts.length > 0 ? (
-                                                            posts.map((dataItem, index) => (
-                                                            <tr key={index}>
-                                                                <td>{index + 1}</td>
-                                                                <td>{dataItem.charger_id ? dataItem.charger_id : '-'}</td>
-                                                                <td className="py-1">
-                                                                    <img src={`../../images/dashboard/${dataItem.charger_model ? dataItem.charger_model : '-'}kw.png`} alt="img" />
-                                                                </td>
-                                                                <td>{dataItem.client_commission ? `${dataItem.client_commission}%` : '-'}</td>
-                                                                <td>{dataItem.unit_price ? dataItem.unit_price : '-'}</td>
-                                                                <td>{dataItem.charger_accessibility === 1 ? 'Public' : dataItem.charger_accessibility === 2 ? 'Private' : '-'}</td>
-                                                                <td>
-                                                                    <button type="button" className="btn btn-outline-warning btn-icon-text" style={{ marginBottom: '10px', marginRight: '10px' }} onClick={() => openFinanceModal(dataItem)}><i className="ti-file btn-icon-prepend"></i>Finance</button>
-                                                                </td>
-                                                                <td>
-                                                                    <button type="button" className="btn btn-outline-success btn-icon-text"  onClick={() => handleViewManageDevice(dataItem)} style={{marginBottom:'10px', marginRight:'10px'}}><i className="mdi mdi-eye"></i>View</button> 
-                                                                </td>   
-                                                                <td>{dataItem.status===true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</td>
-                                                                <td>
-                                                                    <div className='form-group' style={{paddingTop:'13px'}}> 
-                                                                        {dataItem.status===true ?
-                                                                            <div className="form-check form-check-danger">
-                                                                                <label className="form-check-label"><input type="radio" className="form-check-input" name="optionsRadios1" id="optionsRadios2" value={false} onClick={(e) => changeDeActivate(e, dataItem)}/>DeActive<i className="input-helper"></i></label>
-                                                                            </div>
-                                                                        :
-                                                                            <div className="form-check form-check-success">
-                                                                                <label className="form-check-label"><input type="radio" className="form-check-input" name="optionsRadios1" id="optionsRadios1" value={true} onClick={(e) => changeActivate(e, dataItem)}/>Active<i className="input-helper"></i></label>
-                                                                            </div>
-                                                                        }
-                                                                    </div>
-                                                                </td>  
-                                                            </tr>
-                                                        ))
-                                                        ) : (
-                                                        <tr>
-                                                            <td colSpan="9" style={{ marginTop: '50px', textAlign: 'center' }}>No devices found</td>
-                                                        </tr>
-                                                        )
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
+<div className="table-responsive" style={{ maxHeight: '500px', overflowY: 'auto' }}>
+    <table className="table table-striped">
+        <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
+            <tr> 
+                <th>Sl.No</th>
+                <th>Charger ID</th>
+                <th>Charger Model</th>
+                <th>Client Commission</th>
+                <th>Per Unit Price</th>
+                <th>Charger Accessibility</th>
+                <th>Assign Finance</th>
+                <th>Option</th>
+                <th>Status</th>
+                <th>Active/DeActive</th>
+            </tr>
+        </thead>
+        <tbody style={{ textAlign: 'center' }}>
+            {loading ? (
+                <tr>
+                    <td colSpan="10" style={{ textAlign: 'center' }}>Loading...</td>
+                </tr>
+            ) : error ? (
+                <tr>
+                    <td colSpan="10" style={{ textAlign: 'center' }}>Error: {error}</td>
+                </tr>
+            ) : Array.isArray(posts) && posts.length === 0 ? (
+                <tr>
+                    <td colSpan="10" style={{ textAlign: 'center' }}>No devices found</td>
+                </tr>
+            ) : (
+                posts.map((dataItem, index) => (
+                    <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{dataItem.charger_id || '-'}</td>
+                        <td className="py-1">
+                            <img src={`../../images/dashboard/${dataItem.charger_model || '-'}kw.png`} alt="img" />
+                        </td>
+                        <td>{dataItem.client_commission ? `${dataItem.client_commission}%` : '-'}</td>
+                        <td>{dataItem.unit_price || '-'}</td>
+                        <td>{dataItem.charger_accessibility === 1 ? 'Public' : dataItem.charger_accessibility === 2 ? 'Private' : '-'}</td>
+                        <td>
+                            <button type="button" className="btn btn-outline-warning btn-icon-text" style={{ marginBottom: '10px', marginRight: '10px' }} onClick={() => openFinanceModal(dataItem)}>
+                                <i className="ti-file btn-icon-prepend"></i>Finance
+                            </button>
+                        </td>
+                        <td>
+                            <button type="button" className="btn btn-outline-success btn-icon-text" onClick={() => handleViewManageDevice(dataItem)} style={{ marginBottom: '10px', marginRight: '10px' }}>
+                                <i className="mdi mdi-eye"></i>View
+                            </button>
+                        </td>
+                        <td>{dataItem.status ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</td>
+                        <td>
+                            <div className='form-group' style={{ paddingTop: '13px' }}>
+                                {dataItem.status ? (
+                                    <div className="form-check form-check-danger">
+                                        <label className="form-check-label">
+                                            <InputField type="radio" className="form-check-input" name={`optionsRadios${index}`} value={false} onClick={(e) => changeDeActivate(e, dataItem)} /> DeActive
+                                            <i className="input-helper"></i>
+                                        </label>
+                                    </div>
+                                ) : (
+                                    <div className="form-check form-check-success">
+                                        <label className="form-check-label">
+                                            <InputField type="radio" className="form-check-input" name={`optionsRadios${index}`} value={true} onClick={(e) => changeActivate(e, dataItem)} /> Active
+                                            <i className="input-helper"></i>
+                                        </label>
+                                    </div>
+                                )}
+                            </div>
+                        </td>
+                    </tr>
+                ))
+            )}
+        </tbody>
+    </table>
+</div>
+
                                     </div>
                                 </div>
                             </div>

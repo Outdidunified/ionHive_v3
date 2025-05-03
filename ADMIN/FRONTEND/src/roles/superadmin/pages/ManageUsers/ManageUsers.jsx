@@ -3,14 +3,14 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import ManageUser from '../../hooks/ManageUsers/ManageUsersHooks';
 import { useNavigate } from 'react-router-dom';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const ManageUsers = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
 
     const {
 
-        handleSearchInputChange, fetchUsers,
+        handleSearchInputChange,
         loading,
         modalAddStyle,
         error,
@@ -24,7 +24,7 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
         handleAddUser,
         handleResellerChange,
         handleselectionReseller,
-        closeAddModal,isloading,
+        closeAddModal, isloading,
         errorMessage, username, theadsticky, theadfixed, theadBackgroundColor, setuserName, setemailID, setPhone, setPassword
 
     } = ManageUser(userInfo);
@@ -99,13 +99,13 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '125px' }}>User Name</span>
                                                                     </div>
-                                                                    <InputField  placeholder="User Name" value={username} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setuserName(sanitizedValue); }} required />
+                                                                    <InputField placeholder="User Name" value={username} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setuserName(sanitizedValue); }} required />
                                                                 </div>
                                                                 <div className="input-group">
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '125px' }}>Email ID</span>
                                                                     </div>
-                                                                    <InputField type="email"  placeholder="Email ID" value={email_id}
+                                                                    <InputField type="email" placeholder="Email ID" value={email_id}
                                                                         onChange={(e) => {
                                                                             const value = e.target.value;
                                                                             // Remove spaces and invalid characters
@@ -131,17 +131,17 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '125px' }}>Password</span>
                                                                     </div>
-                                                                    <InputField  placeholder="Password" value={Password} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue); }} required />
+                                                                    <InputField placeholder="Password" value={Password} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue); }} required />
                                                                 </div>
                                                             </div>
                                                             {errorMessage && <div className="text-danger">{errorMessage}</div>}<br />
 
 
-                                                            <LoadingButton
+                                                            <ReusableButton
                                                                 type="submit"
                                                                 loading={loading}
                                                                 disabled={loading}>Add
-                                                            </LoadingButton>
+                                                            </ReusableButton>
 
                                                         </div>
                                                     </form>
@@ -170,7 +170,7 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <InputField  placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange} />
+                                                            <InputField placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange} />
                                                         </div>
                                                     </div>
                                                 </div>

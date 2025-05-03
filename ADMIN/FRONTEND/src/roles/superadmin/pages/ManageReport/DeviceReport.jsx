@@ -5,24 +5,24 @@ import useDeviceReport from '../../hooks/ManageReport/DeviceReportHooks';
 import InputField from '../../../../utils/InputField';
 
 const DeviceReport = ({ userInfo, handleLogout }) => {
-  const {
-    today,
-    deviceData,
-    loadingDevice,
-    errorDevice,
-    fromDate,
-    toDate,
-    selectDevice,
-    loading,
-    tableData,
-    deviceId,
-    setFromDate,
-    setToDate,
-    setDevice,
-    handleSearch,handleExport,handlePrint
-  } = useDeviceReport();
-  
- 
+    const {
+        today,
+        deviceData,
+        loadingDevice,
+        errorDevice,
+        fromDate,
+        toDate,
+        selectDevice,
+        loading,
+        tableData,
+        deviceId,
+        setFromDate,
+        setToDate,
+        setDevice,
+        handleSearch, handleExport, handlePrint
+    } = useDeviceReport();
+
+
 
     return (
         <div className='container-scroller'>
@@ -30,7 +30,7 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
             <Header userInfo={userInfo} handleLogout={handleLogout} />
             <div className="container-fluid page-body-wrapper">
                 {/* Sidebar */}
-                <Sidebar/>
+                <Sidebar />
                 <div className="main-panel">
                     <div className="content-wrapper">
                         <div className="row">
@@ -81,7 +81,7 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
                                                 </div>
 
                                                 <div className="form-group">
-                                                    <label htmlFor="selectField" style={{fontSize:'17px'}}>Select Device</label>
+                                                    <label htmlFor="selectField" style={{ fontSize: '17px' }}>Select Device</label>
                                                     {/* <select name="selectField" value={selectDevice}  onChange={(e) => setDevice(e.target.value)} className="form-input inputCss">
                                                         <option value="" disabled>Select Device</option>
                                                         <option value="4989348034">4989348034</option>
@@ -94,7 +94,7 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
                                                     ) : deviceData.length === 0 ? (
                                                         <p>No device data available.</p>
                                                     ) : (
-                                                        <select 
+                                                        <select
                                                             name="selectField"
                                                             value={selectDevice}
                                                             onChange={(e) => setDevice(e.target.value)} className="form-input inputCss">
@@ -108,24 +108,24 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
                                                     )}
                                                 </div>
                                                 <div className="form-group">
-                                                <button
-  type="button"
-  className="form-submit-btn inputCss"
-  onClick={handleSearch}
-  disabled={loading} // disable button during loading
->
-  {loading ? (
-    <div
-      className="spinner-border spinner-border-sm text-light"
-      role="status"
-      style={{ width: '1rem', height: '1rem' }}
-    ></div>
-  ) : (
-    <>
-      <i className="mdi mdi-magnify"></i> Search
-    </>
-  )}
-</button>
+                                                    <button
+                                                        type="button"
+                                                        className="form-submit-btn inputCss"
+                                                        onClick={handleSearch}
+                                                        disabled={loading} // disable button during loading
+                                                    >
+                                                        {loading ? (
+                                                            <div
+                                                                className="spinner-border spinner-border-sm text-light"
+                                                                role="status"
+                                                                style={{ width: '1rem', height: '1rem' }}
+                                                            ></div>
+                                                        ) : (
+                                                            <>
+                                                                <i className="mdi mdi-magnify"></i> Search
+                                                            </>
+                                                        )}
+                                                    </button>
 
                                                 </div>
                                                 <div className="form-group">
@@ -139,11 +139,11 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
                                                     </button>
                                                 </div>
                                             </form>
-                                        </div><hr/>
+                                        </div><hr />
                                         <div className="table-responsive" style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                             <table className="table table-striped">
                                                 <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                                    <tr> 
+                                                    <tr>
                                                         <th>Sl.No</th>
                                                         <th>Charger ID</th>
                                                         <th>Session ID</th>
@@ -155,29 +155,29 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody style={{ textAlign: "center" }}>
-    {loading ? (
-        <tr>
-            <td colSpan="8">Loading...</td>
-        </tr>
-    ) : (Array.isArray(tableData) && tableData.length > 0) ? (
-        tableData.map((session, index) => (
-            <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{deviceId || "-"}</td> 
-                <td>{session.session_id || "-"}</td>
-                <td>{session.user || "-"}</td>
-                <td>{session.start_time || "-"}</td>
-                <td>{session.stop_time || "-"}</td>
-                <td>{session.unit_consumed || "-"}</td>
-                <td>{session.price || "-"}</td>
-            </tr>
-        ))
-    ) : (
-        <tr>
-            <td colSpan="8">No devices found</td>
-        </tr>
-    )}
-</tbody>
+                                                    {loading ? (
+                                                        <tr>
+                                                            <td colSpan="8">Loading...</td>
+                                                        </tr>
+                                                    ) : (Array.isArray(tableData) && tableData.length > 0) ? (
+                                                        tableData.map((session, index) => (
+                                                            <tr key={index}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{deviceId || "-"}</td>
+                                                                <td>{session.session_id || "-"}</td>
+                                                                <td>{session.user || "-"}</td>
+                                                                <td>{session.start_time || "-"}</td>
+                                                                <td>{session.stop_time || "-"}</td>
+                                                                <td>{session.unit_consumed || "-"}</td>
+                                                                <td>{session.price || "-"}</td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="8">No devices found</td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
 
                                             </table>
                                         </div>
@@ -188,10 +188,10 @@ const DeviceReport = ({ userInfo, handleLogout }) => {
                     </div>
                     {/* Footer */}
                     <Footer />
-                </div>         
-            </div>    
+                </div>
+            </div>
         </div>
     );
-}; 
-                 
+};
+
 export default DeviceReport

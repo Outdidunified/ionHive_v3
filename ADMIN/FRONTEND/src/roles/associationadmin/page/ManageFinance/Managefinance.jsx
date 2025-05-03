@@ -2,15 +2,13 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useManagefinance from '../../hooks/ManageFinance/ManageFinanceHooks';
+import InputField from '../../../../utils/InputField';
 const Managefinance = ({ userInfo, handleLogout }) => {
   const {
-    financeDetails, setFinanceDetails,
-        searchQuery, setSearchQuery,
-        fetchUsersCalled,
-        fetchFinanceDetails,
+        searchQuery,
         handleSearch,
         filteredFinanceDetails,
-        handleView,navigateToCreateUser
+        handleView,navigateToCreateUser,loading
   }=useManagefinance(userInfo)
     return (
         <div className='container-scroller'>
@@ -50,7 +48,7 @@ const Managefinance = ({ userInfo, handleLogout }) => {
                                                             <i className="icon-search"></i>
                                                         </span>
                                                     </div>
-                                                    <input type="text" className="form-control" placeholder="Search now" value={searchQuery} onChange={handleSearch}/>
+                                                    <InputField  placeholder="Search now" value={searchQuery} onChange={handleSearch}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -73,33 +71,45 @@ const Managefinance = ({ userInfo, handleLogout }) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody style={{ textAlign: 'center' }}>
-                                                    {filteredFinanceDetails.length > 0 ? (
-                                                        filteredFinanceDetails.map((finance, index) => (
-                                                            <tr key={index}>
-                                                                <td>{index + 1}</td>
-                                                                <td>{finance.totalprice ? `₹ ${finance.totalprice}` : '-'}</td>
-                                                                <td>{finance.eb_charge ? `₹ ${finance.eb_charge}` : '-'}</td>
-                                                                <td>{finance.margin ? `₹ ${finance.margin}` : '-'}</td>
-                                                                <td>{finance.gst ? `${finance.gst} %` : '-'}</td>
-                                                                <td>{finance.processing_fee ?  `₹ ${finance.processing_fee}` : '-'}</td>
-                                                                <td>{finance.parking_fee ? `₹ ${finance.parking_fee}` : '-'}</td>
-                                                                <td>{finance.convenience_fee ? `₹ ${finance.convenience_fee}` : '-'}</td>
-                                                                <td>{finance.service_fee ? `₹ ${finance.service_fee}` : '-'}</td>
-                                                                <td>{finance.station_fee ? `₹ ${finance.station_fee}` : '-'}</td>
-                                                                <td style={{ color: finance.status ? 'green' : 'red' }}>
-                                                                    {finance.status ? 'Active' : 'DeActive'}
-                                                                </td>
-                                                                <td>
-                                                                    <button type="button" className="btn btn-outline-success btn-icon-text" onClick={() => handleView(finance)} style={{ marginRight: '5px' }}><i className="mdi mdi-eye btn-icon-prepend"></i> View</button>
-                                                                </td>
-                                                            </tr>
-                                                        ))
-                                                    ) : (
-                                                        <tr className="text-center">
-                                                            <td colSpan="12">No Finance Details Found</td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
+  {loading ? (
+    <tr>
+      <td colSpan="12">Loading...</td>
+    </tr>
+  ) : filteredFinanceDetails.length > 0 ? (
+    filteredFinanceDetails.map((finance, index) => (
+      <tr key={index}>
+        <td>{index + 1}</td>
+        <td>{finance.totalprice ? `₹ ${finance.totalprice}` : '-'}</td>
+        <td>{finance.eb_charge ? `₹ ${finance.eb_charge}` : '-'}</td>
+        <td>{finance.margin ? `₹ ${finance.margin}` : '-'}</td>
+        <td>{finance.gst ? `${finance.gst} %` : '-'}</td>
+        <td>{finance.processing_fee ? `₹ ${finance.processing_fee}` : '-'}</td>
+        <td>{finance.parking_fee ? `₹ ${finance.parking_fee}` : '-'}</td>
+        <td>{finance.convenience_fee ? `₹ ${finance.convenience_fee}` : '-'}</td>
+        <td>{finance.service_fee ? `₹ ${finance.service_fee}` : '-'}</td>
+        <td>{finance.station_fee ? `₹ ${finance.station_fee}` : '-'}</td>
+        <td style={{ color: finance.status ? 'green' : 'red' }}>
+          {finance.status ? 'Active' : 'DeActive'}
+        </td>
+        <td>
+          <button
+            type="button"
+            className="btn btn-outline-success btn-icon-text"
+            onClick={() => handleView(finance)}
+            style={{ marginRight: '5px' }}
+          >
+            <i className="mdi mdi-eye btn-icon-prepend"></i> View
+          </button>
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr className="text-center">
+      <td colSpan="12">No Finance Details Found</td>
+    </tr>
+  )}
+</tbody>
+
                                             </table>
                                         </div>
                                     </div>

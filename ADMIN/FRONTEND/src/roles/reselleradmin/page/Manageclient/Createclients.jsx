@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useCreateClient from '../../hooks/ManageClient/CreateClientsHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const CreateClients = ({ userInfo, handleLogout }) => {
     const {
@@ -102,11 +102,11 @@ const CreateClients = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}<br />
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             loading={loading}
                                                             disabled={loading}>Add
-                                                        </LoadingButton>
+                                                        </ReusableButton>
 
                                                     </form>
                                                 </div>

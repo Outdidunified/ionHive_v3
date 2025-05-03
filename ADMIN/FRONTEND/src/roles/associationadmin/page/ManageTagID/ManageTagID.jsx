@@ -2,35 +2,33 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useManageTagID from '../../hooks/ManageTagID/ManageTagIDhooks';
+import InputField from '../../../../utils/InputField';
+import ReusableButton from '../../../../utils/ReusableButton';
 
 const ManageTagID = ({ userInfo, handleLogout }) => {
 
   const {
-    data, setData,
-    loading,setLoading,
-    error, setError,
-    filteredData,
-    posts, setPosts,
-    fetchUserRoleCalled,
-    initialTagID, setInitialTagID,
-    initialTagIDExpiryDateD, setInitialTagIDExpiryDate,
-    fetchTagID,handleSearchInputChange,
+    loading,
+    error, 
+    posts, 
+    initialTagID,
+    initialTagIDExpiryDateD, 
+    handleSearchInputChange,
     formatTimestamp,
-    showAddForm,setShowAddForm,closeEditModal,
-    addChargers,
+    closeEditModal,
     closeAddModal,
     modalAddStyle ,add_tag_id, setTagID,
     add_tag_id_expiry_date, setTagIDExpiryDate,
     addTagID,modalEditStyle,
-    theadBackgroundColor, setTheadBackgroundColor,   
-    theadsticky, setTheadsticky,theadfixed, setTheadfixed,
+    theadBackgroundColor,   
+    theadsticky,theadfixed, 
     handleEditUserAndToggleBackground,
     handleAddUserAndToggleBackground,
-    tag_id, setEditTagID,
+    tag_id, 
     tag_id_expiry_date, setEditTagIDExpiryDate,
     editTagID,changeDeActivate,
     changeActivate,formatDateForInput,
-    getMinDate,
+    getMinDate,editloading,isloading
   }=useManageTagID(userInfo)
     
     return (
@@ -65,7 +63,7 @@ const ManageTagID = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{color:'black', width:'180px'}}>Tag ID</span>
                                                                     </div>
-                                                                    <input type="text" className="form-control" placeholder="Tag ID" value={add_tag_id} maxLength={20} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, ''); setTagID(sanitizedValue);}} required/>
+                                                                    <InputField  placeholder="Tag ID" value={add_tag_id} maxLength={20} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, ''); setTagID(sanitizedValue);}} required/>
                                                                 </div>
                                                             </div>
                                                             <div className="table-responsive pt-3">
@@ -73,12 +71,13 @@ const ManageTagID = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{color:'black', width:'180px'}}>Tag ID Expiry Date</span>
                                                                     </div>
-                                                                    <input type="datetime-local" className="form-control" value={add_tag_id_expiry_date} onChange={(e) => setTagIDExpiryDate(e.target.value)}  min={getMinDate()}/>
+                                                                    <InputField type="datetime-local" className="form-control" value={add_tag_id_expiry_date} onChange={(e) => setTagIDExpiryDate(e.target.value)}  min={getMinDate()}/>
                                                                 </div>
                                                             </div>
-                                                            <div style={{textAlign:'center'}}>
+                                                            {/* <div style={{textAlign:'center'}}>
                                                                 <button type="submit" className="btn btn-primary mr-2" style={{marginTop:'10px'}}>Add</button>
-                                                            </div>
+                                                            </div> */}
+                                                            <ReusableButton type="submit" loading={isloading} >Add</ReusableButton>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -98,24 +97,26 @@ const ManageTagID = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '180px' }}>Tag ID</span>
                                                                     </div>
-                                                                    <input type="text" className="form-control" placeholder="Tag ID" style={{ width:'200px'}} value={tag_id} maxLength={20} readOnly />
+                                                                    <InputField  placeholder="Tag ID" style={{ width:'200px'}} value={tag_id} maxLength={20} readOnly />
                                                                 </div>
                                                             </div>
                                                             <div className="input-group">
                                                                 <div className="input-group-prepend">
                                                                     <span className="input-group-text" style={{ color: 'black', width: '180px' }}>Tag ID Expiry Date</span>
                                                                 </div>
-                                                                <input 
+                                                                <InputField 
                                                                     type="datetime-local" 
-                                                                    className="form-control"    
                                                                     value={formatDateForInput(tag_id_expiry_date)}
                                                                     onChange={(e) => setEditTagIDExpiryDate(e.target.value)}
                                                                     min={getMinDate()}
                                                                 />
                                                             </div>
-                                                            <div style={{textAlign:'center'}}>
+                                                            {/* <div style={{textAlign:'center'}}>
                                                                 <button type="submit" className="btn btn-primary mr-2" style={{marginTop:'10px'}} disabled={tag_id === initialTagID && tag_id_expiry_date === initialTagIDExpiryDateD}>Update</button>
-                                                            </div>
+                                                            </div> */}
+                                                            <ReusableButton type="submit"
+                                                            disabled={tag_id === initialTagID && tag_id_expiry_date === initialTagIDExpiryDateD}
+                                                            loading={editloading}>Update</ReusableButton>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -143,7 +144,7 @@ const ManageTagID = ({ userInfo, handleLogout }) => {
                                                                 <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" aria-label="search" aria-describedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
+                                                            <InputField  placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
                                                         </div>
                                                     </div>
                                                 </div>

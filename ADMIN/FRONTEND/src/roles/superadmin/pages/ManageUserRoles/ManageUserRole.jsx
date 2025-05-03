@@ -2,17 +2,15 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useManageUserRole from '../../hooks/ManageUserRoles/ManageUserRoleHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const ManageUserRole = ({ userInfo, handleLogout }) => {
     const {
-        data,
         editLoading,
         posts,
         loading,
         error,
         roleEditname,
-        showEditForm,
         initialRoleEditname,
         theadsticky,
         theadfixed,
@@ -75,16 +73,16 @@ const ManageUserRole = ({ userInfo, handleLogout }) => {
                                                                     <div className="input-group-prepend">
                                                                         <span className="input-group-text" style={{ color: 'black', width: '125px' }}>Role Name</span>
                                                                     </div>
-                                                                    <InputField  placeholder="Role Name" value={roleEditname} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setEdituserRole(sanitizedValue); }} required />
+                                                                    <InputField placeholder="Role Name" value={roleEditname} maxLength={25} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setEdituserRole(sanitizedValue); }} required />
                                                                 </div>
                                                             </div>
 
-                                                            <LoadingButton
+                                                            <ReusableButton
                                                                 loading={editLoading}
                                                                 disabled={roleEditname === initialRoleEditname || editLoading}
                                                                 type="submit">
                                                                 Update
-                                                            </LoadingButton>
+                                                            </ReusableButton>
 
 
                                                         </div>

@@ -3,7 +3,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useEditass from '../../hooks/ManageAssociation/EditAssociationHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const Editass = ({ userInfo, handleLogout }) => {
     const {
@@ -198,10 +198,10 @@ const Editass = ({ userInfo, handleLogout }) => {
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             disabled={!isModified}
-                                                            loading={loading} >Update</LoadingButton>                                                </form>
+                                                            loading={loading} >Update</ReusableButton>                                                </form>
                                                 </div>
                                             </div>
                                         </div>

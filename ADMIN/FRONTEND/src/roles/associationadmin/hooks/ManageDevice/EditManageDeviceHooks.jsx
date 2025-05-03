@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import {showSuccessAlert,showErrorAlert} from '../../../../utils/alert';
 import axiosInstance from '../../../../utils/utils';
 const useEditManageDevice = (userInfo) => {
     const location = useLocation();
@@ -23,7 +23,7 @@ const useEditManageDevice = (userInfo) => {
     const [tempLat, setTempLat] = useState(latitude);
     const [tempLong, setTempLong] = useState(longitude);
     const [tempAddress, setTempAddress] = useState(address);
-
+    const [isLoading, setIsLoading] = useState(false);
     const [initialValues, setInitialValues] = useState({
         lat: dataItem?.lat || '',
         long: dataItem.long || '',
@@ -58,51 +58,43 @@ const useEditManageDevice = (userInfo) => {
         navigate('/associationadmin/ManageDevice');
     };
 
+
     const editManageDevice = async (e) => {
         e.preventDefault();
+        setIsLoading(true); // Start loading
         try {
             const Status = parseInt(selectStatus);
-            const response = await axiosInstance.post('/associationadmin/UpdateDevice', 
-               
-                {
-                    charger_id: dataItem.charger_id,
-                    charger_accessibility: Status,
-                    lat: latitude,
-                    long: longitude,
-                    address,
-                    landmark,
-                    wifi_username: wifiUsername,
-                    wifi_password: wifiPassword,
-                    modified_by: userInfo.email_id
-                })
-
-            if (response.status==200) {
-                Swal.fire({
-                    title: "Device updated successfully",
-                    icon: "success"
-                });
+            const response = await axiosInstance.post('/associationadmin/UpdateDevice', {
+                charger_id: dataItem.charger_id,
+                charger_accessibility: Status,
+                lat: latitude,
+                long: longitude,
+                address,
+                landmark,
+                wifi_username: wifiUsername,
+                wifi_password: wifiPassword,
+                modified_by: userInfo.email_id
+            });
+    
+            if (response.status === 200) {
+                showSuccessAlert("Device updated successfully"); // Use success alert helper
                 setLatitude('');
                 setLongitude('');
                 setWifiUsername('');
                 setWifiPassword('');
-                editBackManageDevice();
                 setAddress('');
+                editBackManageDevice();
             } else {
-                const responseData = await response.json();
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to update device, " + responseData.message,
-                    icon: "error"
-                });
+                showErrorAlert("Error", "Failed to update device"); // Use error alert helper
             }
         } catch (error) {
-            Swal.fire({
-                title: "Error",
-                text: "An error occurred while updating the device",
-                icon: "error"
-            });
+            console.error('Error updating device:', error);
+            showErrorAlert("Error", "An error occurred while updating the device"); // Use error alert helper
+        } finally {
+            setIsLoading(false); // Stop loading
         }
     };
+    
 
     useEffect(() => {
         setInitialValues({
@@ -143,6 +135,6 @@ const useEditManageDevice = (userInfo) => {
         backManageDevice,
         editBackManageDevice,
         editManageDevice,
-        isLocationModified
+        isLocationModified,isLoading
     }}
     export default useEditManageDevice;

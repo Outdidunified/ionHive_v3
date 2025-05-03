@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useProfile from '../../hooks/Profile/ProfileHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 
 const Profile = ({ userInfo, handleLogout }) => {
@@ -67,11 +67,11 @@ const Profile = ({ userInfo, handleLogout }) => {
                                             </div>
                                             {errorMessages && <div className="text-danger">{errorMessages}</div>}<br />
                                         
-                                             <LoadingButton
+                                             <ReusableButton
                                                 type="submit"
                                                 disabled={!clientModified}
                                                 loading={loading}>Submit
-                                            </LoadingButton>
+                                            </ReusableButton>
                                         </form>
                                     </div>
                                 </div>
@@ -101,11 +101,11 @@ const Profile = ({ userInfo, handleLogout }) => {
                                             </div>
                                             {errorMessage && <div className="text-danger">{errorMessage}</div>}<br />
 
-                                            <LoadingButton
+                                            <ReusableButton
                                                 type="submit"
                                                 disabled={!userModified}
                                                 loading={isloading}>Submit
-                                            </LoadingButton>
+                                            </ReusableButton>
                                         </form>
                                     </div>
                                 </div>

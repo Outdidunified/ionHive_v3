@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useCreateFinance from '../../hooks/ManageFinance/CreateFinanceHooks';
+import InputField from '../../../../utils/InputField';
+import ReusableButton from '../../../../utils/ReusableButton';
 
 const CreateFinance = ({ userInfo, handleLogout }) => {
-   const {
-    newFinance,
-    setNewFinance,
-    errorMessage,
-    setErrorMessage,
-    handleInputChange,
-    createFinance,
-    goBack
-   }=useCreateFinance(userInfo)
+    const {
+        newFinance,
+        errorMessage,
+        handleInputChange,
+        createFinance,
+        goBack, loading
+    } = useCreateFinance(userInfo)
     return (
         <div className='container-scroller'>
             {/* Header */}
@@ -62,9 +61,8 @@ const CreateFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 placeholder="EB Charger"
                                                                                 value={newFinance.eb_charge}
                                                                                 onChange={(e) => handleInputChange(e, 'eb_charge')}
@@ -83,9 +81,8 @@ const CreateFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control" placeholder="Margin"
+                                                                            <InputField
+                                                                                placeholder="Margin"
                                                                                 value={newFinance.margin || 0}
                                                                                 onChange={(e) => handleInputChange(e, 'margin')}
                                                                                 required
@@ -102,9 +99,8 @@ const CreateFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 placeholder="GST"
                                                                                 value={newFinance.gst}
                                                                                 onChange={(e) => handleInputChange(e, 'gst')}
@@ -122,9 +118,8 @@ const CreateFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control" placeholder="Processing Fee"
+                                                                            <InputField
+                                                                                placeholder="Processing Fee"
                                                                                 value={newFinance.processing_fee || 0}
                                                                                 onChange={(e) => handleInputChange(e, 'processing_fee')}
                                                                                 required
@@ -141,9 +136,8 @@ const CreateFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control" placeholder="Parking Fee"
+                                                                            <InputField
+                                                                                placeholder="Parking Fee"
                                                                                 value={newFinance.parking_fee || 0}
                                                                                 onChange={(e) => handleInputChange(e, 'parking_fee')} required
                                                                             />
@@ -159,9 +153,8 @@ const CreateFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control" placeholder="Convenience Fee"
+                                                                            <InputField
+                                                                                placeholder="Convenience Fee"
                                                                                 value={newFinance.convenience_fee || 0}
                                                                                 onChange={(e) => handleInputChange(e, 'convenience_fee')} required
                                                                             />
@@ -177,9 +170,8 @@ const CreateFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control" placeholder="Service Fee"
+                                                                            <InputField
+                                                                                placeholder="Service Fee"
                                                                                 value={newFinance.service_fee || 0}
                                                                                 onChange={(e) => handleInputChange(e, 'service_fee')}
                                                                                 required
@@ -196,9 +188,8 @@ const CreateFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control" placeholder="Station Fee"
+                                                                            <InputField
+                                                                                placeholder="Station Fee"
                                                                                 value={newFinance.station_fee || 0}
                                                                                 onChange={(e) => handleInputChange(e, 'station_fee')}
                                                                                 required
@@ -209,9 +200,9 @@ const CreateFinance = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
-                                                        <div style={{ textAlign: 'center', padding:'15px'}}>
-                                                            <button type="submit" className="btn btn-primary mr-2">Create Finance</button>
-                                                        </div>
+
+                                                        <ReusableButton type="submit"
+                                                            loading={loading}>Create Finance</ReusableButton>
                                                     </form>
                                                 </div>
                                             </div>

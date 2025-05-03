@@ -104,14 +104,14 @@ const useDashboard = ( userInfo ) => {
                 totalsession: totalsession.data.data || [],
             });
 
-            const energyConsumed = energyRes.data.ChargerTotalEnergy.totalEnergyConsumed || 0;
-            const CO2_from_EV = energyRes.data.ChargerTotalEnergy.CO2_from_EV || 0;
-            const CO2_from_ICE = energyRes.data.ChargerTotalEnergy.CO2_from_ICE || 0;
-            const CO2_Savings = energyRes.data.ChargerTotalEnergy.CO2_Savings || 0;
+            const energyConsumed = energyRes.data.totalEnergyConsumed || 0;
+const CO2_from_EV = energyRes.data.CO2_from_EV || 0;
+const CO2_from_ICE = energyRes.data.CO2_from_ICE || 0;
+const CO2_Savings = energyRes.data.CO2_Savings || 0;
 
-            const weeklyEnergyData = energyRes.data.ChargerTotalEnergy.weeklyTotalEnergyConsumed || [];
-            const monthlyEnergyData = energyRes.data.ChargerTotalEnergy.monthlyTotalEnergyConsumed || [];
-            const yearlyEnergyData = energyRes.data.ChargerTotalEnergy.yearlyTotalEnergyConsumed || [];
+const weeklyEnergyData = energyRes.data.weeklyTotalEnergyConsumed || [];
+const monthlyEnergyData = energyRes.data.monthlyTotalEnergyConsumed || [];
+const yearlyEnergyData = energyRes.data.yearlyTotalEnergyConsumed || [];
 
             setEnergyData({
                 totalEnergyConsumed: energyConsumed,

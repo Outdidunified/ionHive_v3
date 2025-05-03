@@ -4,7 +4,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAssignReseller from '../../hooks/ManageDevice/AssignResellerHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const AssignReseller = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
@@ -124,13 +124,13 @@ const AssignReseller = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <LoadingButton
+                                                    <ReusableButton
                                                         type="submit"
                                                         loading={loading}
                                                         disabled={loading}
                                                     >
                                                         Assign
-                                                    </LoadingButton>
+                                                    </ReusableButton>
 
                                                 </form>
                                             </div>

@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useEdituser from '../../hooks/ManageUser/EdituserHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const Edituser = ({ userInfo, handleLogout }) => {
     const {
@@ -152,10 +152,10 @@ const Edituser = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             disabled={!isModified}
-                                                            loading={loading}>Update</LoadingButton>
+                                                            loading={loading}>Update</ReusableButton>
                                                     </form>
                                                 </div>
                                             </div>

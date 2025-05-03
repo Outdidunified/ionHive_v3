@@ -9,15 +9,13 @@ import useDashboard from '../../hooks/Dashboard/DashboardHooks';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-
-
 const Dashboard = ({ userInfo, handleLogout }) => {
     const {
         totalChargers,
         availableChargers,
-        faultedChargers, 
-        offlineChargers, 
-        totalsession, 
+        faultedChargers,
+        offlineChargers,
+        totalsession,
         scrollIndex, setScrollIndex,
         visibleBars,
         containerRef,
@@ -29,11 +27,11 @@ const Dashboard = ({ userInfo, handleLogout }) => {
         selectedCharger,
         isModalOpen,
         setIsModalOpen,
-        totalCounts,chargersData,
-        energyData,viewMode, setViewMode,
-        fetchData,getChartData,scrollLeft,
-        scrollRight,handleChargerClick,
-    }=useDashboard(userInfo);
+        totalCounts, chargersData,
+        energyData, viewMode, setViewMode,
+        fetchData, getChartData, scrollLeft,
+        scrollRight, handleChargerClick,
+    } = useDashboard(userInfo);
 
 
 
@@ -62,79 +60,79 @@ const Dashboard = ({ userInfo, handleLogout }) => {
 
                         </div>
                         <div className="row d-flex justify-content-center">
-                        <div className="col-md-6 mb-3 d-flex justify-content-center">
-  <div className="card p-4 text-center shadow-lg card-custom-box" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
-    <h2 className="title-energy-consumed">
-      EV ENERGY CONSUMED
-    </h2>
-    <p className="description">
-      Insights into energy consumption and environmental impact of EV chargers.
-    </p>
+                            <div className="col-md-6 mb-3 d-flex justify-content-center">
+                                <div className="card p-4 text-center shadow-lg card-custom-box" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+                                    <h2 className="title-energy-consumed">
+                                        EV ENERGY CONSUMED
+                                    </h2>
+                                    <p className="description">
+                                        Insights into energy consumption and environmental impact of EV chargers.
+                                    </p>
 
-    <div className="row" style={{ width: '100%', flexWrap: 'wrap' }}>
-      {/* CO2 Savings Block */}
-      <div className="col-12 col-md-6 d-flex align-items-center mb-3 co2-savings-block">
-        <div className="d-flex flex-column align-items-center">
-          <i className="fa fa-leaf co2-icon"></i>
-          <p className="co2-savings-text">
-            {(energyData && energyData.CO2_Savings !== undefined) ? energyData.CO2_Savings.toFixed(2) : '0.00'} kg
-          </p>
-          <p className="co2-savings-title">
-            CO<sub>2</sub> Savings
-          </p>
-        </div>
-      </div>
+                                    <div className="row" style={{ width: '100%', flexWrap: 'wrap' }}>
+                                        {/* CO2 Savings Block */}
+                                        <div className="col-12 col-md-6 d-flex align-items-center mb-3 co2-savings-block">
+                                            <div className="d-flex flex-column align-items-center">
+                                                <i className="fa fa-leaf co2-icon"></i>
+                                                <p className="co2-savings-text">
+                                                    {(energyData && energyData.CO2_Savings !== undefined) ? energyData.CO2_Savings.toFixed(2) : '0.00'} kg
+                                                </p>
+                                                <p className="co2-savings-title">
+                                                    CO<sub>2</sub> Savings
+                                                </p>
+                                            </div>
+                                        </div>
 
-      {/* Other 3 Blocks on the Right Side */}
-      <div className="col-12 col-md-6 d-flex flex-column justify-content-between" style={{ height: 'auto' }}>
-        {/* Total Energy Consumed Block */}
-        <div className="d-flex align-items-center mb-3 energy-block">
-          <div className="icon-circle">
-            <i className="fa fa-bolt" style={{ fontSize: '1.0rem' }}></i>
-          </div>
-          <div className="d-flex flex-column">
-            <p className="energy-text">
-              Total Energy Consumed
-            </p>
-            <p className="energy-value">
-              {(energyData && energyData.totalEnergyConsumed !== undefined) ? energyData.totalEnergyConsumed.toFixed(2) : '0.00'} kWh
-            </p>
-          </div>
-        </div>
+                                        {/* Other 3 Blocks on the Right Side */}
+                                        <div className="col-12 col-md-6 d-flex flex-column justify-content-between" style={{ height: 'auto' }}>
+                                            {/* Total Energy Consumed Block */}
+                                            <div className="d-flex align-items-center mb-3 energy-block">
+                                                <div className="icon-circle">
+                                                    <i className="fa fa-bolt" style={{ fontSize: '1.0rem' }}></i>
+                                                </div>
+                                                <div className="d-flex flex-column">
+                                                    <p className="energy-text">
+                                                        Total Energy Consumed
+                                                    </p>
+                                                    <p className="energy-value">
+                                                        {(energyData && energyData.totalEnergyConsumed !== undefined) ? energyData.totalEnergyConsumed.toFixed(2) : '0.00'} kWh
+                                                    </p>
+                                                </div>
+                                            </div>
 
-        {/* CO2 from EV Block */}
-        <div className="d-flex align-items-center mb-3 co2-from-ev-block">
-          <div className="icon-circle car">
-            <i className="fa fa-car" style={{ fontSize: '1.0rem' }}></i>
-          </div>
-          <div className="d-flex flex-column">
-            <p className="energy-text">
-              CO<sub>2</sub> from EV
-            </p>
-            <p className="energy-value">
-              {(energyData && energyData.CO2_from_EV !== undefined) ? energyData.CO2_from_EV.toFixed(2) : '0.00'} kg
-            </p>
-          </div>
-        </div>
+                                            {/* CO2 from EV Block */}
+                                            <div className="d-flex align-items-center mb-3 co2-from-ev-block">
+                                                <div className="icon-circle car">
+                                                    <i className="fa fa-car" style={{ fontSize: '1.0rem' }}></i>
+                                                </div>
+                                                <div className="d-flex flex-column">
+                                                    <p className="energy-text">
+                                                        CO<sub>2</sub> from EV
+                                                    </p>
+                                                    <p className="energy-value">
+                                                        {(energyData && energyData.CO2_from_EV !== undefined) ? energyData.CO2_from_EV.toFixed(2) : '0.00'} kg
+                                                    </p>
+                                                </div>
+                                            </div>
 
-        {/* CO2 from ICE Block */}
-        <div className="d-flex align-items-center mb-3 co2-from-ice-block">
-          <div className="icon-circle fire">
-            <i className="fa fa-fire" style={{ fontSize: '1.0rem' }}></i>
-          </div>
-          <div className="d-flex flex-column">
-            <p className="energy-text">
-              CO<sub>2</sub> from ICE
-            </p>
-            <p className="energy-value">
-              {(energyData && energyData.CO2_from_ICE !== undefined) ? energyData.CO2_from_ICE.toFixed(2) : '0.00'} kg
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                                            {/* CO2 from ICE Block */}
+                                            <div className="d-flex align-items-center mb-3 co2-from-ice-block">
+                                                <div className="icon-circle fire">
+                                                    <i className="fa fa-fire" style={{ fontSize: '1.0rem' }}></i>
+                                                </div>
+                                                <div className="d-flex flex-column">
+                                                    <p className="energy-text">
+                                                        CO<sub>2</sub> from ICE
+                                                    </p>
+                                                    <p className="energy-value">
+                                                        {(energyData && energyData.CO2_from_ICE !== undefined) ? energyData.CO2_from_ICE.toFixed(2) : '0.00'} kg
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
 
 
@@ -150,28 +148,23 @@ const Dashboard = ({ userInfo, handleLogout }) => {
                                     { title: 'Associations', count: totalCounts.associationsCount, color: '#8BC34A', icon: 'fa-handshake', bgColor: '#8BC34A' },
                                 ].map((item, index) => (
                                     <div key={index} className="col-12 col-md-4 mb-3 d-flex justify-content-center">
-                                      <div
-                                        className="dashboard-card"
-                                        onMouseEnter={(e) => e.currentTarget.classList.add('hover-scale')}
-                                        onMouseLeave={(e) => e.currentTarget.classList.remove('hover-scale')}
-                                        onClick={() => item.targetRef && item.targetRef.current.scrollIntoView({ behavior: 'smooth' })}
-                                      >
-                                        <div className="card-content">
-                                          <h6 className="card-title">{item.title}</h6>
-                                          <h3 className="card-count" style={{ color: item.color }}>{item.count}</h3>
+                                        <div
+                                            className="dashboard-card"
+                                            onMouseEnter={(e) => e.currentTarget.classList.add('hover-scale')}
+                                            onMouseLeave={(e) => e.currentTarget.classList.remove('hover-scale')}
+                                            onClick={() => item.targetRef && item.targetRef.current.scrollIntoView({ behavior: 'smooth' })}
+                                        >
+                                            <div className="card-content">
+                                                <h6 className="card-title">{item.title}</h6>
+                                                <h3 className="card-count" style={{ color: item.color }}>{item.count}</h3>
+                                            </div>
+                                            <div className="card-icon" style={{ backgroundColor: item.bgColor }}>
+                                                <i className={`fa ${item.icon}`}></i>
+                                            </div>
                                         </div>
-                                        <div className="card-icon" style={{ backgroundColor: item.bgColor }}>
-                                          <i className={`fa ${item.icon}`}></i>
-                                        </div>
-                                      </div>
                                     </div>
-                                  ))}
-                                </div>
-
-
-
-
-
+                                ))}
+                            </div>
 
                             {/* Energy Consumption Box moved above Chargers Unavailable Table */}
                             {/* 4 Boxes in One Row */}
@@ -179,140 +172,140 @@ const Dashboard = ({ userInfo, handleLogout }) => {
 
                             {/* Chargers Data Tables */}
                             <div className="col-md-12 mt-4">
-                                 <div className="row mb-4 card-container">
-                                 {/* First Row: Chargers Overview & Energy Consumed */}
-                                 <div className="col-md-4">
-                                 <div className="card p-3 shadow-sm card-custom">
-                                     <h5 className="font-weight-normal mb-3 title-chargers-overview">
-                                         Chargers Overview
-                                     </h5>
-                             
-                                     <div className="chart-container">
-                                         {availableChargers === 0 && faultedChargers === 0 && offlineChargers === 0 ? (
-                                             <p className="no-data-message">
-                                                 No Data Available
-                                             </p>
-                                         ) : (
-                                             <Chart
-                                                 options={{
-                                                     chart: { type: 'pie' },
-                                                     labels: ['Online Chargers', 'Faulted Chargers', 'Offline Chargers'],
-                                                     colors: ['#4CAF50', '#FF9800', '#F44336'],
-                                                     legend: { position: 'bottom' }
-                                                 }}
-                                                 series={[availableChargers, faultedChargers, offlineChargers]}
-                                                 type="pie"
-                                                 width="290"
-                                                 height="240px"
-                                             />
-                                         )}
-                                     </div>
-                                 </div>
-                             </div>
-                             
-                             
-                                 <div className="col-md-8">
-                                     <div className="card p-3 shadow-sm card-custom-energy">
-                                         <h5 className="title-energy-consumed-title">
-                                             Total Energy Consumed
-                                         </h5>
-                             
-                                         {/* Buttons to switch between weekly/monthly/yearly */}
-                                         <div style={{ textAlign: 'center', marginBottom: '15px' }}>
-                                             <button
-                                                 onClick={() => { setViewMode('weekly'); setScrollIndex(0); }}
-                                                 className={`button-custom ${viewMode === 'weekly' ? 'button-weekly-active' : 'button-weekly-inactive'}`}
-                                             >
-                                                 Weekly
-                                             </button>
-                                             <button
-                                                 onClick={() => { setViewMode('monthly'); setScrollIndex(0); }}
-                                                 className={`button-custom ${viewMode === 'monthly' ? 'button-weekly-active' : 'button-weekly-inactive'}`}
-                                             >
-                                                 Monthly
-                                             </button>
-                                             <button
-                                                 onClick={() => { setViewMode('yearly'); setScrollIndex(0); }}
-                                                 className={`button-custom ${viewMode === 'yearly' ? 'button-weekly-active' : 'button-weekly-inactive'}`}
-                                             >
-                                                 Yearly
-                                             </button>
-                                         </div>
-                             
-                                         <div style={{ display: 'flex', alignItems: 'center', height: '270px', justifyContent: 'space-between' }}>
-                                             <button
-                                                 onClick={scrollLeft}
-                                                 disabled={scrollIndex === 0}
-                                                 className={`button-left-right ${scrollIndex === 0 ? 'button-disabled' : 'button-enabled'}`}
-                                             >
-                                                 &lt;
-                                             </button>
-                             
-                                             {/* Scrollable Chart */}
-                                             <div
-                                                 ref={containerRef}
-                                                 className="chart-container"
-                                             >
-                                                 {getChartData() ? (
-                                                     <div style={{ width: '80%', height: '97%' }}>
-                                                     <Bar
-                                                             data={getChartData()}
-                                                             options={{
-                                                                 responsive: true,
-                                                                 maintainAspectRatio: false,
-                                                                 plugins: {
-                                                                     tooltip: {
-                                                                         callbacks: {
-                                                                             label: (tooltipItem) => `${tooltipItem.raw} kWh`,
-                                                                         },
-                                                                     },
-                                                                     legend: { display: false },
-                                                                 },
-                                                                 scales: {
-                                                                     x: {
-                                                                         grid: { display: false },
-                                                                         ticks: {
-                                                                             autoSkip: true,
-                                                                             maxTicksLimit: 10,
-                                                                             font: { size: 10 },  // Set the font size of the x-axis labels
-                                                                         }
-                                                                     },
-                                                                     y: {
-                                                                         beginAtZero: true,
-                                                                         ticks: {
-                                                                             max: Math.max(...getChartData().datasets[0].data) + 10
-                                                                         }
-                                                                     },
-                                                                 },
-                                                                 elements: {
-                                                                     bar: {
-                                                                         borderRadius: 5,
-                                                                         barThickness: 8,  // Increased thickness of bars
-                                                                         categoryPercentage: 0.3,  // Adjusted category width
-                                                                         barPercentage: 0.7,      // Increased bar width within category
-                                                                     }
-                                                                 },
-                                                                 backgroundColor: '#007BFF',  // Blue color for the bars
-                                                                 borderColor: '#007BFF',      // Blue border color for the bars
-                                                             }}
-                                                         />
-                                                     </div>
-                                                 ) : (
-                                                     <p>No data available.</p>
-                                                 )}
-                                             </div>
-                             
-                                             <button
-                                                 onClick={scrollRight}
-                                                 disabled={scrollIndex + visibleBars >= energyData[`${viewMode}EnergyConsumed`].length}
-                                                 className={`button-left-right ${scrollIndex + visibleBars >= energyData[`${viewMode}EnergyConsumed`].length ? 'button-disabled' : 'button-enabled'}`}
-                                             >
-                                                 &gt;
-                                             </button>
-                                         </div>
-                                     </div>
-                                 </div>
-                             </div>
+                                <div className="row mb-4 card-container">
+                                    {/* First Row: Chargers Overview & Energy Consumed */}
+                                    <div className="col-md-4">
+                                        <div className="card p-3 shadow-sm card-custom">
+                                            <h5 className="font-weight-normal mb-3 title-chargers-overview">
+                                                Chargers Overview
+                                            </h5>
+
+                                            <div className="chart-container">
+                                                {availableChargers === 0 && faultedChargers === 0 && offlineChargers === 0 ? (
+                                                    <p className="no-data-message">
+                                                        No Data Available
+                                                    </p>
+                                                ) : (
+                                                    <Chart
+                                                        options={{
+                                                            chart: { type: 'pie' },
+                                                            labels: ['Online Chargers', 'Faulted Chargers', 'Offline Chargers'],
+                                                            colors: ['#4CAF50', '#FF9800', '#F44336'],
+                                                            legend: { position: 'bottom' }
+                                                        }}
+                                                        series={[availableChargers, faultedChargers, offlineChargers]}
+                                                        type="pie"
+                                                        width="290"
+                                                        height="240px"
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div className="col-md-8">
+                                        <div className="card p-3 shadow-sm card-custom-energy">
+                                            <h5 className="title-energy-consumed-title">
+                                                Total Energy Consumed
+                                            </h5>
+
+                                            {/* Buttons to switch between weekly/monthly/yearly */}
+                                            <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+                                                <button
+                                                    onClick={() => { setViewMode('weekly'); setScrollIndex(0); }}
+                                                    className={`button-custom ${viewMode === 'weekly' ? 'button-weekly-active' : 'button-weekly-inactive'}`}
+                                                >
+                                                    Weekly
+                                                </button>
+                                                <button
+                                                    onClick={() => { setViewMode('monthly'); setScrollIndex(0); }}
+                                                    className={`button-custom ${viewMode === 'monthly' ? 'button-weekly-active' : 'button-weekly-inactive'}`}
+                                                >
+                                                    Monthly
+                                                </button>
+                                                <button
+                                                    onClick={() => { setViewMode('yearly'); setScrollIndex(0); }}
+                                                    className={`button-custom ${viewMode === 'yearly' ? 'button-weekly-active' : 'button-weekly-inactive'}`}
+                                                >
+                                                    Yearly
+                                                </button>
+                                            </div>
+
+                                            <div style={{ display: 'flex', alignItems: 'center', height: '270px', justifyContent: 'space-between' }}>
+                                                <button
+                                                    onClick={scrollLeft}
+                                                    disabled={scrollIndex === 0}
+                                                    className={`button-left-right ${scrollIndex === 0 ? 'button-disabled' : 'button-enabled'}`}
+                                                >
+                                                    &lt;
+                                                </button>
+
+                                                {/* Scrollable Chart */}
+                                                <div
+                                                    ref={containerRef}
+                                                    className="chart-container"
+                                                >
+                                                    {getChartData() ? (
+                                                        <div style={{ width: '80%', height: '97%' }}>
+                                                            <Bar
+                                                                data={getChartData()}
+                                                                options={{
+                                                                    responsive: true,
+                                                                    maintainAspectRatio: false,
+                                                                    plugins: {
+                                                                        tooltip: {
+                                                                            callbacks: {
+                                                                                label: (tooltipItem) => `${tooltipItem.raw} kWh`,
+                                                                            },
+                                                                        },
+                                                                        legend: { display: false },
+                                                                    },
+                                                                    scales: {
+                                                                        x: {
+                                                                            grid: { display: false },
+                                                                            ticks: {
+                                                                                autoSkip: true,
+                                                                                maxTicksLimit: 10,
+                                                                                font: { size: 10 },  // Set the font size of the x-axis labels
+                                                                            }
+                                                                        },
+                                                                        y: {
+                                                                            beginAtZero: true,
+                                                                            ticks: {
+                                                                                max: Math.max(...getChartData().datasets[0].data) + 10
+                                                                            }
+                                                                        },
+                                                                    },
+                                                                    elements: {
+                                                                        bar: {
+                                                                            borderRadius: 5,
+                                                                            barThickness: 8,  // Increased thickness of bars
+                                                                            categoryPercentage: 0.3,  // Adjusted category width
+                                                                            barPercentage: 0.7,      // Increased bar width within category
+                                                                        }
+                                                                    },
+                                                                    backgroundColor: '#007BFF',  // Blue color for the bars
+                                                                    borderColor: '#007BFF',      // Blue border color for the bars
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <p>No data available.</p>
+                                                    )}
+                                                </div>
+
+                                                <button
+                                                    onClick={scrollRight}
+                                                    disabled={scrollIndex + visibleBars >= energyData[`${viewMode}EnergyConsumed`].length}
+                                                    className={`button-left-right ${scrollIndex + visibleBars >= energyData[`${viewMode}EnergyConsumed`].length ? 'button-disabled' : 'button-enabled'}`}
+                                                >
+                                                    &gt;
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
 
                                 <div className="row">
@@ -611,101 +604,101 @@ const Dashboard = ({ userInfo, handleLogout }) => {
                                                     </table>
 
                                                     {isModalOpen && selectedCharger && (
-    <div
-        className="modal fade show"
-        onClick={() => setIsModalOpen(false)} // Close on background click
-        style={{
-            display: 'flex',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            height: '100vh',
-            width: '100vw',
-            zIndex: 1050,
-            overflowY: 'auto',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '2rem',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)', // optional dim background
-        }}
-    >
-        <div
-            className="modal-dialog"
-            style={{ maxWidth: '60%', width: '100%' }}
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
-        >
-            <div className="modal-content rounded-4 shadow">
-                <div
-                    className="modal-header d-flex justify-content-between align-items-center"
-                    style={{
-                        borderTopLeftRadius: '1rem',
-                        borderTopRightRadius: '1rem',
-                        padding: '1rem 1.5rem',
-                        borderBottom: '1px solid #dee2e6',
-                    }}
-                >
-                    <h5 className="modal-title mb-0">
-                        <span style={{ fontWeight: 500 }}>Charger Details</span>
-                    </h5>
-                    <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => setIsModalOpen(false)}
-                    >
-                        <i className="fas fa-arrow-left me-2 pr-3"></i>Back
-                    </button>
-                </div>
+                                                        <div
+                                                            className="modal fade show"
+                                                            onClick={() => setIsModalOpen(false)} // Close on background click
+                                                            style={{
+                                                                display: 'flex',
+                                                                position: 'fixed',
+                                                                top: 0,
+                                                                left: 0,
+                                                                height: '100vh',
+                                                                width: '100vw',
+                                                                zIndex: 1050,
+                                                                overflowY: 'auto',
+                                                                justifyContent: 'center',
+                                                                alignItems: 'center',
+                                                                padding: '2rem',
+                                                                backgroundColor: 'rgba(0, 0, 0, 0.5)', // optional dim background
+                                                            }}
+                                                        >
+                                                            <div
+                                                                className="modal-dialog"
+                                                                style={{ maxWidth: '60%', width: '100%' }}
+                                                                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+                                                            >
+                                                                <div className="modal-content rounded-4 shadow">
+                                                                    <div
+                                                                        className="modal-header d-flex justify-content-between align-items-center"
+                                                                        style={{
+                                                                            borderTopLeftRadius: '1rem',
+                                                                            borderTopRightRadius: '1rem',
+                                                                            padding: '1rem 1.5rem',
+                                                                            borderBottom: '1px solid #dee2e6',
+                                                                        }}
+                                                                    >
+                                                                        <h5 className="modal-title mb-0">
+                                                                            <span style={{ fontWeight: 500 }}>Charger Details</span>
+                                                                        </h5>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-outline-secondary btn-sm"
+                                                                            onClick={() => setIsModalOpen(false)}
+                                                                        >
+                                                                            <i className="fas fa-arrow-left me-2 pr-3"></i>Back
+                                                                        </button>
+                                                                    </div>
 
-                <div className="modal-body px-4 py-3">
-                    <div className="row">
-                        {Object.entries(selectedCharger)
-                            .filter(([key, value]) => key !== '_id' && key !== 'connector_id' && key !== 'assigned_reseller_id' && key !== 'assigned_client_id' && key !== 'assigned_association_id' &&  key !== 'finance_id' && value !== undefined && value !== null)
-                            .map(([key, value], idx) => {
-                                let displayValue = value;
+                                                                    <div className="modal-body px-4 py-3">
+                                                                        <div className="row">
+                                                                            {Object.entries(selectedCharger)
+                                                                                .filter(([key, value]) => key !== '_id' && key !== 'connector_id' && key !== 'assigned_reseller_id' && key !== 'assigned_client_id' && key !== 'assigned_association_id' && key !== 'finance_id' && value !== undefined && value !== null)
+                                                                                .map(([key, value], idx) => {
+                                                                                    let displayValue = value;
 
-                                if (key === 'connector_type') {
-                                    displayValue = value === 1 ? 'Socket' : value === 2 ? 'Gun' : value;
-                                } else if (key === 'charger_accessibility') {
-                                    displayValue = value === 1 ? 'Public' : value === 2 ? 'Private' : value;
-                                }
-                                else if (key === 'status') {
-                                    displayValue = value ? 'Active' : 'Deactive';
-                                }else if (typeof value === 'boolean') {
-                                    displayValue = value ? 'Yes' : 'No';
-                                } else if (typeof value === 'string' && value.includes('T') && value.includes('Z')) {
-                                    displayValue = new Date(value).toLocaleString();
-                                }
-                                
+                                                                                    if (key === 'connector_type') {
+                                                                                        displayValue = value === 1 ? 'Socket' : value === 2 ? 'Gun' : value;
+                                                                                    } else if (key === 'charger_accessibility') {
+                                                                                        displayValue = value === 1 ? 'Public' : value === 2 ? 'Private' : value;
+                                                                                    }
+                                                                                    else if (key === 'status') {
+                                                                                        displayValue = value ? 'Active' : 'Deactive';
+                                                                                    } else if (typeof value === 'boolean') {
+                                                                                        displayValue = value ? 'Yes' : 'No';
+                                                                                    } else if (typeof value === 'string' && value.includes('T') && value.includes('Z')) {
+                                                                                        displayValue = new Date(value).toLocaleString();
+                                                                                    }
 
-                                return (
-                                    <div className="col-md-4 mb-3" key={idx}>
-                                    <div className="form-group">
-                                        <div style={{ fontWeight: '500', color: '#212529' }}>
-                                            {key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}:{' '}
-                                            <span
-                                                style={{
-                                                    fontWeight: 'normal',
-                                                    color:
-                                                        key === 'status'
-                                                            ? value
-                                                                ? 'green'
-                                                                : 'red'
-                                                            : '#212529',
-                                                }}
-                                            >
-                                                {displayValue}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                );
-                            })}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-)}
+
+                                                                                    return (
+                                                                                        <div className="col-md-4 mb-3" key={idx}>
+                                                                                            <div className="form-group">
+                                                                                                <div style={{ fontWeight: '500', color: '#212529' }}>
+                                                                                                    {key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}:{' '}
+                                                                                                    <span
+                                                                                                        style={{
+                                                                                                            fontWeight: 'normal',
+                                                                                                            color:
+                                                                                                                key === 'status'
+                                                                                                                    ? value
+                                                                                                                        ? 'green'
+                                                                                                                        : 'red'
+                                                                                                                    : '#212529',
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        {displayValue}
+                                                                                                    </span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    );
+                                                                                })}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
 
 
                                                 </div>

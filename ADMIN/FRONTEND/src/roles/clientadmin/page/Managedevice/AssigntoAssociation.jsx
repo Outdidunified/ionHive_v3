@@ -2,20 +2,18 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useAssigntoAssociation from '../../hooks/ManageDevice/AssigntoAssociationHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const AssigntoAssociation = ({ userInfo, handleLogout }) => {
     const {
-        selectedAssociationId, setSelectedAssociationId,
-        selectedChargers, setSelectedChargers,
-        commission, setCommission, reloadPage, setReloadPage,
-        chargersLoading, setChargersLoading,
-        unallocatedChargers, setUnallocatedChargers,
-        clientsList, setClientsList,
-        fetchClientsCalled,
-        fetchUnallocatedChargersCalled,
-        selectedModel, setSelectedModel, fetchClients, fetchUnallocatedChargers, handleAssociationChange, handleChargerChange,
-        errorMessage, setErrorMessage, handleCommissionChange, handleSubmit, submitAssign, goBack,
+        selectedAssociationId,
+        selectedChargers,
+        commission, 
+        chargersLoading,
+        unallocatedChargers, 
+        clientsList, 
+        handleAssociationChange, handleChargerChange,
+        errorMessage, handleCommissionChange, handleSubmit, goBack,
         handleModelChange, filteredChargers, loading
 
     } = useAssigntoAssociation(userInfo);
@@ -218,12 +216,12 @@ const AssigntoAssociation = ({ userInfo, handleLogout }) => {
                                                         </div> */}
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             loading={loading}
                                                             disabled={loading}
                                                         >Submit
-                                                        </LoadingButton>
+                                                        </ReusableButton>
                                                     </form>
                                                 </div>
                                             </div>

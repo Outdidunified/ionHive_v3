@@ -2,21 +2,17 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useAssignTagID from '../../hooks/ManageUser/AssignTagIdHooks';
+import InputField from '../../../../utils/InputField';
 
 const AssignTagID = ({ userInfo, handleLogout }) => {
    const {
-    data, setData,
-    loading, setLoading,
-    error,setError,
-    filteredData,
-    posts,setPosts,
-    fetchUserRoleCalled,
-    newUser,setNewUser,
-    fetchTagID,
+    loading,
+    error,
+    posts,
+    newUser,
     handleSearchInputChange,
     formatTimestamp,goBack,
     handleAssignTagID,
-    backManageUserPage
    }=useAssignTagID(userInfo)
     return (
         <div className='container-scroller'>
@@ -63,7 +59,7 @@ const AssignTagID = ({ userInfo, handleLogout }) => {
                                                                 <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" aria-label="search" aria-describedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
+                                                            <InputField  placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off" onChange={handleSearchInputChange}/>
                                                         </div>
                                                     </div>
                                                 </div>

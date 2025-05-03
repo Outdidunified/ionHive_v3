@@ -2,15 +2,14 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useManageUsers from '../../hooks/ManageUser/ManageUsersHooks';
+import InputField from '../../../../utils/InputField';
 
 const ManageUsers = ({ userInfo, handleLogout }) => {
 const {
-    data, setData,
-    loading, setLoading,
-    error, setError,
-    filteredData,
-    posts, setPosts,handleSearchInputChange,
-    fetchUsers,handleViewUser
+    loading, 
+    error,data,
+    posts,handleSearchInputChange,
+    handleViewUser
 }  =useManageUsers(userInfo) 
     return (
         <div className='container-scroller'>
@@ -117,7 +116,7 @@ const {
                                                                 <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <input type="text" className="form-control" placeholder="Search now" aria-label="search" aria-describedby="search" autoComplete="off"  onChange={handleSearchInputChange}/>
+                                                            <InputField  placeholder="Search now" ariaLabel="search" ariadescribedby="search" autoComplete="off"  onChange={handleSearchInputChange}/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -137,39 +136,45 @@ const {
                                                         <th>Option</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody style={{textAlign:'center'}}>
-                                                    {loading ? (
-                                                        <tr>
-                                                            <td colSpan="10" style={{ marginTop: '50px', textAlign: 'center' }}>Loading...</td>
-                                                        </tr>
-                                                    ) : error ? (
-                                                        <tr>
-                                                            <td colSpan="10" style={{ marginTop: '50px', textAlign: 'center' }}>Error: {error}</td>
-                                                        </tr>
-                                                    ) : (
-                                                        Array.isArray(posts) && posts.length > 0 ? (
-                                                            posts.map((dataItem, index) => (
-                                                            <tr key={index}>
-                                                                <td>{index + 1}</td>
-                                                                <td>{dataItem.role_name ? dataItem.role_name : '-'}</td>
-                                                                <td>{dataItem.username ? dataItem.username : '-'}</td>
-                                                                <td>{dataItem.email_id ? dataItem.email_id : '-'}</td>
-                                                                <td>{dataItem.status===true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</td>
-                                                                {/* <td>
-                                                                    <button type="button" className="btn btn-warning" onClick={() => handleViewAssignTagID(dataItem)} style={{marginBottom:'10px'}}>Assign</button><br/>
-                                                                </td>   */}
-                                                                <td>
-                                                                    <button type="button" className="btn btn-outline-success btn-icon-text"  onClick={() => handleViewUser(dataItem)} style={{marginBottom:'10px', marginRight:'10px'}}><i className="mdi mdi-eye"></i>View</button> 
-                                                                </td>
-                                                            </tr>
-                                                        ))
-                                                        ) : (
-                                                            <tr>
-                                                                <td colSpan="6" style={{ marginTop: '50px', textAlign: 'center' }}>No Manage user's found</td>
-                                                            </tr>
-                                                        )
-                                                    )}
-                                                </tbody>
+                                                <tbody style={{ textAlign: 'center' }}>
+    {loading ? (
+        <tr>
+            <td colSpan="10" style={{ textAlign: 'center' }}>Loading...</td>
+        </tr>
+    ) : error ? (
+        <tr>
+            <td colSpan="10" style={{ textAlign: 'center' }}>Error: {error}</td>
+        </tr>
+    ) : posts && posts.length > 0 ? (
+        posts.map((dataItem, index) => (
+            <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{dataItem.role_name || '-'}</td>
+                <td>{dataItem.username || '-'}</td>
+                <td>{dataItem.email_id || '-'}</td>
+                <td>{dataItem.status === true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</td>
+                <td>
+                    <button
+                        type="button"
+                        className="btn btn-outline-success btn-icon-text"
+                        onClick={() => handleViewUser(dataItem)}
+                        style={{ marginBottom: '10px', marginRight: '10px' }}
+                    >
+                        <i className="mdi mdi-eye"></i>View
+                    </button>
+                </td>
+            </tr>
+        ))
+    ) : (
+        // Only show this if loading is false AND data was fetched
+        !loading && data.length === 0 && (
+            <tr>
+                <td colSpan="10" style={{ textAlign: 'center' }}>No Manage user's found</td>
+            </tr>
+        )
+    )}
+</tbody>
+
                                             </table>
                                         </div>
                                     </div>

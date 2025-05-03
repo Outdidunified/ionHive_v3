@@ -2,51 +2,51 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useEditManageDevice from '../../hooks/ManageDevice/EditManageDeviceHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
+
 const EditManageDevice = ({ userInfo, handleLogout }) => {
-  const {
-    backManageDevice,
-    handleModel,
-     handleChargerType,
-     handleWiFiModule,
-     charger_id,
-     loading,
-     charger_model,
-     charger_type,
-     vendor,
-     max_current,
-     max_power,
-     wifi_module,
-     bluetooth_module,
-     connectors,
-     errorMessage,
-     errorMessageCurrent,
-     errorMessagePower,
-     isFormModified,
-     addConnector,
-     handleRemoveConnector,
-     updateConnectors,
-     handleBluetoothModule,
-     handleConnectorChange,
-     handleConnectorType,
-     editManageDevice,
-     setMaxCurrent,
-     setVendor,
-     setChargerID,
-     setErrorMessageCurrent,
-     setMaxPower,
-     setErrorMessagePower,
-  } = useEditManageDevice(userInfo);
+    const {
+        backManageDevice,
+        handleModel,
+        handleChargerType,
+        handleWiFiModule,
+        charger_id,
+        loading,
+        charger_model,
+        charger_type,
+        vendor,
+        max_current,
+        max_power,
+        wifi_module,
+        bluetooth_module,
+        connectors,
+        errorMessage,
+        errorMessageCurrent,
+        errorMessagePower,
+        isFormModified,
+        addConnector,
+        handleRemoveConnector,
+        handleBluetoothModule,
+        handleConnectorChange,
+        handleConnectorType,
+        editManageDevice,
+        setMaxCurrent,
+        setVendor,
+        setChargerID,
+        setErrorMessageCurrent,
+        setMaxPower,
+        setErrorMessagePower,
+    } = useEditManageDevice(userInfo);
 
 
     return (
         <div className='container-scroller'>
             {/* Header */}
-            <Header userInfo={userInfo} handleLogout={handleLogout}/>
+            <Header userInfo={userInfo} handleLogout={handleLogout} />
             <div className="container-fluid page-body-wrapper">
                 {/* Sidebar */}
-                <Sidebar/>
+                <Sidebar />
                 <div className="main-panel">
                     <div className="content-wrapper">
                         <div className="row">
@@ -73,29 +73,29 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                     <h4 className="card-title">Manage Device</h4>
                                                     <form className="form-sample" onSubmit={editManageDevice}>
                                                         <div className="row">
-                                                        <div className="col-md-6">
-    <div className="form-group row">
-        <label className="col-sm-12 col-form-label labelInput">Charger ID</label>
-        <div className="col-sm-12">
-            <InputField
-                placeholder="Charger ID"
-                value={charger_id}
-                maxLength={14}
-                onChange={(e) => {
-                    const value = e.target.value;
-                    const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 14);
-                    setChargerID(sanitizedValue);
-                }}
-                required
-            />
-        </div>
-    </div>
-</div>
+                                                            <div className="col-md-6">
+                                                                <div className="form-group row">
+                                                                    <label className="col-sm-12 col-form-label labelInput">Charger ID</label>
+                                                                    <div className="col-sm-12">
+                                                                        <InputField
+                                                                            placeholder="Charger ID"
+                                                                            value={charger_id}
+                                                                            maxLength={14}
+                                                                            onChange={(e) => {
+                                                                                const value = e.target.value;
+                                                                                const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 14);
+                                                                                setChargerID(sanitizedValue);
+                                                                            }}
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                             <div className="col-md-6">
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Vendor</label>
                                                                     <div className="col-sm-12">
-                                                                        <InputField  placeholder="Vendor" value={vendor} maxLength={20} onChange={(e) => {const value = e.target.value; let sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setVendor(sanitizedValue); }} required/>
+                                                                        <InputField placeholder="Vendor" value={vendor} maxLength={20} onChange={(e) => { const value = e.target.value; let sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setVendor(sanitizedValue); }} required />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -132,16 +132,16 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Max Current</label>
                                                                     <div className="col-sm-12">
-                                                                        <InputField 
-                                                                            type="tel" 
-                                                                            placeholder="Max Current" 
-                                                                            value={max_current} 
+                                                                        <InputField
+                                                                            type="tel"
+                                                                            placeholder="Max Current"
+                                                                            value={max_current}
                                                                             onChange={(e) => {
                                                                                 let value = e.target.value;
-                                                                                
+
                                                                                 // Remove any non-numeric characters
                                                                                 value = value.replace(/\D/g, '');
-                                                                                
+
                                                                                 // Ensure the value is within the specified range
                                                                                 if (value < 1) {
                                                                                     value = '';
@@ -150,11 +150,11 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
 
                                                                                     value = '32';
                                                                                 }
-                                                                                
+
                                                                                 // Update the state with the sanitized and restricted value
                                                                                 setMaxCurrent(value);
-                                                                            }} 
-                                                                            required 
+                                                                            }}
+                                                                            required
                                                                         />
                                                                         {errorMessageCurrent && <div className="text-danger">{errorMessageCurrent}</div>}
                                                                     </div>
@@ -164,25 +164,25 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Max Power</label>
                                                                     <div className="col-sm-12">
-                                                                        <InputField type="tel"  placeholder="Max Power" value={max_power} 
-                                                                        onChange={(e) => {
-                                                                            let value = e.target.value;
-                                                                            
-                                                                            // Remove any non-numeric characters
-                                                                            value = value.replace(/\D/g, '');
-                                                                            
-                                                                            // Ensure the value is within the specified range
-                                                                            if (value < 1) {
-                                                                                value = '';
-                                                                            } else if (value > 22000) {
-                                                                                setErrorMessagePower('Max Power must be between 1 and 22,000');
-                                                                                value = '22000';
-                                                                            }
-                                                                            
-                                                                            // Update the state with the sanitized and restricted value
-                                                                            setMaxPower(value);
-                                                                        }} 
-                                                                         required/> 
+                                                                        <InputField type="tel" placeholder="Max Power" value={max_power}
+                                                                            onChange={(e) => {
+                                                                                let value = e.target.value;
+
+                                                                                // Remove any non-numeric characters
+                                                                                value = value.replace(/\D/g, '');
+
+                                                                                // Ensure the value is within the specified range
+                                                                                if (value < 1) {
+                                                                                    value = '';
+                                                                                } else if (value > 22000) {
+                                                                                    setErrorMessagePower('Max Power must be between 1 and 22,000');
+                                                                                    value = '22000';
+                                                                                }
+
+                                                                                // Update the state with the sanitized and restricted value
+                                                                                setMaxPower(value);
+                                                                            }}
+                                                                            required />
                                                                         {errorMessagePower && <div className="text-danger">{errorMessagePower}</div>}
 
                                                                     </div>
@@ -221,10 +221,10 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                                 <div className="col-md-4">
                                                                     <div className="form-group">
                                                                         <label className="col-form-label labelInput">Connector Type</label>
-                                                                        <select 
-                                                                            className="form-control" 
-                                                                            value={connector.connector_type || ''} 
-                                                                            onChange={(e) => handleConnectorType(index, 'connector_type', e.target.value)} 
+                                                                        <select
+                                                                            className="form-control"
+                                                                            value={connector.connector_type || ''}
+                                                                            onChange={(e) => handleConnectorType(index, 'connector_type', e.target.value)}
                                                                             required
                                                                         >
                                                                             <option value="" disabled>Select type</option>
@@ -260,10 +260,10 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                                     <div className="col-md-2" style={{ paddingTop: '40px' }}>
                                                                         <div className="form-group">
                                                                             <div style={{ textAlign: 'center' }}>
-                                                                                <button 
+                                                                                <button
                                                                                     type="button" // Changed to button to avoid submitting the form
-                                                                                    className="btn btn-outline-danger" 
-                                                                                    onClick={() => handleRemoveConnector(index)} 
+                                                                                    className="btn btn-outline-danger"
+                                                                                    onClick={() => handleRemoveConnector(index)}
                                                                                     disabled={connectors.length === 1} // Prevent removal if there's only one connector
                                                                                 >
                                                                                     <i className="mdi mdi-delete"></i>
@@ -277,9 +277,9 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                                     <div className="col-md-2" style={{ paddingTop: '40px' }}>
                                                                         <div className="form-group">
                                                                             <div style={{ textAlign: 'center' }}>
-                                                                                <button 
-                                                                                    type="button" 
-                                                                                    className="btn btn-outline-primary" 
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="btn btn-outline-primary"
                                                                                     onClick={addConnector}
                                                                                 >
                                                                                     <i className="mdi mdi-plus"></i>
@@ -291,16 +291,16 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         ))}
                                                         {/* Connectors section start */}
-                                                        
+
 
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
-                                                        <LoadingButton
-  type="submit"
-  loading={loading}
-  disabled={!isFormModified}
->
-  Update
-</LoadingButton>
+                                                        <ReusableButton
+                                                            type="submit"
+                                                            loading={loading}
+                                                            disabled={!isFormModified}
+                                                        >
+                                                            Update
+                                                        </ReusableButton>
 
                                                     </form>
                                                 </div>
@@ -313,10 +313,10 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                     </div>
                     {/* Footer */}
                     <Footer />
-                </div>         
-            </div>    
+                </div>
+            </div>
         </div>
     );
-};   
-                 
+};
+
 export default EditManageDevice;

@@ -7,29 +7,26 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Lege
 import Chart from 'react-apexcharts';
 import useDashboard from '../../hooks/Dashboard/Dashboard';
 
-
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
-
-
 
 const Dashboard = ({ userInfo, handleLogout }) => {
     const {
-        totalChargers, setTotalChargers,
-        availableChargers, setAvailableChargers,
-        faultedChargers, setFaultedChargers,
-        offlineChargers, setOfflineChargers,
-        totalsession, setTotalSession,
+        totalChargers,
+        availableChargers,
+        faultedChargers,
+        offlineChargers,
+        totalsession,
         scrollIndex, setScrollIndex,
         visibleBars,
-        hover, setHover,
+        setHover,
         totalChargersRef,
         onlineChargersRef,
         faultedChargersRef,
-        offlineChargersRef, totalCounts, setTotalCounts,
-        chargersData, setChargersData,
-        energyData, setEnergyData,
+        offlineChargersRef, totalCounts,
+        chargersData,
+        energyData,
         viewMode, setViewMode,
-        selectedCharger, setSelectedCharger,
+        selectedCharger,
         isModalOpen, setIsModalOpen,
         fetchData,
         getChartData,

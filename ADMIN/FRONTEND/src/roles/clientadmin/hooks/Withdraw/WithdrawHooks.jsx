@@ -18,36 +18,36 @@ const useWithdraw = (userInfo) => {
     const fetchCommissionAmountCalled = useRef(false); 
     const isFetching = useRef(false);
 
-    // Function to fetch withdrawal requests and reseller data
+    
     const fetchData = async () => {
-        if (isFetching.current) return;
-        isFetching.current = true;
-
-        try {
-            setIsLoading(true);
-            const response = await axiosInstance.post('/clientadmin/FetchPaymentRequest', {
-                user_id: userInfo.user_id,
-            });
-
-            if (response.status === 200 && response.data.data) {
-                const { withdrawalDetails, clientData, user } = response.data.data;
-                setWithdrawalRequests(withdrawalDetails);
-                setClientData(clientData);
-                setUserData(user);
-            } else {
-                setWithdrawalRequests([]);
-                setClientData(null);
-                setUserData(null);
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        } finally {
-            setIsLoading(false);
-            isFetching.current = false;
-        }
-    };
-
-   
+      if (isFetching.current) return;
+      isFetching.current = true;
+  
+      try {
+          setIsLoading(true);
+          const response = await axiosInstance.post('/clientadmin/FetchPaymentRequest', {
+              user_id: userInfo.user_id,
+          });
+  
+          if (response.status === 200 && response.data.status === 'Success') {
+            const { withdrawalDetails, clientData, user } = response.data;
+          
+              setWithdrawalRequests(withdrawalDetails || []);
+              setClientData(clientData || null);
+              setUserData(user || null);
+          } else {
+              setWithdrawalRequests([]);
+              setClientData(null);
+              setUserData(null);
+          }
+      } catch (error) {
+          console.error('Error fetching data:', error);
+      } finally {
+          setIsLoading(false);
+          isFetching.current = false;
+      }
+  };
+  
     useEffect(() => {
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps

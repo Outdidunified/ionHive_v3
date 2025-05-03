@@ -4,7 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import useAddManageDevice from '../../hooks/ManageDevice/AddManageDeviceHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const AddManageDevice = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
@@ -53,7 +53,7 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <button type="button" className="btn btn-success" onClick={backManageDevice}>Back</button>
+                                            <ReusableButton className="btn btn-success" onClick={backManageDevice}>Back</ReusableButton>
                                         </div>
                                     </div>
                                 </div>
@@ -302,13 +302,13 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
                                                         <br></br>
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             loading={loading}
                                                             className="mr-2"
                                                         >
                                                             Add
-                                                        </LoadingButton>
+                                                        </ReusableButton>
 
                                                     </form>
                                                 </div>

@@ -1,6 +1,7 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { showSuccessAlert, showErrorAlert } from '../../../../utils/alert' // Import alert functions
 import axiosInstance from '../../../../utils/utils';
+
 
 const useManageTagID = (userInfo) => {
 
@@ -11,15 +12,15 @@ const useManageTagID = (userInfo) => {
     const [posts, setPosts] = useState([]);
     const fetchUserRoleCalled = useRef(false); // Ref to track if fetchProfile has been called
     const [initialTagID, setInitialTagID] = useState('');
-    const [initialTagIDExpiryDateD, setInitialTagIDExpiryDate]= useState('');
-
-    // Fetch Tagid // updated by vivek on 24 aug
+    const [initialTagIDExpiryDateD, setInitialTagIDExpiryDate] = useState('');
+    const [isloading, setIsLoading] = useState(false)
+    const [editloading, setEditLoading] = useState(false)
     const fetchTagID = useCallback(async () => {
         try {
             const res = await axiosInstance.post('/associationadmin/FetchAllTagIDs', {
                 association_id: userInfo.association_id
             });
-    
+
             if (res.data && res.data.status === 'Success') {
                 if (typeof res.data.data === 'string' && res.data.data === 'No tags found') {
                     // If the response indicates no tags were found
@@ -28,14 +29,16 @@ const useManageTagID = (userInfo) => {
                 } else if (Array.isArray(res.data.data)) {
                     // If the data is an array of tag IDs, set it directly
                     setData(res.data.data);
-                    setError(null); // Clear any previous errors
+                    setPosts(res.data.data); // Add this line
+                    setError(null);
+                    // Clear any previous errors
                 } else {
                     setError('Unexpected response format.');
                 }
             } else {
                 setError('Error fetching data. Please try again.');
             }
-    
+
             setLoading(false);
         } catch (err) {
             console.error('Error fetching data:', err);
@@ -81,7 +84,7 @@ const useManageTagID = (userInfo) => {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
-        
+
         let hours = date.getHours();
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const seconds = String(date.getSeconds()).padStart(2, '0');
@@ -89,7 +92,7 @@ const useManageTagID = (userInfo) => {
         hours = hours % 12;
         hours = hours ? hours : 12; // the hour '0' should be '12'
         hours = String(hours).padStart(2, '0');
-    
+
         const formattedDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds} ${ampm}`;
         return formattedDate;
     }
@@ -101,7 +104,7 @@ const useManageTagID = (userInfo) => {
         setShowAddForm(prevState => !prevState); // Toggles the form visibility
     };
     const closeAddModal = () => {
-        setTagID(''); 
+        setTagID('');
         setTagIDExpiryDate('');
         setShowAddForm(false); // Close the form
         setTheadsticky('sticky');
@@ -117,41 +120,40 @@ const useManageTagID = (userInfo) => {
     const [add_tag_id, setTagID] = useState('');
     const [add_tag_id_expiry_date, setTagIDExpiryDate] = useState('');
 
-    const addTagID = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axiosInstance.post('/associationadmin/CreateTagID', {
-                 tag_id:add_tag_id, tag_id_expiry_date:add_tag_id_expiry_date, created_by: userInfo.email_id, association_id: userInfo.association_id })
-            
-            if (response.status==200) {
-                Swal.fire({
-                    title: "Add TagID successfully",
-                    icon: "success"
-                });
-                setTagID(''); 
-                setTagIDExpiryDate('');
-                setShowAddForm(false);
-                closeAddModal();
-                fetchTagID();
-                setTheadsticky('sticky');
-                setTheadfixed('fixed');
-                setTheadBackgroundColor('white');
-            } else {
-                const responseData = response.data
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to TagID, " + responseData.message,
-                    icon: "error"
-                });
-            }
-        }catch (error) {
-            Swal.fire({
-                title: "Error:", error,
-                text: "An error occurred while adding TagID",
-                icon: "error"
-            });
+
+const addTagID = async (e) => {
+    e.preventDefault();
+    try {
+        setIsLoading(true);
+
+        const response = await axiosInstance.post('/associationadmin/CreateTagID', {
+            tag_id: add_tag_id, 
+            tag_id_expiry_date: add_tag_id_expiry_date, 
+            created_by: userInfo.email_id, 
+            association_id: userInfo.association_id
+        });
+
+        if (response.status === 200) {
+            showSuccessAlert("TagID added successfully");
+            setTagID('');
+            setTagIDExpiryDate('');
+            setShowAddForm(false);
+            closeAddModal();
+            fetchTagID();
+            setTheadsticky('sticky');
+            setTheadfixed('fixed');
+            setTheadBackgroundColor('white');
+        } else {
+            const responseData = response.data;
+            showErrorAlert("Error", "Failed to add TagID, " + responseData.message);
         }
-    };
+    } catch (error) {
+        console.error("Error adding TagID:", error);
+        showErrorAlert("Error", "An error occurred while adding TagID");
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     // Edit user role start 
     const [showEditForm, setShowEditForm] = useState(false);
@@ -159,11 +161,11 @@ const useManageTagID = (userInfo) => {
 
     const handleEditUser = (dataItem) => {
         setEditDataItem(dataItem);
-        setEditTagID(dataItem.tag_id); 
+        setEditTagID(dataItem.tag_id);
         setEditTagIDExpiryDate(dataItem.tag_id_expiry_date);
-        setInitialTagID(dataItem.tag_id); 
-        setInitialTagIDExpiryDate(dataItem.tag_id_expiry_date); 
-        setShowEditForm(true); 
+        setInitialTagID(dataItem.tag_id);
+        setInitialTagIDExpiryDate(dataItem.tag_id_expiry_date);
+        setShowEditForm(true);
     };
 
     const closeEditModal = () => {
@@ -176,7 +178,7 @@ const useManageTagID = (userInfo) => {
     const modalEditStyle = {
         display: showEditForm ? 'block' : 'none',
     }
- 
+
     const [theadBackgroundColor, setTheadBackgroundColor] = useState('white');
     const [theadsticky, setTheadsticky] = useState('sticky');
     const [theadfixed, setTheadfixed] = useState('fixed');
@@ -201,101 +203,86 @@ const useManageTagID = (userInfo) => {
     const [tag_id, setEditTagID] = useState('');
     const [tag_id_expiry_date, setEditTagIDExpiryDate] = useState('');
 
-    const editTagID = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axiosInstance.post('/associationadmin/UpdateTagID', {
-            id:dataItem.id, tag_id, tag_id_expiry_date, status:dataItem.status, modified_by: userInfo.email_id })
-            
-            if (response.status==200) {
-                Swal.fire({
-                    title: "Update TagID successfully",
-                    icon: "success"
-                });
-                setEditTagID(''); 
-                setEditTagIDExpiryDate('');
-                setShowEditForm(false);
-                closeEditModal();
-                fetchTagID();
-                setTheadsticky('sticky');
-                setTheadfixed('fixed');
-                setTheadBackgroundColor('white');
-            } else {
-                const responseData = response.data
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to update TagID, " + responseData.message,
-                    icon: "error"
-                });
-            }
-        }catch (error) {
-            Swal.fire({
-                title: "Error:", error,
-                text: "An error occurred while update TagID",
-                icon: "error"
-            });
-        }
-    };
 
-    // DeActive
-    const changeDeActivate = async (e, id) => {
-        e.preventDefault();
-        try {
-            const response = await axiosInstance.post('/associationadmin/DeactivateOrActivateTagID', {
-           id, status:false, modified_by: userInfo.email_id })
-        
-            if (response.status==200) {
-                Swal.fire({
-                    title: "DeActivate successfully",
-                    icon: "success"
-                });
-                fetchTagID();
-            } else {
-                const responseData = response.data
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to DeActivate, " + responseData.message,
-                    icon: "error"
-                });
-            }
-        }catch (error) {
-            Swal.fire({
-                title: "Error:", error,
-                text: "An error occurred while adding DeActivate",
-                icon: "error"
-            });
-        }
-    };
+// Edit TagID
+const editTagID = async (e) => {
+    e.preventDefault();
+    try {
+        setEditLoading(true);
 
-    // Active
-    const changeActivate = async (e, id) => {
-        e.preventDefault();
-        try {
-            const response = await axiosInstance.post('/associationadmin/DeactivateOrActivateTagID', {
-           id, status:true, modified_by: userInfo.email_id })
-            
-            if (response.status==200) {
-                Swal.fire({
-                    title: "Activate successfully",
-                    icon: "success"
-                });
-                fetchTagID();
-            } else {
-                const responseData = response.data
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to Activate, " + responseData.message,
-                    icon: "error"
-                });
-            }
-        }catch (error) {
-            Swal.fire({
-                title: "Error:", error,
-                text: "An error occurred while adding Activate",
-                icon: "error"
-            });
+        const response = await axiosInstance.post('/associationadmin/UpdateTagID', {
+            id: dataItem.id, 
+            tag_id, 
+            tag_id_expiry_date, 
+            status: dataItem.status, 
+            modified_by: userInfo.email_id
+        });
+
+        if (response.status === 200) {
+            showSuccessAlert("TagID updated successfully");
+            setEditTagID('');
+            setEditTagIDExpiryDate('');
+            setShowEditForm(false);
+            closeEditModal();
+            fetchTagID();
+            setTheadsticky('sticky');
+            setTheadfixed('fixed');
+            setTheadBackgroundColor('white');
+        } else {
+            const responseData = response.data;
+            showErrorAlert("Error", "Failed to update TagID, " + responseData.message);
         }
-    };
+    } catch (error) {
+        showErrorAlert("Error", "An error occurred while updating TagID");
+    } finally {
+        setEditLoading(false);
+    }
+};
+
+// Deactivate TagID
+const changeDeActivate = async (e, id) => {
+    e.preventDefault();
+    try {
+        const response = await axiosInstance.post('/associationadmin/DeactivateOrActivateTagID', {
+            id, 
+            status: false, 
+            modified_by: userInfo.email_id
+        });
+
+        if (response.status === 200) {
+            showSuccessAlert("Deactivated successfully", "TagID deactivated successfully");
+            fetchTagID();
+        } else {
+            const responseData = response.data;
+            showErrorAlert("Error", "Failed to Deactivate, " + responseData.message);
+        }
+    } catch (error) {
+        showErrorAlert("Error", "An error occurred while deactivating TagID");
+    }
+};
+
+// Activate TagID
+const changeActivate = async (e, id) => {
+    e.preventDefault();
+    try {
+        const response = await axiosInstance.post('/associationadmin/DeactivateOrActivateTagID', {
+            id, 
+            status: true, 
+            modified_by: userInfo.email_id
+        });
+
+        if (response.status === 200) {
+            showSuccessAlert("Activated successfully", "TagID activated successfully");
+            fetchTagID();
+        } else {
+            const responseData = response.data;
+            showErrorAlert("Error", "Failed to Activate, " + responseData.message);
+        }
+    } catch (error) {
+        showErrorAlert("Error", "An error occurred while activating TagID");
+    }
+};
+
 
     function formatDateForInput(date) {
         const d = new Date(date);
@@ -313,47 +300,48 @@ const useManageTagID = (userInfo) => {
     //     date.setHours(0, 0, 0, 0); // Set time to midnight (00:00:00) of the next day
     //     return date.toISOString().slice(0, 16); // Format for datetime-local input
     // }; 
-    
+
     const getMinDate = () => {
         const date = new Date();
         date.setDate(date.getDate() + 1); // Move to two days ahead
         date.setHours(0, 5, 0, 0); // Set time to 12:05 AM (local time) on the next day
-    
+
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
-    
+
         // Format the date and time string for the datetime-local input
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
-    return{
+    return {
         data, setData,
-        loading,setLoading,
-        error, setError,closeEditModal,
+        loading, setLoading,
+        error, setError, closeEditModal,
         filteredData,
         posts, setPosts,
         fetchUserRoleCalled,
         initialTagID, setInitialTagID,
         initialTagIDExpiryDateD, setInitialTagIDExpiryDate,
-        fetchTagID,handleSearchInputChange,
+        fetchTagID, handleSearchInputChange,
         formatTimestamp,
-        showAddForm,setShowAddForm,
+        showAddForm, setShowAddForm,
         addChargers,
         closeAddModal,
-        modalAddStyle ,add_tag_id, setTagID,
+        modalAddStyle, add_tag_id, setTagID,
         add_tag_id_expiry_date, setTagIDExpiryDate,
-        addTagID,modalEditStyle,
-        theadBackgroundColor, setTheadBackgroundColor,   
-        theadsticky, setTheadsticky,theadfixed, setTheadfixed,
+        addTagID, modalEditStyle,
+        theadBackgroundColor, setTheadBackgroundColor,
+        theadsticky, setTheadsticky, theadfixed, setTheadfixed,
         handleEditUserAndToggleBackground,
         handleAddUserAndToggleBackground,
         tag_id, setEditTagID,
         tag_id_expiry_date, setEditTagIDExpiryDate,
-        editTagID,changeDeActivate,
-        changeActivate,formatDateForInput,
-        getMinDate,
+        editTagID, changeDeActivate,
+        changeActivate, formatDateForInput,
+        getMinDate, isloading, editloading
 
-    }}
+    }
+}
 export default useManageTagID;

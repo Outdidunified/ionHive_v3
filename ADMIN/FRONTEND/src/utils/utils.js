@@ -13,11 +13,7 @@ axiosInstance.interceptors.request.use((config) => {
   const associationAdminToken = sessionStorage.getItem('associationAdminToken');
   const clientAdminToken = sessionStorage.getItem('clientAdminToken');
 
-  const token =
-    superAdminToken ||
-    resellerAdminToken ||
-    associationAdminToken ||
-    clientAdminToken;
+  const token = superAdminToken || resellerAdminToken || associationAdminToken || clientAdminToken;
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -25,5 +21,6 @@ axiosInstance.interceptors.request.use((config) => {
 
   return config;
 }, (error) => Promise.reject(error));
+
 
 export default axiosInstance;

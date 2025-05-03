@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
-import Chart from 'react-apexcharts';
 import axiosInstance from '../../../../utils/utils';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -31,9 +30,6 @@ const useDashboard = (userInfo) => {
 
     // eslint-disable-next-line
     const [totalCount, setTotalCounts] = useState({
-        resellersCount: 0,
-        clientsCount: 0,
-        associatinsCount: 0,
         appUsersCount: 0
     });
     const [chargersData, setChargersData] = useState({
@@ -91,12 +87,10 @@ const useDashboard = (userInfo) => {
                 association_id: userInfo.association_id,
             });
 
-            const { resellersCount, clientsCount, associatinsCount, appUsersCount } = res.data.TotalCounts;
+            const appUsersCount = res.data.appUsersCount || 0;
 
             setTotalCounts({
-                resellersCount,
-                clientsCount,
-                associatinsCount,
+                
                 appUsersCount,
             });
 
@@ -114,14 +108,15 @@ const useDashboard = (userInfo) => {
                 totalsession: totalsession.data.data || [],
             });
 
-            const energyConsumed = energyRes.data.ChargerTotalEnergy.totalEnergyConsumed || 0;
-            const CO2_from_EV = energyRes.data.ChargerTotalEnergy.CO2_from_EV || 0;
-            const CO2_from_ICE = energyRes.data.ChargerTotalEnergy.CO2_from_ICE || 0;
-            const CO2_Savings = energyRes.data.ChargerTotalEnergy.CO2_Savings || 0;
-
-            const weeklyEnergyData = energyRes.data.ChargerTotalEnergy.weeklyTotalEnergyConsumed || [];
-            const monthlyEnergyData = energyRes.data.ChargerTotalEnergy.monthlyTotalEnergyConsumed || [];
-            const yearlyEnergyData = energyRes.data.ChargerTotalEnergy.yearlyTotalEnergyConsumed || [];
+            const energyConsumed = energyRes.data.totalEnergyConsumed || 0;
+            const CO2_from_EV = energyRes.data.CO2_from_EV || 0;
+            const CO2_from_ICE = energyRes.data.CO2_from_ICE || 0;
+            const CO2_Savings = energyRes.data.CO2_Savings || 0;
+            
+            const weeklyEnergyData = energyRes.data.weeklyTotalEnergyConsumed || [];
+            const monthlyEnergyData = energyRes.data.monthlyTotalEnergyConsumed || [];
+            const yearlyEnergyData = energyRes.data.yearlyTotalEnergyConsumed || [];
+            
 
             setEnergyData({
                 totalEnergyConsumed: energyConsumed,
@@ -136,7 +131,7 @@ const useDashboard = (userInfo) => {
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
-            isFetching.current = false; // ✅ Reset isFetching after request
+            isFetching.current = false; 
         }
     };
 
@@ -196,27 +191,28 @@ const useDashboard = (userInfo) => {
         setSelectedCharger(charger);
         setIsModalOpen(true);
     };
-return {
-    totalChargers, setTotalChargers,
-    availableChargers, setAvailableChargers,
-    faultedChargers, setFaultedChargers,
-    offlineChargers, setOfflineChargers,
-    totalsession,setTotalSession,
-    scrollIndex,setScrollIndex,visibleBars,
-    containerRef,
-    hover, setHover,
-    totalChargersRef,
-    onlineChargersRef,
+
+    return {
+        totalChargers, setTotalChargers,
+        availableChargers, setAvailableChargers,
+        faultedChargers, setFaultedChargers,
+        offlineChargers,setOfflineChargers,
+        totalsession,setTotalSession,
+        scrollIndex,setScrollIndex,
+        visibleBars,
+        containerRef,
+        hover,
+        setHover,
+        totalChargersRef,
+        onlineChargersRef,
     faultedChargersRef,
     offlineChargersRef,
-    selectedCharger,setSelectedCharger,
-    isModalOpen,setIsModalOpen,
-    totalCount, setTotalCounts,
-    chargersData, setChargersData,
-    energyData, setEnergyData,
-    viewMode, setViewMode,
-    fetchData,getChartData,
-    scrollLeft,scrollRight,handleChargerClick
+    selectedCharger,
+    handleChargerClick,
+    scrollRight,
+    scrollLeft,
+    getChartData,isModalOpen,setIsModalOpen,
+    fetchData,energyData, setEnergyData,viewMode, setViewMode,chargersData
+    }}
 
-}}
-export default useDashboard;
+export default useDashboard

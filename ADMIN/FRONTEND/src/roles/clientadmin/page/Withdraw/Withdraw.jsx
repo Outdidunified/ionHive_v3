@@ -182,11 +182,7 @@ const Withdraw = ({ userInfo, handleLogout }) => {
                                             </button>
                                         </div>
 
-
-
-
-
-                                        <h4 className="card-title responsive-title" style={{ paddingTop: '20px', paddingLeft: '20px' }}>
+   <h4 className="card-title responsive-title" style={{ paddingTop: '20px', paddingLeft: '20px' }}>
                                             Withdrawal Details
                                         </h4>
                                         <div className="table-responsive" style={{ maxHeight: '600px', overflowY: 'auto' }}>

@@ -2,18 +2,20 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useEditManageUsers from '../../hooks/ManageUser/EditManageUsersHooks';
+import InputField from '../../../../utils/InputField';
+import ReusableButton from '../../../../utils/ReusableButton';
 
 const EditManageUsers = ({ userInfo, handleLogout }) => {
     const {
         dataItem,
-        errorMessage,setErrorMessage,
-        selectStatus, setSelectedStatus,
+        errorMessage,
+        selectStatus, 
         username, setUsername,
         password,setPassword,
         phone_no,setPhoneNumber,
-        initialValues,setInitialValues,isModified,
-        handleStatusChange,backManageUser,editManageUser,
-        goBack
+        isModified,
+        handleStatusChange,editManageUser,
+        goBack,isloading
     }=useEditManageUsers(userInfo)
     return (
         <div className='container-scroller'>
@@ -54,7 +56,7 @@ const EditManageUsers = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">User Name</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text" className="form-control" value={username} maxLength={25} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setUsername(sanitizedValue);}} readOnly required/>
+                                                                        <InputField  value={username} maxLength={25} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^a-zA-Z0-9 ]/g, ''); setUsername(sanitizedValue);}} readOnly required/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -62,7 +64,7 @@ const EditManageUsers = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Phone Number</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text" className="form-control" value={phone_no} maxLength={10} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPhoneNumber(sanitizedValue);}} required/>
+                                                                        <InputField value={phone_no} maxLength={10} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPhoneNumber(sanitizedValue);}} required/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -72,7 +74,7 @@ const EditManageUsers = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Email ID</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="email" className="form-control" value={dataItem.email_id} readOnly required/>
+                                                                        <InputField type="email"  value={dataItem.email_id} readOnly required/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -80,7 +82,7 @@ const EditManageUsers = ({ userInfo, handleLogout }) => {
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Password</label>
                                                                     <div className="col-sm-12">
-                                                                        <input type="text" className="form-control" value={password} maxLength={4} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue);}} required/>
+                                                                        <InputField  value={password} maxLength={4} onChange={(e) => {const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue);}} required/>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -99,9 +101,12 @@ const EditManageUsers = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}<br/>
-                                                        <div style={{ textAlign: 'center', padding:'15px'}}>
+                                                        {/* <div style={{ textAlign: 'center', padding:'15px'}}>
                                                             <button type="submit" className="btn btn-primary mr-2" disabled={!isModified}>Update</button>
-                                                        </div>
+                                                        </div> */}
+
+                                                        <ReusableButton type="submit" loading={isloading} disabled={!isModified}>Update</ReusableButton>
+
                                                     </form>
                                                 </div>
                                             </div>

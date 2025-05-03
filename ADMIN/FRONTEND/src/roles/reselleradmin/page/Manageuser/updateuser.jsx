@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useUpdateUser from '../../hooks/ManageUser/updateusersHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 
 const UpdateUser = ({ userInfo, handleLogout }) => {
@@ -150,11 +150,11 @@ const UpdateUser = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             disabled={isLoading || !isModified}
                                                             loading={isLoading}>
-                                                            Update</LoadingButton>
+                                                            Update</ReusableButton>
 
                                                     </form>
                                                 </div>

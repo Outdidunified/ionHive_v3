@@ -4,18 +4,18 @@ import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useViewClient from '../../hooks/ManageClient/ViewClientHooks';
 const ViewClient = ({ userInfo, handleLogout }) => {
- const {
-    newUser,
+    const {
+        newUser,
         goBack,
         navigateToEditUser,
         formatTimestamp,
- }=useViewClient(userInfo);
+    } = useViewClient(userInfo);
 
     return (
         <div className='container-scroller'>
             {/* Header */}
             <Header userInfo={userInfo} handleLogout={handleLogout} />
-            <div className="container-fluid page-body-wrapper" style={{paddingTop:'40px'}}>
+            <div className="container-fluid page-body-wrapper" style={{ paddingTop: '40px' }}>
                 {/* Sidebar */}
                 <Sidebar />
                 <div className="main-panel">
@@ -43,8 +43,8 @@ const ViewClient = ({ userInfo, handleLogout }) => {
                                             <div className="col-md-12 grid-margin">
                                                 <div className="row">
                                                     <div className="col-12 col-xl-12">
-                                                        <div style={{textAlign:'center'}}>
-                                                            <h4 className="card-title" style={{paddingTop:'10px'}}>Client User Details</h4>
+                                                        <div style={{ textAlign: 'center' }}>
+                                                            <h4 className="card-title" style={{ paddingTop: '10px' }}>Client User Details</h4>
                                                             <hr></hr>
                                                         </div>
                                                     </div>
@@ -102,7 +102,7 @@ const ViewClient = ({ userInfo, handleLogout }) => {
                                                     <div className="row col-12 col-xl-12 viewDataCss">
                                                         <div className="col-md-4">
                                                             <div className="form-group row">
-                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Status: <span style={{fontWeight:'normal'}}>{newUser.status===true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</span></div>
+                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Status: <span style={{ fontWeight: 'normal' }}>{newUser.status === true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</span></div>
                                                             </div>
                                                         </div>
                                                     </div>

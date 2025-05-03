@@ -6,13 +6,12 @@ import InputField from '../../../../utils/InputField';
 
 const Allocateddevice = ({ userInfo, handleLogout }) => {
     const {
-        allocatedChargers, setAllocatedChargers,
-        searchQuery, setSearchQuery,
+        allocatedChargers, 
+        searchQuery,
         handleSearch, filterChargers,
         navigateToViewChargerDetails,
         deactivateCharger,
-        fetchAllocatedChargerDetailsCalled,
-        fetchAllocatedChargerDetails, loading
+         loading
     } = useAllocateddevice(userInfo)
 
     return (

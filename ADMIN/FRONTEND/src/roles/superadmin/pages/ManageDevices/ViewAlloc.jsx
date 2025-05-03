@@ -248,15 +248,15 @@ const ViewAllocated = ({ userInfo, handleLogout }) => {
                                                     {newDevice.connector_details && newDevice.connector_details.length > 0 ? (
                                                         <div className="row col-12 col-xl-12 viewDataCss">
                                                             {newDevice.connector_details.map((connector, index) => (
-                                                            <div className="col-md-4" style={{paddingBottom:'15px'}} key={index}>
-                                                                <div className="form-group row">
-                                                                    <div className="col-sm-12" style={{ fontWeight: 'bold' }}>
-                                                                        Connector {index + 1}: <span style={{ fontWeight: 'bold' }}>
-                                                                        Type: <span style={{ fontWeight: 'normal' }}>{connector.connector_type},</span> Type Name: <span style={{ fontWeight: 'normal' }}>{connector.connector_type_name}</span>
-                                                                        </span>
+                                                                <div className="col-md-4" style={{ paddingBottom: '15px' }} key={index}>
+                                                                    <div className="form-group row">
+                                                                        <div className="col-sm-12" style={{ fontWeight: 'bold' }}>
+                                                                            Connector {index + 1}: <span style={{ fontWeight: 'bold' }}>
+                                                                                Type: <span style={{ fontWeight: 'normal' }}>{connector.connector_type},</span> Type Name: <span style={{ fontWeight: 'normal' }}>{connector.connector_type_name}</span>
+                                                                            </span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
                                                             ))}
                                                         </div>
                                                     ) : (

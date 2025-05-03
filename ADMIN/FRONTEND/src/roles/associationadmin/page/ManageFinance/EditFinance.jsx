@@ -2,30 +2,28 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useEditFinance from '../../hooks/ManageFinance/EditFinanceHooks';
+import InputField from '../../../../utils/InputField';
+import ReusableButton from '../../../../utils/ReusableButton';
+
 
 const EditFinance = ({ userInfo, handleLogout }) => {
-   const {
-    dataItems,
-        eb_charge, setEbCharge,
+    const {
+        eb_charge,
         margin, setMargin,
         processing_fee, setProcessingFee,
         parking_fee, setParkingFee,
         convenience_fee, setConvienceFee,
         service_fee, setServiceFee,
         station_fee, setStationFee,
-        status, setStatus,
-        errorMessage, setErrorMessage,
-        initialValues,
+        status,
+        errorMessage,
         isModified,
-        validateEBCharge,
-        validateGST,
-        validateOtherCharges,
         handleEBChargeChange,
         handleGSTChange,
         handleOtherChargesChange,
         handleStatusChange,
-        updateFinanceDetails,goBack,gst, setGst
-   }=useEditFinance(userInfo)
+        updateFinanceDetails, goBack, gst, loading
+    } = useEditFinance(userInfo)
 
     return (
         <div className='container-scroller'>
@@ -75,9 +73,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="eb_charge"
                                                                                 value={eb_charge}
                                                                                 onChange={handleEBChargeChange}
@@ -95,9 +92,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="margin"
                                                                                 value={margin || 0}
                                                                                 onChange={handleOtherChargesChange(setMargin)}
@@ -115,9 +111,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">%</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="gst"
                                                                                 value={gst}
                                                                                 onChange={handleGSTChange}
@@ -135,9 +130,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="processing_fee"
                                                                                 value={processing_fee}
                                                                                 onChange={handleOtherChargesChange(setProcessingFee)}
@@ -155,9 +149,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="parking_fee"
                                                                                 value={parking_fee}
                                                                                 onChange={handleOtherChargesChange(setParkingFee)}
@@ -175,9 +168,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="convenience_fee"
                                                                                 value={convenience_fee}
                                                                                 onChange={handleOtherChargesChange(setConvienceFee)}
@@ -195,9 +187,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="service_fee"
                                                                                 value={service_fee}
                                                                                 onChange={handleOtherChargesChange(setServiceFee)}
@@ -215,9 +206,8 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                             <div className="input-group-prepend">
                                                                                 <span className="input-group-text">₹</span>
                                                                             </div>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="form-control"
+                                                                            <InputField
+
                                                                                 name="station_fee"
                                                                                 value={station_fee}
                                                                                 onChange={handleOtherChargesChange(setStationFee)}
@@ -226,7 +216,7 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>                                                            
+                                                            </div>
                                                             <div className="col-md-6">
                                                                 <div className="form-group row">
                                                                     <label className="col-sm-12 col-form-label labelInput">Status</label>
@@ -240,9 +230,11 @@ const EditFinance = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
-                                                        <div style={{ textAlign: 'center', padding:'15px'}}>
-                                                            <button type="submit" className="btn btn-primary mr-2" disabled={!isModified}>Update</button>
-                                                        </div>
+
+                                                        <ReusableButton type="submit"
+                                                            disabled={!isModified}
+                                                            loading={loading}>Update
+                                                        </ReusableButton>
                                                     </form>
                                                 </div>
                                             </div>

@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import usecreateUser from '../../hooks/ManageUser/CreateusersHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 
 const CreateUsers = ({ userInfo, handleLogout }) => {
@@ -171,12 +171,12 @@ const CreateUsers = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             loading={isLoading}
                                                             disabled={isLoading}
                                                             type="submit">
                                                             Create
-                                                        </LoadingButton>
+                                                        </ReusableButton>
 
                                                     </form>
                                                 </div>

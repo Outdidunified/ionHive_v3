@@ -19,6 +19,7 @@ const useManageUsers = (userInfo) => {
     // Get user data
     const fetchUsers = useCallback(async () => {
         try {
+            setLoading(true)
             const response = await axiosInstance.post('/associationadmin/FetchUsers', {
                 association_id: userInfo.association_id,
             });
@@ -34,7 +35,8 @@ const useManageUsers = (userInfo) => {
         } catch (error) {
             console.error('Error fetching data:', error);
             setError('Error fetching data. Please try again.');
-            setLoading(false);
+        }finally{
+            setLoading(false)
         }
     }, [userInfo.association_id]);
 
@@ -76,6 +78,6 @@ const useManageUsers = (userInfo) => {
         error, setError,
         filteredData,
         posts, setPosts,handleSearchInputChange,
-        fetchUsers,handleViewUser
+        fetchUsers,handleViewUser,
     }}
     export default useManageUsers;

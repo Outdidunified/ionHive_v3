@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useUpdateClientForm from '../../hooks/ManageClient/UpdateClientsHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const UpdateClient = ({ userInfo, handleLogout }) => {
     const {
@@ -176,12 +176,12 @@ const UpdateClient = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             loading={loading}
                                                             disabled={!isModified || loading}
                                                         >Update
-                                                        </LoadingButton>
+                                                        </ReusableButton>
                                                     </form>
                                                 </div>
                                             </div>

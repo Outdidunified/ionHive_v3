@@ -2,18 +2,15 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useAssignfinance from '../../hooks/ManageAssociation/AssignFinanceHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 
 const Assignfinance = ({ userInfo, handleLogout }) => {
     const {
-        fetchFinanceId,
         handleFinanceChange,
         handleSubmit, goBack, chargerId,
         financeOptions, selectedFinanceId,
-        isEdited, setFinanceOptions,
-        fetchFinanceIdCalled, setChargerId,
-        setIsEdited
+        isEdited
 
     } = useAssignfinance(userInfo);
     return (
@@ -91,10 +88,10 @@ const Assignfinance = ({ userInfo, handleLogout }) => {
                                                         </div>
 
 
-                                                        <LoadingButton
+                                                        <ReusableButton
                                                             type="submit"
                                                             loading={loading}
-                                                            disabled={isEdited}>Assign</LoadingButton>
+                                                            disabled={isEdited}>Assign</ReusableButton>
                                                     </form>
                                                 </div>
                                             </div>

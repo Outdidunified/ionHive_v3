@@ -2,7 +2,7 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useAddManageReseller from '../../hooks/ManageReseller/AddManageResellerHooks';
-import LoadingButton from '../../../../utils/LoadingButton';
+import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const AddManageReseller = ({ userInfo, handleLogout }) => {
   const {
@@ -127,13 +127,13 @@ const AddManageReseller = ({ userInfo, handleLogout }) => {
                             {errorMessage && <div className="text-danger">{errorMessage}</div>}
                             <br />
 
-                            <LoadingButton
+                            <ReusableButton
                               type="submit"
                               loading={loading}
                               disabled={loading}
                             >
                               Add
-                            </LoadingButton>
+                            </ReusableButton>
 
                           </form>
                         </div>

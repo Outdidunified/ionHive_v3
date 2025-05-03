@@ -31,13 +31,16 @@ const AssociationAdminApp = () => {
 
   // Handle login
   const handleLogin = (data) => {
-    const { token, user } = data;
+    const user = data.user;
+    const token = user.token; 
+  
     setUserInfo(user);
     setLoggedIn(true);
     sessionStorage.setItem('associationAdminUser', JSON.stringify(user));
-    sessionStorage.setItem('associationAdminToken',token)
+    sessionStorage.setItem('associationAdminToken', token);
     navigate('/associationadmin/Dashboard');
   };
+  
 
   // Handle logout
   const handleLogout = () => {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
+import { showSuccessAlert, showErrorAlert } from '../../../../utils/alert';
+
 import axiosInstance from '../../../../utils/utils';
 
 const useAssignTagID = (userInfo) => {
@@ -12,8 +13,7 @@ const useAssignTagID = (userInfo) => {
     const [error, setError] = useState(null);
     const [filteredData] = useState([]);
     const [posts, setPosts] = useState([]);
-    const fetchUserRoleCalled = useRef(false); // Ref to track if fetchProfile has been called
-
+    const fetchUserRoleCalled = useRef(false);
     const [newUser, setNewUser] = useState({
         user_id: '', tag_id: '', _id: '',
     });
@@ -128,34 +128,28 @@ const useAssignTagID = (userInfo) => {
         navigate(-1);
     };
 
-    const handleAssignTagID = async (dataItem) => {
-        try {
-            const response = await axiosInstance.post('/associationadmin/AssignTagIdToUser', {
-                user_id: newUser.user_id, tag_id: dataItem.tag_id, modified_by: userInfo.email_id })
-            
-            if (response.status==200) {
-                Swal.fire({
-                    title: "Assign TagID successfully",
-                    icon: "success"
-                });
-                fetchTagID();
-                backManageUserPage();
-            } else {
-                const responseData = response.data
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to Assign TagID, " + responseData.message,
-                    icon: "error"
-                });
-            }
-        } catch (error) {
-            Swal.fire({
-                title: "Error",
-                text: "An error occurred while assigning TagID",
-                icon: "error"
-            });
+
+const handleAssignTagID = async (dataItem) => {
+    try {
+        const response = await axiosInstance.post('/associationadmin/AssignTagIdToUser', {
+            user_id: newUser.user_id, 
+            tag_id: dataItem.tag_id, 
+            modified_by: userInfo.email_id
+        });
+
+        if (response.status === 200) {
+            showSuccessAlert("Assign TagID successfully", "TagID assigned to user successfully");
+            fetchTagID();
+            backManageUserPage();
+        } else {
+            const responseData = response.data;
+            showErrorAlert("Error", "Failed to assign TagID, " + responseData.message);
         }
-    };
+    } catch (error) {
+        showErrorAlert("Error", "An error occurred while assigning TagID");
+    }
+};
+
     
 
     // Back manageuser page

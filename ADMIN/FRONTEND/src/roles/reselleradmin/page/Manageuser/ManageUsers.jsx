@@ -6,19 +6,19 @@ import useManageUsers from '../../hooks/ManageUser/ManageUsersHooks';
 import InputField from '../../../../utils/InputField';
 
 const ManageUsers = ({ userInfo, handleLogout }) => {
-   const {
-        searchQuery, 
+    const {
+        searchQuery,
         navigateToCreateUser,
         navigateToViewSession,
         handleSearch,
-        filteredUsers,isLoading
-   }=useManageUsers(userInfo);
+        filteredUsers, isLoading
+    } = useManageUsers(userInfo);
 
     return (
         <div className='container-scroller'>
             {/* Header */}
             <Header userInfo={userInfo} handleLogout={handleLogout} />
-            <div className="container-fluid page-body-wrapper" style={{paddingTop:'40px'}}>
+            <div className="container-fluid page-body-wrapper" style={{ paddingTop: '40px' }}>
                 {/* Sidebar */}
                 <Sidebar />
                 <div className="main-panel">
@@ -54,7 +54,7 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                                                     <i className="icon-search"></i>
                                                                 </span>
                                                             </div>
-                                                            <InputField  placeholder="Search now" value={searchQuery} onChange={handleSearch} />
+                                                            <InputField placeholder="Search now" value={searchQuery} onChange={handleSearch} />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -63,7 +63,7 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                         <div className="table-responsive" style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                             <table className="table table-striped">
                                                 <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                                    <tr> 
+                                                    <tr>
                                                         <th>Sl.No</th>
                                                         <th>Role Name</th>
                                                         <th>User Name</th>
@@ -73,38 +73,38 @@ const ManageUsers = ({ userInfo, handleLogout }) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody style={{ textAlign: 'center' }}>
-    {isLoading ? (
-        <tr>
-            <td colSpan="6">
-                Loading...
-            </td>
-        </tr>
-    ) : filteredUsers.length > 0 ? (
-        filteredUsers.map((user, index) => (
-            <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{user.role_name || '-'}</td>
-                <td>{user.username || '-'}</td>
-                <td>{user.email_id || '-'}</td>
-                <td>{user.status === true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</td>
-                <td>
-                    <button
-                        type="button"
-                        className="btn btn-outline-success btn-icon-text"
-                        onClick={() => navigateToViewSession(user)}
-                        style={{ marginBottom: '10px', marginRight: '10px' }}
-                    >
-                        <i className="mdi mdi-eye btn-icon-prepend"></i>View
-                    </button>
-                </td>
-            </tr>
-        ))
-    ) : (
-        <tr>
-            <td colSpan="6">No Record Found</td>
-        </tr>
-    )}
-</tbody>
+                                                    {isLoading ? (
+                                                        <tr>
+                                                            <td colSpan="6">
+                                                                Loading...
+                                                            </td>
+                                                        </tr>
+                                                    ) : filteredUsers.length > 0 ? (
+                                                        filteredUsers.map((user, index) => (
+                                                            <tr key={index}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{user.role_name || '-'}</td>
+                                                                <td>{user.username || '-'}</td>
+                                                                <td>{user.email_id || '-'}</td>
+                                                                <td>{user.status === true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</td>
+                                                                <td>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-success btn-icon-text"
+                                                                        onClick={() => navigateToViewSession(user)}
+                                                                        style={{ marginBottom: '10px', marginRight: '10px' }}
+                                                                    >
+                                                                        <i className="mdi mdi-eye btn-icon-prepend"></i>View
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="6">No Record Found</td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
 
                                             </table>
                                         </div>

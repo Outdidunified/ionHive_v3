@@ -16,10 +16,10 @@ import Edituser from '../../roles/clientadmin/page/Manageuser/Edituser';
 import Createuser from '../../roles/clientadmin/page/Manageuser/Createuser';
 
 // managefinance
-import Managefinance from '../../roles/clientadmin/page/ManageFinance/Managefinance';
-import ViewFinance from '../../roles/clientadmin/page/ManageFinance/ViewFinance';
-import EditFinance from '../../roles/clientadmin/page/ManageFinance/EditFinance'
-import CreateFinance from '../../roles/clientadmin/page/ManageFinance/CreateFinance'
+// import Managefinance from '../../roles/clientadmin/page/ManageFinance/Managefinance';
+// import ViewFinance from '../../roles/clientadmin/page/ManageFinance/ViewFinance';
+// import EditFinance from '../../roles/clientadmin/page/ManageFinance/EditFinance'
+// import CreateFinance from '../../roles/clientadmin/page/ManageFinance/CreateFinance'
 
 // manageassociation
 import ManageAssociation from '../../roles/clientadmin/page/ManageAssociation/ManageAssociation';
@@ -157,7 +157,7 @@ const ClientAdminApp = () => {
         {/*  */}
 
         {/* Manage Finance */}
-        <Route
+        {/* <Route
           path="/Managefinance"
           element={loggedIn ? (
             <Managefinance userInfo={userInfo} handleLogout={handleLogout} />
@@ -188,7 +188,7 @@ const ClientAdminApp = () => {
           ) : (
             <Navigate to="/clientadmin" />
           )}
-        />
+        /> */}
         
         {/*  */}
 

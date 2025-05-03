@@ -7,9 +7,7 @@ const revenueData = ({ userInfo, handleLogout }) => {
 
 
     const {
-        firstTableData,
         totalRevenue,
-        secondTableData,
         filteredFirstTableData,
         filteredSecondTableData,
         firstTableSearchQuery,

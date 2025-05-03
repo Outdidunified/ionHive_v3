@@ -67,12 +67,12 @@ const AssignCharger = ({ userInfo, handleLogout }) => {
                                                                 </span>
                                                             </div>
                                                             <InputField
-    placeholder="Search now"
-    ariaLabel="search"
-    ariadescribedby="search"
-    autoComplete="off"
-    onChange={handleSearchInputChange}
-/>
+                                                                placeholder="Search now"
+                                                                ariaLabel="search"
+                                                                ariadescribedby="search"
+                                                                autoComplete="off"
+                                                                onChange={handleSearchInputChange}
+                                                            />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -81,7 +81,7 @@ const AssignCharger = ({ userInfo, handleLogout }) => {
                                         <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                                             <table className="table table-striped">
                                                 <thead style={{ textAlign: 'center', position: 'sticky', tableLayout: 'fixed', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                                                    <tr> 
+                                                    <tr>
                                                         <th>Sl.No</th>
                                                         <th>Charger ID</th>
                                                         <th>Status</th>
@@ -89,38 +89,38 @@ const AssignCharger = ({ userInfo, handleLogout }) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody style={{ textAlign: 'center' }}>
-    {isLoading ? (
-        <tr>
-            <td colSpan="4" className="p-4">
-                Loading...
-            </td>
-        </tr>
-    ) : filteredData.length > 0 ? (
-        filteredData.map((post, index) => (
-            <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{post.chargerID ? post.chargerID : '-'}</td>
-                <td>{post.status === true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</td>
-                <td>
-                    <button
-                        type="button"
-                        className="btn btn-outline-success btn-icon-text"
-                        onClick={() => handleSessionHistory(dataItem, post.sessiondata)}
-                        style={{ marginBottom: '10px', marginRight: '10px' }}
-                    >
-                        <i className="mdi mdi-eye"></i> Session History
-                    </button>
-                </td>
-            </tr>
-        ))
-    ) : (
-        <tr>
-            <td colSpan="4" style={{ marginTop: '50px', textAlign: 'center' }}>
-                No assigned chargers found
-            </td>
-        </tr>
-    )}
-</tbody>
+                                                    {isLoading ? (
+                                                        <tr>
+                                                            <td colSpan="4" className="p-4">
+                                                                Loading...
+                                                            </td>
+                                                        </tr>
+                                                    ) : filteredData.length > 0 ? (
+                                                        filteredData.map((post, index) => (
+                                                            <tr key={index}>
+                                                                <td>{index + 1}</td>
+                                                                <td>{post.chargerID ? post.chargerID : '-'}</td>
+                                                                <td>{post.status === true ? <span className="text-success">Active</span> : <span className="text-danger">DeActive</span>}</td>
+                                                                <td>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-outline-success btn-icon-text"
+                                                                        onClick={() => handleSessionHistory(dataItem, post.sessiondata)}
+                                                                        style={{ marginBottom: '10px', marginRight: '10px' }}
+                                                                    >
+                                                                        <i className="mdi mdi-eye"></i> Session History
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="4" style={{ marginTop: '50px', textAlign: 'center' }}>
+                                                                No assigned chargers found
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
 
                                             </table>
                                         </div>
