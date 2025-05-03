@@ -5,7 +5,6 @@ import useViewFinance from '../../hooks/ManageFinance/ViewFinanceHooks';
 const ViewFinance = ({ userInfo, handleLogout }) => {
    const {
     newfinance,
-    setNewFinance,
     formatTimestamp,goBack,handleEdit
    }=useViewFinance(userInfo)
 

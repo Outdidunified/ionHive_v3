@@ -1,23 +1,21 @@
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
-
 import useDeviceReport from '../../hooks/ManageReport/DeviceReportHooks';
 import InputField from '../../../../utils/InputField';
 
 const DeviceReport = ({ userInfo, handleLogout }) => {
   const {
-    deviceData, setDeviceData,
-    loadingDevice, setLoadingDevice,
-    errorDevice, setErrorDevice,
-    fetchDataCalled,
+    deviceData, 
+    loadingDevice,
+    errorDevice,
     fromDate, setFromDate,
     toDate, setToDate,
     selectDevice,setDevice,
-    loading,setLoading,
-    tableData,setTableData,
-    deviceId,setDeviceId,
-    error,setError,
+    loading,
+    tableData,
+    deviceId,
+    error,
   handleSearch,
   handlePrint,
   handleExport,today

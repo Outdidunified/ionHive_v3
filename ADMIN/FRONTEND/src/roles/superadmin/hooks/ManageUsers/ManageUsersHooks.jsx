@@ -6,10 +6,6 @@ import axiosInstance from '../../../../utils/utils';
 const ManageUser = ( userInfo ) => {
     const navigate = useNavigate();
     
-    // View user list
- 
-
-    // Add Chargers start 
     const [showAddForm, setShowAddForm] = useState(false);
 
     const addChargers = () => {

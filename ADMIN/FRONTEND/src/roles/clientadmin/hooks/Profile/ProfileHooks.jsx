@@ -4,6 +4,7 @@ import {
     showSuccessAlert,
     showErrorAlert,
   } from '../../../../utils/alert';
+  
 const useProfile = (userInfo) => {
     const [data, setPosts] = useState({});
     const [username, setUserUname] = useState('');

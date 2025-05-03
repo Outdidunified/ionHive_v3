@@ -1,4 +1,3 @@
-// src/hooks/superadmin/useViewManageReseller.js
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 

@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../../utils/utils';
 
-
 const useUnallocateddevice = (userInfo) => {
     const navigate = useNavigate();
     const [unallocatedChargers, setUnallocatedChargers] = useState([]);

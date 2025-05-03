@@ -4,7 +4,6 @@ import Footer from '../../components/Footer';
 import Swal from 'sweetalert2';
 import useEditManageDevice from '../../hooks/ManageDevice/EditManageDeviceHooks';
 import InputField from '../../../../utils/InputField';
-import { Links } from 'react-router-dom';
 import ReusableButton from '../../../../utils/ReusableButton';
 
 const EditManageDevice = ({ userInfo, handleLogout }) => {

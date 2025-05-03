@@ -2,13 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Swal from 'sweetalert2';
 import axiosInstance from '../../../../utils/utils';
 const useOcppConfig = ({ userInfo, handleLogout }) => {
-    // const navigate = useNavigate();
-
-    // View Ocpp Config Log
-    // const handleOcppConfigLog = () => {
-    //     navigate('/superadmin/OcppConfigLog');
-    // };
-
     const [chargerId, setChargerId] = useState('');
     const [commandsLibrary, setCommandsLibrary] = useState([]);
     const [selectedCommand, setSelectedCommand] = useState("ChangeAvailability");

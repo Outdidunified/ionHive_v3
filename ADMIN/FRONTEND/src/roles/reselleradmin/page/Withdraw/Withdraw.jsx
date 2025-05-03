@@ -1,7 +1,7 @@
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
-import useWithdraw from '../../hooks/Withdraw/WithdrawHooks'
+import useWithdrawal from '../../hooks/Withdraw/WithdrawHooks';
 import InputField from '../../../../utils/InputField';
 const Withdraw = ({ userInfo, handleLogout }) => {
     const {
@@ -15,7 +15,7 @@ const Withdraw = ({ userInfo, handleLogout }) => {
         handleSubmit, handleWithdraw,
         fetchData,
 
-    } = useWithdraw(userInfo)
+    } = useWithdrawal(userInfo)
 
     return (
         <div className="container-scroller">
@@ -184,13 +184,6 @@ const Withdraw = ({ userInfo, handleLogout }) => {
                                                 <i className="fa fa-sync"></i> Reload Data
                                             </button>
                                         </div>
-
-
-
-
-
-
-
 
                                         <h4 className="card-title responsive-title" style={{ paddingTop: '20px', paddingLeft: '20px' }}>
                                             Withdrawal Details

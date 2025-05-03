@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../../../../utils/utils';
 const useResellerData = (userInfo) => {

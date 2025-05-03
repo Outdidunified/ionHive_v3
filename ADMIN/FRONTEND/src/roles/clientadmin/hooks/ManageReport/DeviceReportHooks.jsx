@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import axiosInstance from '../../../../utils/utils';
 import { showErrorAlert,showWarningAlert } from '../../../../utils/alert';
+
 const useDeviceReport = (userInfo) => {  
     const [deviceData, setDeviceData] = useState([]);
     const [loadingDevice, setLoadingDevice] = useState(true);
@@ -15,8 +16,6 @@ const useDeviceReport = (userInfo) => {
     const [error, setError] = useState(null);
     const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
  
-
-    
     // Get manage charger data
     useEffect(() => {
         if (!fetchDataCalled.current) {

@@ -21,8 +21,7 @@ const useEditAllocatedDevice = (userInfo) => {
         navigate('/superadmin/Allocateddevice');
     };
 
-    
-    
+
     const handleModel = (e) => {
         setModel(e.target.value);
     };

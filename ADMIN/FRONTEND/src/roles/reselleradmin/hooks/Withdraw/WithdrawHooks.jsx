@@ -6,13 +6,11 @@ import {
     showErrorAlert,showWarningAlert
   } from "../../../../utils/alert"; 
 
-const useWithdraw = (userInfo) => {
+const useWithdrawal = (userInfo) => {
     const [commissionAmount, setCommissionAmount] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [withdrawalRequests, setWithdrawalRequests] = useState([]);
-     // eslint-disable-next-line
     const [resellerData, setResellerData] = useState(null);
-    // eslint-disable-next-line
     const [userData, setUserData] = useState(null);
 
     const fetchCommissionAmountCalled = useRef(false); 
@@ -21,8 +19,6 @@ const useWithdraw = (userInfo) => {
     const fetchData = async () => {
         if (isFetching.current) return;
         isFetching.current = true;
-
-
         try {
             setIsLoading(true);
             const response = await axiosInstance.post('/reselleradmin/FetchPaymentRequest', {
@@ -373,4 +369,4 @@ const useWithdraw = (userInfo) => {
 
     }
 }
-export default useWithdraw;
+export default useWithdrawal;

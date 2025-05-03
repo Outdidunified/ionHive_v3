@@ -16,8 +16,6 @@ const useAssignedDevicesClient = ( userInfo) => {
     const [isUpdating, setIsUpdating] = useState(false);
 
     
-
-
     // Fetch charger details
     const fetchChargerDetails = useCallback(async () => {
         setIsLoading(true); // Start loading

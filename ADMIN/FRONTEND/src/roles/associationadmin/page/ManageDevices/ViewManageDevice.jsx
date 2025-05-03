@@ -1,13 +1,11 @@
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
-
 import useViewManageDevice from '../../hooks/ManageDevice/ViewManageDeviceHooks';
 
 const ViewManageDevice = ({ userInfo, handleLogout }) => {
       const {
         deviceData,
-        setDeviceData,
         handleBack,
         handleEditManageDevice,
         formatTimestamp

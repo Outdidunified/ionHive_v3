@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axiosInstance from '../../../../utils/utils';
-import { showConfirmationAlert,showErrorAlert,showSuccessAlert } from '../../../../utils/alert';
+import { showErrorAlert,showSuccessAlert } from '../../../../utils/alert';
 
 const useAllocatedChargers = (userInfo) => {
     const [allocatedChargers, setAllocatedChargers] = useState([]);

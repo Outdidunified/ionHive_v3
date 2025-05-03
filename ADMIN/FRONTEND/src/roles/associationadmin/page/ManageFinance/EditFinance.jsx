@@ -5,7 +5,6 @@ import useEditFinance from '../../hooks/ManageFinance/EditFinanceHooks';
 import InputField from '../../../../utils/InputField';
 import ReusableButton from '../../../../utils/ReusableButton';
 
-
 const EditFinance = ({ userInfo, handleLogout }) => {
     const {
         eb_charge,

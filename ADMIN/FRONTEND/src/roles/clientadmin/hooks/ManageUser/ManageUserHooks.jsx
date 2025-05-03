@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../../utils/utils';
-// import Swal from 'sweetalert2';
 
 const useManageUsers = (userInfo) => {
     const navigate = useNavigate();

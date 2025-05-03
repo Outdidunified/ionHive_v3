@@ -7,7 +7,6 @@ import ReusableButton from '../../../../utils/ReusableButton';
 
 const ManageDevice = ({ userInfo, handleLogout }) => {    
   const {
-    data,
     loading,
     error,
     posts, 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Swal from 'sweetalert2';
+import { showSuccessAlert, showErrorAlert } from '../../../../utils/alert';
 import axiosInstance from '../../../../utils/utils';
 const useWithdrawRequests = (userInfo) => {
     const [withdrawalRequests, setWithdrawalRequests] = useState([]);
@@ -39,54 +40,56 @@ const useWithdrawRequests = (userInfo) => {
         fetchWithdrawalRequests();
     }, [userInfo]);
 
-    const handleStatusChange = async (withdrawalId, newStatus, rejectionReason) => {
-            if (!userInfo?.email_id) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Admin email not found.' });
-                return;
-            }
-        
-            const withdrawalData = withdrawalRequests.find(request => request.withdrawal._id === withdrawalId);
-            if (!withdrawalData) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Withdrawal request not found.' });
-                return;
-            }
-        
-            const userId = withdrawalData.withdrawal.user_id;
-            console.log("Withdrawal ID:", withdrawalId); 
-            console.log("User ID:", userId); 
-        
-            if (!userId) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'User ID not found.' });
-                return;
-            }
-        
-            const reason = newStatus === 'Rejected' ? rejectionReason : ''; 
-            try {
-                const response = await axiosInstance.post('/superadmin/UpdatePaymentRequestStatus', {
-                    user_id: userId,
-                    _id: withdrawalId, 
-                    withdrawal_approved_status: newStatus,
-                    withdrawal_approved_by: userInfo.email_id,
-                    withdrawal_rejected_message: reason, 
-                });
-        
-                if (response.status === 200) {
-                    setSelectedStatus(prevState => ({ ...prevState, [withdrawalId]: newStatus }));
-                    setWithdrawalRequests(prevState => prevState.map(item => {
-                        if (item.withdrawal._id === withdrawalId) {
-                            item.withdrawal.withdrawal_approved_status = newStatus;
-                        }
-                        return item;
-                    }));
-        
-                    Swal.fire({ icon: 'success', title: 'Status Updated', text: response.data.message });
+  
+
+const handleStatusChange = async (withdrawalId, newStatus, rejectionReason, userInfo, withdrawalRequests, setWithdrawalRequests, setSelectedStatus) => {
+    if (!userInfo?.email_id) {
+        showErrorAlert('Error', 'Admin email not found.');
+        return;
+    }
+
+    const withdrawalData = withdrawalRequests.find(request => request.withdrawal._id === withdrawalId);
+    if (!withdrawalData) {
+        showErrorAlert('Error', 'Withdrawal request not found.');
+        return;
+    }
+
+    const userId = withdrawalData.withdrawal.user_id;
+    console.log("Withdrawal ID:", withdrawalId); 
+    console.log("User ID:", userId); 
+
+    if (!userId) {
+        showErrorAlert('Error', 'User ID not found.');
+        return;
+    }
+
+    const reason = newStatus === 'Rejected' ? rejectionReason : ''; 
+    try {
+        const response = await axiosInstance.post('/superadmin/UpdatePaymentRequestStatus', {
+            user_id: userId,
+            _id: withdrawalId, 
+            withdrawal_approved_status: newStatus,
+            withdrawal_approved_by: userInfo.email_id,
+            withdrawal_rejected_message: reason, 
+        });
+
+        if (response.status === 200) {
+            setSelectedStatus(prevState => ({ ...prevState, [withdrawalId]: newStatus }));
+            setWithdrawalRequests(prevState => prevState.map(item => {
+                if (item.withdrawal._id === withdrawalId) {
+                    item.withdrawal.withdrawal_approved_status = newStatus;
                 }
-            } catch (error) {
-                const errorMessage = error?.response?.data?.message || 'Failed to update the status. Please try again.';
-                Swal.fire({ icon: 'error', title: 'Error', text: errorMessage });
-            }
-            
-        };
+                return item;
+            }));
+
+            showSuccessAlert('Status Updated', response.data.message);
+        }
+    } catch (error) {
+        const errorMessage = error?.response?.data?.message || 'Failed to update the status. Please try again.';
+        showErrorAlert('Error', errorMessage);
+    }
+};
+
 
         const handleViewDetails = async (withdrawal) => {
             setRejectionReason(''); // Reset rejection reason

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import Swal from 'sweetalert2';
+import { showSuccessAlert, showErrorAlert } from '../../../../utils/alert'; // Make sure the path is correct
 import axiosInstance from '../../../../utils/utils';
 
 const useProfile = (userInfo) => {
@@ -84,6 +84,7 @@ const useProfile = (userInfo) => {
     }, [errorMessage, errorMessages]);
 
     // update reseller profile
+
     const addResellerProfileUpdate = async (e) => {
         e.preventDefault();
         setErrorMessages("");
@@ -111,29 +112,19 @@ const useProfile = (userInfo) => {
             });
     
             if (response.status === 200) {
-                Swal.fire({
-                    title: "Reseller profile updated successfully",
-                    icon: "success",
-                });
+                showSuccessAlert("Reseller profile updated successfully");
                 fetchResellerUserDetails();
             } else {
                 const responseData = await response.json();
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to update reseller profile, " + responseData.message,
-                    icon: "error",
-                });
+                showErrorAlert("Error", "Failed to update reseller profile, " + responseData.message);
             }
         } catch (error) {
-            Swal.fire({
-                title: "Error",
-                text: "An error occurred while updating the reseller profile",
-                icon: "error",
-            });
+            showErrorAlert("Error", "An error occurred while updating the reseller profile");
         } finally {
             setIsResellerSubmitting(false); // Hide spinner
         }
     };
+    
     
 
     // User profile update
@@ -147,6 +138,7 @@ const useProfile = (userInfo) => {
     }, [data]);
 
     // update user profile
+
     const addUserProfileUpdate = async (e) => {
         e.preventDefault();
         setErrorMessage("");
@@ -189,24 +181,13 @@ const useProfile = (userInfo) => {
             });
     
             if (response.status === 200) {
-                Swal.fire({
-                    title: "User profile updated successfully",
-                    icon: "success",
-                });
+                showSuccessAlert("User profile updated successfully");
                 fetchResellerUserDetails();
             } else {
-                Swal.fire({
-                    title: "Error",
-                    text: "Failed to update user profile",
-                    icon: "error",
-                });
+                showErrorAlert("Error", "Failed to update user profile");
             }
         } catch (error) {
-            Swal.fire({
-                title: "Error",
-                text: "An error occurred while updating the user profile",
-                icon: "error",
-            });
+            showErrorAlert("Error", "An error occurred while updating the user profile");
         } finally {
             setIsSubmitting(false); // Stop spinner
         }

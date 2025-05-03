@@ -1,4 +1,3 @@
-// src/hooks/superadmin/useViewAllocated.js
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 

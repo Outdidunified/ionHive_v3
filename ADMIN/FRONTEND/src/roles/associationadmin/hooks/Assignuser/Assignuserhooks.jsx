@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import Swal from 'sweetalert2';
+import { showSuccessAlert, showErrorAlert } from '../../../../utils/alert'; // Make sure the path is correct
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../../../utils/utils';
 
@@ -38,30 +38,23 @@ const useAssignuser = (userInfo) => {
   }, [fetchUsersToUnassign]);
 
   // Function to handle selecting and removing a user
-  const handleSelectRemove = async (userId) => {
+
+const handleSelectRemove = async (userId) => {
     try {
-      await axiosInstance.post('/associationadmin/RemoveUserFromAssociation', {
-        association_id: userInfo.association_id,
-        user_id: parseInt(userId),
-        modified_by: userInfo.email_id
-      });
-      Swal.fire({
-        title: 'Success!',
-        text: 'User has been removed from the association.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-      });
-      fetchUsersToUnassign(); // Refresh the list after removal
+        await axiosInstance.post('/associationadmin/RemoveUserFromAssociation', {
+            association_id: userInfo.association_id,
+            user_id: parseInt(userId),
+            modified_by: userInfo.email_id
+        });
+
+        showSuccessAlert('Success!', 'User has been removed from the association.');
+        fetchUsersToUnassign(); // Refresh the list after removal
     } catch (error) {
-      console.error(error);
-      Swal.fire({
-        title: 'Error!',
-        text: 'There was a problem removing the user.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
+        console.error(error);
+        showErrorAlert('Error!', 'There was a problem removing the user.');
     }
-  };
+};
+
 
   // Search assign users name
   const handleSearchInputChange = (e) => {
@@ -84,58 +77,39 @@ const useAssignuser = (userInfo) => {
     }
   };
 
+
   const handleAssuserSubmits = async (e) => {
-    e.preventDefault();
-
-
-    try {
-      const response = await axiosInstance.post('/associationadmin/AssUserToAssociation', {
-        association_id: userInfo.association_id,
-        email_id,
-        // phone_no: parseInt(phone_no),
-        modified_by: userInfo.email_id
-      });
-      fetchUsersToUnassign();
-      // Check if the response status is 200 (OK) 
-      if (response.status === 200) {
-        Swal.fire({
-          title: 'Success!',
-          text: 'Users have been added to the association.',
-          icon: 'success',
-          confirmButtonText: 'OK'
-        });
-        setAssEmail('');
-        // setAssPhone('');
-      } else {
-        Swal.fire({
-          title: 'Error!',
-          text: 'Unexpected response: ' + response.status,
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-      }
+      e.preventDefault();
   
-    } catch (error) {
-        if (error.response) {
-          // Handle 400, 404 or any server response
-          Swal.fire({
-            title: 'Error!',
-            text: error.response.data.message || 'Something went wrong.',
-            icon: 'error',
-            confirmButtonText: 'OK'
+      try {
+          const response = await axiosInstance.post('/associationadmin/AssUserToAssociation', {
+              association_id: userInfo.association_id,
+              email_id,
+              modified_by: userInfo.email_id
           });
-        } else {
-          // Network error or other unknown error
-          Swal.fire({
-            title: 'Error!',
-            text: 'There was a problem assigning the users: ' + error.message,
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-        }
+  
+          fetchUsersToUnassign();
+  
+          // Check if the response status is 200 (OK)
+          if (response.status === 200) {
+              showSuccessAlert('Success!', 'Users have been added to the association.');
+              setAssEmail('');
+              // setAssPhone('');
+          } else {
+              showErrorAlert('Error!', 'Unexpected response: ' + response.status);
+          }
+  
+      } catch (error) {
+          if (error.response) {
+              // Handle 400, 404 or any server response
+              showErrorAlert('Error!', error.response.data.message || 'Something went wrong.');
+          } else {
+              // Network error or other unknown error
+              showErrorAlert('Error!', 'There was a problem assigning the users: ' + error.message);
+          }
       }
-      
-  };  
+  };
+    
 
   // View user list
   const handleViewAssignTagID = (dataItem) => {
