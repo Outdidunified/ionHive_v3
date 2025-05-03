@@ -71,9 +71,14 @@ const authenticate = async (req, res) => {
 
 // 2.Dashboard
 // Function to fetch chargers assigned to a specific association
-async function FetchTotalCharger(association_id, res) {
+const FetchTotalCharger = async (req, res) => {
     try {
-        console.log("Connecting to the database...");
+        const { association_id } = req.body;
+
+        if (!association_id) {
+            return res.status(400).json({ status: 'Failed', message: 'association_id is required' });
+        }
+
         const db = await database.connectToDatabase();
 
         if (!db) {
@@ -87,67 +92,107 @@ async function FetchTotalCharger(association_id, res) {
             assigned_association_id: association_id
         }).toArray();
 
-        console.log("Fetched chargers:", recentChargers);
-
-        const totalCount = recentChargers.length; // Get total count of matched chargers
+        const totalCount = recentChargers.length;
 
         if (totalCount === 0) {
             return res.status(200).json({ status: 'Success', totalCount, message: 'No chargers found' });
         }
 
         return res.status(200).json({ status: 'Success', totalCount, data: recentChargers });
+
     } catch (error) {
-        console.error(`Error fetching charger details: ${error}`);
+        console.error('Error in FetchTotalCharger:', error);
         return res.status(500).json({ status: 'Failed', message: 'Failed to fetch charger details' });
     }
-}
+};
 
 // fetch FetchOnlineCharger
-async function FetchOnlineCharger(association_id, res) {
+// Controller function
+async function FetchOnlineCharger(req, res) {
     try {
+        const association_id = req.body.association_id;
+
+        if (!association_id) {
+            return res.status(400).json({ status: 'Failed', message: 'association_id is required' });
+        }
+
         const db = await database.connectToDatabase();
 
         const chargerCollection = db.collection("charger_details");
         const statusCollection = db.collection("charger_status");
 
-        // Get charger IDs assigned to the given association_id
-        const assignedChargers = await chargerCollection.find({ assigned_association_id: association_id }).toArray();
+        // Step 1: Get chargers assigned to the association
+        const assignedChargers = await chargerCollection.find({
+            assigned_association_id: association_id
+        }).toArray();
 
         if (!assignedChargers.length) {
-            return res.status(200).json({ status: 'Success', totalCount: 0, onlineChargers: [], message: "No chargers assigned to this association" });
+            return res.status(200).json({
+                status: 'Success',
+                totalCount: 0,
+                onlineChargers: [],
+                message: "No chargers assigned to this association"
+            });
         }
 
-        // Extract charger IDs
+        // Step 2: Extract charger IDs
         const chargerIds = assignedChargers.map(charger => charger.charger_id);
         console.log("Charger IDs assigned to association:", chargerIds);
 
-        // Get the current time in UTC and calculate one hour ago
+        // Step 3: Time filter - last 1 hour
         const currentTime = new Date();
-        const oneHourAgo = new Date(currentTime.getTime() - (1 * 60 * 60 * 1000));
+        const oneHourAgo = new Date(currentTime.getTime() - 60 * 60 * 1000);
 
-        // Fetch online chargers from charger_status table
+        // Step 4: Fetch status where chargers are online
         const onlineChargers = await statusCollection.find({
             charger_id: { $in: chargerIds },
-            timestamp: { $gte: oneHourAgo }, // Last modified within 1 hour
+            timestamp: { $gte: oneHourAgo },
             error_code: "NoError"
         }).toArray();
 
         const totalCount = onlineChargers.length;
 
         if (totalCount === 0) {
-            return res.status(200).json({ status: 'Success', totalCount, onlineChargers: [], message: "No online chargers found in the last hour" });
+            return res.status(200).json({
+                status: 'Success',
+                totalCount,
+                onlineChargers: [],
+                message: "No online chargers found in the last hour"
+            });
         }
 
-        return res.status(200).json({ status: 'Success', totalCount, data: onlineChargers });
+        // Step 5: Sanitize response to remove circular/BSON issues
+        const sanitizedOnline = onlineChargers.map(({ charger_id, timestamp, error_code, status }) => ({
+            charger_id,
+            timestamp,
+            error_code,
+            status
+        }));
+
+        return res.status(200).json({
+            status: 'Success',
+            totalCount,
+            data: sanitizedOnline
+        });
     } catch (error) {
-        console.error(`Error fetching online charger details: ${error}`);
-        return res.status(500).json({ status: 'Failed', message: 'Failed to fetch online charger details' });
+        console.error(`Error fetching online charger details:`, error);
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Failed to fetch online charger details',
+            error: error.message
+        });
     }
 }
 
 // fetch FetchOfflineCharger
-async function FetchOfflineCharger(association_id, res) {
+async function FetchOfflineCharger(req, res) {
     try {
+        const association_id = req.body.association_id;
+
+        if (!association_id) {
+            return res.status(400).json({ status: 'Failed', message: 'association_id is required' });
+        }
+
         const db = await database.connectToDatabase();
 
         const chargerCollection = db.collection("charger_details");
@@ -188,8 +233,14 @@ async function FetchOfflineCharger(association_id, res) {
 }
 
 // Fetch Faulty Chargers Function
-async function FetchFaultsCharger(association_id, res) {
+async function FetchFaultsCharger(req, res) {
     try {
+        const association_id = req.body.association_id;
+
+        if (!association_id) {
+            return res.status(400).json({ status: 'Failed', message: 'association_id is required' });
+        }
+
         const db = await database.connectToDatabase();
 
         const chargerCollection = db.collection("charger_details");
@@ -232,8 +283,14 @@ async function FetchFaultsCharger(association_id, res) {
 }
 
 // Fetch Charger Total Energy Function
-async function FetchChargerTotalEnergy(association_id, res) {
+async function FetchChargerTotalEnergy(req, res) {
     try {
+        const association_id = req.body.association_id;
+
+        if (!association_id) {
+            return res.status(400).json({ status: 'Failed', message: 'association_id is required' });
+        }
+
         const db = await database.connectToDatabase();
         const chargerCollection = db.collection("charger_details");
         const sessionCollection = db.collection("device_session_details");
@@ -1625,7 +1682,7 @@ async function fetchFinance(req, res) {
 
 // Function to Update Finance Entry (Validate _id & association_id)
 async function updateFinance(req, res) {
-    const {
+    let {
         _id, finance_id, eb_charge, margin, gst, parking_fee, convenience_fee,
         station_fee, processing_fee, service_fee, association_id, status, modified_by
     } = req.body;
@@ -1633,19 +1690,22 @@ async function updateFinance(req, res) {
     try {
         // Validate required fields
         if (!_id || !finance_id || !eb_charge || !gst || !association_id || !modified_by) {
-            return res.status(400).json({ status: 'Failed', message: '_id, finance_id, eb_charge, gst, modified_by, and association_id are required' });
+            return res.status(400).json({
+                status: 'Failed',
+                message: '_id, finance_id, eb_charge, gst, modified_by, and association_id are required'
+            });
         }
-
-        const db = await database.connectToDatabase();
-        const financeCollection = db.collection('financeDetails');
 
         // Validate _id format
         if (!ObjectId.isValid(_id)) {
             return res.status(400).json({ status: 'Failed', message: 'Invalid _id format' });
         }
 
-        // Ensure finance_id is an integer
-        finance_id = parseInt(finance_id);
+        const db = await database.connectToDatabase();
+        const financeCollection = db.collection('financeDetails');
+
+        const parsedFinanceId = parseInt(finance_id);
+        const parsedAssociationId = parseInt(association_id);
 
         // Check if _id exists and matches the given finance_id
         const existingFinance = await financeCollection.findOne({ _id: new ObjectId(_id) });
@@ -1654,22 +1714,22 @@ async function updateFinance(req, res) {
             return res.status(404).json({ status: 'Failed', message: 'No record found for the given _id' });
         }
 
-        if (parseInt(existingFinance.finance_id) !== finance_id) {
+        if (parseInt(existingFinance.finance_id) !== parsedFinanceId) {
             return res.status(400).json({ status: 'Failed', message: 'finance_id does not match the record associated with _id' });
         }
 
-        // Convert fields to correct types, using `??` to handle undefined values
+        // Convert fields to correct types
         const updatedData = {
             eb_charge: (eb_charge ?? "").toString(),
             margin: (margin ?? "").toString(),
             gst: (gst ?? "").toString(),
             parking_fee: (parking_fee ?? "").toString(),
-            convenience_fee: (convenience_fee ?? "").toString(), // Ensure it's handled
+            convenience_fee: (convenience_fee ?? "").toString(),
             station_fee: (station_fee ?? "").toString(),
             processing_fee: (processing_fee ?? "").toString(),
             service_fee: (service_fee ?? "").toString(),
-            association_id: parseInt(association_id),
-            status: status === "true" || status === true, // Convert to Boolean
+            association_id: parsedAssociationId,
+            status: status === "true" || status === true,
             modified_by,
             modified_date: new Date().toISOString()
         };
@@ -2284,7 +2344,7 @@ async function FetchChargerListWithAllCostWithRevenue(req, res) {
     try {
         const { association_id } = req.body;
 
-        // Validate the request parameters
+        // Validate request input
         if (!association_id) {
             return res.status(400).json({ status: 'Failed', message: 'association_id is required' });
         }
@@ -2297,23 +2357,21 @@ async function FetchChargerListWithAllCostWithRevenue(req, res) {
         const chargerCollection = db.collection("charger_details");
         const sessionCollection = db.collection("device_session_details");
 
-        // Convert association_id to Integer (to match MongoDB data type)
         const associationId = parseInt(association_id);
 
-        // Fetch chargers assigned to this association
+        // Fetch chargers
         const chargers = await chargerCollection.find({ assigned_association_id: associationId }).toArray();
-        console.log("Chargers found:", chargers);
 
         if (!chargers.length) {
             return res.status(200).json({
                 status: "Success",
-                message: "No chargers found for this client",
+                message: "No chargers found for this association",
                 revenueData: [],
             });
         }
 
+        // Generate revenue data per charger
         const revenueData = await Promise.all(chargers.map(async (charger) => {
-            // Fetch session revenue details for each charger
             const sessions = await sessionCollection.find({
                 charger_id: charger.charger_id,
                 start_time: { $ne: null },
@@ -2343,8 +2401,11 @@ async function FetchChargerListWithAllCostWithRevenue(req, res) {
         });
 
     } catch (error) {
-        console.error(`Error fetching charger list with cost and revenue: ${error.message}`);
-        return res.status(500).json({ status: 'Failed', message: 'Error fetching charger list with cost and revenue' });
+        console.error('Error in FetchChargerListWithAllCostWithRevenue:', error);
+        return res.status(500).json({
+            status: 'Failed',
+            message: 'Error fetching charger list with cost and revenue'
+        });
     }
 }
 

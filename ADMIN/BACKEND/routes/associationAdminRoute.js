@@ -130,27 +130,7 @@ router.post('/DeviceReport', verifyToken, Controller.DeviceReport);
 router.post('/FetchSpecificChargerRevenue', verifyToken, Controller.FetchSpecificChargerRevenue);
 
 // Route to fetch charger list with all cost with revenue
-router.post('/FetchChargerListWithAllCostWithRevenue', verifyToken, async (req, res) => {
-    try {
-        const { association_id } = req.body;
-
-        if (!association_id) {
-            return res.status(400).json({ status: 'Failed', message: 'association_id is required' });
-        }
-
-        // Fetch both revenueData 
-        const { revenueData } = await Controller.FetchChargerListWithAllCostWithRevenue(association_id);
-
-        res.status(200).json({
-            status: "Success",
-            revenueData,
-        });
-
-    } catch (error) {
-        console.error('Error in FetchChargerListWithAllCostWithRevenue route:', error);
-        res.status(500).json({ status: 'Failed', message: 'Failed to fetch charger list with all cost with revenue ' });
-    }
-});
+router.post('/FetchChargerListWithAllCostWithRevenue', verifyToken, Controller.FetchChargerListWithAllCostWithRevenue);
 
 // 10.Profile
 // Route to FetchUserProfile 

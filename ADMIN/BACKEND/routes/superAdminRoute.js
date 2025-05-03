@@ -3,6 +3,7 @@ const router = express.Router();
 const Controller = require('../controllers/superAdminControllers');
 const verifyToken = require('../middlewares/authMiddleware');
 const flatted = require('flatted');
+const { ObjectId } = require('mongodb');
 
 // 1.Login
 // Route to check login credentials
@@ -76,13 +77,13 @@ router.post('/UpdateReseller', verifyToken, Controller.UpdateReseller);
 
 // 5.Manage User
 // Route to fetch users
-router.post('/FetchUsers', verifyToken, Controller.FetchUsers);
+router.get('/FetchUsers', verifyToken, Controller.FetchUsers); 
 
-// Route to FetchSpecificUserRoleForSelection // Route to FetchSpecificUserRoleForSelection
-router.post('/FetchSpecificUserRoleForSelection', verifyToken, Controller.FetchSpecificUserRoleForSelection);
+// Route to FetchSpecificUserRoleForSelection
+router.get('/FetchSpecificUserRoleForSelection', verifyToken, Controller.FetchSpecificUserRoleForSelection); 
 
 // Route to FetchResellerForSelection
-router.post('/FetchResellerForSelection', verifyToken, Controller.FetchResellerForSelection);
+router.get('/FetchResellerForSelection', verifyToken, Controller.FetchResellerForSelection);
 
 // Route to CreateUser
 router.post('/CreateUser', verifyToken, Controller.CreateUser);
@@ -91,7 +92,7 @@ router.post('/CreateUser', verifyToken, Controller.CreateUser);
 router.post('/UpdateUser', verifyToken, Controller.UpdateUser);
 
 // 6.Manage User Role
-router.post('/FetchUserRoles', verifyToken, Controller.FetchUserRoles);
+router.get('/FetchUserRoles', verifyToken, Controller.FetchUserRoles);
 
 // Route to CreateUserRole
 router.post('/CreateUserRole', verifyToken, Controller.CreateUserRole);
@@ -120,26 +121,26 @@ router.post('/DeActivateOutputType', verifyToken, Controller.DeActivateOutputTyp
 
 // 8.Withdrawal
 // Route to fetch payment request details
-router.post('/FetchPaymentRequest', verifyToken, Controller.FetchPaymentRequest);
+router.get('/FetchPaymentRequest', verifyToken, Controller.FetchPaymentRequest);
 
 // Route to update payment request status
 router.post('/UpdatePaymentRequestStatus', verifyToken, Controller.UpdatePaymentRequestStatus);
 
 // Route to fetch payment notification
-router.post('/FetchPaymentNotification', verifyToken, Controller.FetchPaymentNotification);
+router.get('/FetchPaymentNotification', verifyToken, Controller.FetchPaymentNotification); 
 
 // Route to mark notification read
 router.post('/MarkNotificationRead', verifyToken, Controller.MarkNotificationRead);
 
 // 9.Manage Device & Revenue Report
 // Route to fetch specific charger revenue list
-router.post('/FetchSpecificChargerRevenue', verifyToken, Controller.FetchSpecificChargerRevenue);
+router.get('/FetchSpecificChargerRevenue', verifyToken, Controller.FetchSpecificChargerRevenue);
 
 // Route to fetch charger list with all cost with revenue
-router.post('/FetchChargerListWithAllCostWithRevenue', verifyToken, Controller.FetchChargerListWithAllCostWithRevenue);
+router.get('/FetchChargerListWithAllCostWithRevenue', verifyToken, Controller.FetchChargerListWithAllCostWithRevenue);
 
 // Route to FetchCharger 
-router.post('/FetchReportDevice', verifyToken, Controller.FetchReportDevice);
+router.get('/FetchReportDevice', verifyToken, Controller.FetchReportDevice);
 
 // Route to revenue report
 router.post('/DeviceReport', verifyToken, Controller.DeviceReport);

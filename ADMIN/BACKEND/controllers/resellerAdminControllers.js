@@ -1563,12 +1563,12 @@ async function saveUserBankDetails(req) {
 }
 
 // fetchUserBankDetails
-async function fetchUserBankDetails(req) {
+async function fetchUserBankDetails(req, res) {
     try {
         const { user_id } = req.body;
 
         if (!user_id) {
-            return { error: true, status: 400, message: 'User ID is required' };
+            return res.status(400).json({ error: true, message: 'User ID is required' });
         }
 
         const db = await database.connectToDatabase();
@@ -1578,21 +1578,21 @@ async function fetchUserBankDetails(req) {
         const user = await Users.findOne({ user_id });
 
         if (!user) {
-            return { error: true, status: 404, message: 'No user found' };
+            return res.status(404).json({ error: true, message: 'No user found' });
         }
 
         const bankDetails = await BankDetails.findOne({ user_id: user.user_id });
 
         if (!bankDetails) {
-            return { error: true, status: 404, message: 'No bank details found for this user' };
+            return res.status(404).json({ error: true, message: 'No bank details found for this user' });
         }
 
-        return { error: false, status: 200, data: bankDetails };
+        return res.status(200).json({ error: false, data: bankDetails });
 
     } catch (error) {
         console.error('Controller error:', error);
         logger.error(error);
-        return { error: true, status: 500, message: 'Internal Server Error' };
+        return res.status(500).json({ error: true, message: 'Internal Server Error' });
     }
 }
 

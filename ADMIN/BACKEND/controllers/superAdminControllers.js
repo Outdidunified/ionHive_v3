@@ -1520,50 +1520,48 @@ async function UpdateReseller(req) {
 
 // 5.Manage User Controller
 // Fetch User Details
-async function FetchUsers() {
+async function FetchUsers(req, res) {
     try {
         const db = await database.connectToDatabase();
+
         const usersCollection = db.collection("users");
         const rolesCollection = db.collection("user_roles");
         const resellerCollection = db.collection("reseller_details");
         const clientCollection = db.collection("client_details");
         const associationCollection = db.collection("association_details");
 
-        // Query to fetch all users
+        // Fetch all users
         const users = await usersCollection.find().toArray();
 
-        // Extract all unique role_ids, reseller_ids, client_ids, and association_ids from users
-        const roleIds = [...new Set(users.map(user => user.role_id))];
-        const resellerIds = [...new Set(users.map(user => user.reseller_id))];
-        const clientIds = [...new Set(users.map(user => user.client_id))];
-        const associationIds = [...new Set(users.map(user => user.association_id))];
+        if (!users.length) {
+            return res.status(200).json({
+                error: false,
+                message: 'No users found',
+                data: []
+            });
+        }
 
-        // Fetch roles based on role_ids
-        const roles = await rolesCollection.find({ role_id: { $in: roleIds } }).toArray();
+        // Extract unique IDs
+        const roleIds = [...new Set(users.map(user => user.role_id).filter(Boolean))];
+        const resellerIds = [...new Set(users.map(user => user.reseller_id).filter(Boolean))];
+        const clientIds = [...new Set(users.map(user => user.client_id).filter(Boolean))];
+        const associationIds = [...new Set(users.map(user => user.association_id).filter(Boolean))];
+
+        // Parallel fetching
+        const [roles, resellers, clients, associations] = await Promise.all([
+            rolesCollection.find({ role_id: { $in: roleIds } }).toArray(),
+            resellerCollection.find({ reseller_id: { $in: resellerIds } }).toArray(),
+            clientCollection.find({ client_id: { $in: clientIds } }).toArray(),
+            associationCollection.find({ association_id: { $in: associationIds } }).toArray()
+        ]);
+
+        // Mapping data
         const roleMap = new Map(roles.map(role => [role.role_id, role.role_name]));
+        const resellerMap = new Map(resellers.map(r => [r.reseller_id, r.reseller_name]));
+        const clientMap = new Map(clients.map(c => [c.client_id, c.client_name]));
+        const associationMap = new Map(associations.map(a => [a.association_id, a.association_name]));
 
-        // Fetch resellers based on reseller_ids
-        let resellers, resellerMap;
-        if (resellerIds) {
-            resellers = await resellerCollection.find({ reseller_id: { $in: resellerIds } }).toArray();
-            resellerMap = new Map(resellers.map(reseller => [reseller.reseller_id, reseller.reseller_name]));
-        }
-
-        // Fetch clients based on client_ids
-        let clients, clientMap;
-        if (clientIds) {
-            clients = await clientCollection.find({ client_id: { $in: clientIds } }).toArray();
-            clientMap = new Map(clients.map(client => [client.client_id, client.client_name]));
-        }
-
-        // Fetch associations based on association_ids
-        let associations, associationMap;
-        if (associationIds) {
-            associations = await associationCollection.find({ association_id: { $in: associationIds } }).toArray();
-            associationMap = new Map(associations.map(association => [association.association_id, association.association_name]));
-        }
-
-        // Attach additional details to each user
+        // Enrich users
         const usersWithDetails = users.map(user => ({
             ...user,
             role_name: roleMap.get(user.role_id) || 'Unknown',
@@ -1572,57 +1570,51 @@ async function FetchUsers() {
             association_name: associationMap.get(user.association_id) || null
         }));
 
-        // Return the users with all details
-        return {
+        return res.status(200).json({
             error: false,
-            status: 200,
             message: 'Users fetched successfully',
             data: usersWithDetails
-        };
+        });
 
     } catch (error) {
         logger.error(`Error fetching users: ${error}`);
-        return {
+        return res.status(500).json({
             error: true,
-            status: 500,
             message: 'Failed to fetch users'
-        };
+        });
     }
 }
 
 // Fetch Specific User Role For Selection
-async function FetchSpecificUserRoleForSelection() {
+async function FetchSpecificUserRoleForSelection(req, res) {
     try {
         const db = await database.connectToDatabase();
         const usersCollection = db.collection("user_roles");
 
-        // Query to fetch all reseller_id and reseller_name
+        // Fetch roles with role_id 1 or 2 and status = true
         const roles = await usersCollection.find(
-            { role_id: { $in: [1, 2] }, status: true }, // Filter to fetch role_id 1 and 2
+            { role_id: { $in: [1, 2] }, status: true },
             {
                 projection: {
                     role_id: 1,
                     role_name: 1,
-                    _id: 0 // Exclude _id from the result
+                    _id: 0
                 }
             }
         ).toArray();
 
-        // Return the roles data with a success status
-        return {
+        return res.status(200).json({
             error: false,
-            status: 200,
             message: 'Roles fetched successfully',
             data: roles
-        };
+        });
 
     } catch (error) {
         logger.error(`Error fetching roles: ${error}`);
-        return {
+        return res.status(500).json({
             error: true,
-            status: 500,
             message: 'Failed to fetch roles'
-        };
+        });
     }
 }
 
@@ -2194,10 +2186,14 @@ const DeActivateOutputType = async (req, res) => {
 };
 
 // 8.Withdrawal Controller
-// Function to fetch payment request details
+// Controller Function
 async function FetchPaymentRequest(req, res) {
     try {
         const db = await database.connectToDatabase();
+        if (!db) {
+            return res.status(500).json({ status: 'Failed', message: 'Database connection failed' });
+        }
+
         const usersCollection = db.collection("users");
         const withdrawalCollection = db.collection("withdrawal_details");
         const roleCollection = db.collection("user_roles");
@@ -2236,7 +2232,22 @@ async function FetchPaymentRequest(req, res) {
 }
 
 // Function to update payment request status
-async function UpdatePaymentRequestStatus(_id, user_id, withdrawal_approved_status, withdrawal_approved_by, withdrawal_rejected_message = null) {
+const UpdatePaymentRequestStatus = async (req, res) => {
+    const {
+        _id,
+        user_id,
+        withdrawal_approved_status,
+        withdrawal_approved_by,
+        withdrawal_rejected_message = null
+    } = req.body;
+
+    if (!_id || !user_id || !withdrawal_approved_status || !withdrawal_approved_by) {
+        return res.status(400).json({
+            status: 'Failed',
+            message: 'Missing required fields: _id, user_id, withdrawal_approved_status, or withdrawal_approved_by'
+        });
+    }
+
     try {
         const db = await database.connectToDatabase();
         const withdrawalCollection = db.collection("withdrawal_details");
@@ -2248,7 +2259,7 @@ async function UpdatePaymentRequestStatus(_id, user_id, withdrawal_approved_stat
         const withdrawalDetails = await withdrawalCollection.findOne({ _id: objectId });
 
         if (!withdrawalDetails) {
-            return { status: 'Failed', message: 'Withdrawal request not found' };
+            return res.status(404).json({ status: 'Failed', message: 'Withdrawal request not found' });
         }
 
         const identifierMapping = [
@@ -2257,26 +2268,25 @@ async function UpdatePaymentRequestStatus(_id, user_id, withdrawal_approved_stat
             { key: 'association_id', collection: associationCollection, walletField: 'association_wallet' }
         ];
 
-        let entityType = identifierMapping.find(type => withdrawalDetails[type.key]);
+        const entityType = identifierMapping.find(type => withdrawalDetails[type.key]);
         if (!entityType) {
-            return { status: 'Failed', message: 'No valid entity found' };
+            return res.status(400).json({ status: 'Failed', message: 'No valid entity found' });
         }
 
-        let entityId = withdrawalDetails[entityType.key];
-        let entityCollection = entityType.collection;
-        let walletField = entityType.walletField;
+        const entityId = withdrawalDetails[entityType.key];
+        const entityCollection = entityType.collection;
+        const walletField = entityType.walletField;
 
         const entityDetails = await entityCollection.findOne({ [entityType.key]: entityId });
-
         if (!entityDetails) {
-            return { status: 'Failed', message: `${entityType.key} not found in respective collection` };
+            return res.status(404).json({ status: 'Failed', message: `${entityType.key} not found in respective collection` });
         }
 
         if (withdrawal_approved_status.toLowerCase() === "completed") {
             const updatedWalletAmount = entityDetails[walletField] - withdrawalDetails.totalWithdrawalAmount;
 
             if (updatedWalletAmount < 0) {
-                return { status: 'Failed', message: 'Insufficient balance in wallet' };
+                return res.status(400).json({ status: 'Failed', message: 'Insufficient balance in wallet' });
             }
 
             const walletUpdateResult = await entityCollection.updateOne(
@@ -2284,26 +2294,21 @@ async function UpdatePaymentRequestStatus(_id, user_id, withdrawal_approved_stat
                 { $set: { [walletField]: updatedWalletAmount } }
             );
 
-            if (walletUpdateResult.modifiedCount > 0) {
-                console.log(`Wallet updated: ${entityType.key} ${entityId} | New Wallet Balance: ${updatedWalletAmount}`);
-            } else {
-                return { status: 'Failed', message: 'Failed to update wallet balance' };
+            if (walletUpdateResult.modifiedCount === 0) {
+                return res.status(500).json({ status: 'Failed', message: 'Failed to update wallet balance' });
             }
         }
 
         const withdrawal_approved_date = new Date();
-        let updateFields = {
+        const updateFields = {
             withdrawal_approved_status,
             withdrawal_approved_by,
             withdrawal_approved_date,
-            rca_admin_notification_status: "unread"
+            rca_admin_notification_status: "unread",
+            withdrawal_rejected_message: withdrawal_approved_status.toLowerCase() === "rejected"
+                ? withdrawal_rejected_message || "No reason provided"
+                : null
         };
-
-        if (withdrawal_approved_status.toLowerCase() === "rejected") {
-            updateFields.withdrawal_rejected_message = withdrawal_rejected_message || "No reason provided";
-        } else {
-            updateFields.withdrawal_rejected_message = null;
-        }
 
         const updateResult = await withdrawalCollection.updateOne(
             { _id: objectId },
@@ -2311,19 +2316,22 @@ async function UpdatePaymentRequestStatus(_id, user_id, withdrawal_approved_stat
         );
 
         if (updateResult.modifiedCount > 0) {
-            return { status: 'Success', message: 'Payment request status updated successfully' };
+            return res.status(200).json({ status: 'Success', message: 'Payment request status updated successfully' });
         } else {
-            return { status: 'Failed', message: 'No changes made or update failed' };
+            return res.status(400).json({ status: 'Failed', message: 'No changes made or update failed' });
         }
 
     } catch (error) {
-        console.error('Error in updatePaymentRequestStatus function:', error);
-        return { status: 'Failed', message: `Internal server error: ${error.message}` };
+        console.error('Error in UpdatePaymentRequestStatus:', error);
+        return res.status(500).json({
+            status: 'Failed',
+            message: `Internal server error: ${error.message}`
+        });
     }
-}
+};
 
 // Function to fetch payment request details with unread notification count
-async function FetchPaymentNotification() {
+async function FetchPaymentNotification(req, res) {
     try {
         const db = await database.connectToDatabase();
         const withdrawalCollection = db.collection("withdrawal_details");
@@ -2333,21 +2341,20 @@ async function FetchPaymentNotification() {
         const withdrawalDetails = await withdrawalCollection.find({}).toArray();
 
         if (!withdrawalDetails.length) {
-            return { status: 'Failed', message: 'No withdrawal requests found' };
+            return res.status(200).json({ status: 'Failed', message: 'No withdrawal requests found' });
         }
 
         // Count unread notifications
         const unreadNotifications = withdrawalDetails.filter(w => w.superadmin_notification_status === "unread").length;
 
-        // Fetch related user details for each withdrawal request
+        // Map over withdrawalDetails and fetch user info for unread notifications
         const results = await Promise.all(withdrawalDetails.map(async (withdrawal) => {
             const user = await usersCollection.findOne({ user_id: withdrawal.user_id });
 
-            // If withdrawal has unread notification, include user details
             let withdrawal_notification = null;
             if (withdrawal.superadmin_notification_status === "unread" && user) {
                 withdrawal_notification = {
-                    _id: withdrawal._id, // Include _id in the notification details
+                    _id: withdrawal._id,
                     user_id: withdrawal.user_id,
                     withdrawal_approved_status: withdrawal.withdrawal_approved_status || "Unknown",
                     username: user.username || "Unknown",
@@ -2362,10 +2369,11 @@ async function FetchPaymentNotification() {
             };
         }));
 
-        return { status: 'Success', data: results }; // Return success with data
+        return res.status(200).json({ status: 'Success', data: results });
+
     } catch (error) {
         console.error('Error fetching payment notification:', error);
-        throw new Error('Error fetching payment notification');
+        return res.status(500).json({ status: 'Error', message: 'Error fetching payment notification' });
     }
 }
 
