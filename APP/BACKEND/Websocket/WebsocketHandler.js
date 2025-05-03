@@ -54,6 +54,7 @@ const handleWebSocketConnection = (
         }
 
         // Set up the new connection
+        previousResults.set(uniqueIdentifier, null);
         wsConnections.set(uniqueIdentifier, ws);
         ClientConnections.add(ws);
         clients.set(ws, uniqueIdentifier);
