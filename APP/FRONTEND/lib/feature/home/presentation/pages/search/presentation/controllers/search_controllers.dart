@@ -3,7 +3,6 @@ import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/Chargingpage/presentation/pages/Chargingpage.dart';
 import 'package:ionhive/feature/home/presentation/pages/qrscanner/domain/repository/qrrepository.dart';
 import 'package:ionhive/feature/home/presentation/pages/qrscanner/domain/model/qrmodel.dart';
-import 'package:ionhive/feature/landing_page.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -176,13 +175,10 @@ class SearchpageController extends GetxController {
                   icon: Icon(Icons.close,
                       color: isDarkTheme ? Colors.white70 : Colors.black38),
                   onPressed: () {
-                    Get.off(
-                      () =>
-                          LandingPage(), // Replace with your actual HomePage widget
-                      transition:
-                          Transition.rightToLeft, // Right to left transition
-                      duration: const Duration(
-                          milliseconds: 300), // Optional: custom duration
+                    // Navigate to the existing LandingPage instance using named route
+                    Get.offNamed(
+                      '/landing',
+                      arguments: {'pageIndex': 0}, // Pass the desired tab index
                     );
                   },
                 ),

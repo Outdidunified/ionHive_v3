@@ -14,6 +14,7 @@ import 'package:ionhive/utils/theme/theme_controller.dart'; // Theme controller
 import 'package:ionhive/core/controllers/connectivity_controller.dart'; // Add the ConnectivityController
 import 'package:flutter/services.dart';
 import 'package:ionhive/feature/home/presentation/pages/qrscanner/presentation/pages/qr_scannerpage.dart';
+import 'package:ionhive/utils/widgets/snackbar/safe_snackbar.dart';
 import 'feature/more/presentation/pages/manage/presentation/pages/vehicle/presentation/controllers/vehicle_controller.dart'; // Add this import for controlling orientation
 
 void main() async {
@@ -39,13 +40,13 @@ void main() async {
   await themeController.loadThemePreferences(); // Wait for theme to be loaded
 
   // Initialize other controllers
-  Get.put(LandingPageController());
+  Get.put(LandingPageController(),
+      permanent: true); // Make it permanent to avoid recreation
   Get.put(HomeController());
   Get.put(SessionController()); // Ensure it is available globally
   Get.put(ConnectivityController());
   Get.put(VehicleController());
   Get.put(SearchpageController());
-
 
   runApp(const IonHive());
 }
@@ -54,13 +55,13 @@ void main() async {
 class SnackbarCloseObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    Get.closeAllSnackbars();
+    SafeSnackbar.closeAll();
     super.didPush(route, previousRoute);
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    Get.closeAllSnackbars();
+    SafeSnackbar.closeAll();
     super.didPop(route, previousRoute);
   }
 }
@@ -99,7 +100,6 @@ class IonHive extends StatelessWidget {
                 name: '/noInternet',
                 page: () => NoInternetScreen()), // Add route
             GetPage(name: '/qr-scanner', page: () => const QrScannerpage()),
-
           ],
         ));
   }

@@ -13,7 +13,6 @@ import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../controllers/navigation_helper.dart';
-import 'package:ionhive/feature/home/presentation/pages/qrscanner/presentation/pages/qr_scannerpage.dart';
 
 class HomeController extends GetxController with WidgetsBindingObserver {
   final markers = <Marker>{}.obs;
@@ -745,7 +744,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<void> launchGoogleMapsNavigation(LatLng destination) async {
-    print("lat long : $destination");
+    debugPrint("lat long : $destination");
     final uri = Uri.parse(
       'https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}&travelmode=driving',
     );

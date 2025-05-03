@@ -31,10 +31,7 @@ class MoreePage extends StatelessWidget {
   }
 
   void handleLogout() {
-    if (!Get.isRegistered<LandingPageController>()) {
-      Get.put(LandingPageController());
-    }
-
+    // The controller is already registered in main.dart as permanent
     final landingPageController = Get.find<LandingPageController>();
     landingPageController.clearPageIndex();
     Get.find<SessionController>().clearSession();

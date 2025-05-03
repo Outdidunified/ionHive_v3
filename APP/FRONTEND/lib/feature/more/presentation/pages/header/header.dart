@@ -6,6 +6,7 @@ import 'package:ionhive/utils/widgets/button/custom_button.dart';
 import 'package:ionhive/utils/widgets/input_field/phonenumber_inputfield.dart';
 import 'package:ionhive/utils/widgets/input_field/username_inputfield.dart';
 import 'package:ionhive/utils/responsive/responsive.dart';
+import 'package:ionhive/utils/widgets/snackbar/safe_snackbar.dart';
 
 class HeaderCard extends StatelessWidget {
   final ThemeData theme;
@@ -24,7 +25,13 @@ class HeaderCard extends StatelessWidget {
   });
 
   final sessionController = Get.find<SessionController>();
-  final controller = Get.put(HeaderController());
+  // Use lazyPut to ensure the controller is only created once
+  HeaderController get controller {
+    if (!Get.isRegistered<HeaderController>()) {
+      Get.put(HeaderController());
+    }
+    return Get.find<HeaderController>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +41,15 @@ class HeaderCard extends StatelessWidget {
 
     // Fetch data when the widget is built (only once)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchHeaderData();
+      // Delay the fetch to ensure everything is properly initialized
+      Future.delayed(const Duration(milliseconds: 500), () {
+        // Use try-catch instead of mounted check
+        try {
+          controller.fetchHeaderData();
+        } catch (e) {
+          debugPrint("Error fetching header data: $e");
+        }
+      });
     });
 
     // Calculate responsive dimensions

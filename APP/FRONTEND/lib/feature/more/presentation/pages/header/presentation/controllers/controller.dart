@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/header/domain/repositories/header_repository.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
+import 'package:ionhive/utils/widgets/snackbar/safe_snackbar.dart';
 
 class HeaderController extends GetxController {
   final HeaderRepository _headerRepository = HeaderRepository();
@@ -182,14 +183,14 @@ class HeaderController extends GetxController {
     final emailId = sessionController.emailId.value;
 
     if (emailId.isEmpty || authToken.isEmpty || userId == 0) {
-      CustomSnackbar.showError(message: "User details are incomplete");
+      SafeSnackbar.showError(message: "User details are incomplete");
       return;
     }
 
     isLoading.value = true;
 
-    // Close any existing snackbars before starting new requests
-    Get.closeAllSnackbars();
+    // Safely close any existing snackbars before starting new requests
+    SafeSnackbar.closeAll();
 
     // Track errors for each API call
     List<String> errors = [];
@@ -234,6 +235,6 @@ class HeaderController extends GetxController {
     usernameController.dispose();
     phoneNumberController.dispose();
     super.onClose();
-    Get.closeAllSnackbars(); // Close all active snackbars
+    SafeSnackbar.closeAll(); // Safely close all active snackbars
   }
 }

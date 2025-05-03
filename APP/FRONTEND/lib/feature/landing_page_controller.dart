@@ -3,47 +3,42 @@ import 'package:get/get.dart';
 
 class LandingPageController extends GetxController {
   var pageIndex = 0.obs;
-  PageController? _pageController;
 
-  // Getter that creates a new controller if needed
+  // We'll create a new PageController each time it's needed
+  // This ensures we don't have a controller attached to multiple scroll views
+  PageController? _currentController;
+
+  // Getter for pageController - creates a new one each time to avoid multiple attachments
   PageController get pageController {
-    if (_pageController == null || !_pageController!.hasClients) {
-      _pageController?.dispose(); // Dispose old controller if it exists
-      _pageController = PageController(initialPage: pageIndex.value);
-    }
-    return _pageController!;
+    // Dispose any existing controller to prevent memory leaks
+    _currentController?.dispose();
+    // Create a new controller
+    _currentController = PageController(initialPage: pageIndex.value);
+    return _currentController!;
   }
 
   @override
   void onInit() {
     super.onInit();
-    debugPrint('Initializing PageController');
+    debugPrint('Initializing LandingPageController');
   }
 
   void changePage(int index) {
+    // Just update the index - the PageView will handle the animation
     pageIndex.value = index;
-
-    // Only try to change page if controller has clients
-    if (_pageController != null && _pageController!.hasClients) {
-      _pageController!.jumpToPage(index);
-    }
   }
 
   void clearPageIndex() {
+    // Just reset the index to 0
     pageIndex.value = 0;
-
-    // Only try to change page if controller has clients
-    if (_pageController != null && _pageController!.hasClients) {
-      _pageController!.jumpToPage(0);
-    }
   }
 
   @override
   void onClose() {
-    _pageController?.dispose();
-    _pageController = null;
+    debugPrint('Disposing LandingPageController');
+    // Safely dispose the controller
+    _currentController?.dispose();
+    _currentController = null;
     super.onClose();
   }
-
-
 }
