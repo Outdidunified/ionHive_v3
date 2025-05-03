@@ -114,23 +114,36 @@ const processMeterValues = async (firstMeter, lastMeter, settings, identifier, c
             await autostop_price(firstMeter, lastMeter, settings, identifier, connector, wsConnections);
         }
 
-        // Calculate and broadcast live price
-        const { livePrice, unit_consumed } = await calculateLivePrice(firstMeter, lastMeter, settings, identifier, connector);
+        // Calculate and broadcast live price and vehicle analytics
+        const { livePrice, unit_consumed, vehicleAnalytics } = await calculateLivePrice(firstMeter, lastMeter, settings, identifier, connector, wsConnections);
 
-        // Prepare broadcast message with live price
+        // Prepare broadcast message with live price and vehicle analytics
+        // Generate a unique ID for the broadcast message
+        const broadcastId = `live_price_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const sendLivePrice = [
             2,
-            "oyw5b1rw3deh4rzi",
+            broadcastId,
             "ChargerLivePrice",
             {
                 connectorId: connector,
                 livePrice: livePrice,
                 unit_consumed: unit_consumed,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                vehicleAnalytics: {
+                    batteryPercentage: vehicleAnalytics.batteryPercentage,
+                    rangeAdded: vehicleAnalytics.rangeAdded,
+                    energyConsumed: vehicleAnalytics.energyConsumed,
+                    energyConsumptionRate: vehicleAnalytics.energyConsumptionRate,
+                    usageTimeMinutes: vehicleAnalytics.usageTimeMinutes,
+                    estimatedMileage: vehicleAnalytics.estimatedMileage,
+                    vehicleModel: vehicleAnalytics.vehicleModel,
+                    vehicleType: vehicleAnalytics.vehicleType
+                }
             }
         ];
 
         logger.loggerInfo(`ChargerID ${identifier} - Live price ${livePrice}`);
+        logger.loggerInfo(`ChargerID ${identifier} - Vehicle analytics: ${vehicleAnalytics.vehicleModel} (${vehicleAnalytics.vehicleType}): Battery ${vehicleAnalytics.batteryPercentage}%, Range added ${vehicleAnalytics.rangeAdded}km, Energy consumed ${vehicleAnalytics.energyConsumed}kWh`);
 
         // Add broadcast data to response for WebsocketHandler to handle
         if (ClientWss && ws) {
@@ -278,8 +291,8 @@ const autostop_price = async (firstMeter, lastMeter, settings, identifier, conne
     }
 };
 
-// Helper function to calculate live price and check wallet balance
-const calculateLivePrice = async (firstMeter, lastMeter, settings, identifier, connector) => {
+// Helper function to calculate live price, vehicle analytics, and check wallet balance
+const calculateLivePrice = async (firstMeter, lastMeter, settings, identifier, connector, wsConnections) => {
     try {
         // Calculate units consumed and price
         const unitsConsumed = lastMeter - firstMeter;
@@ -291,40 +304,73 @@ const calculateLivePrice = async (firstMeter, lastMeter, settings, identifier, c
         // Check if wallet balance is sufficient
         if (settings && settings.wallet_balance && livePrice >= parseFloat(settings.wallet_balance)) {
             logger.loggerInfo(`Autostop triggered for ${identifier}, connector ${connector} - Insufficient wallet balance (${settings.wallet_balance})`);
-            await Chargercontrollers.chargerStopCall(identifier, connector);
+            await Chargercontrollers.chargerStopCall(identifier, connector, wsConnections);
         }
 
-        return { livePrice, unit_consumed: unitsConsumed };
+        // Get user email for this charging session
+        const userEmail = await dbService.getUserEmail(identifier, connector);
+
+        // Get vehicle data for the user
+        const vehicleData = await dbService.getUserVehicleData(userEmail);
+
+        // Calculate vehicle analytics
+        const energyConsumed = unitsConsumed; // kWh
+
+        // Calculate battery percentage based on energy consumed and battery capacity
+        // For a 2-wheeler with 4.5 kWh battery, each kWh is about 22% of battery
+        const batteryPercentageFromCharge = Math.min(100, Math.round((energyConsumed / vehicleData.batteryCapacity) * 100));
+
+        // Calculate estimated range added based on average consumption
+        // For TVS iQube, typical range is about 100km on full charge (4.5kWh)
+        const rangeAdded = vehicleData.averageConsumption > 0
+            ? Math.round(energyConsumed / vehicleData.averageConsumption)
+            : Math.round(energyConsumed * 22); // Fallback: ~22km per kWh for 2-wheelers
+
+        // Calculate energy consumption rate (kWh/km)
+        const energyConsumptionRate = rangeAdded > 0
+            ? parseFloat((energyConsumed / rangeAdded).toFixed(3))
+            : vehicleData.averageConsumption;
+
+        // Calculate usage time (in minutes) - assuming this is from the start of the session
+        const usageTimeMinutes = Math.round((new Date() - vehicleData.lastChargeTime) / (1000 * 60));
+
+        // Return all calculated values
+        return {
+            livePrice,
+            unit_consumed: unitsConsumed,
+            vehicleAnalytics: {
+                batteryPercentage: batteryPercentageFromCharge,
+                rangeAdded: rangeAdded,
+                energyConsumed: parseFloat(energyConsumed.toFixed(2)),
+                energyConsumptionRate: energyConsumptionRate,
+                usageTimeMinutes: usageTimeMinutes,
+                estimatedMileage: vehicleData.mileage + rangeAdded,
+                vehicleModel: vehicleData.vehicleModel || "TVS iQube",
+                vehicleType: vehicleData.vehicleType || "2-wheeler"
+            }
+        };
     } catch (error) {
-        logger.loggerError(`Error calculating live price: ${error.message}`);
-        return { livePrice: 0, unit_consumed: 0 };
+        logger.loggerError(`Error calculating live price and vehicle analytics: ${error.message}`);
+        return {
+            livePrice: 0,
+            unit_consumed: 0,
+            vehicleAnalytics: {
+                batteryPercentage: 0,
+                rangeAdded: 0,
+                energyConsumed: 0,
+                energyConsumptionRate: 0,
+                usageTimeMinutes: 0,
+                estimatedMileage: 0,
+                vehicleModel: "TVS iQube",
+                vehicleType: "2-wheeler"
+            }
+        };
     }
 };
 
-// This is a duplicate function that was accidentally left in the file
-// Using the extractMeterValue function defined above
-/*const extractMeterValue = (meterValueArray) => {
-    if (!meterValueArray || !Array.isArray(meterValueArray) || meterValueArray.length === 0) {
-        return null;
-    }
-    
-    // Look for Energy.Active.Import.Register which is typically the main meter reading
-    for (const meterValue of meterValueArray) {
-        if (meterValue.sampledValue && Array.isArray(meterValue.sampledValue)) {
-            for (const sample of meterValue.sampledValue) {
-                if (sample.measurand === "Energy.Active.Import.Register" || !sample.measurand) {
-                    return parseFloat(sample.value);
-                }
-            }
-        }
-    }
-    
-    // If no specific measurand found, try to get the first value
-    if (meterValueArray[0].sampledValue && meterValueArray[0].sampledValue[0]) {
-        return parseFloat(meterValueArray[0].sampledValue[0].value);
-    }
-    
-    return null;
-}*/
+// Duplicate function has been removed
 
-module.exports = { handleMeterValues };
+module.exports = {
+    handleMeterValues,
+    getMeterValues
+};

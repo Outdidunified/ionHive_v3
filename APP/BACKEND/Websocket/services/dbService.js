@@ -595,6 +595,95 @@ const getPricePerUnit = async (uniqueIdentifier, connectorId) => {
         return 0;
     }
 };
+/**
+ * Get vehicle data for a user
+ * 
+ * @param {string} userEmail - The user's email
+ * @returns {Promise<object>} - Vehicle data or default values if not found
+ */
+const getUserVehicleData = async (userEmail) => {
+    try {
+        if (!db) {
+            db = await connectToDatabase();
+        }
+
+        const defaultVehicleData = {
+            batteryCapacity: 4.5, // kWh
+            maxRange: 100,        // km
+            averageConsumption: 0.045, // kWh/km
+            mileage: 0,
+            lastChargeTime: new Date(),
+            vehicleModel: "TVS iQube",
+            vehicleType: "2-wheeler"
+        };
+
+        if (!userEmail) {
+            logger.loggerWarn('getUserVehicleData - No user email provided');
+            return defaultVehicleData;
+        }
+
+        const userCollection = db.collection('users');
+        const userData = await userCollection.findOne({ email_id: userEmail });
+
+        if (!userData) {
+            logger.loggerWarn(`getUserVehicleData - User with email ${userEmail} not found`);
+            return defaultVehicleData;
+        }
+
+        // Check for assigned vehicle_id
+        const userVehicleId = userData.vehicles?.[0]?.vehicle_id;
+
+        if (!userVehicleId) {
+            logger.loggerWarn(`getUserVehicleData - No vehicle_id found for user ${userEmail}`);
+            return defaultVehicleData;
+        }
+
+        // Fetch vehicle model based on user's vehicle_id
+        const vehicleModelCollection = db.collection('vehicle_models');
+        const vehicleData = await vehicleModelCollection.findOne({ vehicle_id: userVehicleId });
+
+        if (!vehicleData) {
+            logger.loggerInfo(`getUserVehicleData - No vehicle model found for vehicle_id ${userVehicleId}, using defaults`);
+            return defaultVehicleData;
+        }
+
+        // Parse and calculate
+        const batterySizeKwh = parseFloat(vehicleData.battery_size_kwh) || defaultVehicleData.batteryCapacity;
+        let maxRange = 100;
+        let avgConsumption = 0.045;
+
+        if (vehicleData.type === "2-wheeler") {
+            maxRange = batterySizeKwh * 22;
+            avgConsumption = batterySizeKwh / maxRange;
+        } else if (vehicleData.type.toLowerCase().includes("4-wheeler") || vehicleData.type.toLowerCase().includes("car")) {
+            maxRange = batterySizeKwh * 5;
+            avgConsumption = batterySizeKwh / maxRange;
+        }
+
+        return {
+            batteryCapacity: batterySizeKwh,
+            maxRange: maxRange,
+            averageConsumption: avgConsumption,
+            mileage: 0,
+            lastChargeTime: new Date(),
+            vehicleModel: vehicleData.model || defaultVehicleData.vehicleModel,
+            vehicleType: vehicleData.type || defaultVehicleData.vehicleType
+        };
+
+    } catch (error) {
+        logger.loggerError(`Error getting vehicle data for user ${userEmail}: ${error.message}`);
+        return {
+            batteryCapacity: 4.5,
+            maxRange: 100,
+            averageConsumption: 0.045,
+            mileage: 0,
+            lastChargeTime: new Date(),
+            vehicleModel: "TVS iQube",
+            vehicleType: "2-wheeler"
+        };
+    }
+};
+
 const SaveChargerValue = async (chargerValue) => {
     try {
         if (!db) {
@@ -708,5 +797,6 @@ module.exports = {
     getAutostop,
     getPricePerUnit,
     getConnectorId,
-    updateInUse
+    updateInUse,
+    getUserVehicleData
 };
