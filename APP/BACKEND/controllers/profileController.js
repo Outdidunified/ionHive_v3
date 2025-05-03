@@ -49,8 +49,8 @@ const CompleteProfile = async (req, res) => {
         // Only check for no changes if phone_number is provided
         if (phone_number !== undefined && existingUser.username === username && existingUser.phone_no === phone_number) {
             return res.status(401).json({ error: true, message: 'no changes found' });
-        } else if (phone_number === undefined && existingUser.username === username) {
-            return res.status(401).json({ error: true, message: 'no changes found' });
+        } else if (phone_number === null && existingUser.username === username) {
+            return res.status(401).json({ error: true, message: "Once phone number is entered it cant't be empty " });
         }
 
         // Prepare update object
