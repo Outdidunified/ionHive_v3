@@ -75,7 +75,7 @@ router.post('/DeActivateClient', verifyToken, Controller.DeActivateClient);
 router.post('/FetchUsers', verifyToken, Controller.FetchUsers);
 
 // Route to FetchSpecificUserRoleForSelection 
-router.post('/FetchSpecificUserRoleForSelection', verifyToken, Controller.FetchSpecificUserRoleForSelection);
+router.get('/FetchSpecificUserRoleForSelection', verifyToken, Controller.FetchSpecificUserRoleForSelection);
 
 // Route to FetchClientForSelection 
 router.post('/FetchClientForSelection', verifyToken, Controller.FetchClientForSelection);

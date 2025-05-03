@@ -1337,7 +1337,7 @@ async function CreateUserAutomatic(role_id, reseller_id, username, email_id, pho
 }
 
 // Create Reseller 
-async function CreateReseller(req) {
+const CreateReseller = async (req, res) => {
     try {
         const {
             reseller_name,
@@ -1347,61 +1347,52 @@ async function CreateReseller(req) {
             created_by
         } = req.body;
 
-        // Validate required fields
         if (!reseller_name || !reseller_phone_no || !reseller_email_id || !reseller_address || !created_by) {
-            return {
-                error: true,
-                status: 400,
+            return res.status(400).json({
+                status: 'Failed',
                 message: 'Reseller Name, Phone Number, Email ID, Address, and Created By are required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
         const resellerCollection = db.collection("reseller_details");
         const roleCollection = db.collection("user_roles");
 
-        const role_id = 2; // Assuming 2 is the role ID for Reseller Admin
+        const role_id = 2; // Assuming 2 = Reseller Admin
 
-        // Check if Reseller Role is active
-        const resellerRole = await roleCollection.findOne({ role_id: role_id });
+        const resellerRole = await roleCollection.findOne({ role_id });
 
         if (!resellerRole) {
-            return {
-                error: true,
-                status: 404,
+            return res.status(404).json({
+                status: 'Failed',
                 message: "Reseller role not found in the system."
-            };
+            });
         }
 
-        if (resellerRole.status === false) {
-            return {
-                error: true,
-                status: 403,
+        if (!resellerRole.status) {
+            return res.status(403).json({
+                status: 'Failed',
                 message: "Reseller role is deactivated. Cannot create reseller & user."
-            };
+            });
         }
 
-        // Check if reseller with same name/email exists
         const existingReseller = await resellerCollection.findOne({
             $or: [
-                { reseller_email_id: reseller_email_id },
-                { reseller_name: reseller_name }
+                { reseller_email_id },
+                { reseller_name }
             ]
         });
 
         if (existingReseller) {
-            return {
-                error: true,
-                status: 400,
+            return res.status(400).json({
+                status: 'Failed',
                 message: 'Reseller name or Email ID already exists'
-            };
+            });
         }
 
-        // Get next reseller_id
         const lastReseller = await resellerCollection.find().sort({ reseller_id: -1 }).limit(1).toArray();
         const newResellerId = lastReseller.length > 0 ? lastReseller[0].reseller_id + 1 : 1;
 
-        // Insert new reseller
         const result = await resellerCollection.insertOne({
             reseller_id: newResellerId,
             reseller_name,
@@ -1417,34 +1408,37 @@ async function CreateReseller(req) {
         });
 
         if (result.insertedId) {
-            // Create user automatically
-            await CreateUserAutomatic(role_id, newResellerId, reseller_name, reseller_email_id, reseller_phone_no, created_by);
-            return {
-                error: false,
-                status: 200,
+            await CreateUserAutomatic(
+                role_id,
+                newResellerId,
+                reseller_name,
+                reseller_email_id,
+                reseller_phone_no,
+                created_by
+            );
+            return res.status(200).json({
+                status: 'Success',
                 message: 'Reseller and associated user created successfully'
-            };
+            });
         } else {
-            return {
-                error: true,
-                status: 500,
+            return res.status(500).json({
+                status: 'Failed',
                 message: 'Failed to create reseller'
-            };
+            });
         }
 
     } catch (error) {
         console.error("Error creating reseller:", error);
         logger.error(`Error creating reseller: ${error}`);
-        return {
-            error: true,
-            status: 500,
+        return res.status(500).json({
+            status: 'Failed',
             message: 'Internal Server Error'
-        };
+        });
     }
-}
+};
 
 // Update Reseller 
-async function UpdateReseller(req) {
+const UpdateReseller = async (req, res) => {
     try {
         const {
             reseller_id,
@@ -1456,31 +1450,34 @@ async function UpdateReseller(req) {
         } = req.body;
 
         // Validate required fields
-        if (!reseller_id || !reseller_phone_no || !reseller_address || !reseller_wallet || !modified_by || typeof status !== 'boolean') {
-            return {
-                error: true,
-                status: 400,
+        if (
+            !reseller_id ||
+            !reseller_phone_no ||
+            !reseller_address ||
+            !reseller_wallet ||
+            !modified_by ||
+            typeof status !== 'boolean'
+        ) {
+            return res.status(400).json({
+                status: 'Failed',
                 message: 'Reseller ID, Phone Number, Address, Wallet, Status, and Modified By are required'
-            };
+            });
         }
 
         const db = await database.connectToDatabase();
         const resellerCollection = db.collection("reseller_details");
 
-        // Check if the reseller exists
-        const existingReseller = await resellerCollection.findOne({ reseller_id: reseller_id });
+        const existingReseller = await resellerCollection.findOne({ reseller_id });
 
         if (!existingReseller) {
-            return {
-                error: true,
-                status: 404,
+            return res.status(404).json({
+                status: 'Failed',
                 message: 'Reseller not found'
-            };
+            });
         }
 
-        // Update the reseller details
         const result = await resellerCollection.updateOne(
-            { reseller_id: reseller_id },
+            { reseller_id },
             {
                 $set: {
                     reseller_phone_no,
@@ -1494,29 +1491,25 @@ async function UpdateReseller(req) {
         );
 
         if (result.modifiedCount === 0) {
-            return {
-                error: true,
-                status: 500,
+            return res.status(500).json({
+                status: 'Failed',
                 message: 'Failed to update reseller'
-            };
+            });
         }
 
-        return {
-            error: false,
-            status: 200,
+        return res.status(200).json({
+            status: 'Success',
             message: 'Reseller updated successfully'
-        };
+        });
 
     } catch (error) {
-        console.error(error);
-        logger.error(`Error updating reseller: ${error}`);
-        return {
-            error: true,
-            status: 500,
+        console.error('Error in UpdateReseller:', error);
+        return res.status(500).json({
+            status: 'Failed',
             message: 'Internal Server Error'
-        };
+        });
     }
-}
+};
 
 // 5.Manage User Controller
 // Fetch User Details

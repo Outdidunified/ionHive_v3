@@ -69,7 +69,7 @@ router.post('/UpdateClientCommission', verifyToken, Controller.UpdateClientCommi
 router.post('/FetchUsers', verifyToken, Controller.FetchUsers);
 
 // Route to FetchSpecificUserRoleForSelection
-router.post('/FetchSpecificUserRoleForSelection', verifyToken, Controller.FetchSpecificUserRoleForSelection);
+router.get('/FetchSpecificUserRoleForSelection', verifyToken, Controller.FetchSpecificUserRoleForSelection);
 
 // Route to FetchAssociationForSelection
 router.post('/FetchAssociationForSelection', verifyToken, Controller.FetchAssociationForSelection);
