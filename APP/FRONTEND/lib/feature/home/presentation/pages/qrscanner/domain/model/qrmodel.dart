@@ -113,7 +113,7 @@ class Updateconnectorwithchargerid {
 
   factory Updateconnectorwithchargerid.fromJson(Map<String, dynamic> json) {
     return Updateconnectorwithchargerid(
-      error: json['error'] ?? true,
+      error: json['error'],
       message: json['message'] ?? "No message",
       unitPrice: (json['unitPrice'] ?? 0.0).toDouble(),
     );

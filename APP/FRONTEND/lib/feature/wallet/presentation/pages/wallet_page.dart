@@ -7,18 +7,37 @@ import 'package:shimmer/shimmer.dart';
 
 import '../controller/wallet_controller.dart';
 
-class WalletPage extends StatelessWidget {
+class WalletPage extends StatefulWidget {
+  const WalletPage({super.key});
+
+  @override
+  State<WalletPage> createState() => _WalletPageState();
+}
+
+class _WalletPageState extends State<WalletPage>
+    with AutomaticKeepAliveClientMixin {
   final sessionController = Get.find<SessionController>();
   final walletController =
       Get.put(WalletController(), permanent: true, tag: 'wallet');
 
-  WalletPage({super.key});
+  @override
+  void initState() {
+    super.initState();
+    // Fetch data when the widget is first created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        walletController.fetchwalletbalance();
+      }
+    });
+  }
+
+  @override
+  bool get wantKeepAlive => true; // Keep the state alive when switching tabs
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     final theme = Theme.of(context);
     final username = sessionController.username.value;
-
-    walletController.fetchwalletbalance();
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
@@ -1033,11 +1052,11 @@ class CornerTag extends StatelessWidget {
   final bool isDarkTheme;
 
   const CornerTag({
-    Key? key,
+    super.key,
     required this.label,
     required this.isCapitative,
     required this.isDarkTheme,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

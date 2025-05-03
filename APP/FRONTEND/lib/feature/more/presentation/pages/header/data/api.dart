@@ -53,12 +53,13 @@ class HeaderAPICalls {
         "username": username,
         "email_id": email,
         "user_id": user_id,
+        "phone_number": phone_number,
       };
 
       // Only add phone_number to the request if it's not null
-      if (phone_number != null) {
-        requestBody["phone_number"] = phone_number;
-      }
+      // if (phone_number != null) {
+      //   requestBody["phone_number"] = phone_number;
+      // }
 
       final response = await http
           .post(

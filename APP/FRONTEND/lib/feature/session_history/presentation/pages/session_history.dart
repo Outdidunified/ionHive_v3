@@ -6,22 +6,40 @@ import 'package:ionhive/feature/session_history/presentation/controllers/session
 import 'package:ionhive/feature/session_history/presentation/pages/session_bill.dart';
 import 'package:shimmer/shimmer.dart';
 
-class SessionHistoryPage extends StatelessWidget {
+class SessionHistoryPage extends StatefulWidget {
   const SessionHistoryPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // Use a unique tag to ensure a fresh controller instance or find existing
-    final SessionHistoryControllers controller =
-        Get.put(SessionHistoryControllers(), tag: 'session_history');
+  State<SessionHistoryPage> createState() => _SessionHistoryPageState();
+}
 
-    // Trigger data refresh when the page is displayed
-    if (!controller.isLoading.value) {
-      controller.refreshAllData().catchError((e) {
-        debugPrint("SessionHistoryPage: Error loading data: $e");
-      });
-    }
+class _SessionHistoryPageState extends State<SessionHistoryPage>
+    with AutomaticKeepAliveClientMixin {
+  late final SessionHistoryControllers controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Use a unique tag to ensure a fresh controller instance or find existing
+    controller = Get.put(SessionHistoryControllers(), tag: 'session_history');
+
+    // Fetch data when the widget is first created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !controller.isLoading.value) {
+        controller.refreshAllData().catchError((e) {
+          debugPrint("SessionHistoryPage: Error loading data: $e");
+        });
+      }
+    });
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,

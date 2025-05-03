@@ -2,11 +2,10 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:ionhive/feature/ChargingStation/data/url.dart';
 import 'package:ionhive/feature/Chargingpage/data/url.dart';
 import 'package:ionhive/utils/exception/exception.dart';
 
-class Chargingpageapicalls{
+class Chargingpageapicalls {
   String _getDefaultErrorMessage(int statusCode) {
     switch (statusCode) {
       case 400:
@@ -39,8 +38,8 @@ class Chargingpageapicalls{
     );
   }
 
-  Future<Map<String, dynamic>> endChargingsession(
-      int user_id, String email, String authToken , int connector_id,String charger_id ) async {
+  Future<Map<String, dynamic>> endChargingsession(int user_id, String email,
+      String authToken, int connector_id, String charger_id) async {
     final url = Chargingpageurl.endchargingsession;
 
     try {
@@ -50,11 +49,15 @@ class Chargingpageapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({'email_id': email, 'user_id': user_id,'connector_id':connector_id,'charger_id':charger_id}),
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'connector_id': connector_id,
+          'charger_id': charger_id
+        }),
       );
       final data = jsonDecode(response.body);
-      print('fetching end charging seesion body : $data');
-      print(response.statusCode);
+      debugPrint('fetching end charging seesion body : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -67,5 +70,4 @@ class Chargingpageapicalls{
       throw HttpException(500, '$e');
     }
   }
-
 }

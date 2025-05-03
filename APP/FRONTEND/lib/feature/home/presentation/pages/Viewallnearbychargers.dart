@@ -6,6 +6,8 @@ import 'package:ionhive/feature/home/presentation/controllers/home_controller.da
 class ViewAllNearbyChargers extends StatelessWidget {
   final HomeController controller = Get.find<HomeController>();
 
+  ViewAllNearbyChargers({super.key});
+
   @override
   Widget build(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
@@ -19,22 +21,22 @@ class ViewAllNearbyChargers extends StatelessWidget {
         ),
       ),
       body: Obx(() => ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: controller.chargers.length,
-        itemBuilder: (context, index) {
-          final station = controller.chargers[index];
-          return _buildStationCard(
-            context: context,
-            station: station,
-            isDarkTheme: isDarkTheme,
-            onTap: () {
-              // Navigate to ChargingStation with the selected station details with left-to-right transition
-              Get.to(() => ChargingStationPage(station: station),
-                  transition: Transition.leftToRight);
+            padding: const EdgeInsets.all(16.0),
+            itemCount: controller.chargers.length,
+            itemBuilder: (context, index) {
+              final station = controller.chargers[index];
+              return _buildStationCard(
+                context: context,
+                station: station,
+                isDarkTheme: isDarkTheme,
+                onTap: () {
+                  // Navigate to ChargingStation with the selected station details with left-to-right transition
+                  Get.to(() => ChargingStationPage(station: station),
+                      transition: Transition.leftToRight);
+                },
+              );
             },
-          );
-        },
-      )),
+          )),
     );
   }
 
@@ -91,10 +93,10 @@ class ViewAllNearbyChargers extends StatelessWidget {
                       child: Text(
                         '${station['location_id']} | ${station['station_address']}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: screenWidth * 0.036,
-                          color: isDarkTheme ? Colors.white70 : null,
-                        ),
+                              fontWeight: FontWeight.w600,
+                              fontSize: screenWidth * 0.036,
+                              color: isDarkTheme ? Colors.white70 : null,
+                            ),
                       ),
                     ),
                   ],
@@ -108,9 +110,11 @@ class ViewAllNearbyChargers extends StatelessWidget {
                       child: Text(
                         station['landmark'] ?? '',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontSize: screenWidth * 0.031,
-                          color: isDarkTheme ? Colors.white60 : Colors.grey[600],
-                        ),
+                              fontSize: screenWidth * 0.031,
+                              color: isDarkTheme
+                                  ? Colors.white60
+                                  : Colors.grey[600],
+                            ),
                       ),
                     ),
                     Row(
@@ -118,18 +122,21 @@ class ViewAllNearbyChargers extends StatelessWidget {
                         Icon(
                           Icons.location_on,
                           size: iconSize,
-                          color: isDarkTheme
-                              ? Colors.white60
-                              : Colors.grey[600],
+                          color:
+                              isDarkTheme ? Colors.white60 : Colors.grey[600],
                         ),
                         const SizedBox(width: 2),
                         Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: Text(
-                            "${(station['distance'] as int) ~/ 1000} km away",                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontSize: screenWidth * 0.031,
-                              color: isDarkTheme ? Colors.white60 : Colors.grey[600],
-                            ),
+                            "${(station['distance'] as int) ~/ 1000} km away",
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      fontSize: screenWidth * 0.031,
+                                      color: isDarkTheme
+                                          ? Colors.white60
+                                          : Colors.grey[600],
+                                    ),
                           ),
                         ),
                       ],
@@ -147,15 +154,15 @@ class ViewAllNearbyChargers extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isDarkTheme
                             ? _getAvailabilityColor(
-                            isOpen, isClosed, isUnderMaintenance)
-                            .withOpacity(0.1)
+                                    isOpen, isClosed, isUnderMaintenance)
+                                .withOpacity(0.1)
                             : _getAvailabilityColor(
-                            isOpen, isClosed, isUnderMaintenance)
-                            .withOpacity(0.1),
+                                    isOpen, isClosed, isUnderMaintenance)
+                                .withOpacity(0.1),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: _getAvailabilityColor(
-                              isOpen, isClosed, isUnderMaintenance)
+                                  isOpen, isClosed, isUnderMaintenance)
                               .withOpacity(isDarkTheme ? 0.3 : 0.3),
                           width: 1,
                         ),
@@ -174,18 +181,21 @@ class ViewAllNearbyChargers extends StatelessWidget {
                           Text(
                             isOpen
                                 ? _capitalizeFirstLetter(
-                                station['availability'] ?? 'Open')
+                                    station['availability'] ?? 'Open')
                                 : isClosed
-                                ? "Closed"
-                                : isUnderMaintenance
-                                ? "Under Maintenance"
-                                : "Unknown",
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: screenWidth * 0.03,
-                              fontWeight: FontWeight.w500,
-                              color: _getAvailabilityColor(
-                                  isOpen, isClosed, isUnderMaintenance),
-                            ),
+                                    ? "Closed"
+                                    : isUnderMaintenance
+                                        ? "Under Maintenance"
+                                        : "Unknown",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontSize: screenWidth * 0.03,
+                                  fontWeight: FontWeight.w500,
+                                  color: _getAvailabilityColor(
+                                      isOpen, isClosed, isUnderMaintenance),
+                                ),
                           ),
                         ],
                       ),
@@ -197,16 +207,18 @@ class ViewAllNearbyChargers extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: isDarkTheme ? Colors.grey[800] : Colors.grey[200],
+                        color:
+                            isDarkTheme ? Colors.grey[800] : Colors.grey[200],
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         station['charger_type'] ?? '',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: screenWidth * 0.03,
-                          fontWeight: FontWeight.w500,
-                          color: isDarkTheme ? Colors.white70 : Colors.black87,
-                        ),
+                              fontSize: screenWidth * 0.03,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  isDarkTheme ? Colors.white70 : Colors.black87,
+                            ),
                       ),
                     ),
                   ],
@@ -257,7 +269,7 @@ String _capitalizeFirstLetter(String text) {
   return text
       .split(' ')
       .map((word) =>
-  word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
+          word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
       .join(' ');
 }
 
@@ -267,11 +279,11 @@ class CornerTag extends StatelessWidget {
   final bool isDarkTheme;
 
   const CornerTag({
-    Key? key,
+    super.key,
     required this.label,
     required this.isCapitative,
     required this.isDarkTheme,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +317,8 @@ class CornerTag extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: isCapitative ? screenWidth * 0.026 : screenWidth * 0.028,
+              fontSize:
+                  isCapitative ? screenWidth * 0.026 : screenWidth * 0.028,
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),

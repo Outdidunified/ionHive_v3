@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
-import 'package:ionhive/feature/home/presentation/pages/qrscanner/domain/repository/qrrepository.dart';
 import 'package:ionhive/feature/home/presentation/pages/search/presentation/controllers/search_controllers.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -9,17 +8,15 @@ import 'package:permission_handler/permission_handler.dart';
 class QrScannerController extends GetxController {
   final RxBool hasPermission = false.obs;
   final RxBool isFlashlightOn = false.obs;
-  final RxBool isScanning = true.obs;
   final RxBool isLoading = false.obs;
   final RxString scannedCode = ''.obs;
   final MobileScannerController scannerController = MobileScannerController();
   final sessionController = Get.find<SessionController>();
   final searchpageController = Get.find<SearchpageController>();
 
-  // Define scan area boundaries
   Rect? scanWindow;
-
-  final Qrscannerrepo _repo = Qrscannerrepo();
+  DateTime? lastScanTime; // For debouncing scans
+  bool _isScannerRunning = false; // Track scanner state
 
   @override
   void onInit() {
@@ -29,6 +26,10 @@ class QrScannerController extends GetxController {
 
   @override
   void onClose() {
+    if (_isScannerRunning) {
+      scannerController.stop();
+      _isScannerRunning = false;
+    }
     scannerController.dispose();
     super.onClose();
   }
@@ -37,9 +38,35 @@ class QrScannerController extends GetxController {
     final status = await Permission.camera.status;
     if (status.isGranted) {
       hasPermission.value = true;
+      await _safeStartScanner();
     } else {
       final result = await Permission.camera.request();
       hasPermission.value = result.isGranted;
+      if (result.isGranted) {
+        await _safeStartScanner();
+      }
+    }
+  }
+
+  Future<void> _safeStartScanner() async {
+    if (!_isScannerRunning) {
+      try {
+        await scannerController.start();
+        _isScannerRunning = true;
+      } catch (e) {
+        debugPrint('Failed to process QR code: 1 $e');
+      }
+    }
+  }
+
+  Future<void> _safeStopScanner() async {
+    if (_isScannerRunning) {
+      try {
+        await scannerController.stop();
+        _isScannerRunning = false;
+      } catch (e) {
+        debugPrint('Failed to process QR code: 2 $e');
+      }
     }
   }
 
@@ -48,24 +75,17 @@ class QrScannerController extends GetxController {
     isFlashlightOn.value = !isFlashlightOn.value;
   }
 
-  void pauseScanning() {
-    isScanning.value = false;
-    scannerController.stop();
-  }
+  Future<void> handleScannedCode(String code, {Barcode? barcode}) async {
+    final now = DateTime.now();
+    if (lastScanTime != null && now.difference(lastScanTime!).inSeconds < 2) {
+      return;
+    }
 
-  void resumeScanning() {
-    isScanning.value = true;
-    scannedCode.value = '';
-    scannerController.start();
-  }
-
-  void handleScannedCode(String code, {Barcode? barcode}) {
-    if (isScanning.value && !isLoading.value) {
-      // If barcode is provided, check if it's within the scan window
+    if (!isLoading.value) {
+      // Validate that the QR code is within the scanWindow
       if (barcode != null && scanWindow != null) {
         final corners = barcode.corners;
         if (corners != null && corners.isNotEmpty) {
-          // Check if at least one corner of the barcode is within the scan window
           bool isWithinScanArea = false;
           for (final corner in corners) {
             if (scanWindow!.contains(corner)) {
@@ -73,25 +93,30 @@ class QrScannerController extends GetxController {
               break;
             }
           }
-
           if (!isWithinScanArea) {
-            // QR code is outside the scan area, ignore it
             return;
           }
         }
       }
 
+      lastScanTime = now;
       scannedCode.value = code;
-      pauseScanning();
+      await _safeStopScanner();
       isLoading.value = true;
 
-      // Call the search controller and wait for the response
-      searchpageController.fetchChargerData(code).then((_) {
+      try {
+        await searchpageController.fetchChargerData(code);
         isLoading.value = false;
-      }).catchError((error) {
+        scannedCode.value = '';
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _safeStartScanner();
+      } catch (error) {
         isLoading.value = false;
-        resumeScanning();
-      });
+        scannedCode.value = '';
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _safeStartScanner();
+        debugPrint('Failed to process QR code: 3 $error');
+      }
     }
   }
 }

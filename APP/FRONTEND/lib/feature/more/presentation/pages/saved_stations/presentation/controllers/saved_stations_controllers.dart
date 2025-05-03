@@ -5,12 +5,14 @@ import 'package:ionhive/feature/ChargingStation/presentation/controllers/Chargin
 import 'package:ionhive/feature/more/presentation/pages/saved_stations/domain/repository/saved_stations_repository.dart';
 
 class SavedStationsControllers extends GetxController {
-  final SavedStationsRepository _savedStationsRepository = SavedStationsRepository();
+  final SavedStationsRepository _savedStationsRepository =
+      SavedStationsRepository();
   final sessionController = Get.find<SessionController>();
   late ChargingStationController chargingStationController;
 
   final RxBool isLoading = false.obs;
-  final RxList<Map<String, dynamic>> savedStations = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> savedStations =
+      <Map<String, dynamic>>[].obs;
   final RxString errorMessage = ''.obs;
 
   // Map to track bookmark status for each station
@@ -25,7 +27,7 @@ class SavedStationsControllers extends GetxController {
   }
 
   Future<void> fetchSavedStations() async {
-    print('hiii');
+    debugPrint('hiii');
     final authToken = sessionController.token.value;
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
@@ -38,9 +40,10 @@ class SavedStationsControllers extends GetxController {
           userId, emailId, authToken);
 
       if (response.success) {
-        if (response.savedstation != null && response.savedstation!.isNotEmpty) {
+        if (response.savedstation != null &&
+            response.savedstation!.isNotEmpty) {
           savedStations.assignAll(response.savedstation!);
-          print("responsesaved: $response");
+          debugPrint("responsesaved: $response");
           // Initialize bookmark status for all stations
           for (var station in savedStations) {
             bookmarkStatus[station['station_id']] = station['status'] ?? true;
@@ -67,10 +70,12 @@ class SavedStationsControllers extends GetxController {
 
     try {
       // Call removeStation from ChargingStationController
-      await chargingStationController.removeStation(userId, emailId, authToken, stationId);
+      await chargingStationController.removeStation(
+          userId, emailId, authToken, stationId);
 
       // On success, remove the station from the savedStations list
-      savedStations.removeWhere((station) => station['station_id'] == stationId);
+      savedStations
+          .removeWhere((station) => station['station_id'] == stationId);
 
       // Update bookmark status
       bookmarkStatus[stationId] = false;

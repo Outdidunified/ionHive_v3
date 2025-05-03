@@ -2,11 +2,10 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:ionhive/feature/ChargingStation/data/url.dart';
 import 'package:ionhive/feature/home/presentation/pages/qrscanner/data/url.dart';
 import 'package:ionhive/utils/exception/exception.dart';
 
-class QRScannerapicalls{
+class QRScannerapicalls {
   String _getDefaultErrorMessage(int statusCode) {
     switch (statusCode) {
       case 400:
@@ -39,9 +38,8 @@ class QRScannerapicalls{
     );
   }
 
-
   Future<Map<String, dynamic>> getconnectorsforchargerid(
-      int user_id, String email, String authToken , String charger_id ) async {
+      int user_id, String email, String authToken, String charger_id) async {
     final url = Qrscannerurl.getconnectors;
 
     try {
@@ -51,11 +49,11 @@ class QRScannerapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({'email_id': email, 'user_id': user_id,'charger_id':charger_id}),
+        body: jsonEncode(
+            {'email_id': email, 'user_id': user_id, 'charger_id': charger_id}),
       );
       final data = jsonDecode(response.body);
-      print('fetching connectors  body : $data');
-      print(response.statusCode);
+      debugPrint('fetching connectors  body : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -70,7 +68,11 @@ class QRScannerapicalls{
   }
 
   Future<Map<String, dynamic>> updateconnectorwithchargerid(
-      int user_id, String email, String authToken , String charger_id ,int connector_id) async {
+      int user_id,
+      String email,
+      String authToken,
+      String charger_id,
+      int connector_id) async {
     final url = Qrscannerurl.updateconnector;
 
     try {
@@ -80,11 +82,15 @@ class QRScannerapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({'email_id': email, 'user_id': user_id,'charger_id':charger_id,'connector_id':connector_id}),
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'charger_id': charger_id,
+          'connector_id': connector_id
+        }),
       );
       final data = jsonDecode(response.body);
-      print('fetching updateconnectors   body : $data');
-      print(response.statusCode);
+      debugPrint('fetching updateconnectors   body : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -97,7 +103,4 @@ class QRScannerapicalls{
       throw HttpException(500, '$e');
     }
   }
-
-
-
 }

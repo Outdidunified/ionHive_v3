@@ -94,8 +94,8 @@ class AppTheme {
       headlineSmall: TextStyle(fontSize: 18, color: Colors.white70),
       titleLarge: TextStyle(
           fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white70),
-      bodyLarge: TextStyle(fontSize: 14, color: Colors.white60),
-      bodyMedium: TextStyle(fontSize: 12, color: Colors.white60),
+      bodyLarge: TextStyle(fontSize: 14, color: Colors.white70),
+      bodyMedium: TextStyle(fontSize: 12, color: Colors.white70),
     ),
     colorScheme: ColorScheme.dark(
       primary: Colors.green,

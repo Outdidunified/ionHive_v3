@@ -1,12 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class MarkerGenerator {
   /// Creates a custom marker with text using the Poppins font

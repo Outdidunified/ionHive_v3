@@ -4,7 +4,7 @@ import 'package:ionhive/feature/home/presentation/pages/search/presentation/cont
 import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
 
 class SearchPage extends StatelessWidget {
-  SearchPage({Key? key}) : super(key: key);
+  SearchPage({super.key});
 
   final SearchpageController controller = Get.put(SearchpageController());
   final TextEditingController textEditingController = TextEditingController();
@@ -16,17 +16,15 @@ class SearchPage extends StatelessWidget {
 
     // Clear search when page builds (handles back navigation)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (textEditingController.text.isNotEmpty) {
-        textEditingController.clear();
-        controller.updateSearch('');
-        controller.suggestedLocations.clear();
-      }
+      // Always clear the text field and search query when the page is shown
+      textEditingController.clear();
+      controller.clearSearchQuery();
     });
 
     return WillPopScope(
       onWillPop: () async {
-        // Clear controller data when navigating back
-        controller.clearAll();
+        // Clear search query when navigating back
+        controller.clearSearchQuery();
         // Clear text editing controller
         textEditingController.clear();
         return true; // Allow navigation

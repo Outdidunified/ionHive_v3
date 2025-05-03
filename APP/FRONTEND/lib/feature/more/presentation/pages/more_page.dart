@@ -35,7 +35,11 @@ class MoreePage extends StatelessWidget {
     final landingPageController = Get.find<LandingPageController>();
     landingPageController.clearPageIndex();
     Get.find<SessionController>().clearSession();
-    Get.offAll(() => LoginPage());
+    Get.offAll(
+      () => LoginPage(),
+      transition: Transition.leftToRight,
+      duration: const Duration(milliseconds: 300),
+    );
   }
 
   void _launchURL() async {
@@ -73,14 +77,14 @@ class MoreePage extends StatelessWidget {
           ),
           SizedBox(
               height: context
-                  .rHeight(isLargeScreen ? 20 : (isSmallScreen ? 12 : 100))),
+                  .rHeight(isLargeScreen ? 20 : (isSmallScreen ? 20 : 100))),
           Expanded(
             child: ListView(
               padding: EdgeInsets.symmetric(
                 horizontal: context
                     .rWidth(isLargeScreen ? 20 : (isSmallScreen ? 10 : 15)),
                 vertical: context
-                    .rHeight(isLargeScreen ? 12 : (isSmallScreen ? 6 : 8)),
+                    .rHeight(isLargeScreen ? 12 : (isSmallScreen ? 24 : 8)),
               ),
               children: [
                 SizedBox(
@@ -90,7 +94,7 @@ class MoreePage extends StatelessWidget {
                 ),
                 SizedBox(
                     height: context.rHeight(
-                        isLargeScreen ? 20 : (isSmallScreen ? 12 : 16))),
+                        isLargeScreen ? 20 : (isSmallScreen ? 6 : 16))),
                 _buildSectionTitle(
                     'Manage', context, isSmallScreen, isLargeScreen),
                 _buildMenuOption(
@@ -108,12 +112,16 @@ class MoreePage extends StatelessWidget {
                   isSmallScreen,
                   isLargeScreen,
                   onTap: () {
-                    Get.to(() => RfidPage(
-                          userId: userId,
-                          username: username,
-                          emailId: emailId,
-                          token: token,
-                        ));
+                    Get.to(
+                      () => RfidPage(
+                        userId: userId,
+                        username: username,
+                        emailId: emailId,
+                        token: token,
+                      ),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
                   },
                 ),
                 _buildMenuOption(
@@ -131,12 +139,16 @@ class MoreePage extends StatelessWidget {
                   isSmallScreen,
                   isLargeScreen,
                   onTap: () {
-                    Get.to(() => VehiclePage(
-                          userId: userId,
-                          username: username,
-                          emailId: emailId,
-                          token: token,
-                        ));
+                    Get.to(
+                      () => VehiclePage(
+                        userId: userId,
+                        username: username,
+                        emailId: emailId,
+                        token: token,
+                      ),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
                   },
                 ),
                 _buildMenuOption(
@@ -154,12 +166,16 @@ class MoreePage extends StatelessWidget {
                   isSmallScreen,
                   isLargeScreen,
                   onTap: () {
-                    Get.to(() => SavedDevicepage(
-                          userId: userId,
-                          username: username,
-                          emailId: emailId,
-                          token: token,
-                        ));
+                    Get.to(
+                      () => SavedDevicepage(
+                        userId: userId,
+                        username: username,
+                        emailId: emailId,
+                        token: token,
+                      ),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
                   },
                 ),
                 SizedBox(
@@ -182,12 +198,16 @@ class MoreePage extends StatelessWidget {
                   isSmallScreen,
                   isLargeScreen,
                   onTap: () {
-                    Get.to(() => SavedStationsPages(
-                          userId: userId,
-                          username: username,
-                          emailId: emailId,
-                          token: token,
-                        ));
+                    Get.to(
+                      () => SavedStationsPages(
+                        userId: userId,
+                        username: username,
+                        emailId: emailId,
+                        token: token,
+                      ),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
                   },
                 ),
                 SizedBox(
@@ -210,12 +230,16 @@ class MoreePage extends StatelessWidget {
                   isSmallScreen,
                   isLargeScreen,
                   onTap: () {
-                    Get.to(() => PaymentHistoryPage(
-                          userId: userId,
-                          username: username,
-                          emailId: emailId,
-                          token: token,
-                        ));
+                    Get.to(
+                      () => PaymentHistoryPage(
+                        userId: userId,
+                        username: username,
+                        emailId: emailId,
+                        token: token,
+                      ),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
                   },
                 ),
                 SizedBox(
@@ -289,7 +313,11 @@ class MoreePage extends StatelessWidget {
                   isSmallScreen,
                   isLargeScreen,
                   onTap: () {
-                    Get.to(() => ThemeSettingsPage());
+                    Get.to(
+                      () => ThemeSettingsPage(),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
                   },
                 ),
                 SizedBox(
@@ -312,7 +340,11 @@ class MoreePage extends StatelessWidget {
                   isSmallScreen,
                   isLargeScreen,
                   onTap: () {
-                    Get.to(() => ContactUs());
+                    Get.to(
+                      () => ContactUs(),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
                   },
                 ),
                 SizedBox(
@@ -335,7 +367,11 @@ class MoreePage extends StatelessWidget {
                   isSmallScreen,
                   isLargeScreen,
                   onTap: () {
-                    Get.to(() => AccountAndPrivacyPage());
+                    Get.to(
+                      () => AccountAndPrivacyPage(),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
                   },
                 ),
                 _buildMenuOption(

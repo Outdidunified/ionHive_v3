@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/domain/models/manage_model.dart';
 import 'package:ionhive/feature/more/presentation/pages/manage/domain/repositories/manage_repository.dart';
@@ -45,15 +46,13 @@ class ManageController extends GetxController {
           email, token, userid, tagid, status);
 
       if (response.error) {
-        // Get.snackbar("Message", response.message);
-        // debugPrint(response.message);
+        Get.snackbar("Message", response.message);
+        debugPrint(response.message);
       } else {
-        // final message = response.message; // ✅ Extract message object
-        // debugPrint(message);
-        // Get.snackbar(
-        //     "Success",
-        //     "RFID: ${message['tag_id']}, Assigned: ${message['tag_id_assigned']}"
-        // );
+        final message = response.message; // ✅ Extract message object
+        debugPrint(message);
+        CustomSnackbar.showSuccess(
+            message: "You have successfully deactivated your RFID card.");
       }
 
       // Store the response

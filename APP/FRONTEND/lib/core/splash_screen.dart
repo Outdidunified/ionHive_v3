@@ -57,11 +57,12 @@ class _SplashScreenState extends State<SplashScreen>
             const Duration(milliseconds: 500), _tryInitializeController);
       } else {
         // If we've exceeded max retries, navigate to GetStartedPage as fallback
-        print('Max retries exceeded, navigating to GetStartedPage as fallback');
+        debugPrint(
+            'Max retries exceeded, navigating to GetStartedPage as fallback');
         _navigateToFallback();
       }
     } catch (e) {
-      print('Error initializing SessionController: $e');
+      debugPrint('Error initializing SessionController: $e');
       if (_retryCount < _maxRetries) {
         // Try again after a delay if we haven't exceeded max retries
         Future.delayed(

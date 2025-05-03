@@ -284,105 +284,296 @@ class _VehiclePageState extends State<VehiclePage> {
                                     if (vehicleNumber.isNotEmpty) {
                                       showDialog(
                                         context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: Text(
-                                            "Remove Vehicle",
-                                            style: theme.textTheme.titleLarge
-                                                ?.copyWith(
-                                              fontSize: screenWidth * 0.045,
-                                            ),
-                                          ),
-                                          content: Text(
-                                            "Are you sure you want to remove vehicle $vehicleNumber?",
-                                            style: theme.textTheme.bodyMedium
-                                                ?.copyWith(
-                                              fontSize: screenWidth * 0.04,
-                                            ),
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
-                                              child: Text(
-                                                "Cancel",
-                                                style: theme
-                                                    .textTheme.bodyMedium
-                                                    ?.copyWith(
-                                                  fontSize: screenWidth * 0.04,
-                                                ),
+                                        builder: (context) => Dialog(
+                                          backgroundColor: Colors
+                                              .transparent, // Transparent background for custom shadow
+                                          child: AnimatedContainer(
+                                            duration: const Duration(
+                                                milliseconds: 200),
+                                            transform: Matrix4.identity()
+                                              ..scale(
+                                                  1.0), // Subtle scale animation
+                                            child: Container(
+                                              padding: EdgeInsets.all(
+                                                  screenWidth * 0.05),
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    theme.colorScheme.surface,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black
+                                                        .withOpacity(0.2),
+                                                    blurRadius: 10,
+                                                    spreadRadius: 2,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  // Title
+                                                  Text(
+                                                    "Remove Vehicle",
+                                                    style: theme
+                                                        .textTheme.titleLarge
+                                                        ?.copyWith(
+                                                      fontSize:
+                                                          screenWidth * 0.045,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: theme.colorScheme
+                                                          .onSurface,
+                                                    ),
+                                                    semanticsLabel:
+                                                        "Remove Vehicle Dialog Title",
+                                                  ),
+                                                  SizedBox(
+                                                      height:
+                                                          screenWidth * 0.02),
+                                                  // Content
+                                                  Text(
+                                                    "Are you sure you want to remove vehicle $vehicleNumber?",
+                                                    style: theme
+                                                        .textTheme.bodyMedium
+                                                        ?.copyWith(
+                                                      fontSize:
+                                                          screenWidth * 0.04,
+                                                      color: theme
+                                                          .colorScheme.onSurface
+                                                          .withOpacity(0.8),
+                                                    ),
+                                                    semanticsLabel:
+                                                        "Confirmation message for removing vehicle $vehicleNumber",
+                                                  ),
+                                                  SizedBox(
+                                                      height:
+                                                          screenWidth * 0.05),
+                                                  // Actions
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: [
+                                                      // Cancel Button
+                                                      OutlinedButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                                context),
+                                                        style: OutlinedButton
+                                                            .styleFrom(
+                                                          side: BorderSide(
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .onSurface
+                                                                  .withOpacity(
+                                                                      0.5)),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12),
+                                                          ),
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                            horizontal:
+                                                                screenWidth *
+                                                                    0.04,
+                                                            vertical:
+                                                                screenWidth *
+                                                                    0.025,
+                                                          ),
+                                                        ),
+                                                        child: Text(
+                                                          "Cancel",
+                                                          style: theme.textTheme
+                                                              .bodyMedium
+                                                              ?.copyWith(
+                                                            fontSize:
+                                                                screenWidth *
+                                                                    0.04,
+                                                            color: theme
+                                                                .colorScheme
+                                                                .onSurface,
+                                                          ),
+                                                          semanticsLabel:
+                                                              "Cancel button",
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                          width: screenWidth *
+                                                              0.03),
+                                                      // Remove Button with Loading Indicator
+                                                      Obx(
+                                                        () => controller
+                                                                .isLoading.value
+                                                            ? SizedBox(
+                                                                width:
+                                                                    screenWidth *
+                                                                        0.25,
+                                                                height:
+                                                                    screenWidth *
+                                                                        0.09,
+                                                                child: Center(
+                                                                  child:
+                                                                      CircularProgressIndicator(
+                                                                    color: theme
+                                                                        .colorScheme
+                                                                        .error,
+                                                                    strokeWidth:
+                                                                        3,
+                                                                    semanticsLabel:
+                                                                        "Loading indicator for removing vehicle",
+                                                                  ),
+                                                                ),
+                                                              )
+                                                            : ElevatedButton(
+                                                                onPressed:
+                                                                    () async {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  setState(() {
+                                                                    controller
+                                                                        .isLoading
+                                                                        .value = true;
+                                                                  });
+                                                                  try {
+                                                                    final result =
+                                                                        await controller
+                                                                            .removeVehicle(vehicleNumber);
+                                                                    if (result[
+                                                                        'success']) {
+                                                                      if (snapshot
+                                                                              .data !=
+                                                                          null) {
+                                                                        snapshot.data!.removeWhere((v) =>
+                                                                            v['vehicle_number'] ==
+                                                                            vehicleNumber);
+                                                                        if (snapshot
+                                                                            .data!
+                                                                            .isEmpty) {
+                                                                          Future.microtask(
+                                                                              () {
+                                                                            controller.vehicles.clear();
+                                                                          });
+                                                                        }
+                                                                      }
+                                                                      CustomSnackbar
+                                                                          .showSuccess(
+                                                                        message:
+                                                                            "Vehicle removed successfully",
+                                                                      );
+                                                                      if (mounted) {
+                                                                        setState(
+                                                                            () {
+                                                                          _futureBuilderKey =
+                                                                              DateTime.now().millisecondsSinceEpoch;
+                                                                        });
+                                                                      }
+                                                                    } else {
+                                                                      CustomSnackbar
+                                                                          .showError(
+                                                                        message:
+                                                                            result['message'] ??
+                                                                                "Failed to remove vehicle",
+                                                                      );
+                                                                    }
+                                                                  } catch (e) {
+                                                                    CustomSnackbar
+                                                                        .showError(
+                                                                      message:
+                                                                          "Issue with removing vehicle: $e",
+                                                                    );
+                                                                  } finally {
+                                                                    if (mounted) {
+                                                                      setState(
+                                                                          () {
+                                                                        controller
+                                                                            .isLoading
+                                                                            .value = false;
+                                                                      });
+                                                                    }
+                                                                  }
+                                                                },
+                                                                style: ElevatedButton
+                                                                    .styleFrom(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .zero,
+                                                                  shape:
+                                                                      RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            12),
+                                                                  ),
+                                                                  elevation: 0,
+                                                                ),
+                                                                child:
+                                                                    Container(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .symmetric(
+                                                                    horizontal:
+                                                                        screenWidth *
+                                                                            0.04,
+                                                                    vertical:
+                                                                        screenWidth *
+                                                                            0.025,
+                                                                  ),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    gradient:
+                                                                        LinearGradient(
+                                                                      colors: [
+                                                                        theme
+                                                                            .colorScheme
+                                                                            .error,
+                                                                        theme
+                                                                            .colorScheme
+                                                                            .error
+                                                                            .withOpacity(0.8),
+                                                                      ],
+                                                                      begin: Alignment
+                                                                          .topLeft,
+                                                                      end: Alignment
+                                                                          .bottomRight,
+                                                                    ),
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            12),
+                                                                  ),
+                                                                  child: Text(
+                                                                    "Remove",
+                                                                    style: theme
+                                                                        .textTheme
+                                                                        .bodyMedium
+                                                                        ?.copyWith(
+                                                                      fontSize:
+                                                                          screenWidth *
+                                                                              0.04,
+                                                                      color: theme
+                                                                          .colorScheme
+                                                                          .onError,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                    ),
+                                                                    semanticsLabel:
+                                                                        "Remove vehicle button",
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                            TextButton(
-                                              onPressed: () async {
-                                                ScaffoldMessenger.of(context);
-                                                Navigator.pop(context);
-                                                setState(() {
-                                                  controller.isLoading.value =
-                                                      true;
-                                                });
-                                                try {
-                                                  final result =
-                                                      await controller
-                                                          .removeVehicle(
-                                                              vehicleNumber);
-                                                  if (result['success']) {
-                                                    if (snapshot.data != null) {
-                                                      snapshot.data!
-                                                          .removeWhere((v) =>
-                                                              v['vehicle_number'] ==
-                                                              vehicleNumber);
-                                                      if (snapshot
-                                                          .data!.isEmpty) {
-                                                        Future.microtask(() {
-                                                          controller.vehicles
-                                                              .clear();
-                                                        });
-                                                      }
-                                                    }
-                                                    CustomSnackbar.showSuccess(
-                                                      message:
-                                                          "Vehicle removed successfully",
-                                                    );
-                                                    if (mounted) {
-                                                      setState(() {
-                                                        _futureBuilderKey =
-                                                            DateTime.now()
-                                                                .millisecondsSinceEpoch;
-                                                      });
-                                                    }
-                                                  } else {
-                                                    CustomSnackbar.showError(
-                                                      message: result[
-                                                              'message'] ??
-                                                          "Failed to remove vehicle",
-                                                    );
-                                                  }
-                                                } catch (e) {
-                                                  CustomSnackbar.showError(
-                                                    message:
-                                                        "issue with removing vehicle: $e",
-                                                  );
-                                                } finally {
-                                                  if (mounted) {
-                                                    setState(() {
-                                                      controller.isLoading
-                                                          .value = false;
-                                                    });
-                                                  }
-                                                }
-                                              },
-                                              child: Text(
-                                                "Remove",
-                                                style: theme
-                                                    .textTheme.bodyMedium
-                                                    ?.copyWith(
-                                                  fontSize: screenWidth * 0.04,
-                                                  color:
-                                                      theme.colorScheme.error,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                       );
                                     }

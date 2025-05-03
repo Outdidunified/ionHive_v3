@@ -37,23 +37,22 @@ class SearchpageController extends GetxController {
   @override
   void onClose() {
     super.onClose();
-    print("SearchController disposed");
+    debugPrint("SearchController disposed");
   }
 
   void clearAll() {
     isChargerId.value = true;
     searchQuery.value = '';
-    recentChargerSearches.clear();
-    recentLocationSearches.clear();
     isLoading.value = false;
     suggestedLocations.clear();
-    _clearRecentSearchesFromStorage();
+    // Don't clear recent searches, just load them from storage
+    _loadRecentSearches();
   }
 
-  Future<void> _clearRecentSearchesFromStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('recent_charger_searches');
-    await prefs.remove('recent_location_searches');
+  // Add a new method to clear search query only
+  void clearSearchQuery() {
+    searchQuery.value = '';
+    suggestedLocations.clear();
   }
 
   Future<void> _loadRecentSearches() async {
@@ -175,11 +174,8 @@ class SearchpageController extends GetxController {
                   icon: Icon(Icons.close,
                       color: isDarkTheme ? Colors.white70 : Colors.black38),
                   onPressed: () {
-                    // Navigate to the existing LandingPage instance using named route
-                    Get.offNamed(
-                      '/landing',
-                      arguments: {'pageIndex': 0}, // Pass the desired tab index
-                    );
+                    clearSearchQuery();
+                    Get.offNamed('/landing', arguments: {'pageIndex': 0});
                   },
                 ),
               ],
@@ -284,10 +280,14 @@ class SearchpageController extends GetxController {
                           style: const TextStyle(fontSize: 16),
                         )),
                   ),
-                ))
+                )),
           ],
         ),
       ),
+      isDismissible: false, // 🚫 Disable tap outside to close
+      enableDrag: false, // 🚫 Disable swipe down to close
+      backgroundColor:
+          Colors.transparent, // Optional: keeps corner radius visible
     );
   }
 
@@ -334,7 +334,7 @@ class SearchpageController extends GetxController {
   Future<List<String>> fetchPlaceSuggestions(String input) async {
     final apiKey = "AIzaSyDdBinCjuyocru7Lgi6YT3FZ1P6_xi0tco";
     final url =
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey';
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&components=country:in'; // Added components=country:in to restrict to India
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -346,7 +346,7 @@ class SearchpageController extends GetxController {
         throw Exception('Failed to fetch suggestions');
       }
     } catch (e) {
-      print('Error fetching suggestions: $e');
+      debugPrint('Error fetching suggestions: $e');
       return [];
     }
   }
@@ -373,10 +373,10 @@ class SearchpageController extends GetxController {
         throw Exception('Failed to fetch coordinates');
       }
     } catch (e) {
-      print('Error fetching coordinates: $e');
+      debugPrint('Error fetching coordinates: $e');
       CustomSnackbar.showError(
         message: 'Failed to fetch coordinates: $e',
-        duration: const Duration(seconds: 3), // <-- Set duration here
+        duration: const Duration(seconds: 3),
       );
       return null;
     }
@@ -392,12 +392,17 @@ class SearchpageController extends GetxController {
         suggestedLocations.value = suggestions;
       } else {
         final allLocations = [
-          'New York',
-          'Los Angeles',
-          'Chicago',
-          'Houston',
-          'Phoenix'
-        ];
+          'Mumbai',
+          'Delhi',
+          'Bangalore',
+          'Hyderabad',
+          'Chennai',
+          'Kolkata',
+          'Pune',
+          'Ahmedabad',
+          'Jaipur',
+          'Lucknow',
+        ]; // Updated to major Indian cities
         suggestedLocations.value = allLocations
             .where((loc) => loc.toLowerCase().contains(query.toLowerCase()))
             .toList();
@@ -532,8 +537,8 @@ class SearchpageController extends GetxController {
         connectorId,
       );
 
-      if (response.error == false) {
-        print("Unit Price: ${response.unitPrice}");
+      if (!response.error) {
+        debugPrint("Unit Price: ${response.unitPrice}");
 
         CustomSnackbar.showSuccess(
           message: 'Charging started with Connector $connectorId',
@@ -542,6 +547,9 @@ class SearchpageController extends GetxController {
 
         await Future.delayed(const Duration(seconds: 3));
         Get.back();
+
+        // Clear the search query
+        clearSearchQuery();
 
         // Create a map for connector details if it's not already a map
         Map<String, dynamic> connDetails;
@@ -584,12 +592,13 @@ class SearchpageController extends GetxController {
           duration: const Duration(seconds: 3),
         );
       }
+      print('Failed to start charging hgfwegfdgh : ${response.message}');
     } catch (e) {
       CustomSnackbar.showError(
         message: 'Failed to start charging: $e',
         duration: const Duration(seconds: 3),
       );
-      print('Charging error: $e');
+      debugPrint('Charging error: $e');
     } finally {
       loadingState.value = false;
     }

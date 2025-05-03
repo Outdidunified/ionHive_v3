@@ -6,7 +6,6 @@ import 'package:ionhive/utils/widgets/button/custom_button.dart';
 import 'package:ionhive/utils/widgets/input_field/phonenumber_inputfield.dart';
 import 'package:ionhive/utils/widgets/input_field/username_inputfield.dart';
 import 'package:ionhive/utils/responsive/responsive.dart';
-import 'package:ionhive/utils/widgets/snackbar/safe_snackbar.dart';
 
 class HeaderCard extends StatelessWidget {
   final ThemeData theme;
@@ -56,10 +55,13 @@ class HeaderCard extends StatelessWidget {
     final double gradientHeight =
         context.rHeight(isLargeScreen ? 260 : (isSmallScreen ? 180 : 180));
     final double whiteBackgroundHeight =
-        context.rHeight(isLargeScreen ? 140 : (isSmallScreen ? 100 : 120));
+        context.rHeight(isLargeScreen ? 140 : (isSmallScreen ? 112 : 120));
+    // final double profileTopPosition =
+    //     (gradientHeight - whiteBackgroundHeight) / 0.83 -
+    //         context.rHeight(isLargeScreen ? 30 : (isSmallScreen ? 20 : 0.01));
     final double profileTopPosition =
         (gradientHeight - whiteBackgroundHeight) / 0.83 -
-            context.rHeight(isLargeScreen ? 30 : (isSmallScreen ? 20 : 0.01));
+            context.rHeight(isLargeScreen ? 30 : (isSmallScreen ? 5 : 0.01));
     final double avatarRadius =
         context.rWidth(isLargeScreen ? 50 : (isSmallScreen ? 30 : 40));
     final double editIconRadius =

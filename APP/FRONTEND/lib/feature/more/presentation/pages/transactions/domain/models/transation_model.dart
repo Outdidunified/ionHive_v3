@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Transaction {
   final String status;
   final double amount;
@@ -49,10 +51,11 @@ class FetchAllTransactionResponse {
               .toList();
         } else {
           // Log the unexpected data type
-          print("Unexpected data type for 'data': ${json['data'].runtimeType}");
+          debugPrint(
+              "Unexpected data type for 'data': ${json['data'].runtimeType}");
         }
       } catch (e) {
-        print("Error parsing transactions: $e");
+        debugPrint("Error parsing transactions: $e");
       }
     }
 
@@ -101,11 +104,11 @@ class SaveFilterResponse {
           }
         } else {
           // Log the unexpected data type
-          print(
+          debugPrint(
               "Unexpected data type for 'updatedTransactionFilter': ${json['updatedTransactionFilter'].runtimeType}");
         }
       } catch (e) {
-        print("Error parsing updatedTransactionFilter days: $e");
+        debugPrint("Error parsing updatedTransactionFilter days: $e");
       }
     }
 
@@ -152,11 +155,11 @@ class FetchTransactionFilter {
           }
         } else {
           // Log the unexpected data type
-          print(
+          debugPrint(
               "Unexpected data type for 'filter': ${json['filter'].runtimeType}");
         }
       } catch (e) {
-        print("Error parsing filter days: $e");
+        debugPrint("Error parsing filter days: $e");
       }
     }
 

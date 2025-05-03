@@ -354,7 +354,7 @@ class RFIDBottomSheet extends StatelessWidget {
 
   Widget _buildShimmerEffect() {
     return Column(
-      children: List.generate(4, (index) {
+      children: List.generate(2, (index) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: Shimmer.fromColors(

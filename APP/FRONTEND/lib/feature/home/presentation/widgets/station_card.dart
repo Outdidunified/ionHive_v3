@@ -6,11 +6,11 @@ class StationCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const StationCard({
-    Key? key,
+    super.key,
     required this.station,
     required this.isDarkTheme,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +86,10 @@ class StationCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          title.length > 35 ? '${title.substring(0, 35)}...' : title,                          style:
+                          title.length > 35
+                              ? '${title.substring(0, 35)}...'
+                              : title,
+                          style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     fontSize: titleFontSize,
@@ -297,11 +300,11 @@ class CornerTag extends StatelessWidget {
   final bool isDarkTheme;
 
   const CornerTag({
-    Key? key,
+    super.key,
     required this.label,
     required this.isCapitative,
     required this.isDarkTheme,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

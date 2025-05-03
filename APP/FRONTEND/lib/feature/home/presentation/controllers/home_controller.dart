@@ -504,8 +504,23 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   Future<void> zoomToCurrentLocation() async {
     debugPrint('Zooming to current location...');
-    isLoading.value = true; // Show loading indicator
+    isLoading.value = true;
     try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        debugPrint('Location services are disabled');
+        CustomSnackbar.showPermissionRequest(
+          message:
+              'Location services are disabled. Please enable them to find nearby charging stations',
+          onOpenSettings: () async {
+            await Geolocator.openLocationSettings();
+          },
+        );
+        return;
+      }
+
+      // Check location permissions
       final permissionStatus = await Permission.locationWhenInUse.status;
       if (permissionStatus != PermissionStatus.granted) {
         debugPrint('Location permission not granted, requesting...');
@@ -522,10 +537,28 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         }
       }
 
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 5),
-      );
+      // Try to get current position with a longer timeout
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 15), // Increased timeout
+        );
+      } on TimeoutException catch (e) {
+        debugPrint('Timeout getting current position: $e');
+        // Fallback to last known position
+        position = await Geolocator.getLastKnownPosition();
+        if (position == null) {
+          CustomSnackbar.showError(
+            message:
+                'Could not get your location. Please ensure you have a GPS signal and try again.',
+          );
+          return;
+        } else {
+          debugPrint(
+              'Using last known position: ${position.latitude}, ${position.longitude}');
+        }
+      }
 
       debugPrint(
           'Updated position: ${position.latitude}, ${position.longitude}');
@@ -563,13 +596,19 @@ class HomeController extends GetxController with WidgetsBindingObserver {
             await Geolocator.openLocationSettings();
           },
         );
+      } else if (e is TimeoutException) {
+        // Already handled above, but catch any unexpected TimeoutExceptions
+        CustomSnackbar.showError(
+          message:
+              'Could not get your location. Please ensure you have a GPS signal and try again.',
+        );
       } else {
         CustomSnackbar.showError(
           message: 'Could not get your location. Please try again later.',
         );
       }
     } finally {
-      isLoading.value = false; // Hide loading indicator
+      isLoading.value = false;
     }
   }
 

@@ -34,7 +34,6 @@ class HeaderController extends GetxController {
   Future<void> updateProfile() async {
     String newUsername = usernameController.text.trim();
     String phoneNumberText = phoneNumberController.text.trim();
-
     final authToken = sessionController.token.value;
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;

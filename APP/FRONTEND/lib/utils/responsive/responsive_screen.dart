@@ -9,11 +9,11 @@ class ResponsiveScreen extends StatelessWidget {
   final Color? backgroundColor;
 
   const ResponsiveScreen({
-    Key? key,
+    super.key,
     required this.builder,
     this.safeArea = true,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +41,11 @@ class ResponsiveLayoutBuilder extends StatelessWidget {
   final Widget Function(BuildContext context, Size size)? desktopBuilder;
 
   const ResponsiveLayoutBuilder({
-    Key? key,
+    super.key,
     this.mobileBuilder,
     this.tabletBuilder,
     this.desktopBuilder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

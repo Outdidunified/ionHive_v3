@@ -62,6 +62,12 @@ class AuthController extends GetxController {
           emailValidationError; // Show email validation error immediately
       return;
     }
+    if (!isChecked.value) {
+      CustomSnackbar.showError(
+        message: "Please accept the terms and conditions.",
+      );
+      return;
+    }
 
     // Clear any previous validation errors before starting the OTP request
     validationError.value = null;
@@ -171,8 +177,11 @@ class AuthController extends GetxController {
         // Clear OTP input
         otpController.clear();
 
-        // Navigate to the landing page
-        Get.offAll(() => LandingPage());
+        Get.offAll(
+          () => LandingPage(),
+          transition: Transition.rightToLeft,
+          duration: const Duration(milliseconds: 300),
+        );
       } else {
         otpValidationError.value = authenticateResponse.message;
       }
@@ -249,8 +258,11 @@ class AuthController extends GetxController {
               token: token!,
             );
 
-            // Navigate to the landing page
-            Get.offAll(() => LandingPage());
+            Get.offAll(
+              () => LandingPage(),
+              transition: Transition.rightToLeft,
+              duration: const Duration(milliseconds: 300),
+            );
           } else {
             CustomSnackbar.showError(
                 message:
@@ -314,8 +326,11 @@ class AuthController extends GetxController {
             token: token!,
           );
 
-          // Navigate to the landing page
-          Get.offAll(() => LandingPage());
+          Get.offAll(
+            () => LandingPage(),
+            transition: Transition.rightToLeft,
+            duration: const Duration(milliseconds: 300),
+          );
         } else {
           CustomSnackbar.showError(
             message:

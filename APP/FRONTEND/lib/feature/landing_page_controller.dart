@@ -24,8 +24,22 @@ class LandingPageController extends GetxController {
   }
 
   void changePage(int index) {
-    // Just update the index - the PageView will handle the animation
-    pageIndex.value = index;
+    // Prevent changing page during a build cycle
+    if (pageIndex.value != index) {
+      try {
+        // Only update if the index is actually changing
+        pageIndex.value = index;
+
+        // Log the change for debugging
+        debugPrint('LandingPageController: Changed page to $index');
+
+        // Force update to ensure UI reflects the change
+        update();
+      } catch (e) {
+        // Log any errors that occur during page change
+        debugPrint('LandingPageController: Error changing page: $e');
+      }
+    }
   }
 
   void clearPageIndex() {

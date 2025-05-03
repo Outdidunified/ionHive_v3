@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:ionhive/feature/ChargingStation/data/url.dart';
 import 'package:ionhive/utils/exception/exception.dart';
 
-class CharginStationapicalls{
+class CharginStationapicalls {
   String _getDefaultErrorMessage(int statusCode) {
     switch (statusCode) {
       case 400:
@@ -38,8 +38,8 @@ class CharginStationapicalls{
     );
   }
 
-  Future<Map<String, dynamic>> savechargingstations(
-      int user_id, String email, String authToken , int station_id,bool status ) async {
+  Future<Map<String, dynamic>> savechargingstations(int user_id, String email,
+      String authToken, int station_id, bool status) async {
     final url = Chargingstationurl.savestations;
 
     try {
@@ -49,11 +49,15 @@ class CharginStationapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({'email_id': email, 'user_id': user_id,'station_id':station_id,'status':true}),
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'station_id': station_id,
+          'status': true
+        }),
       );
       final data = jsonDecode(response.body);
-      print('fetching save stations body : $data');
-      print(response.statusCode);
+      debugPrint('fetching save stations body : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -67,9 +71,8 @@ class CharginStationapicalls{
     }
   }
 
-
-  Future<Map<String, dynamic>> removechargingstation(
-      int user_id, String email, String authToken , int station_id,bool status ) async {
+  Future<Map<String, dynamic>> removechargingstation(int user_id, String email,
+      String authToken, int station_id, bool status) async {
     final url = Chargingstationurl.removestation;
 
     try {
@@ -79,11 +82,15 @@ class CharginStationapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({'email_id': email, 'user_id': user_id,'station_id':station_id,'status':false}),
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'station_id': station_id,
+          'status': false
+        }),
       );
       final data = jsonDecode(response.body);
-      print('fetching remove stations body : $data');
-      print(response.statusCode);
+      debugPrint('fetching remove stations body : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -97,8 +104,8 @@ class CharginStationapicalls{
     }
   }
 
-  Future<Map<String, dynamic>> fetchspecificchargers(
-      int user_id, String email, String authToken , int station_id,String location_id ) async {
+  Future<Map<String, dynamic>> fetchspecificchargers(int user_id, String email,
+      String authToken, int station_id, String location_id) async {
     final url = Chargingstationurl.fetchspecificchargers;
 
     try {
@@ -108,11 +115,15 @@ class CharginStationapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({'email_id': email, 'user_id': user_id,'station_id':station_id,'location_id':location_id}),
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'station_id': station_id,
+          'location_id': location_id
+        }),
       );
       final data = jsonDecode(response.body);
-      print('fetching specific station cahrgers body : $data');
-      print(response.statusCode);
+      debugPrint('fetching specific station cahrgers body : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -126,8 +137,8 @@ class CharginStationapicalls{
     }
   }
 
-  Future<Map<String, dynamic>> savedevices(
-      int user_id, String email, String authToken , String charger_id,bool status ) async {
+  Future<Map<String, dynamic>> savedevices(int user_id, String email,
+      String authToken, String charger_id, bool status) async {
     final url = Chargingstationurl.savechargers;
 
     try {
@@ -137,11 +148,15 @@ class CharginStationapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({'email_id': email, 'user_id': user_id,'charger_id':charger_id,'status':true}),
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'charger_id': charger_id,
+          'status': true
+        }),
       );
       final data = jsonDecode(response.body);
-      print('fetching save charger response body : $data');
-      print(response.statusCode);
+      debugPrint('fetching save charger response body : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -155,8 +170,8 @@ class CharginStationapicalls{
     }
   }
 
-  Future<Map<String, dynamic>> removedevices(
-      int user_id, String email, String authToken , String charger_id,bool status ) async {
+  Future<Map<String, dynamic>> removedevices(int user_id, String email,
+      String authToken, String charger_id, bool status) async {
     final url = Chargingstationurl.removechargers;
 
     try {
@@ -166,11 +181,15 @@ class CharginStationapicalls{
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({'email_id': email, 'user_id': user_id,'charger_id':charger_id,'status':false}),
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'charger_id': charger_id,
+          'status': false
+        }),
       );
       final data = jsonDecode(response.body);
-      print('fetching save charger response body : $data');
-      print(response.statusCode);
+      debugPrint('fetching save charger response body : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
