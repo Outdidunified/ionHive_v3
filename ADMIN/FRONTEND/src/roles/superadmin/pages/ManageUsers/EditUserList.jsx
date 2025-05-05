@@ -9,7 +9,6 @@ import InputField from '../../../../utils/InputField';
 const EditUserList = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
 
-
     const {
         editManageUser,
         setPhoneNo,
@@ -22,12 +21,10 @@ const EditUserList = ({ userInfo, handleLogout }) => {
         errorMessage,
         selectStatus, dataItem, setPassword, loading
     } = useEditUser(userInfo)
+
     const backManageDevice = () => {
         navigate('/superadmin/ViewUserList');
     };
-
-    // Back view manage user
-    
 
 
     return (

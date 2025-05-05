@@ -7,7 +7,7 @@ import { useViewManageDevice } from '../../hooks/ManageDevice/ViewManageDeviceHo
 import { formatTimestamp } from '../../../../utils/formatTimestamp';
 const ViewManageDevice = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
-    const { newUser, setNewUser } = useViewManageDevice();
+    const { newUser } = useViewManageDevice();
 
     // Back manage device
     const handleBack = () => {

@@ -4,7 +4,6 @@ import Footer from '../../components/Footer';
 import useAssignuser from '../../hooks/Assignuser/Assignuserhooks';
 import InputField from '../../../../utils/InputField';
 
-
 const Assignuser = ({ userInfo, handleLogout }) => {
   const {
     usersToUnassign,

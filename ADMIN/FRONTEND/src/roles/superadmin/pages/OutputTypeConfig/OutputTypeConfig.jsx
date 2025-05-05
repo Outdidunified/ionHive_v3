@@ -28,9 +28,6 @@ const OutputTypeConfig = ({ userInfo, handleLogout }) => {
         setEditOutputTypeConfig, editOutputTypeConfig, changeDeActivate,
         changeActivate, setOutputTypeConfig,
         isUpdating, isloading
-
-
-
     } = useOutputTypeConfig(userInfo);
 
     
