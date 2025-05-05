@@ -15,4 +15,17 @@ class Chargingpagerepo {
     }
   }
 
+  Future<Fetchlaststatusresponse> fetchlastdata(
+      int user_id, String email, String authToken, int connector_id, String charger_id,int connector_type) async {
+    try {
+      final responseJson =
+      await _api.fetchlaststaus(user_id, email, authToken, connector_id, charger_id,connector_type);
+      return Fetchlaststatusresponse.fromJson(responseJson);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+
+
 }

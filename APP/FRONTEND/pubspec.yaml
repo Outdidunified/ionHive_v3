@@ -46,6 +46,7 @@ dependencies:
   share_plus: ^7.2.1
   mobile_scanner: ^3.5.2
   qr_flutter: ^4.1.0
+  web_socket_channel: ^2.4.0
 
 
 
