@@ -11,13 +11,12 @@ const useAllocatedChargers = (userInfo) => {
     const handleSearch = (e) => {
         setSearchQuery(e.target.value);
     };
-
+    
     const filterChargers = useCallback(() => {
         return allocatedChargers.filter((charger) =>
             charger.charger_id.toString().toLowerCase().includes(searchQuery.toLowerCase())
         );
     }, [allocatedChargers, searchQuery]);
-
 
     const fetchAllocatedChargers = useCallback(() => {
         if (!fetchAllocatedChargerDetailsCalled.current) {

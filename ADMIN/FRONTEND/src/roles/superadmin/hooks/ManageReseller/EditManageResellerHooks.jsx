@@ -81,9 +81,6 @@ const useEditResellerForm = (userInfo) => {
     }
   };
   
-  
-      
-
     useEffect(() => {
         setInitialValues({
             reseller_phone_no: dataItem?.reseller_phone_no || '',

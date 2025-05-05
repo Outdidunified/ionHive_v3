@@ -12720,8 +12720,8 @@ input[type="button"].btn-block {
 .has-validation.asColorPicker-wrap > .custom-select:nth-last-child(n + 3),
 .input-group.has-validation > .custom-file:nth-last-child(n + 3) .custom-file-label::after,
 .has-validation.asColorPicker-wrap > .custom-file:nth-last-child(n + 3) .custom-file-label::after {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  border-top-right-radius: 10;
+  border-bottom-right-radius: 10;
 }
 
 .input-group-prepend,
@@ -21079,7 +21079,7 @@ code {
   font-size: 0.875rem;
   line-height: 1;
   font-weight: 400;
-  border-radius: 15px;
+  border-radius: 12px;
   /* Buttons with only icons */
   /* Buttons with icon and text */
 }
@@ -30819,7 +30819,7 @@ div.tagsinput span.tag a {
 }
 
 .input-group input {
-  border-radius: 10px;
+  border-radius: 12px;
 }
 
 
