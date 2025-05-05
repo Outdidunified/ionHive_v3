@@ -2,13 +2,14 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useViewManageUser from '../../hooks/ManageUser/ViewManageDeviceHooks';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 
 const ViewManageUser = ({ userInfo, handleLogout }) => {
     const {
         newUser,
     setNewUser,
     handleBack,
-    handleEditUser,formatTimestamp
+    handleEditUser,
     }=useViewManageUser(userInfo);
     return (
         <div className='container-scroller'>

@@ -2,12 +2,12 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useViewAlloc from '../../hooks/ManageDevice/ViewAllocHooks';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 
 
 const ViewAlloc = ({ userInfo, handleLogout }) => {
     const {
         newDevice,
-        formatTimestamp,
         goBack
     } = useViewAlloc();
     return (

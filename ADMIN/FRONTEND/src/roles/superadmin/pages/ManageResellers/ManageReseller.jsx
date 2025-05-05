@@ -30,7 +30,7 @@ const ManageReseller = ({ userInfo, handleLogout }) => {
   };
 
   // Using the custom hook
-  const { loading, error, posts, handleSearchInputChange, filteredData } = useResellerData();
+  const { loading, error, posts, handleSearchInputChange } = useResellerData();
 
   return (
     <div className='container-scroller'>

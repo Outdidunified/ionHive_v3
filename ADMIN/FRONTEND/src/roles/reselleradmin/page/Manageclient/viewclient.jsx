@@ -3,12 +3,12 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useViewClient from '../../hooks/ManageClient/ViewClientHooks';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 const ViewClient = ({ userInfo, handleLogout }) => {
     const {
         newUser,
         goBack,
         navigateToEditUser,
-        formatTimestamp,
     } = useViewClient(userInfo);
 
     return (

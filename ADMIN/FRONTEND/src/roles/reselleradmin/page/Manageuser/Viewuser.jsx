@@ -4,13 +4,13 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useViewuser from '../../hooks/ManageUser/ViewuserHooks';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 
 const Viewuser = ({ userInfo, handleLogout }) => {
     const {
         newUser,
         goBack,
         navigateToEditUser,
-        formatTimestamp
     } = useViewuser(userInfo);
     return (
         <div className='container-scroller'>

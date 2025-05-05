@@ -2,11 +2,11 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Sidebar from '../../components/Sidebar';
 import useViewuser from '../../hooks/ManageUser/ViewUserHooks';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 
 const Viewuser = ({ userInfo, handleLogout }) => {
    const {
     newUser,
-    formatTimestamp,
     goBack,
     navigateToEditUser
 

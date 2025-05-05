@@ -6,7 +6,6 @@ import ReusableButton from '../../../../utils/ReusableButton';
 import InputField from '../../../../utils/InputField';
 const Edituser = ({ userInfo, handleLogout }) => {
     const {
-
         username, setUsername,
         email_id,
         password, setPassword,

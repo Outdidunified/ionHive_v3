@@ -2,10 +2,11 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useViewAss from '../../hooks/ManageAssociation/viewAssociationHooks';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 
 const ViewAss = ({ userInfo, handleLogout }) => {
    const {
-    newass,handleEdit,formatTimestamp,goBack
+    newass,handleEdit,goBack
 
    }=useViewAss(userInfo);
   

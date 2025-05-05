@@ -3,12 +3,12 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useSessionHistoryClient from '../../hooks/ManageClient/SessionHistoryClientHooks';
 import InputField from '../../../../utils/InputField';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 const Sessionhistoryclient = ({ userInfo, handleLogout }) => {
     const {
         sessions,
         handleSearchInputChange,
         goBack,
-        formatTimestamp
     } = useSessionHistoryClient();
 
     return (

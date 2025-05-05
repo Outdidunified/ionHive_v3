@@ -2,13 +2,13 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useViewManageDevice from '../../hooks/ManageDevice/ViewManageDeviceHooks';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 
 const ViewManageDevice = ({ userInfo, handleLogout }) => {
       const {
         deviceData,
         handleBack,
         handleEditManageDevice,
-        formatTimestamp
       }=useViewManageDevice(userInfo)
     return (
         <div className='container-scroller'>

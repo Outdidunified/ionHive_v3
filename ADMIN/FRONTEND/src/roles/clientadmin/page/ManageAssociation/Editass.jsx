@@ -12,12 +12,11 @@ const Editass = ({ userInfo, handleLogout }) => {
         association_phone_no, setAssociationPhoneNo,
         association_wallet, setAssociationWallet,
         association_address, setAssociationAddress,
-        status, setStatus,
+        status, 
         errorMessage, setErrorMessage,
-        initialValues, setInitialValues,
         isModified, handleStatusChange,
         updateAssociationDetails,
-        goBack, editBack, loading
+        goBack, loading
 
     } = useEditass(userInfo)
     return (

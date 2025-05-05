@@ -4,6 +4,7 @@ import Footer from '../../components/Footer';
 import useManageTagID from '../../hooks/ManageTagID/ManageTagIDhooks';
 import InputField from '../../../../utils/InputField';
 import ReusableButton from '../../../../utils/ReusableButton';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 
 const ManageTagID = ({ userInfo, handleLogout }) => {
 
@@ -14,7 +15,6 @@ const ManageTagID = ({ userInfo, handleLogout }) => {
     initialTagID,
     initialTagIDExpiryDateD, 
     handleSearchInputChange,
-    formatTimestamp,
     closeEditModal,
     closeAddModal,
     modalAddStyle ,add_tag_id, setTagID,

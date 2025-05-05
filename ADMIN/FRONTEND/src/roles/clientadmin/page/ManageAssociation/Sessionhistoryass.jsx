@@ -3,14 +3,12 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useSessionhistoryass from '../../hooks/ManageAssociation/SessionHistoryAssociationHooks';
 import InputField from '../../../../utils/InputField';
-
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 const Sessionhistoryass = ({ userInfo, handleLogout }) => {
     const {
         sessions,
-        setSessions,
         handleSearchInputChange,
         goBack,
-        formatTimestamp
     }=useSessionhistoryass(userInfo)
     return (
         <div className='container-scroller'>

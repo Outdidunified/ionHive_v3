@@ -53,7 +53,7 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <ReusableButton className="btn btn-success" onClick={backManageDevice}>Back</ReusableButton>
+                                            <button type="button" className="btn btn-success" onClick={backManageDevice}>Back</button>
                                         </div>
                                     </div>
                                 </div>

@@ -4,13 +4,12 @@ import Sidebar from '../../components/Sidebar';
 import Footer from '../../components/Footer';
 import useViewManageReseller from '../../hooks/ManageReseller/ViewManageResellerHooks';
 import { useNavigate } from 'react-router-dom';
-
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 const ViewManageReseller = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
 
     const {
-        newUser,
-        formatTimestamp,
+        newUser
     } = useViewManageReseller();
 
     const handleBack = () => {

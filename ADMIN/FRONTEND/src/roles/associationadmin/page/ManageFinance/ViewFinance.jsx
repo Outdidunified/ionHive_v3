@@ -2,10 +2,12 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import useViewFinance from '../../hooks/ManageFinance/ViewFinanceHooks';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
+
 const ViewFinance = ({ userInfo, handleLogout }) => {
    const {
     newfinance,
-    formatTimestamp,goBack,handleEdit
+   goBack,handleEdit
    }=useViewFinance(userInfo)
 
     return (

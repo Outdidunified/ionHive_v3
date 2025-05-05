@@ -1,47 +1,16 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-
+import React from 'react';
+import { useResellerAdminLogin } from '../hooks/login/ResellerLoginHooks';
+import ReusableButton from '../../../utils/ReusableButton';
 const Login = ({ handleLogin }) => {
-  const [email, setEmail] = useState('');
-  const [passwords, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-
-  // login
-  const handleLoginFormSubmit = async (e) => {
-    e.preventDefault();
-
-    // Validate 4-digit password
-    const passwordRegex = /^\d{4}$/;
-    if (!passwords || !passwordRegex.test(passwords)) {
-      setErrorMessage('Password number must be a 4-digit number.');
-      return;
-    }
-
-    try {
-      const parsedPassword = parseInt(passwords);
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/reselleradmin/CheckLoginCredentials`,
-        { email, password: parsedPassword }
-      );
-
-      if (response.status === 200 && response.data.status === 'Success') {
-        const userData = response.data;
-        handleLogin(userData); // Pass full data including user and token
-        setErrorMessage('');
-        setSuccessMessage('Login successful!');
-      } else {
-        setErrorMessage('Login failed. ' + (response.data.message || ''));
-      }
-    } catch (error) {
-      setSuccessMessage('');
-      if (error.response) {
-        setErrorMessage(`Error: ${error.response.data.message || error.response.statusText}`);
-      } else {
-        setErrorMessage('An error occurred during login. Please try again later.');
-      }
-    }
-  };
+  const {
+    email,
+    passwords,
+    errorMessage,
+    successMessage,
+    setEmail,
+    setPassword,
+    handleLoginFormSubmit,loading
+  } = useResellerAdminLogin(handleLogin);
 
   return (
     <div className="container-scroller">
@@ -79,7 +48,9 @@ const Login = ({ handleLogin }) => {
                   {errorMessage && <p className="text-danger">{errorMessage}</p>}<br />
                   {successMessage && <p className="text-success">{successMessage}</p>}<br />
                   <div className="mt-3">
-                    <button type="submit" className="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn">SIGN IN</button>
+                    <ReusableButton type="submit"   className="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn signin-btn"
+                    loading={loading}
+                    >SIGN IN</ReusableButton>
                   </div>
                 </form>
               </div>

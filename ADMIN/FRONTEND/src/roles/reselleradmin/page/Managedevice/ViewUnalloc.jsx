@@ -1,11 +1,11 @@
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import useViewUnalloc from '../../hooks/ManageDevice/ViewunAllocHooks';
+import useViewUnalloc from '../../hooks/ManageDevice/ViewUnAllocHooks';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 const ViewUnalloc = ({ userInfo, handleLogout }) => {
     const {
         newDevice,
-        formatTimestamp,
         goBack
     } = useViewUnalloc(userInfo);
     return (

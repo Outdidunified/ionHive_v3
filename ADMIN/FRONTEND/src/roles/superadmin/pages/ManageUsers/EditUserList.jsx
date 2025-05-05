@@ -27,9 +27,7 @@ const EditUserList = ({ userInfo, handleLogout }) => {
     };
 
     // Back view manage user
-    const editBackManageDevice = () => {
-        navigate('/superadmin/ManageUsers');
-    };
+    
 
 
     return (

@@ -5,12 +5,12 @@ import Footer from '../../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import useSessionHistory from '../../hooks/ManageReseller/SessionHistoryHooks';
 import InputField from '../../../../utils/InputField';
+import { formatTimestamp } from '../../../../utils/formatTimestamp';
 const SessionHistory = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
     const {
         posts,
         handleSearchInputChange,
-        formatTimestamp,
         dataItem,
     } = useSessionHistory();
 
