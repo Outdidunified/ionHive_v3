@@ -538,7 +538,7 @@ const updateConnectorUser = async (req, res) => {
                 const result = await sendPreparingStatus(wsConnections, charger_id, connector_id);
                 if (!result) {
                     logger.loggerInfo('Device not connected to the server');
-                    return res.status(500).json({ error: true, message: 'Device not connected to the server' });
+                    return res.status(401).json({ error: true, message: 'Device not connected to the server' });
                 }
             }
         }
