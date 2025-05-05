@@ -23,13 +23,15 @@ const useManageUserRole = (userInfo) => {
 
     const fetchUserRoles = async () => {
         try {
+          setLoading(true)
             const res = await axiosInstance.get('/superadmin/FetchUserRoles');
             setData(res.data.data);
-            setLoading(false);
+            setPosts(res.data.data);
         } catch (err) {
             console.error('Error fetching data:', err);
             setError('Error fetching data. Please try again.');
-            setLoading(false);
+        }finally{
+          setLoading(false)
         }
     };
 
