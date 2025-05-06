@@ -525,10 +525,10 @@ const endChargingSession = async (req, res) => {
                 message: `ChargerID - ${charger_id} not found in charger_details`
             });
         }
-
-        // Check if the current user matches the email_id provided
-        if (chargerDetails[connectorField] !== email_id) {
-            logger.loggerWarn(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - The email does not match the active user.`);
+        //TODO - go back of page 
+        // Check if the current user matches the email_id provided  // 
+        if (chargerDetails[connectorField] !== null && chargerDetails[connectorField] !== email_id) {
+            logger.loggerWarn(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - The email: ${email_id} does not match the active user:  ${chargerDetails[connectorField]}.`);
             return res.status(400).json({
                 error: true,
                 message: 'The provided email does not match the active user for this connector.'

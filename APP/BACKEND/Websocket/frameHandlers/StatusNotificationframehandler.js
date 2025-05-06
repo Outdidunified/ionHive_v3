@@ -1,6 +1,7 @@
 const dbService = require("../services/dbService");
 const logger = require('../../utils/logger');
 const { framevalidation } = require("../validation/framevalidation");
+// const { broadcastMessage } = require("../WebsocketHandler");
 
 const validateStatusnotification = (data) => {
     return framevalidation(data, "StatusNotification.json");
@@ -21,7 +22,9 @@ const handleStatusNotification = async (
     chargerStartTime,
     chargerStopTime,
     meterValuesMap,
-    clientIpAddress
+    clientIpAddress,
+    ws,
+    ClientWss
 ) => {
     const formattedDate = new Date().toISOString();
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
@@ -90,6 +93,18 @@ const handleStatusNotification = async (
             }
             timeoutId = setTimeout(async () => {
                 const result = await dbService.updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
+                // if (result) {
+                //     // Custom frame to broadcast when update is successful
+                //     const customFrame = {
+                //         type: "forceDisconnect",
+                //         connectorId: connectorId,
+                //         message: "Session cleared. Please return to home screen."
+                //     };
+
+                //     broadcastMessage(uniqueIdentifier, customFrame, ws, ClientWss);
+                //     logger.loggerInfo(`Broadcasted disconnect message for charger ${uniqueIdentifier}, connector ${connectorId}`);
+                // }
+
                 logger.loggerInfo(`ChargerID ${uniqueIdentifier} - End charging session ${result ? "updated" : "not updated"}`);
             }, 50000);
 

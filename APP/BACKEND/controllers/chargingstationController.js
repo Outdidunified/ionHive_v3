@@ -535,7 +535,7 @@ const updateConnectorUser = async (req, res) => {
             const fetchChargerStatus = await chargerStatusCollection.findOne({ charger_id: charger_id, connector_id: connector_id, connector_type: 1 });
 
             if (fetchChargerStatus && fetchChargerStatus.charger_status !== 'Charging' && fetchChargerStatus.charger_status !== 'Preparing') {
-                const result = await sendPreparingStatus(wsConnections, charger_id, connector_id);
+                const result = await sendPreparingStatus(wsConnections, charger_id, connector_id, chargerDetails.vendor);
                 if (!result) {
                     logger.loggerInfo('Device not connected to the server');
                     return res.status(401).json({ error: true, message: 'Device not connected to the server' });
@@ -596,7 +596,7 @@ const updateConnectorUser = async (req, res) => {
 
 
 // Helper function to send preparing status
-async function sendPreparingStatus(wsConnections, charger_id, connector_id) {
+async function sendPreparingStatus(wsConnections, charger_id, connector_id, vendor) {
     try {
         const wsToSendTo = wsConnections.get(charger_id);
 
@@ -605,14 +605,16 @@ async function sendPreparingStatus(wsConnections, charger_id, connector_id) {
             return false;
         }
 
-        // Send a message to prepare the connector
-        const preparingMessage = {
-            type: 'preparing',
+        const preparingMessage = [2, charger_id, "DataTransfer", {
+            vendorId: vendor,
+            messageId: "TEST",
+            data: "Preparing",
             connectorId: Number(connector_id)
-        };
+        }];
 
         wsToSendTo.send(JSON.stringify(preparingMessage));
-        logger.loggerInfo(`Preparing message sent for charger ID: ${charger_id}, connector ID: ${connector_id}`);
+
+        logger.loggerInfo(`Preparing message sent for charger ID: ${charger_id}, connector ID: ${connector_id}, message: ${JSON.stringify(preparingMessage)}`);
 
         return true;
     } catch (error) {
