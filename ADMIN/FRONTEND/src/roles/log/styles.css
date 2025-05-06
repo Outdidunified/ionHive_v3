@@ -1,0 +1,53 @@
+
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .searchIconCss{
+    border-radius: 10px 0 0 0; 
+    border-color:#57B657 !important;
+    background-color:#57B657;
+  }
+
+  .searchInputCss{
+    border-radius: 0 0 10px 0;
+    border-color:#57B657;
+  }
+
+  /* Default for window view */
+  .table-responsive {
+    max-height: 500px;
+  }
+
+  @media (min-width: 768px) and (max-width: 991.98px) {
+    /* iPad Mini */
+    .table-responsive {
+      max-height: 490px;
+    }
+  }
+
+  @media (min-width: 1024px) and (max-width: 1366px) {
+    /* iPad Pro */
+    .table-responsive {
+      max-height: 800px;
+    }
+  }
+
+  @media (min-width: 820px) and (max-width: 1199.98px) {
+        /* iPad Air */
+    .table-responsive {
+      max-height: 660px;
+    }
+  }

@@ -5,13 +5,12 @@ const initializeDB = async () => {
     if (!db) {
         db = await db_conn.connectToDatabase();
     }
+    return db;
 };
 initializeDB(); // Initialize the DB connection once
 
-
-const EARTH_RADIUS = 6371; // Earth radius in KM
-const RADIUS_KM = 80; // Search radius
-
+const EARTH_RADIUS_KM = 6371;
+const RADIUS_KM = 100;
 
 // MANAGE GENERIC FILTER  //TODO - 1
 // Saved Filter
@@ -73,14 +72,14 @@ const SaveSearchFilter = async (req, res) => {
         );
 
         if (updateResult.modifiedCount === 0) {
-            logger.warn(`Failed to update search filters for user ${user_id} with email ${email_id}.`);
+            logger.loggerWarn(`Failed to update search filters for user ${user_id} with email ${email_id}.`);
             return res.status(200).json({
                 error: false,
                 message: 'Failed to update search filters. (no changes found)',
             });
         }
 
-        logger.info(`Search filters updated successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Search filters updated successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
             message: 'Search filters updated successfully',
@@ -89,7 +88,7 @@ const SaveSearchFilter = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`SaveSearchFilter - ${error.message}`);
+        logger.loggerError(`SaveSearchFilter - ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -175,7 +174,7 @@ const fetchSavedSearchFilter = async (req, res) => {
             return { ...charger, status: status || null, unit_price: unitPrice };
         }));
 
-        logger.info('Successfully fetched favorite chargers', { user_id, count: detailedFavChargers.length });
+        logger.loggerSuccess('Successfully fetched favorite chargers', { user_id, count: detailedFavChargers.length });
 
         return res.status(200).json({
             error: false,
@@ -185,7 +184,7 @@ const fetchSavedSearchFilter = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error('Error fetching favorite chargers', { error: error.message });
+        logger.loggerError('Error fetching favorite chargers', { error: error.message });
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -196,15 +195,12 @@ const fetchSavedSearchFilter = async (req, res) => {
 
 
 // STATIONS
-
 // Function to find nearby stations
-
+// Function to find nearby stations
 const getNearbyStations = async (req, res) => {
     try {
         const { latitude, longitude, user_id, email_id } = req.body;
 
-
-        // Validate required parameters
         if (!latitude || !longitude || !user_id || !email_id) {
             return res.status(400).json({
                 error: true,
@@ -212,57 +208,88 @@ const getNearbyStations = async (req, res) => {
             });
         }
 
-        // Ensure database connection exists
         if (!db) {
-            logger.error("Database connection failed");
+            logger.loggerError("Database connection failed");
             return res.status(500).json({
                 error: true,
                 message: "Database connection failed. Please try again later.",
             });
         }
 
-
+        const lat = parseFloat(latitude);
+        const lon = parseFloat(longitude);
         const stationsCollection = db.collection("charging_stations");
+        const usersCollection = db.collection("users");
 
-        // Fetch nearby stations using aggregation
+        // Step 1: Fetch the user's saved stations (favStations)
+        const user = await usersCollection.findOne({ user_id: user_id, email_id: email_id });
+        if (!user) {
+            return res.status(404).json({
+                error: true,
+                message: "User not found",
+            });
+        }
+
+        const favStations = user.favStations || [];
+        const savedStationIds = favStations
+            .filter(station => station.status === true) // Only include stations with status: true
+            .map(station => station.station_id);
+
+        // Constants for distance calculation
+        const EARTH_RADIUS_KM = 6371; // Radius of Earth in KM
+        const PI = Math.PI;
+        const DEG_TO_RAD = PI / 180;
+
+        const userLatRad = lat * DEG_TO_RAD;
+        const userLonRad = lon * DEG_TO_RAD;
+
+        // Step 2: Fetch nearby stations
         const nearbyStations = await stationsCollection.aggregate([
             {
                 $addFields: {
-                    latitudeRadians: { $multiply: ["$latitude", Math.PI / 180] },
-                    longitudeRadians: { $multiply: ["$longitude", Math.PI / 180] },
-                    userLatitudeRadians: { $multiply: [latitude, Math.PI / 180] },
-                    userLongitudeRadians: { $multiply: [longitude, Math.PI / 180] }
+                    latRad: { $multiply: ["$latitude", DEG_TO_RAD] },
+                    lonRad: { $multiply: ["$longitude", DEG_TO_RAD] },
                 }
             },
             {
                 $addFields: {
-                    distance: {
-                        $multiply: [
-                            EARTH_RADIUS,
+                    dLat: { $subtract: ["$latRad", userLatRad] },
+                    dLon: { $subtract: ["$lonRad", userLonRad] }
+                }
+            },
+            {
+                $addFields: {
+                    a: {
+                        $add: [
+                            { $pow: [{ $sin: { $divide: ["$dLat", 2] } }, 2] },
                             {
-                                $acos: {
-                                    $add: [
-                                        {
-                                            $multiply: [
-                                                { $sin: "$latitudeRadians" },
-                                                { $sin: "$userLatitudeRadians" }
-                                            ]
-                                        },
-                                        {
-                                            $multiply: [
-                                                { $cos: "$latitudeRadians" },
-                                                { $cos: "$userLatitudeRadians" },
-                                                { $cos: { $subtract: ["$longitudeRadians", "$userLongitudeRadians"] } }
-                                            ]
-                                        }
-                                    ]
-                                }
+                                $multiply: [
+                                    { $cos: userLatRad },
+                                    { $cos: "$latRad" },
+                                    { $pow: [{ $sin: { $divide: ["$dLon", 2] } }, 2] }
+                                ]
                             }
                         ]
                     }
                 }
             },
-            { $match: { distance: { $lte: RADIUS_KM } } }, // Filter stations within radius
+            {
+                $addFields: {
+                    distance: {
+                        $round: [
+                            {
+                                $multiply: [
+                                    2,
+                                    EARTH_RADIUS_KM,
+                                    { $atan2: [{ $sqrt: "$a" }, { $sqrt: { $subtract: [1, "$a"] } }] }
+                                ]
+                            },
+                            2
+                        ]
+                    }
+                }
+            },
+            { $match: { distance: { $lte: 100 } } }, // RADIUS_KM can be replaced here
             {
                 $lookup: {
                     from: "charger_details",
@@ -284,8 +311,7 @@ const getNearbyStations = async (req, res) => {
                     latitude: 1,
                     longitude: 1,
                     charger_type: 1,
-                    // chargers: 1,
-                    distance: 1, // Include calculated distance
+                    distance: 1,
                     charger_details: {
                         charger_id: 1,
                         model: 1,
@@ -303,22 +329,31 @@ const getNearbyStations = async (req, res) => {
                         status: 1,
                         address: 1,
                         landmark: 1
-                    } // Include only necessary charger details
+                    }
                 }
             },
-            { $sort: { distance: 1 } } // Sort nearest first
+            { $sort: { distance: 1 } }
         ]).toArray();
 
-        logger.info(`Found ${nearbyStations.length} nearby stations`);
+        // Step 3: Add saved_station field to each nearby station
+        const updatedStations = nearbyStations.map(station => {
+            const isSaved = savedStationIds.includes(station.station_id);
+            return {
+                ...station,
+                saved_station: isSaved // Add saved_station key with true/false
+            };
+        });
+
+        logger.loggerSuccess(`Found ${updatedStations.length} nearby stations & retrieved successfully`);
 
         return res.status(200).json({
             error: false,
             message: "Nearby charging stations retrieved successfully",
-            stations: nearbyStations
+            stations: updatedStations
         });
 
     } catch (error) {
-        logger.error(`Error fetching nearby stations: ${error.message}`);
+        logger.loggerError(`Error fetching nearby stations: ${error.message}`);
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",
@@ -327,193 +362,147 @@ const getNearbyStations = async (req, res) => {
     }
 };
 
-// const getNearbyStations = async (req, res) => {
-//     try {
-//         const { latitude, longitude, user_id, email_id } = req.body;
+// MANAGE ACTIVE CHARGER'S OF SPECIFIC USER
+// Fetch active charging sessions of a user
+const fetchActiveChargersOfUser = async (req, res) => {
+    try {
+        const { email_id } = req.body;
 
-//         logger.info(`Received request for nearby stations - User: ${user_id}, Email: ${email_id}`);
+        if (!db) {
+            logger.loggerError('Database connection failed.');
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.'
+            });
+        }
 
-//         if (!latitude || !longitude || !user_id || !email_id) {
-//             logger.warn("Missing required parameters in request body");
-//             return res.status(400).json({
-//                 error: true,
-//                 message: "Latitude, Longitude, User ID, and Email are required",
-//             });
-//         }
+        const userDetailsCollection = db.collection('users');
+        const chargerDetailsCollection = db.collection('charger_details');
+        const chargerStatusCollection = db.collection('charger_status');
+        const financeDetailsCollection = db.collection('financeDetails');
 
-//         if (!db) {
-//             logger.error("Database connection failed");
-//             return res.status(500).json({
-//                 error: true,
-//                 message: "Database connection failed. Please try again later.",
-//             });
-//         }
+        // Fetch user details
+        const user = await userDetailsCollection.findOne({ email_id: email_id });
+        if (!user) {
+            logger.loggerWarn(`User not found with email: ${email_id}`);
+            return res.status(404).json({
+                error: true,
+                message: 'User not found'
+            });
+        }
 
-//         logger.info("Database connection successful. Fetching nearby stations...");
+        // Fetch all chargers with active status
+        const allChargers = await chargerDetailsCollection.find({ status: true }).toArray();
 
-//         const stationsCollection = db.collection("charging_stations");
-//         const nearbyStations = await stationsCollection.aggregate([
-//             {
-//                 $addFields: {
-//                     latitudeRadians: { $multiply: ["$latitude", Math.PI / 180] },
-//                     longitudeRadians: { $multiply: ["$longitude", Math.PI / 180] },
-//                     userLatitudeRadians: { $multiply: [latitude, Math.PI / 180] },
-//                     userLongitudeRadians: { $multiply: [longitude, Math.PI / 180] }
-//                 }
-//             },
-//             {
-//                 $addFields: {
-//                     distance: {
-//                         $multiply: [
-//                             EARTH_RADIUS,
-//                             {
-//                                 $acos: {
-//                                     $add: [
-//                                         {
-//                                             $multiply: [
-//                                                 { $sin: "$latitudeRadians" },
-//                                                 { $sin: "$userLatitudeRadians" }
-//                                             ]
-//                                         },
-//                                         {
-//                                             $multiply: [
-//                                                 { $cos: "$latitudeRadians" },
-//                                                 { $cos: "$userLatitudeRadians" },
-//                                                 { $cos: { $subtract: ["$longitudeRadians", "$userLongitudeRadians"] } }
-//                                             ]
-//                                         }
-//                                     ]
-//                                 }
-//                             }
-//                         ]
-//                     }
-//                 }
-//             },
-//             { $match: { distance: { $lte: RADIUS_KM } } }, // Filter within radius
-//             {
-//                 $lookup: {
-//                     from: "charger_details",
-//                     localField: "chargers",
-//                     foreignField: "charger_id",
-//                     as: "charger_details"
-//                 }
-//             },
-//             { $unwind: { path: "$charger_details", preserveNullAndEmptyArrays: true } },
-//             {
-//                 $lookup: {
-//                     from: "socket_gun_config",
-//                     localField: "charger_details.charger_id",
-//                     foreignField: "charger_id",
-//                     as: "socket_gun_config" // Ensure it matches in $map
-//                 }
-//             },
-//             { $unwind: { path: "$socket_gun_config", preserveNullAndEmptyArrays: true } },
-//             {
-//                 $group: {
-//                     _id: "$station_id",
-//                     station_id: { $first: "$station_id" },
-//                     location_id: { $first: "$location_id" },
-//                     station_address: { $first: "$station_address" },
-//                     landmark: { $first: "$landmark" },
-//                     network: { $first: "$network" },
-//                     availability: { $first: "$availability" },
-//                     accessibility: { $first: "$accessibility" },
-//                     latitude: { $first: "$latitude" },
-//                     longitude: { $first: "$longitude" },
-//                     charger_type: { $first: "$charger_type" },
-//                     chargers: { $first: "$chargers" },
-//                     distance: { $first: "$distance" },
-//                     charger_details: {
-//                         $push: {
-//                             charger_id: "$charger_details.charger_id",
-//                             model: "$charger_details.model",
-//                             type: "$charger_details.type",
-//                             vendor: "$charger_details.vendor",
-//                             charger_model: "$charger_details.charger_model",
-//                             charger_type: "$charger_details.charger_type",
-//                             status: "$charger_details.status",
-//                             address: "$charger_details.address",
-//                             landmark: "$charger_details.landmark",
-//                             socket_gun_config: {
-//                                 $arrayToObject: {
-//                                     $map: {
-//                                         input: { $ifNull: ["$socket_gun_config", []] }, // Ensure it's an array
-//                                         as: "config",
-//                                         in: [
-//                                             {
-//                                                 k: { $concat: ["connector_", { $toString: "$$config.connector_id" }, "_type"] },
-//                                                 v: "$$config.connector_type"
-//                                             },
-//                                             {
-//                                                 k: { $concat: ["connector_", { $toString: "$$config.connector_id" }, "_type_name"] },
-//                                                 v: "$$config.connector_type_name"
-//                                             },
-//                                             {
-//                                                 k: { $concat: ["connector_", { $toString: "$$config.connector_id" }, "_output_type_name"] },
-//                                                 v: "$$config.connector_output_type_name"
-//                                             },
-//                                             {
-//                                                 k: { $concat: ["connector_", { $toString: "$$config.connector_id" }, "_socket_count"] },
-//                                                 v: "$$config.socket_count"
-//                                             },
-//                                             {
-//                                                 k: { $concat: ["connector_", { $toString: "$$config.connector_id" }, "_gun_connector"] },
-//                                                 v: "$$config.gun_connector"
-//                                             }
-//                                         ]
-//                                     }
-//                                 }
-//                             }
-//                         }
-//                     }
-//                 }
-//             },
-//             {
-//                 $project: {
-//                     _id: 0,
-//                     station_id: 1,
-//                     location_id: 1,
-//                     station_address: 1,
-//                     landmark: 1,
-//                     network: 1,
-//                     availability: 1,
-//                     accessibility: 1,
-//                     latitude: 1,
-//                     longitude: 1,
-//                     charger_type: 1,
-//                     chargers: 1,
-//                     distance: 1, // Include calculated distance
-//                     charger_details: 1 // Includes nested socket_gun_config
-//                 }
-//             },
-//             { $sort: { distance: 1 } } // Sort nearest first
-//         ]).toArray();
+        // Filter chargers where the user is an active connector
+        const userActiveChargers = allChargers.filter(charger =>
+            Object.keys(charger).some(key =>
+                key.startsWith("current_or_active_user_for_connector_") && charger[key] === email_id
+            )
+        );
 
-//         logger.info(`Found ${nearbyStations.length} nearby stations`);
+        // If no active chargers are found, return an error response
+        if (userActiveChargers.length === 0) {
+            logger.loggerInfo(`No active charging found for user: ${email_id}`);
+            return res.status(200).json({
+                error: false,
+                message: 'No active charging found!',
+                data: []
+            });
+        }
 
-//         return res.status(200).json({
-//             error: false,
-//             message: "Nearby charging stations retrieved successfully",
-//             stations: nearbyStations
-//         });
+        // Fetch additional details for active chargers
+        const activeChargers = await Promise.all(userActiveChargers.flatMap(async (charger) => {
+            const chargerId = charger.charger_id;
+            const financeId = charger.finance_id;
 
-//     } catch (error) {
-//         logger.error(`Error fetching nearby stations: ${error.message}`);
-//         return res.status(500).json({
-//             error: true,
-//             message: "Internal Server Error",
-//             error_details: error.message
-//         });
-//     }
-// };
+            // Find all connector IDs used by the user
+            const connectorIds = Object.keys(charger)
+                .filter(key => key.startsWith("current_or_active_user_for_connector_") && charger[key] === email_id)
+                .map(key => key.split("_").pop()); // Extract connector numbers
 
+            // Fetch charger status and prepare response for each connector ID
+            return Promise.all(connectorIds.map(async (connectorId) => {
+                // Fetch charger status
+                const status = await chargerStatusCollection.findOne({
+                    charger_id: chargerId,
+                    connector_id: parseInt(connectorId)
+                });
+
+                // Calculate unit price
+                let unitPrice = null;
+                if (financeId) {
+                    const financeRecord = await financeDetailsCollection.findOne({ finance_id: financeId });
+                    if (financeRecord) {
+                        const EB_fee = parseFloat(financeRecord.eb_charge) + parseFloat(financeRecord.margin);
+
+                        // List of additional charges (excluding GST)
+                        const additionalCharges = [
+                            parseFloat(financeRecord.parking_fee),     // Parking fee
+                            parseFloat(financeRecord.convenience_fee), // Convenience fee
+                            parseFloat(financeRecord.station_fee),     // Station fee
+                            parseFloat(financeRecord.processing_fee),  // Processing fee
+                            parseFloat(financeRecord.service_fee)      // Service fee
+                        ];
+
+                        // Calculate total additional charges (sum of all charges except GST)
+                        const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + (charge || 0), 0);
+
+                        // Calculate the base price (including additional charges per unit)
+                        const TotalEBPrice = (EB_fee + totalAdditionalCharges);
+
+                        // Apply GST on the total amount
+                        const gstPercentage = financeRecord.gst;
+                        const gstAmount = (TotalEBPrice * gstPercentage) / 100;
+
+                        // Final price after adding GST
+                        unitPrice = TotalEBPrice + gstAmount;
+                    }
+                }
+
+                return {
+                    charger_id: chargerId,
+                    connector_id: connectorId, // Include all connectors used by the user
+                    model: charger.model,
+                    type: charger.type,
+                    vendor: charger.vendor,
+                    lat: charger.lat,
+                    long: charger.long,
+                    address: charger.address,
+                    landmark: charger.landmark,
+                    unit_price: parseFloat(unitPrice || 0).toFixed(2),
+                    status: status || null
+                };
+            }));
+        }));
+
+        // Flatten the nested array
+        const flattenedChargers = activeChargers.flat();
+
+        logger.loggerSuccess(`Successfully fetched ${flattenedChargers.length} active chargers for user: ${email_id}`);
+        return res.status(200).json({
+            error: false,
+            message: 'Active chargers retrieved successfully',
+            data: flattenedChargers
+        });
+    } catch (error) {
+        logger.loggerError(`Error in fetchActiveChargersOfUser: ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+            error_details: error.message
+        });
+    }
+};
 
 module.exports = {
     // MANAGE GENERIC FILTER 
     SaveSearchFilter,
     fetchSavedSearchFilter,
-
+    // STATIONS
     getNearbyStations,
+    // MANAGE ACTIVE CHARGER'S OF SPECIFIC USER
+    fetchActiveChargersOfUser
 };
 
 

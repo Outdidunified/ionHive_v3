@@ -39,6 +39,7 @@ class _AdvancedPhoneNumberInputState extends State<AdvancedPhoneNumberInput> {
         labelStyle: theme.textTheme.bodyMedium,
         filled: true,
         fillColor: theme.colorScheme.surface,
+
         contentPadding:
             const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
         errorText: _hasError ? "Enter a valid phone number" : null,
@@ -58,6 +59,7 @@ class _AdvancedPhoneNumberInputState extends State<AdvancedPhoneNumberInput> {
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: theme.colorScheme.error, width: 2.0),
         ),
+        counterText: "", // This hides the counter completely
       ),
       initialCountryCode: 'IN', // Default to India 🇮🇳
       onChanged: (phone) {
@@ -70,7 +72,7 @@ class _AdvancedPhoneNumberInputState extends State<AdvancedPhoneNumberInput> {
       onCountryChanged: (country) =>
           widget.onCountryChanged?.call(country.code),
       keyboardType: TextInputType.phone,
-      
+
       style: theme.textTheme.bodyLarge,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
     );

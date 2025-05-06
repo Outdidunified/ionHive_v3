@@ -28,14 +28,46 @@ class ContactUs extends StatelessWidget {
         padding: EdgeInsets.all(screenWidth * 0.04),
         child: ListView(
           children: [
+            Center(
+              child: Container(
+                width: screenWidth * 0.30,
+                height: screenWidth * 0.30,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.cardColor,
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 0.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.shadowColor.withOpacity(0.1),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(screenWidth * 0.05),
+                  child: Image.asset(
+                    'assets/icons/contact.png',
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: screenHeight * 0.03),
             Text(
               'Get in Touch',
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: screenHeight * 0.01),
             Text(
               "We're here to help. Reach out to us with any questions, concerns, or feedback.",
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6)),
             ),
             SizedBox(height: screenHeight * 0.03),
 
@@ -43,11 +75,21 @@ class ContactUs extends StatelessWidget {
             Row(
               children: [
                 _buildContactCard(
-                  theme, Icons.call, 'Call us', 'Mon-Sat • 9.30-6.30', _makeCall, screenWidth,
+                  theme,
+                  Icons.call,
+                  'Call us',
+                  'Mon-Sat • 9.30am-6.30pm',
+                  _makeCall,
+                  screenWidth,
                 ),
                 SizedBox(width: screenWidth * 0.03),
                 _buildContactCard(
-                  theme, Icons.email, 'Email us', 'Mon-Sat • 9.30-6.30', _sendEmail, screenWidth,
+                  theme,
+                  Icons.email,
+                  'Email us',
+                  'Mon-Sat • 9.30am-6.30pm',
+                  _sendEmail,
+                  screenWidth,
                 ),
               ],
             ),
@@ -56,12 +98,19 @@ class ContactUs extends StatelessWidget {
             // Social Media Section
             Text(
               'Follow Us',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w500),
             ),
             SizedBox(height: screenHeight * 0.02),
 
-            _buildSocialCard(theme, 'LinkedIn', '286 Followers • 11 Posts', FontAwesomeIcons.linkedin, () => _launchURL(linkedInUrl)),
-            _buildSocialCard(theme, 'WhatsApp', 'Available Mon-Sat • 9.30-6.30', FontAwesomeIcons.whatsapp, () => _launchWhatsApp(phoneNumber)),
+            _buildSocialCard(theme, 'LinkedIn', 'Available Mon-Sat • 9.30am-6.30pm',
+                FontAwesomeIcons.linkedin, () => _launchURL(linkedInUrl)),
+            _buildSocialCard(
+                theme,
+                'WhatsApp',
+                'Available Mon-Sat • 9.30am-6.30pm',
+                FontAwesomeIcons.whatsapp,
+                () => _launchWhatsApp(phoneNumber)),
           ],
         ),
       ),
@@ -76,7 +125,10 @@ class ContactUs extends StatelessWidget {
 
   // Function to open email app
   void _sendEmail() async {
-    final Uri emailUri = Uri(scheme: 'mailto', path: email, queryParameters: {'subject': 'Support Request'});
+    final Uri emailUri = Uri(
+        scheme: 'mailto',
+        path: email,
+        queryParameters: {'subject': 'Support Request'});
     if (await canLaunchUrl(emailUri)) await launchUrl(emailUri);
   }
 
@@ -91,8 +143,8 @@ class ContactUs extends StatelessWidget {
     if (await canLaunchUrl(Uri.parse(url))) await launchUrl(Uri.parse(url));
   }
 
-  Widget _buildContactCard(
-      ThemeData theme, IconData icon, String title, String subtitle, VoidCallback onTap, double screenWidth) {
+  Widget _buildContactCard(ThemeData theme, IconData icon, String title,
+      String subtitle, VoidCallback onTap, double screenWidth) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -101,28 +153,31 @@ class ContactUs extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.cardColor,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: theme.shadowColor.withOpacity(0.2),
-                blurRadius: 8,
-                spreadRadius: 2,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(
+              color: Colors.grey, // Grey border
+              width: 0.3, // Border width
+            ),
           ),
           child: Column(
             children: [
               CircleAvatar(
                 radius: screenWidth * 0.06,
                 backgroundColor: theme.primaryColor,
-                child: Icon(icon, color: Colors.white, size: screenWidth * 0.08),
+                child:
+                    Icon(icon, color: Colors.white, size: screenWidth * 0.08),
               ),
               SizedBox(height: screenWidth * 0.02),
-              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+              Text(
+                title,
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w500),
               ),
               SizedBox(height: screenWidth * 0.01),
-              Text(subtitle, textAlign: TextAlign.center,style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
-
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.6)),
               ),
             ],
           ),
@@ -131,29 +186,28 @@ class ContactUs extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialCard(ThemeData theme, String title, String details, IconData icon, VoidCallback onTap) {
+  Widget _buildSocialCard(ThemeData theme, String title, String details,
+      IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(top: 10), // Margin at the top
         padding: const EdgeInsets.all(12), // Padding inside the card
         decoration: BoxDecoration(
-          color: theme.cardColor, // Use theme's card color (adapts to light/dark mode)
-          borderRadius: BorderRadius.circular(12), // Rounded corners
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadowColor.withOpacity(0.1), // Subtle shadow
-              blurRadius: 8,
-              spreadRadius: 2,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey, // Grey border
+            width: 0.2, // Border width
+          ),
         ),
+
         child: Row(
           children: [
             CircleAvatar(
               radius: 20,
-              backgroundColor: theme.primaryColor, // Use theme primary color for the icon background
+              backgroundColor: theme
+                  .primaryColor, // Use theme primary color for the icon background
               child: Icon(icon, color: Colors.white, size: 20), // White icon
             ),
             const SizedBox(width: 12), // Spacing between icon and text
@@ -164,13 +218,15 @@ class ContactUs extends StatelessWidget {
                   Text(
                     title,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500, // Medium font weight for title
+                      fontWeight:
+                          FontWeight.w500, // Medium font weight for title
                     ),
                   ),
                   Text(
                     details,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6), // Subdued text color
+                      color: theme.colorScheme.onSurface
+                          .withOpacity(0.6), // Subdued text color
                     ),
                   ),
                 ],
@@ -178,11 +234,13 @@ class ContactUs extends StatelessWidget {
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: theme.colorScheme.onSurface.withOpacity(0.6), // Adaptive arrow color
+              color: theme.colorScheme.onSurface
+                  .withOpacity(0.6), // Adaptive arrow color
               size: 16,
             ),
           ],
         ),
       ),
     );
-  }}
+  }
+}

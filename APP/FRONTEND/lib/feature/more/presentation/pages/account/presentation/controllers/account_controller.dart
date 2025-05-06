@@ -4,6 +4,7 @@ import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/auth/presentation/pages/login_page.dart';
 import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/account/domain/repositories/account_repository.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class AccountController extends GetxController {
   final AccountRepository _accountRepository = AccountRepository();
@@ -18,7 +19,7 @@ class AccountController extends GetxController {
     "The app is buggy and really slow",
     "Switching to another competitor",
     "Bad charging experience",
-    "Something Else"
+    "Other" // Changed from "Something Else" to "Other" to match our implementation
   ];
   final RxBool isLoading = false.obs;
   Rx<String?> validationError = Rx<String?>(null);
@@ -26,63 +27,74 @@ class AccountController extends GetxController {
   // Observable for selected reason
   var selectedReason = ''.obs;
 
+  // Observable for other reason text when "Other" is selected
+  var otherReason = ''.obs;
+
   // Logic for deleting account with confirmation
   Future<void> deleteAccount() async {
     final email = sessionController.emailId.value;
     final userId = sessionController.userId.value;
     final authToken = sessionController.token.value;
-    final reason = selectedReason.value;
-    if (reason.isEmpty) {
-      Get.snackbar("Note", "Please select a reason to proceed.",
-          snackPosition: SnackPosition.BOTTOM);
+
+    // Get the reason - if "Other" is selected, use the otherReason text
+    String finalReason;
+    if (selectedReason.value.isEmpty) {
+      CustomSnackbar.showWarning(message: "Please select a reason to proceed.");
       return;
+    } else if (selectedReason.value == "Other") {
+      if (otherReason.value.isEmpty) {
+        CustomSnackbar.showWarning(message: "Please specify your reason.");
+        return;
+      }
+      finalReason = "Other: ${otherReason.value}";
+    } else {
+      finalReason = selectedReason.value;
     }
 
-    // Show confirmation Snackbar before proceeding
-    Get.snackbar(
-      "Confirm Deletion",
-      "Are you sure you want to delete your account?",
-      snackPosition: SnackPosition.BOTTOM,
-      mainButton: TextButton(
-        onPressed: () async {
-          isLoading.value = true;
-          try {
-            final deleteAccountResponse =
-                await _accountRepository.DeleteAccount(
-                    email, reason, userId, authToken); // Passing correct types
+    // Show confirmation dialog instead of snackbar
+    Get.dialog(
+      AlertDialog(
+        title: Text("Confirm Deletion"),
+        content: Text("Are you sure you want to delete your account?"),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(), // Close dialog
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Get.back(); // Close dialog
+              isLoading.value = true;
+              try {
+                final deleteAccountResponse =
+                    await _accountRepository.DeleteAccount(
+                        email, finalReason, userId, authToken);
 
-            if (!deleteAccountResponse.error) {
-              Get.snackbar(
-                "Account Deleted",
-                "Your account has been deleted successfully.",
-                snackPosition: SnackPosition.BOTTOM,
-              );
-              // Close the confirmation Snackbar and navigate to the login page
-              Get.back(); // Close the Snackbar
-              handleLogout(); // Log out the user after successful deletion
-            } else {
-              validationError.value = deleteAccountResponse.message;
-              Get.snackbar(
-                "Note",
-                deleteAccountResponse.message,
-                snackPosition: SnackPosition.BOTTOM,
-              );
-            }
-          } catch (e) {
-            validationError.value = e.toString(); // Show actual error message
-            debugPrint("Error: $e");
-            Get.snackbar(
-              "Note",
-              "Something went wrong. Please try again.",
-              snackPosition: SnackPosition.BOTTOM,
-            );
-          } finally {
-            isLoading.value = false;
-          }
-        },
-        child: Text("Yes, Delete"),
+                if (!deleteAccountResponse.error) {
+                  CustomSnackbar.showSuccess(
+                    message: "Your account has been deleted successfully.",
+                  );
+                  handleLogout(); // Log out the user after successful deletion
+                } else {
+                  validationError.value = deleteAccountResponse.message;
+                  CustomSnackbar.showError(
+                    message: deleteAccountResponse.message,
+                  );
+                }
+              } catch (e) {
+                validationError.value = e.toString();
+                debugPrint("Error: $e");
+                CustomSnackbar.showError(
+                  message: "Something went wrong. Please try again.",
+                );
+              } finally {
+                isLoading.value = false;
+              }
+            },
+            child: Text("Yes, Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
-      icon: Icon(Icons.delete_forever),
     );
   }
 
@@ -95,4 +107,9 @@ class AccountController extends GetxController {
     Get.find<SessionController>().clearSession();
     Get.offAll(() => LoginPage());
   }
+}
+
+@override
+void onClose() {
+  Get.closeAllSnackbars(); // Close all active snackbars
 }

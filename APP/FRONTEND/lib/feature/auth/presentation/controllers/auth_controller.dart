@@ -4,6 +4,7 @@ import 'package:ionhive/core/controllers/session_controller.dart'; // Session Co
 import 'package:ionhive/feature/auth/domain/repositories/auth_repository.dart'; // Auth Repository
 import 'package:ionhive/feature/auth/presentation/pages/otp_page.dart'; // OTP Page
 import 'package:ionhive/feature/landing_page.dart'; // Laning pages
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart'; // Custom Snackbar
 
 import 'package:ionhive/utils/log/logger.dart'; // Debug Logger
 
@@ -61,6 +62,12 @@ class AuthController extends GetxController {
           emailValidationError; // Show email validation error immediately
       return;
     }
+    if (!isChecked.value) {
+      CustomSnackbar.showError(
+        message: "Please accept the terms and conditions.",
+      );
+      return;
+    }
 
     // Clear any previous validation errors before starting the OTP request
     validationError.value = null;
@@ -69,9 +76,12 @@ class AuthController extends GetxController {
     try {
       final otpResponse = await _authRepository.GetOTP(email);
 
-
       if (!otpResponse.error) {
-        // Check the 'error' field
+        // Clear OTP field before navigating to OTP page
+        otpController.clear();
+        otpValidationError.value = null;
+
+        // Navigate to OTP page
         Get.to(() => OtpPage(email: email));
       } else {
         debugPrint("Error: ${otpResponse.message}}");
@@ -103,8 +113,12 @@ class AuthController extends GetxController {
       final otpResponse = await _authRepository.GetOTP(email);
 
       if (!otpResponse.error) {
-        // Check the 'error' field
-        Get.to(() => OtpPage(email: email));
+        // Clear OTP field before navigating to OTP page
+        otpController.clear();
+        otpValidationError.value = null;
+
+        // Show success message
+        CustomSnackbar.showSuccess(message: "OTP sent successfully");
       } else {
         validationError.value = otpResponse.message; // Show error message
       }
@@ -163,8 +177,11 @@ class AuthController extends GetxController {
         // Clear OTP input
         otpController.clear();
 
-        // Navigate to the landing page
-        Get.offAll(() => LandingPage());
+        Get.offAll(
+          () => LandingPage(),
+          transition: Transition.rightToLeft,
+          duration: const Duration(milliseconds: 300),
+        );
       } else {
         otpValidationError.value = authenticateResponse.message;
       }
@@ -180,17 +197,8 @@ class AuthController extends GetxController {
   Future<void> handleGoogleSignIn() async {
     // Check if the terms and conditions are accepted
     if (!isChecked.value) {
-      Get.snackbar(
-        'Verification failed',
-        "Please accept the terms and conditions.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.isDarkMode
-            ? Colors.red.withOpacity(0.7) // Dark mode background color
-            : Colors.red.withOpacity(0.9), // Light mode background color
-        colorText: Get.isDarkMode
-            ? Colors.white // Dark mode text color
-            : Colors.white, // Light mode text color
-        duration: const Duration(seconds: 3),
+      CustomSnackbar.showError(
+        message: "Please accept the terms and conditions.",
       );
       return;
     }
@@ -250,12 +258,15 @@ class AuthController extends GetxController {
               token: token!,
             );
 
-            // Navigate to the landing page
-            Get.offAll(() => LandingPage());
+            Get.offAll(
+              () => LandingPage(),
+              transition: Transition.rightToLeft,
+              duration: const Duration(milliseconds: 300),
+            );
           } else {
-            Get.snackbar(
-                "Login Verification Failed", GoogleSignInResponse.message,
-                snackPosition: SnackPosition.BOTTOM);
+            CustomSnackbar.showError(
+                message:
+                    "Login Verification Failed: ${GoogleSignInResponse.message}");
           }
         } else {
           debugPrint(
@@ -265,10 +276,9 @@ class AuthController extends GetxController {
     } catch (error) {
       debugPrint(
           "--------------- Error: $error --------------------------------");
-      Get.snackbar(
-        "Login Verification Failed",
-        "Something went wrong ,Please Try Again Later",
-        snackPosition: SnackPosition.BOTTOM,
+      CustomSnackbar.showError(
+        message:
+            "Login Verification Failed: Something went wrong, Please Try Again Later",
       );
     }
   }
@@ -277,17 +287,8 @@ class AuthController extends GetxController {
   Future<void> handleAppleSignIn() async {
     // Check if the terms and conditions are accepted
     if (!isChecked.value) {
-      Get.snackbar(
-        'Verification failed',
-        "Please accept the terms and conditions.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.isDarkMode
-            ? Colors.red.withOpacity(0.7) // Dark mode background color
-            : Colors.red.withOpacity(0.9), // Light mode background color
-        colorText: Get.isDarkMode
-            ? Colors.white // Dark mode text color
-            : Colors.black, // Light mode text color
-        duration: const Duration(seconds: 3),
+      CustomSnackbar.showError(
+        message: "Please accept the terms and conditions.",
       );
       return;
     }
@@ -325,22 +326,23 @@ class AuthController extends GetxController {
             token: token!,
           );
 
-          // Navigate to the landing page
-          Get.offAll(() => LandingPage());
+          Get.offAll(
+            () => LandingPage(),
+            transition: Transition.rightToLeft,
+            duration: const Duration(milliseconds: 300),
+          );
         } else {
-          Get.snackbar(
-            "Login Verification Failed",
-            appleSignInResponse.message,
-            snackPosition: SnackPosition.BOTTOM,
+          CustomSnackbar.showError(
+            message:
+                "Login Verification Failed: ${appleSignInResponse.message}",
           );
         }
       }
     } catch (error) {
       debugPrint("Error: $error");
-      Get.snackbar(
-        "Login Verification Failed",
-        "Something went wrong ,Please Try Again Later",
-        snackPosition: SnackPosition.BOTTOM,
+      CustomSnackbar.showError(
+        message:
+            "Login Verification Failed: Something went wrong, Please Try Again Later",
       );
     }
   }
@@ -359,5 +361,6 @@ class AuthController extends GetxController {
   void dispose() {
     emailController.dispose();
     super.dispose();
+    Get.closeAllSnackbars(); // Close all active snackbars
   }
 }

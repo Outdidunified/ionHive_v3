@@ -6,12 +6,12 @@ const logger = require('../utils/logger');
 
 // Create a transporter object
 let transporter = nodemailer.createTransport({
-    host: 'smtppro.zoho.in', // replace with your SMTP server
+    host: "smtp.gmail.com", // Gmail SMTP server
     port: 465, // 465 for SSL or 587 for TLS
-    secure: true, // true for SSL, false for TLS
+    secure: true, // true for SSL
     auth: {
-        user: 'anish@outdidtech.com', // your email
-        pass: '5XuiNJvgeijM', // your email password
+        user: "info@outdidunified.com", // Your Gmail email address
+        pass: "yylh zjwo psvr slqb", // App Password (not your regular Gmail password)
     },
 });
 // Function to send email
@@ -26,10 +26,11 @@ const sendEmail = async (to, subject, text) => {
             html: `<p>${text}</p>`, // HTML body
         });
 
-        logger.info('Message sent: %s', info.messageId);
+        logger.loggerSuccess(`Message sent: ${info.messageId}`);
+        console
         return true;
     } catch (error) {
-        logger.error('Error sending email:', error);
+        logger.loggerError(`Error sending email: ${error}`);
         return false;
     }
 }
@@ -144,7 +145,7 @@ const EmailConfig = async (email, mailHead, otp) => {
         const result = await sendEmail(sendTo, mail_subject, mail_body);
         return result;
     } catch (error) {
-        logger.error('Error sending email:', error);
+        logger.loggerError(`Error sending email: ${error}`);
         return false;
     }
 }
@@ -225,11 +226,11 @@ const sendPaymentEmail = async (email, amount, transactionId, date, paymentMetho
         };
 
         await transporter.sendMail(mailOptions);
-        logger.info(`Email sent successfully to ${email}`);
+        logger.loggerSuccess(`Email sent successfully to ${email}`);
 
         fs.unlinkSync(pdfPath);
     } catch (error) {
-        logger.error(`Error sending email: ${error.message}`);
+        logger.loggerError(`Error sending email: ${error.message}`);
     }
 };
 

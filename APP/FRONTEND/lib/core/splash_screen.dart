@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/auth/presentation/pages/GettingStarted%20page.dart';
 import 'package:ionhive/feature/landing_page.dart';
+import 'package:ionhive/utils/debug/build_guard.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,29 +13,109 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  final SessionController sessionController = Get.find<SessionController>();
-  bool _hasNavigated = false;  // Add this flag
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  // Don't find the controller immediately - we'll check for it later
+  SessionController? _sessionController;
+  bool _hasNavigated = false;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
 
-    ever(sessionController.isLoggedIn, (isLoggedIn) {
-      if (_hasNavigated) return;
-      _hasNavigated = true;
-      if (isLoggedIn) {
-        debugPrint("Navigating to LandingPage");
-        Get.offAll(() => LandingPage(), transition: Transition.rightToLeft,duration: Duration(milliseconds: 600));
-      } else {
-        debugPrint("Navigating to LoginPage");
-        Get.offAll(() => GetStartedPage(), transition: Transition.rightToLeft,duration: Duration(milliseconds: 600));
-      }
+    // Try to initialize after a short delay to allow GetX to set up
+    _initializeWithDelay();
+  }
 
+  void _initializeWithDelay() {
+    // Delay to allow controllers to be registered
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _tryInitializeController();
+    });
+  }
+
+  // Counter to limit retry attempts
+  int _retryCount = 0;
+  static const int _maxRetries = 10;
+
+  void _tryInitializeController() {
+    if (_isInitialized) return;
+
+    // Increment retry counter
+    _retryCount++;
+
+    try {
+      // Try to find the SessionController
+      if (Get.isRegistered<SessionController>()) {
+        _sessionController = Get.find<SessionController>();
+        _setupNavigation();
+        _isInitialized = true;
+      } else if (_retryCount < _maxRetries) {
+        // If not found and we haven't exceeded max retries, try again after a delay
+        Future.delayed(
+            const Duration(milliseconds: 500), _tryInitializeController);
+      } else {
+        // If we've exceeded max retries, navigate to GetStartedPage as fallback
+        debugPrint(
+            'Max retries exceeded, navigating to GetStartedPage as fallback');
+        _navigateToFallback();
+      }
+    } catch (e) {
+      debugPrint('Error initializing SessionController: $e');
+      if (_retryCount < _maxRetries) {
+        // Try again after a delay if we haven't exceeded max retries
+        Future.delayed(
+            const Duration(milliseconds: 500), _tryInitializeController);
+      } else {
+        // Navigate to fallback if max retries exceeded
+        _navigateToFallback();
+      }
+    }
+  }
+
+  void _navigateToFallback() {
+    if (!_hasNavigated) {
+      _hasNavigated = true;
+      // Use a safe navigation approach
+      BuildGuard.runSafely(() {
+        Future.delayed(const Duration(seconds: 2), () {
+          Get.offAll(() => GetStartedPage(),
+              transition: Transition.rightToLeft,
+              duration: Duration(milliseconds: 600));
+        });
+      });
+    }
+  }
+
+  void _setupNavigation() {
+    if (_sessionController == null) return;
+
+    // Set up the listener for login state changes
+    ever(_sessionController!.isLoggedIn, (isLoggedIn) {
+      BuildGuard.runSafely(() {
+        if (_hasNavigated) return;
+        _hasNavigated = true;
+
+        if (isLoggedIn) {
+          debugPrint("Navigating to LandingPage");
+          Get.offAll(() => LandingPage(),
+              transition: Transition.rightToLeft,
+              duration: Duration(milliseconds: 600));
+        } else {
+          debugPrint("Navigating to LoginPage");
+          Get.offAll(() => GetStartedPage(),
+              transition: Transition.rightToLeft,
+              duration: Duration(milliseconds: 600));
+        }
+      });
     });
 
+    // Check login state after a delay to allow animation to complete
     Future.delayed(const Duration(seconds: 2), () {
-      sessionController.isLoggedIn.refresh(); // Ensure correct state is checked
+      if (_sessionController != null) {
+        _sessionController!.isLoggedIn.refresh();
+      }
     });
   }
 
@@ -64,10 +145,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 builder: (context, double scale, child) {
                   return Transform.scale(
                     scale: scale,
-                    child: Icon(
-                      Icons.electric_car,
-                      size: screenWidth * 0.25, // Responsive size
-                      color: Colors.black,
+                    child: Image.asset(
+                      'assets/icons/charging-vehicle.png',
+                      width: screenWidth * 0.25, // Responsive size
+                      height: screenWidth * 0.25, // Maintain aspect ratio
+                      color: Colors.black, // Apply color if needed
                     ),
                   );
                 },
@@ -92,9 +174,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           child: Text(
                             letter,
                             style: GoogleFonts.orbitron(
-                              fontSize: screenWidth * 0.08, // Responsive text size
+                              fontSize:
+                                  screenWidth * 0.08, // Responsive text size
                               fontWeight: FontWeight.bold,
-                              color: letter == "H" ? Colors.greenAccent : Colors.white,
+                              color: letter == "H"
+                                  ? Colors.greenAccent
+                                  : Colors.white,
                               letterSpacing: screenWidth * 0.005,
                             ),
                           ),
@@ -109,6 +194,5 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         ),
       ),
     );
-
   }
 }

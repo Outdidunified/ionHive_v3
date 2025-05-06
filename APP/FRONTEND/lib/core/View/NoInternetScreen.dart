@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/connectivity_controller.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class NoInternetScreen extends StatelessWidget {
   const NoInternetScreen({super.key});
@@ -40,9 +41,8 @@ class NoInternetScreen extends StatelessWidget {
                   Text(
                     "No Internet Connection",
                     style: textTheme.bodyLarge?.copyWith(
-                      color: textTheme.bodyMedium?.color?.withOpacity(0.7),
-                      fontWeight: FontWeight.bold
-                    ),
+                        color: textTheme.bodyMedium?.color?.withOpacity(0.7),
+                        fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: screenHeight * 0.02),
@@ -71,11 +71,10 @@ class NoInternetScreen extends StatelessWidget {
                         _showNoInternetSnackbar();
                       }
                     },
-                    child: Text(
-                      "Retry",
-                      style: textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onPrimary,)
-                    ),
+                    child: Text("Retry",
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onPrimary,
+                        )),
                   ),
                 ],
               ),
@@ -87,16 +86,8 @@ class NoInternetScreen extends StatelessWidget {
   }
 
   void _showNoInternetSnackbar() {
-    Get.snackbar(
-      "No Internet",
-      "Please check your connection!",
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.grey.shade900,
-      colorText: Colors.white,
-      icon: const Icon(Icons.wifi_off, color: Colors.white),
-      duration: const Duration(seconds: 3),
-      margin: const EdgeInsets.all(12),
-      borderRadius: 10,
+    CustomSnackbar.showError(
+      message: "No Internet. Please check your connection!",
     );
   }
 }

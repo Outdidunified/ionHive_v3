@@ -3,19 +3,23 @@ import 'package:flutter/material.dart';
 class AppTheme {
   // Light Theme
   static ThemeData lightTheme = ThemeData(
+    useMaterial3: true,
+    fontFamily: 'CustomFont', // ✅ Apply your custom font globally
     primaryColor: Colors.green,
     primaryColorDark: Colors.green[800],
     primarySwatch: Colors.green,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: Colors.white, // Clean white background
-    appBarTheme: AppBarTheme(
-      color: Colors.green[700], // AppBar color
-      iconTheme: const IconThemeData(color: Colors.white), // AppBar icon color
-      titleTextStyle: const TextStyle(
+    scaffoldBackgroundColor: Colors.white,
+    appBarTheme: const AppBarTheme(
+      color: Colors.white,
+      iconTheme: IconThemeData(color: Colors.black),
+      titleTextStyle: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: Colors.black,
       ),
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
     ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(
@@ -32,42 +36,51 @@ class AppTheme {
       bodyLarge: TextStyle(fontSize: 14, color: Colors.black54),
       bodyMedium: TextStyle(fontSize: 12, color: Colors.black45),
     ),
-    colorScheme: const ColorScheme.light(
+    colorScheme: ColorScheme.light(
       primary: Colors.green,
-      onPrimary: Colors.white,
       secondary: Colors.greenAccent,
-      onSecondary: Colors.black,
       surface: Colors.white,
-      onSurface: Colors.black,
-      error: Colors.red,
-      onError: Colors.white,
+      background: Colors.grey[50]!,
     ),
-    buttonTheme: ButtonThemeData(
-      buttonColor: Colors.green[600],
-      textTheme: ButtonTextTheme.primary,
+    extensions: <ThemeExtension<dynamic>>[
+      ShimmerColors(
+        baseColor: Colors.grey[200]!,
+        highlightColor: Colors.grey[100]!,
+      ),
+    ],
+    cardTheme: CardTheme(
+      color: Colors.white,
+      elevation: 2,
+      margin: EdgeInsets.zero,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
     ),
-    cardColor: Colors.grey[50],
     dividerColor: Colors.grey[300],
-    iconTheme: const IconThemeData(
-      color: Colors.black54,
-    ),
+    iconTheme: const IconThemeData(color: Colors.black54),
   );
 
   // Dark Theme
   static ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
+    fontFamily: 'CustomFont', // ✅ Apply your custom font globally
     primaryColor: Colors.green,
     primaryColorDark: Colors.green[800],
     primarySwatch: Colors.green,
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: const Color(0xFF121212), // Dark background
-    appBarTheme: AppBarTheme(
-      color: Colors.green[900], // AppBar color
-      iconTheme: const IconThemeData(color: Colors.white),
-      titleTextStyle: const TextStyle(
+    scaffoldBackgroundColor: const Color(0xFF121212),
+    appBarTheme: const AppBarTheme(
+      color: Colors.black,
+      iconTheme: IconThemeData(color: Colors.white),
+      titleTextStyle: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color: Colors.white,
       ),
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
     ),
     textTheme: const TextTheme(
       displayLarge: TextStyle(
@@ -81,27 +94,66 @@ class AppTheme {
       headlineSmall: TextStyle(fontSize: 18, color: Colors.white70),
       titleLarge: TextStyle(
           fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white70),
-      bodyLarge: TextStyle(fontSize: 14, color: Colors.white60),
-      bodyMedium: TextStyle(fontSize: 12, color: Colors.white60),
+      bodyLarge: TextStyle(fontSize: 14, color: Colors.white70),
+      bodyMedium: TextStyle(fontSize: 12, color: Colors.white70),
     ),
     colorScheme: ColorScheme.dark(
       primary: Colors.green,
-      onPrimary: Colors.black,
       secondary: Colors.greenAccent[400]!,
-      onSecondary: Colors.white70,
       surface: const Color(0xFF1E1E1E),
-      onSurface: Colors.white,
-      error: Colors.red[400]!,
-      onError: Colors.black,
+      background: const Color(0xFF121212),
     ),
-    buttonTheme: ButtonThemeData(
-      buttonColor: Colors.green[600],
-      textTheme: ButtonTextTheme.primary,
+    extensions: <ThemeExtension<dynamic>>[
+      ShimmerColors(
+        baseColor: Colors.grey,
+        highlightColor: Colors.grey[500]!,
+      ),
+    ],
+    cardTheme: CardTheme(
+      color: const Color(0xFF1E1E1E),
+      elevation: 2,
+      margin: EdgeInsets.zero,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Color(0x45000000)), // black27 equivalent
+      ),
     ),
-    cardColor: const Color(0xFF1E1E1E),
     dividerColor: const Color(0xFF303030),
-    iconTheme: const IconThemeData(
-      color: Colors.white70,
-    ),
+    iconTheme: const IconThemeData(color: Colors.white70),
   );
+}
+
+// Custom shimmer colors extension
+class ShimmerColors extends ThemeExtension<ShimmerColors> {
+  final Color baseColor;
+  final Color highlightColor;
+
+  const ShimmerColors({
+    required this.baseColor,
+    required this.highlightColor,
+  });
+
+  @override
+  ThemeExtension<ShimmerColors> copyWith({
+    Color? baseColor,
+    Color? highlightColor,
+  }) {
+    return ShimmerColors(
+      baseColor: baseColor ?? this.baseColor,
+      highlightColor: highlightColor ?? this.highlightColor,
+    );
+  }
+
+  @override
+  ThemeExtension<ShimmerColors> lerp(
+      ThemeExtension<ShimmerColors>? other, double t) {
+    if (other is! ShimmerColors) {
+      return this;
+    }
+    return ShimmerColors(
+      baseColor: Color.lerp(baseColor, other.baseColor, t)!,
+      highlightColor: Color.lerp(highlightColor, other.highlightColor, t)!,
+    );
+  }
 }

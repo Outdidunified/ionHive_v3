@@ -1,39 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ionhive/core/components/footer.dart';
+import 'package:ionhive/feature/landing_page_controller.dart';
+import 'package:ionhive/feature/session_history/presentation/pages/session_history.dart';
+import 'package:ionhive/feature/wallet/presentation/pages/wallet_page.dart';
+import 'package:ionhive/feature/home/presentation/pages/home_page.dart';
+import 'package:ionhive/feature/more/presentation/pages/more_page.dart';
 
-import '../core/components/footer.dart'; // Footer Component
-import 'package:ionhive/feature/landing_page_controller.dart'; // Landing page controller
-import 'package:ionhive/feature/home/presentation/pages/home_page.dart'; // Home page
-import 'package:ionhive/feature/wallet/presentation/pages/wallet_page.dart'; // Wallet page
-import 'package:ionhive/feature/trip/presentation/pages/trip_page.dart'; // Trip page
-import 'package:ionhive/feature/more/presentation/pages/more_page.dart'; // More page
+class LandingPage extends StatefulWidget {
+  const LandingPage({super.key});
 
-class LandingPage extends StatelessWidget {
-  LandingPage({super.key});
+  @override
+  State<LandingPage> createState() => _LandingPageState();
+}
 
-  // Retrieve the existing controller instance
-  final LandingPageController controller = Get.find<LandingPageController>();
+class _LandingPageState extends State<LandingPage> {
+  late final LandingPageController controller;
+
+  // Pre-initialize all pages to maintain their state
+  final List<Widget> _pages = [
+    HomePage(),
+    const WalletPage(),
+    const SessionHistoryPage(),
+    MoreePage(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<LandingPageController>();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: controller.pageController,
-        onPageChanged: controller.changePage,
-        children: [
-          const HomePage(),
-          const WalletPage(),
-          const TripMapPage(),
-          MoreePage(),
-        ],
-      ),
+      body: Obx(() {
+        // Use IndexedStack to preserve state of all pages
+        return IndexedStack(
+          index: controller.pageIndex.value,
+          children: _pages,
+        );
+      }),
       bottomNavigationBar: Obx(
-            () => Footer(
-          onTabChanged: controller.changePage,
+        () => Footer(
+          onTabChanged: (index) {
+            // Ensure we're not in the middle of a build cycle
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              controller.changePage(index);
+            });
+          },
           currentIndex: controller.pageIndex.value,
         ),
       ),
     );
   }
 }
-

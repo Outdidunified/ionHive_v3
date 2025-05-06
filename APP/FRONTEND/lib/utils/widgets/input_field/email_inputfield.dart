@@ -5,6 +5,7 @@ class EmailInput extends StatelessWidget {
   final String hintText;
   final String? errorText;
   final void Function(String)? onChanged;
+  final bool readOnly;
 
   const EmailInput({
     super.key,
@@ -12,6 +13,7 @@ class EmailInput extends StatelessWidget {
     this.hintText = 'Enter your email', // Default value for hintText
     this.errorText,
     this.onChanged,
+    this.readOnly = false,
   });
 
   @override
@@ -22,6 +24,7 @@ class EmailInput extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.emailAddress,
       onChanged: onChanged,
+      readOnly: readOnly,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: theme.textTheme.bodyLarge?.copyWith(
@@ -47,14 +50,14 @@ class EmailInput extends StatelessWidget {
         ),
         suffixIcon: controller.text.isNotEmpty
             ? IconButton(
-                icon: Icon(Icons.clear, color: theme.iconTheme.color),
-                onPressed: () => controller.clear(),
-              )
+          icon: Icon(Icons.clear, color: theme.iconTheme.color),
+          onPressed: () => controller.clear(),
+        )
             : null,
         filled: true,
         fillColor: theme.colorScheme.surface,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       style: theme.textTheme.bodyLarge,
     );

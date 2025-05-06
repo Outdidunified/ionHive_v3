@@ -1,0 +1,87 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+build/
+flutter_*.png
+*.flutter-plugins
+*.flutter-plugins-dependencies
+
+# IntelliJ/Android Studio
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+.history/
+
+# Generated files
+pubspec.lock
+*.lock
+*.log
+*.tmp
+*.temp
+*.swp
+
+# Output of the `flutter build` command
+*.apk
+*.aab
+*.ipa
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+
+# Android
+.android/
+android/.gradle/
+android/app/build/
+
+# macOS
+macos/Flutter/ephemeral/
+
+# Windows
+windows/Flutter/ephemeral/
+
+# Linux
+linux/Flutter/ephemeral/
+
+# Web
+web/.dart_tool/
+
+# JetBrains IDEs
+*.idea/
+*.iws
+*.ipr
+*.iml
+
+# VS Code extensions
+*.code-workspace
+
+# Firebase related
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json
+
+# Misc
+*.DS_Store
+*.class
+*.jar
+*.pyc
+*.exe
+*.out
+*.deb
+*.dll
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+
+# Others
+*.dill
+*.stamp

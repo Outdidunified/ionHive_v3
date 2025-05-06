@@ -11,7 +11,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     controller.validationError.value =
-        null; // Reset validation error when the page is rebuilt
+    null; // Reset validation error when the page is rebuilt
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -34,7 +34,7 @@ class LoginPage extends StatelessWidget {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(35.0),
                               child: Image.asset(
-                                "assets/ionHive_logo's/ionHive.png",
+                                "assets/ionHive_logo/ionHive.png",
                                 width: 90.0,
                                 height: 90.0,
                                 fit: BoxFit.cover,
@@ -68,6 +68,7 @@ class LoginPage extends StatelessWidget {
                               controller.validationError.value =
                                   controller.validateEmail();
                             },
+                            readOnly: controller.isLoading.value,
                           );
                         }),
                         const SizedBox(height: 16),
@@ -89,74 +90,7 @@ class LoginPage extends StatelessWidget {
                           );
                         }),
                         const SizedBox(height: 24),
-                        // Row(
-                        //   children: [
-                        //     Expanded(
-                        //       child: Divider(
-                        //         color: Colors.grey.shade400,
-                        //         thickness: 1,
-                        //       ),
-                        //     ),
-                        //     const SizedBox(width: 8),
-                        //     Text(
-                        //       "OR",
-                        //       style: theme.textTheme.bodyMedium?.copyWith(
-                        //         color: Colors.grey.shade600,
-                        //       ),
-                        //     ),
-                        //     const SizedBox(width: 8),
-                        //     Expanded(
-                        //       child: Divider(
-                        //         color: Colors.grey.shade400,
-                        //         thickness: 1,
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-                        // const SizedBox(height: 24),
-                        // // Apple and Google login buttons with dynamic circular background
-                        // Row(
-                        //   mainAxisAlignment: MainAxisAlignment.center,
-                        //   children: [
-                        //     GestureDetector(
-                        //       onTap: () {
-                        //         // Apple login logic
-                        //         controller.handleAppleSignIn();
-                        //       },
-                        //       child: Container(
-                        //         width: 50,
-                        //         height: 50,
-                        //         decoration: BoxDecoration(
-                        //           color: theme.primaryColor.withOpacity(0.1),
-                        //           shape: BoxShape.circle,
-                        //         ),
-                        //         child: const Icon(Icons.apple, size: 30),
-                        //       ),
-                        //     ),
-                        //     const SizedBox(width: 32),
-                        //     GestureDetector(
-                        //       onTap: () {
-                        //         // Google login logic
-                        //         controller.handleGoogleSignIn();
-                        //       },
-                        //       child: Container(
-                        //         width: 50,
-                        //         height: 50,
-                        //         decoration: BoxDecoration(
-                        //           color: theme.primaryColor.withOpacity(0.1),
-                        //           shape: BoxShape.circle,
-                        //         ),
-                        //         child: Transform.translate(
-                        //           offset: const Offset(0, 2),
-                        //           child: const Icon(Icons.g_mobiledata_rounded,
-                        //               size: 35),
-                        //         ),
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-                        // const SizedBox(height: 24),
-                        // // Terms and conditions
+                        // Terms and conditions
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -176,12 +110,12 @@ class LoginPage extends StatelessWidget {
                                           value ?? false; // Update the RxBool
                                     },
                                     activeColor:
-                                        Colors.green, // Color when checked
+                                    Colors.green, // Color when checked
                                     checkColor:
-                                        Colors.black, // Color of the checkmark
+                                    Colors.black, // Color of the checkmark
                                     side: BorderSide(
                                       color:
-                                          Colors.grey.shade600, // Border color
+                                      Colors.grey.shade600, // Border color
                                       width: 1, // Border width
                                     ),
                                   ),
@@ -200,7 +134,7 @@ class LoginPage extends StatelessWidget {
                                     TextSpan(
                                       text: "Terms & Conditions",
                                       style:
-                                          theme.textTheme.bodySmall?.copyWith(
+                                      theme.textTheme.bodySmall?.copyWith(
                                         color: theme.primaryColor,
                                       ),
                                     ),
@@ -208,7 +142,7 @@ class LoginPage extends StatelessWidget {
                                     TextSpan(
                                       text: "Privacy Policy",
                                       style:
-                                          theme.textTheme.bodySmall?.copyWith(
+                                      theme.textTheme.bodySmall?.copyWith(
                                         color: theme.primaryColor,
                                       ),
                                     ),

@@ -3,59 +3,148 @@ const http = require('http');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
-const logger = require('./utils/logger');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
+const path = require("path");
+const logger = require('./utils/logger');
+const { loggerInfo, loggerError, loggerDebug, loggerWarn } = require('./utils/logger');
+const { initializeWebSocket } = require('./Websocket/Websocket');
 
-const app = express();
-
-// Load environment variables from .env file
+// Load environment variables
 dotenv.config();
 
-// Middlewares
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Enable JSON Parsing
-app.use(helmet()); // Secure HTTP Headers with Helmet
-app.use(bodyParser.json());
+// Validate required environment variables
+const requiredEnvVars = ['HTTP_PORT', 'WS_PORT', 'WS_PORT_CLIENT'];
+requiredEnvVars.forEach((envVar) => {
+    if (!process.env[envVar]) {
+        loggerError(`Missing environment variable: ${envVar}`);
+        process.exit(1);
+    }
+});
 
-// Logger Middleware
+// Define ports from environment
+const HTTP_PORT = process.env.HTTP_PORT || 3000;
+const WS_PORT = process.env.WS_PORT || 7003;
+const WS_PORT_CLIENT = process.env.WS_PORT_CLIENT || 7004;
+
+// Initialize Express app
+const app = express();
+
+// Initialize WebSocket servers
+const webSocketServer = http.createServer();
+const clientWebSocketServer = http.createServer();
+
+// Middleware
+app.use(cors({ origin: '*' }));
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(compression());
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads/vehicle_images")));
+
+// Rate Limiting
+const apiLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 1000,
+    message: 'Too many requests, please try again later.',
+});
+app.use(apiLimiter);
+
+// Request Logger Middleware
 app.use((req, res, next) => {
-    console.log(`${req.method} request for '${req.url}'`);
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        loggerInfo(`${req.method} ${req.url} from ${req.ip} - ${res.statusCode} (${duration}ms)`);
+    });
     next();
 });
 
-// Set route path
-const auth = require('./routes/authRoute');
-const profile = require('./routes/profileRoute');
-const session = require('./routes/sessionRoute');
-const wallet = require('./routes/walletRoute');
-const map = require('./routes/mapRoute');
+// Standard API Response Middleware
+app.use((req, res, next) => {
+    res.success = (data, message = 'Success') => res.json({ error: false, message, data });
+    res.fail = (message = 'Something went wrong', statusCode = 500) => res.status(statusCode).json({ error: true, message });
+    next();
+});
 
-app.use('/auth', auth);
-app.use('/profile', profile);
-app.use('/session', session);
-app.use('/wallet', wallet);
-app.use('/map', map);
+// Routes
+const routes = ['auth', 'profile', 'session', 'wallet', 'map', 'chargingstation', 'chargingsession', 'ocpp', 'search'];
+routes.forEach(route => app.use(`/${route}`, require(`./routes/${route}Route`)));
 
-
-// Default route for unknown endpoints
+// Handle 404 - Not Found
 app.use((req, res) => {
+    loggerWarn(`404 Not Found: ${req.method} ${req.url} from ${req.ip}`);
     res.status(404).json({ error: true, message: 'Route not found' });
 });
 
-// Error-handling middleware
+// Global Error Handling
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    loggerError(`Error: ${err.message}`);
     res.status(500).json({ error: true, message: 'Something went wrong!' });
 });
 
-// Create an HTTP server using Express app
+// Start Servers Function
+const startServer = (server, port, name) => {
+    server.listen(port, () => {
+        loggerDebug(`${name} listening on port ${port}`);  // Logs in blue (debug level)
+    }).on('error', (err) => {
+        loggerError(`${name} failed to start: ${err.message}`);
+    });
+};
+
+// Create HTTP Server
 const httpServer = http.createServer(app);
 
-// Define HTTP server port
-const HTTP_PORT = process.env.HTTP_PORT || 3000; // Default to 3000 if not set
+// Import database connection
+const dbService = require('./Websocket/services/dbService');
 
-// Start the HTTP server
-httpServer.listen(HTTP_PORT, () => {
-    console.log(`HTTP Server listening on port ${HTTP_PORT}`);
-    logger.info(`HTTP Server listening on port ${HTTP_PORT}`);
-});
+// Start servers after database connection is established
+const startServers = async () => {
+    try {
+        // Ensure database connection is established - this is the only place we connect to the database
+        await dbService.connectToDatabase();
+
+        // Start servers
+        startServer(httpServer, HTTP_PORT, 'HTTP Server');
+        startServer(webSocketServer, WS_PORT, 'WebSocket Server');
+        startServer(clientWebSocketServer, WS_PORT_CLIENT, 'Client WebSocket Server');
+        loggerDebug('Establishing database connection before starting servers...');
+
+        // Initialize WebSockets after servers are listening
+        initializeWebSocket(webSocketServer, clientWebSocketServer);
+    } catch (error) {
+        loggerError(`Failed to start servers: ${error.message}`);
+        process.exit(1);
+    }
+};
+
+// Start the servers
+startServers();
+
+// WebSocket Connection Logging
+const logWebSocketConnection = (server, name, port) => {
+    server.on('connection', () => loggerInfo(`New ${name} connection on port ${port}`));
+    server.on('error', (err) => loggerError(`${name} Error: ${err.message}`));
+};
+
+logWebSocketConnection(webSocketServer, 'WebSocket Server', WS_PORT);
+logWebSocketConnection(clientWebSocketServer, 'Client WebSocket Server', WS_PORT_CLIENT);
+
+// Graceful Shutdown
+let isShuttingDown = false;
+
+const shutdown = () => {
+    if (isShuttingDown) return; // Prevent duplicate execution
+    isShuttingDown = true;
+
+    loggerError('⚠ Shutting down server...');
+    httpServer.close(() => loggerInfo('HTTP server closed.'));
+    webSocketServer.close(() => loggerInfo('WebSocket server closed.'));
+    clientWebSocketServer.close(() => loggerInfo('Client WebSocket server closed.'));
+
+    setTimeout(() => process.exit(0), 100);
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

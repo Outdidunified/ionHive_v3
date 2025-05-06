@@ -16,10 +16,10 @@ const isAuthenticated = (req, res, next) => {
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
-      logger.info(`Token expiry: ${err.message}, IP: ${req.ip}, token: ${token}`);
+      logger.loggerSuccess(`Token expiry: ${err.message}, IP: ${req.ip}, token: ${token}`);
       return res.status(401).json({ error: true, message: 'Token expired!' });
     }
-    logger.info(`Invalid token: ${err.message}, IP: ${req.ip}, token: ${token}`);
+    logger.loggerError(`Invalid token: ${err.message}, IP: ${req.ip}, token: ${token}`);
     return res.status(401).json({ error: true, message: 'Invalid token!' });
   }
 };

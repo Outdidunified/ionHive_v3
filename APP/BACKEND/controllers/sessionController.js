@@ -6,6 +6,7 @@ const initializeDB = async () => {
     if (!db) {
         db = await db_conn.connectToDatabase();
     }
+    return db;
 };
 initializeDB(); // Initialize the DB connection once
 
@@ -72,7 +73,7 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error fetching total session data for email_id=${req.body?.email_id}: ${error.message}`, { error });
+        logger.loggerError(`Error fetching total session data for email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -124,14 +125,14 @@ const saveChargingSessionHistoryFilter = async (req, res) => {
         );
 
         if (updateResult.modifiedCount === 0) {
-            logger.warn(`Failed to update Charging SessionHistory Filter for user ${user_id} with email ${email_id}.`);
+            logger.loggerWarn(`Failed to update Charging SessionHistory Filter for user ${user_id} with email ${email_id}.`);
             return res.status(500).json({
                 error: true,
                 message: 'Failed to update Charging SessionHistory Filter .',
             });
         }
 
-        logger.info(`Charging SessionHistory  filter updated successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Charging SessionHistory  filter updated successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
             message: 'Charging SessionHistory  filter updated successfully',
@@ -139,7 +140,7 @@ const saveChargingSessionHistoryFilter = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error in updatedChargingSessionHistoryFilter - ${error.message}`);
+        logger.loggerError(`Error in updatedChargingSessionHistoryFilter - ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -176,9 +177,11 @@ const fetchChargingSessionHistoryFilter = async (req, res) => {
             return res.status(200).json({ success: true, message: 'No Charging SessionHistory filter found.', filter: {} });
         }
 
+        logger.loggerSuccess(`Charging SessionHistory  filter fetched successfully for user ${user_id} `);
         return res.status(200).json({ success: true, message: 'Charging SessionHistory filter retrieved successfully.', filter: user.ChargingSessionHistoryFilter });
 
     } catch (error) {
+        logger.loggerError(`Error in fetchChargingSessionHistoryFilter - ${error.message}`);
         return res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
     }
 };
@@ -190,7 +193,7 @@ const fetchChargingSessionDetails = async (req, res) => {
         // Validate input
         if (!email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Invalid input: email_id must be a non-empty string.',
             });
         }
@@ -226,29 +229,28 @@ const fetchChargingSessionDetails = async (req, res) => {
                 }
             };
         }
-        console.log(query);
 
         // Fetch filtered sessions in descending order by stop_time
         const result = await collection.find(query).sort({ stop_time: -1 }).toArray();
-        console.log(result);
 
         if (!result || result.length === 0) {
-            return res.status(404).json({
-                success: false,
+            return res.status(200).json({
+                error: false,
                 message: 'No charging session records found!',
             });
         }
 
+        logger.loggerSuccess(`Charge session retrieved successfully for email_id=${req.body?.email_id}`)
         return res.status(200).json({
-            success: true,
+            error: false,
             message: 'Charging session details retrieved successfully.',
             data: result,
         });
 
     } catch (error) {
-        logger.error(`Error fetching charging session details for email_id=${req.body?.email_id}: ${error.message}`, { error });
+        logger.loggerError(`Error fetching charging session details for email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
-            success: false,
+            error: true,
             message: 'Internal Server Error',
             error: error.message,
         });
@@ -258,14 +260,15 @@ const fetchChargingSessionDetails = async (req, res) => {
 // DOWNLOAD CHARGING HISTORY 
 // download all user charging session details
 const DownloadChargingSessionDetails = async (req, res) => {
-    const { email_id, total_unit_consumed } = req.query;
+    const { email_id, total_unit_consumed } = req.body;
+
 
     try {
 
         // Validate input
         if (!email_id || typeof email_id !== 'string' || email_id.trim() === '') {
             return res.status(400).json({
-                success: false,
+                error: true,
                 message: 'Invalid input: email_id must be a non-empty string.',
             });
         }
@@ -279,16 +282,15 @@ const DownloadChargingSessionDetails = async (req, res) => {
         }
         const Collection = db.collection('device_session_details');
 
-        const sessions = await Collection.find({ user: email_id, stop_time: { $ne: null } })
+        const sessions = await Collection.find({ email_id: email_id, stop_time: { $ne: null } })
             .sort({ stop_time: -1 })
             .toArray();
-
         if (!sessions || sessions.length === 0) {
-            logger.info(` No charging session records found for email_id: ${email_id}`);
+            logger.loggerInfo(` No charging session records found for email_id: ${email_id}`);
             return res.status(404).json({ message: 'No charging session records found!' });
         }
 
-        logger.info(`Found ${sessions.length} session(s), generating PDF...`);
+        logger.loggerInfo(`Found ${sessions.length} session(s), generating PDF...`);
         let totalUnits = 0;
         let totalPrice = 0;
 
@@ -386,10 +388,10 @@ const DownloadChargingSessionDetails = async (req, res) => {
             rowY += rowHeight;
         });
 
-        logger.info(`PDF generated successfully for ${email_id}, sending response...`);
+        logger.loggerSuccess(`PDF generated successfully for ${email_id}, sending response...`);
         doc.end();
     } catch (error) {
-        logger.error('Error generating charging session PDF:', error);
+        logger.loggerError('Error generating charging session PDF:', error);
         if (!res.headersSent) {
             return res.status(500).json({ message: 'Internal Server Error' });
         }
@@ -404,5 +406,5 @@ module.exports = {
     fetchChargingSessionHistoryFilter,
     fetchChargingSessionDetails,
     // DOWNLOAD CHARGING HISTORYx
-    DownloadChargingSessionDetails
+    DownloadChargingSessionDetails,
 };

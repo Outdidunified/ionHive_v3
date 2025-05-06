@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Controller = require("../controllers/sessionController");
 const authUser = require("../middlewares/authenticated");
+const Invoice = require('../middlewares/invoice/createInvoice');
 
 // TOTAL CHARGING SESSION
 // Total Charging session details
@@ -16,6 +17,9 @@ router.post("/fetchChargingSessionDetails", authUser.isAuthenticated, Controller
 // DOWNLOAD CHARGING HISTORY 
 // download all user charging session details
 router.post("/DownloadChargingSessionDetails", authUser.isAuthenticated, Controller.DownloadChargingSessionDetails); // Route to download session details
+
+// DOWNLOAD invoice of a particular session 
+router.post("/downloadInvoice", authUser.isAuthenticated, Invoice.createInvoice); // Route to download invoice
 
 // Export the router
 module.exports = router;

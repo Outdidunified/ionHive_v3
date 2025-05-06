@@ -1,11 +1,15 @@
 const db_conn = require('../config/db');
 const emailer = require('../middlewares/emailer');
 const logger = require('../utils/logger');
+const natural = require("natural"); // Optional NLP support
+const tokenizer = new natural.WordTokenizer();
 let db;
+
 const initializeDB = async () => {
     if (!db) {
         db = await db_conn.connectToDatabase();
     }
+    return db;
 };
 initializeDB(); // Initialize the DB connection once
 
@@ -20,10 +24,10 @@ const CompleteProfile = async (req, res) => {
         if (!username || typeof username !== 'string' ||
             !email_id || typeof email_id !== 'string' ||
             !user_id || !Number.isInteger(Number(user_id)) ||
-            !phone_number || !Number.isInteger(Number(phone_number))) {
+            (phone_number !== undefined && !Number.isInteger(Number(phone_number)))) {
             return res.status(400).json({
                 error: true,
-                message: 'Invalid input: User ID and phone number must be integers, username and email ID must be strings, and all fields are required.'
+                message: 'Invalid input: User ID must be an integer, username and email ID must be strings, and phone number (if provided) must be an integer.'
             });
         }
 
@@ -42,36 +46,47 @@ const CompleteProfile = async (req, res) => {
             return res.status(404).json({ error: true, message: 'User not found' });
         }
 
-        if (existingUser.username === username && existingUser.phone_no === phone_number) {
+        // Only check for no changes if phone_number is provided
+        if (phone_number !== undefined && existingUser.username === username && existingUser.phone_no === phone_number) {
             return res.status(401).json({ error: true, message: 'no changes found' });
+        } else if (phone_number === null && existingUser.username === username) {
+            return res.status(401).json({ error: true, message: "Once phone number is entered it cant't be empty " });
+        }
+
+        // Prepare update object
+        const updateFields = {
+            username: username,
+            modified_by: email_id,
+            modified_date: new Date()
+        };
+
+        // Only include phone_no in update if it was provided
+        if (phone_number !== undefined) {
+            updateFields.phone_no = phone_number;
         }
 
         // Update user status
         const updateResult = await usersCollection.updateOne(
             { user_id: user_id },
             {
-                $set: {
-                    username: username,
-                    phone_no: phone_number,
-                    modified_by: email_id,
-                    modified_date: new Date()
-                }
+                $set: updateFields
             }
         );
 
         if (updateResult.matchedCount === 0) {
-            logger.info(`${email_id} - Failed to update account, please try again later!`);
+            logger.loggerWarn(`${email_id} - Failed to update account, please try again later!`);
             return res.status(500).json({ error: true, message: 'Failed to update account, please try again later!' });
         }
 
-        logger.info(`${email_id} - Account updated successfully!`);
+        logger.loggerSuccess(`${email_id} - Account updated successfully!`);
         return res.status(200).json({ error: false, message: 'Account updated successfully!' });
 
     } catch (error) {
-        logger.error(`editAccount - ${error.message}`);
+        logger.loggerError(`editAccount - ${error.message}`);
         res.status(500).json({ error: true, message: 'Internal Server Error' });
     }
 };
+
 // fetch User Profile
 const fetchuserprofile = async (req, res) => {
     try {
@@ -129,7 +144,7 @@ const fetchuserprofile = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error fetching user profile for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
+        logger.loggerError(`Error fetching user profile for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -181,18 +196,19 @@ const fetchRFID = async (req, res) => {
         const fetchTagID = await tagIdCollection.findOne({ id: RFID });
 
         if (!fetchTagID) {
-            logger.warn(`Tag ID ${RFID} not found for ${email_id}`);
+            logger.loggerWarn(`Tag ID ${RFID} not found for ${email_id}`);
             return res.status(401).json({ error: true, message: 'RFID is not found' });
         }
 
-        logger.info(`RFID ${RFID} successfully retrieved for ${email_id}`);
+        logger.loggerSuccess(`RFID ${RFID} successfully retrieved for ${email_id}`);
         return res.status(200).json({ error: false, message: fetchTagID });
 
     } catch (error) {
-        logger.error(`fetchRFID - ${error.message}`);
+        logger.loggerError(`fetchRFID - ${error.message}`);
         return res.status(500).json({ error: true, message: 'Internal Server Error' });
     }
 };
+
 // Deactivate RFID
 const DeactivateRFID = async (req, res) => {
     try {
@@ -247,18 +263,19 @@ const DeactivateRFID = async (req, res) => {
         );
 
         if (updateTagResult.modifiedCount === 0) {
-            logger.error(`Failed to update RFID status for tag_id: ${tag_id}`);
+            logger.loggerError(`Failed to update RFID status for tag_id: ${tag_id}`);
             return res.status(500).json({ error: true, message: 'Failed to update RFID status' });
         }
 
-        logger.info(`RFID ${tag_id} deactivated successfully by ${email_id}`);
+        logger.loggerSuccess(`RFID ${tag_id} deactivated successfully by ${email_id}`);
         return res.status(200).json({ error: false, message: `RFID ${tag_id} deactivated successfully` });
 
     } catch (error) {
-        logger.error(`DeactivateRFID - ${error.message}`);
+        logger.loggerError(`DeactivateRFID - ${error.message}`);
         return res.status(500).json({ error: true, message: 'Internal Server Error' });
     }
 };
+
 // DEVICES 
 // Save Devices
 const SaveDevices = async (req, res) => {
@@ -288,7 +305,7 @@ const SaveDevices = async (req, res) => {
         const user = await usersCollection.findOne({ user_id: user_id, email_id });
 
         if (!user) {
-            logger.warn(`User ${user_id} with email ${email_id} not found.`);
+            logger.loggerWarn(`User ${user_id} with email ${email_id} not found.`);
             return res.status(404).json({
                 error: true,
                 message: 'User not found.',
@@ -320,14 +337,14 @@ const SaveDevices = async (req, res) => {
         );
 
         if (updateResult.modifiedCount === 0) {
-            logger.warn(`Failed to update favorite charger for user ${user_id} with email ${email_id}.`);
+            logger.loggerWarn(`Failed to update favorite charger for user ${user_id} with email ${email_id}.`);
             return res.status(500).json({
                 error: true,
                 message: 'Failed to update favorite charger.',
             });
         }
 
-        logger.info(`Favorite charger updated successfully for user ${user_id} with email ${email_id}.`);
+        logger.loggerSuccess(`Favorite charger updated successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
             message: status ? 'Favorite charger updated successfully' : 'Favorite charger removed successfully',
@@ -335,18 +352,18 @@ const SaveDevices = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`SaveStaions - ${error.message}`);
+        logger.loggerError(`SaveStaions - ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
         });
     }
 };
+
 // fetch devices
 const fetchSavedDevices = async (req, res) => {
     try {
         const { user_id, email_id } = req.body;
-
 
         // Validate request parameters
         if (!user_id || isNaN(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
@@ -355,7 +372,6 @@ const fetchSavedDevices = async (req, res) => {
                 message: 'Invalid input: user_id must be a valid number and email_id must be a non-empty string',
             });
         }
-
 
         if (!db) {
             return res.status(500).json({
@@ -367,6 +383,7 @@ const fetchSavedDevices = async (req, res) => {
         const chargerDetailsCollection = db.collection('charger_details');
         const chargerStatusCollection = db.collection('charger_status');
         const financeDetailsCollection = db.collection('finance_details');
+        const socketGunConfigCollection = db.collection('socket_gun_config');
 
         // Find user and retrieve favorite chargers
         const user = await usersCollection.findOne(
@@ -387,18 +404,45 @@ const fetchSavedDevices = async (req, res) => {
             .filter(item => typeof item === "object" && item.charger_id)
             .map(item => String(item.charger_id));
 
-
         // Fetch charger details
         const favChargers = await chargerDetailsCollection.find({
             charger_id: { $in: favChargerIds },
             status: true
+        }).project({
+            _id: 0,
+            charger_id: 1,
+            model: 1,
+            type: 1,
+            vendor: 1,
+            charger_model: 1,
+            charger_type: 1,
+            gun_connector: 1,
+            max_current: 1,
+            max_power: 1,
+            socket_count: 1,
+            lat: 1,
+            long: 1,
+            finance_id: 1,
+            status: 1,
+            address: 1,
+            landmark: 1
         }).toArray();
 
-        // Fetch detailed charger info
+        // Fetch socket & gun configurations
+        const socketGunConfigs = await socketGunConfigCollection.find(
+            { charger_id: { $in: favChargerIds } }
+        ).toArray();
+
+        // Fetch charger statuses for all connectors
+        const chargerStatuses = await chargerStatusCollection.find(
+            { charger_id: { $in: favChargerIds } }
+        ).toArray();
+
+        // Process charger details with finance info and connectors
         const detailedFavChargers = await Promise.all(favChargers.map(async (charger) => {
             const chargerId = charger.charger_id;
-            const status = await chargerStatusCollection.findOne({ charger_id: chargerId });
 
+            // Get finance details and calculate unit price
             let unitPrice = null;
             if (charger.finance_id) {
                 const financeRecord = await financeDetailsCollection.findOne({ finance_id: charger.finance_id });
@@ -418,10 +462,40 @@ const fetchSavedDevices = async (req, res) => {
                 }
             }
 
-            return { ...charger, status: status || null, unit_price: unitPrice };
+            // Get socket/gun configuration
+            const config = socketGunConfigs.find(cfg => cfg.charger_id === chargerId) || {};
+
+            // Extract all connector types dynamically
+            const connectors = [];
+            if (config) {
+                const connectorKeys = Object.keys(config).filter(key => /^connector_\d+_type$/.test(key));
+
+                for (const key of connectorKeys) {
+                    const connectorIndex = key.match(/\d+/)[0];
+
+                    // Find matching status from charger_status collection
+                    const matchingStatus = chargerStatuses.find(
+                        status => status.charger_id === chargerId && status.connector_id === parseInt(connectorIndex)
+                    );
+
+                    connectors.push({
+                        connector_id: parseInt(connectorIndex),
+                        connector_type: config[key] || null,
+                        connector_type_name: config[`connector_${connectorIndex}_type_name`] || null,
+                        charger_status: matchingStatus ? matchingStatus.charger_status : " - "
+                    });
+                }
+            }
+
+            // Return charger with all details
+            return {
+                ...charger,
+                unit_price: unitPrice,
+                connectors: connectors
+            };
         }));
 
-        logger.info('Successfully fetched favorite chargers', { user_id, count: detailedFavChargers.length });
+        logger.loggerSuccess('Successfully fetched favorite chargers', { user_id, count: detailedFavChargers.length });
 
         return res.status(200).json({
             error: false,
@@ -430,8 +504,9 @@ const fetchSavedDevices = async (req, res) => {
             favChargersDetails: detailedFavChargers
         });
 
+
     } catch (error) {
-        logger.error('Error fetching favorite chargers', { error: error.message });
+        logger.loggerError('Error fetching favorite chargers', { error: error.message });
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -439,27 +514,20 @@ const fetchSavedDevices = async (req, res) => {
         });
     }
 };
-
-// VEHICLE
-//  - vehicle model details with images
-// Adding vehicle Model and is details
-const savevehicleModel = async (req, res) => {
+// Remove devices
+const RemoveDevice = async (req, res) => {
     try {
-        const { model, vehicle_company, year, battery_size_kwh, range, charger_type } = req.body;
-        // Validate required fields
-        if (
-            !model ||
-            typeof model !== "string" ||
-            !battery_size_kwh ||
-            (typeof battery_size_kwh !== "number")
-        ) {
+        const { user_id, email_id, charger_id } = req.body;
+
+        // Validate input
+        if (!user_id || !email_id || !charger_id ||
+            !Number.isInteger(Number(user_id)) || typeof email_id !== 'string' ||
+            typeof charger_id !== 'string') {
             return res.status(400).json({
                 error: true,
-                message: "Invalid input: 'model' must be a string and 'battery_size_kwh' must be a number (integer or float)",
+                message: 'Invalid input: user_id must be an integer, email_id must be a string, and charger_id must be a string.',
             });
         }
-
-
 
         if (!db) {
             return res.status(500).json({
@@ -467,41 +535,130 @@ const savevehicleModel = async (req, res) => {
                 message: 'Database connection failed. Please try again later.',
             });
         }
-        const vehicleCollection = db.collection("vehicle_models");
+        const usersCollection = db.collection('users');
 
-        const lastvehicle = await vehicleCollection.find().sort({ vehicle_id: -1 }).limit(1).toArray();
-        const nextvehicleId = lastvehicle.length > 0 ? lastvehicle[0].vehicle_id + 1 : 1;
+        // Find the user with both user_id and email_id
+        const user = await usersCollection.findOne({ user_id: user_id, email_id });
 
-        let imageBase64 = null;
-        if (req.file && req.file.buffer) {
-            imageBase64 = req.file.buffer.toString("base64");
-        } else {
-            logger.warn("No image provided.");
+        if (!user) {
+            logger.loggerWarn(`User ${user_id} with email ${email_id} not found.`);
+            return res.status(404).json({
+                error: true,
+                message: 'User not found.',
+            });
         }
 
-        const vehicleData = {
-            vehicle_id: nextvehicleId,
-            model,
-            vehicle_company,
-            year,
-            battery_size_kwh,
-            range: range || null,
-            charger_type,
-            vehicle_image: imageBase64,
-        };
+        let updatedFavChargers = user.favChargers || [];
 
+        // Check if charger_id exists in favChargers
+        const index = updatedFavChargers.findIndex(fav => fav.charger_id === charger_id);
 
-        await vehicleCollection.insertOne(vehicleData);
+        if (index === -1) {
+            logger.loggerWarn(`Charger ${charger_id} not found in favorites for user ${user_id} with email ${email_id}.`);
+            return res.status(404).json({
+                error: true,
+                message: 'Charger not found in favorites.',
+            });
+        }
 
-        logger.info("vehicle model added successfully.");
-        return res.status(201).json({
+        // Remove the charger from the list
+        updatedFavChargers.splice(index, 1);
+
+        // Update the user's favorite chargers array
+        const updateResult = await usersCollection.updateOne(
+            { user_id: user_id, email_id },
+            { $set: { favChargers: updatedFavChargers } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.loggerWarn(`Failed to remove favorite charger for user ${user_id} with email ${email_id}.`);
+            return res.status(500).json({
+                error: true,
+                message: 'Failed to remove favorite charger.',
+            });
+        }
+
+        logger.loggerSuccess(`Favorite charger ${charger_id} removed successfully for user ${user_id} with email ${email_id}.`);
+        return res.status(200).json({
             error: false,
-            message: "vehicle model added successfully",
-            vehicleData,
+            message: 'Favorite charger removed successfully',
+            updatedFavChargers,
         });
 
     } catch (error) {
-        logger.error(`Internal Server Error: ${error.message}`);
+        logger.loggerError(`RemoveDevice - ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+        });
+    }
+};
+
+
+// VEHICLE
+//  - vehicle model details with images
+// Adding vehicle Model and is details
+
+const savevehicleModel = async (req, res) => {
+    try {
+        const { model, vehicle_company, battery_size_kwh, type, charger_type } = req.body;
+
+        // Validate required fields
+        if (!model || typeof model !== "string" || !battery_size_kwh) {
+            return res.status(400).json({
+                error: true,
+                message: "Invalid input: 'model' must be a string and 'battery_size_kwh' must be a number (integer or float)",
+            });
+        }
+
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: "Database connection failed. Please try again later.",
+            });
+        }
+
+        const vehicleCollection = db.collection("vehicle_models");
+
+        // Fetch the last vehicle ID and generate the next ID
+        const lastVehicle = await vehicleCollection.find().sort({ vehicle_id: -1 }).limit(1).toArray();
+        const nextVehicleId = lastVehicle.length > 0 ? lastVehicle[0].vehicle_id + 1 : 1;
+
+        // Store file path instead of base64
+        const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+        if (!imagePath) {
+            logger.loggerWarn("No image provided.");
+        }
+
+        const vehicleData = {
+            vehicle_id: nextVehicleId,
+            model,
+            type: type || null,
+            vehicle_company,
+            battery_size_kwh,
+            charger_type,
+            vehicle_image: imagePath || null, // Store file path in DB
+        };
+        const result = await vehicleCollection.insertOne(vehicleData);
+
+        if (result.acknowledged && result.insertedId) {
+            logger.loggerSuccess("Vehicle model added successfully.");
+            return res.status(201).json({
+                error: false,
+                message: "Vehicle model added successfully",
+                vehicleData,
+            });
+        } else {
+            logger.loggerError("Failed to add vehicle model.");
+            return res.status(500).json({
+                error: true,
+                message: "Failed to add vehicle model",
+            });
+        }
+
+    } catch (error) {
+        logger.loggerError(`Internal Server Error: ${error.message}`);
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",
@@ -523,7 +680,7 @@ const getAllvehicleModels = async (req, res) => {
         const vehicleCollection = db.collection("vehicle_models");
 
         const vehicleModels = await vehicleCollection.find({}).toArray();
-        logger.info(`Fetched ${vehicleModels.length} vehicle models from database.`);
+        logger.loggerSuccess(`Fetched ${vehicleModels.length} vehicle models from database.`);
 
         return res.status(200).json({
             error: false,
@@ -531,7 +688,7 @@ const getAllvehicleModels = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error fetching vehicle models: ${error.message}`);
+        logger.loggerError(`Error fetching vehicle models: ${error.message}`);
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",
@@ -544,12 +701,13 @@ const getAllvehicleModels = async (req, res) => {
 const SaveVehiclesOfUser = async (req, res) => {
     try {
         const { user_id, email_id, vehicle_number, vehicle_id } = req.body;
+
         // Validate input
         if (
             !user_id || !email_id || !vehicle_number || !vehicle_id ||
-            !Number.isInteger(user_id) || typeof email_id !== 'string' || email_id.trim() === '' ||
+            !Number.isInteger(Number(user_id)) || typeof email_id !== 'string' || email_id.trim() === '' ||
             typeof vehicle_number !== 'string' || vehicle_number.trim() === '' ||
-            !Number.isInteger(vehicle_id)
+            !Number.isInteger(Number(vehicle_id))
         ) {
             return res.status(400).json({
                 error: true,
@@ -557,6 +715,108 @@ const SaveVehiclesOfUser = async (req, res) => {
             });
         }
 
+        if (!db) {
+            return res.status(500).json({
+                error: true,
+                message: 'Database connection failed. Please try again later.',
+            });
+        }
+
+        const usersCollection = db.collection('users');
+
+        // Find the user with both user_id and email_id
+        const user = await usersCollection.findOne({ user_id: Number(user_id), email_id });
+
+        if (!user) {
+            return res.status(404).json({
+                error: true,
+                message: 'User not found.',
+            });
+        }
+
+        // Check if the vehicle number already exists for any user
+        const vehicleNumberExists = await usersCollection.findOne({
+            'vehicles.vehicle_number': vehicle_number.trim()
+        });
+
+        // If vehicle number exists and belongs to another user, return error
+        if (vehicleNumberExists && vehicleNumberExists.user_id !== Number(user_id)) {
+            logger.loggerWarn(`Vehicle number ${vehicle_number} already exists for another user.`);
+            return res.status(409).json({
+                error: true,
+                message: 'Vehicle number already exists. Please use a different vehicle number.',
+            });
+        }
+
+        let updatedVehicles = user.vehicles || [];
+
+        // Check if a vehicle with the same number already exists for this user
+        const sameVehicleNumberIndex = updatedVehicles.findIndex(v => v.vehicle_number === vehicle_number.trim());
+
+        // If the same vehicle number already exists for this user, return error
+        if (sameVehicleNumberIndex !== -1) {
+            logger.loggerWarn(`Vehicle number ${vehicle_number} already exists for user ${user_id}.`);
+            return res.status(409).json({
+                error: true,
+                message: 'This vehicle number is already registered in your account.',
+            });
+        }
+
+        // Always add as a new vehicle (append to the list)
+        updatedVehicles.push({
+            vehicle_id: Number(vehicle_id),
+            vehicle_number: vehicle_number.trim()
+        });
+
+        logger.loggerInfo(`Adding new vehicle with ID ${vehicle_id} and number ${vehicle_number} for user ${user_id}`);
+
+        // Update the user's vehicles array
+        const updateResult = await usersCollection.updateOne(
+            { user_id: Number(user_id), email_id },
+            { $set: { vehicles: updatedVehicles } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+            logger.loggerWarn(`Failed to update vehicles for user ${user_id} with email ${email_id}.`);
+            return res.status(500).json({
+                error: true,
+                message: 'Failed to update vehicles.',
+            });
+        }
+
+        logger.loggerSuccess(`Vehicle added successfully for user ${user_id} with email ${email_id}.`);
+        return res.status(200).json({
+            error: false,
+            message: 'Vehicle added successfully',
+            updatedVehicles,
+        });
+
+    } catch (error) {
+        logger.loggerError(`SaveVehiclesOfUser - ${error.message}`);
+        return res.status(500).json({
+            error: true,
+            message: 'Internal Server Error',
+        });
+    }
+};
+const RemoveVehicleOfUser = async (req, res) => {
+    try {
+        const { user_id, email_id, vehicle_number, vehicle_id } = req.body;
+
+        // Validate input
+        if (
+            !user_id || !email_id ||
+            (!vehicle_number && !vehicle_id) ||
+            !Number.isInteger(Number(user_id)) ||
+            typeof email_id !== 'string' || email_id.trim() === '' ||
+            (vehicle_number && typeof vehicle_number !== 'string') ||
+            (vehicle_id && !Number.isInteger(Number(vehicle_id)))
+        ) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: user_id must be an integer, email_id must be a non-empty string, and either vehicle_number (string) or vehicle_id (integer) must be provided.',
+            });
+        }
 
         if (!db) {
             return res.status(500).json({
@@ -564,10 +824,11 @@ const SaveVehiclesOfUser = async (req, res) => {
                 message: 'Database connection failed. Please try again later.',
             });
         }
+
         const usersCollection = db.collection('users');
 
-        // Find the user with both user_id and email_id
-        const user = await usersCollection.findOne({ user_id: user_id, email_id });
+        // Find the user
+        const user = await usersCollection.findOne({ user_id: Number(user_id), email_id });
 
         if (!user) {
             return res.status(404).json({
@@ -578,40 +839,67 @@ const SaveVehiclesOfUser = async (req, res) => {
 
         let updatedVehicles = user.vehicles || [];
 
-        // Check if vehicle already exists
-        const index = updatedVehicles.findIndex(v => v.vehicle_id === vehicle_id);
+        // Find the index of the specific vehicle to remove
+        let vehicleIndex = -1;
 
-        if (index === -1) {
-            // If vehicle does not exist, add it to the array
-            updatedVehicles.push({ vehicle_number, vehicle_id });
-        } else {
-            // If vehicle exists, update vehicle_number
-            updatedVehicles[index].vehicle_number = vehicle_number;
+        if (vehicle_number && vehicle_id) {
+            // If both are provided, find the exact match
+            vehicleIndex = updatedVehicles.findIndex(v =>
+                v.vehicle_number === vehicle_number.trim() &&
+                v.vehicle_id === Number(vehicle_id)
+            );
+        } else if (vehicle_number) {
+            // Find by vehicle number only
+            vehicleIndex = updatedVehicles.findIndex(v => v.vehicle_number === vehicle_number.trim());
+        } else if (vehicle_id) {
+            // Find by vehicle ID only
+            vehicleIndex = updatedVehicles.findIndex(v => v.vehicle_id === Number(vehicle_id));
         }
+
+        // Check if the vehicle was found
+        if (vehicleIndex === -1) {
+            return res.status(404).json({
+                error: true,
+                message: vehicle_number
+                    ? 'Vehicle with this number not found in your account.'
+                    : 'Vehicle with this ID not found in your account.',
+            });
+        }
+
+        // Remove only the specific vehicle at the found index
+        const removedVehicle = updatedVehicles[vehicleIndex];
+        updatedVehicles.splice(vehicleIndex, 1);
 
         // Update the user's vehicles array
         const updateResult = await usersCollection.updateOne(
-            { user_id: user_id, email_id },
+            { user_id: Number(user_id), email_id },
             { $set: { vehicles: updatedVehicles } }
         );
 
         if (updateResult.modifiedCount === 0) {
-            logger.warn(`Failed to update vehicles for user ${user_id} with email ${email_id}.`);
+            const identifier = removedVehicle.vehicle_number
+                ? `number ${removedVehicle.vehicle_number}`
+                : `ID ${removedVehicle.vehicle_id}`;
+            logger.loggerWarn(`Failed to remove vehicle with ${identifier} for user ${user_id} with email ${email_id}.`);
             return res.status(500).json({
                 error: true,
-                message: 'Failed to update vehicles.',
+                message: 'Failed to remove vehicle.',
             });
         }
 
-        logger.info(`Vehicle updated successfully for user ${user_id} with email ${email_id}.`);
+        const identifier = removedVehicle.vehicle_number
+            ? `number ${removedVehicle.vehicle_number}`
+            : `ID ${removedVehicle.vehicle_id}`;
+        logger.loggerSuccess(`Vehicle with ${identifier} removed successfully for user ${user_id} with email ${email_id}.`);
         return res.status(200).json({
             error: false,
-            message: 'Vehicle updated successfully',
-            updatedVehicles,
+            message: 'Vehicle removed successfully',
+            updatedVehicles: updatedVehicles,
+            removedVehicle: removedVehicle
         });
 
     } catch (error) {
-        logger.error(`SaveVehiclesOfUser - ${error.message}`);
+        logger.loggerError(`RemoveVehicleOfUser - ${error.message}`);
         return res.status(500).json({
             error: true,
             message: 'Internal Server Error',
@@ -660,11 +948,14 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
         const vehicleDetails = await Promise.all(savedVehicles.map(async (vehicle) => {
             const vehicleData = await vehicleModelsCollection.findOne(
                 { vehicle_id: vehicle.vehicle_id },
-                { projection: { _id: 0 } } // Exclude _id from result
+                { projection: { _id: 0 } }
             );
+
             let imageBase64 = null;
-            if (vehicleData && vehicleData.battery_size_kwh) {
-                imageBase64 = Buffer.from(vehicleData.battery_size_kwh).toString('base64');
+            if (vehicleData && Buffer.isBuffer(vehicleData.battery_size_kwh)) {
+                imageBase64 = vehicleData.battery_size_kwh.toString('base64');
+            } else if (vehicleData?.battery_size_kwh) {
+                imageBase64 = vehicleData.battery_size_kwh.toString();
             }
 
             return {
@@ -674,14 +965,15 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
                     model: vehicleData.model,
                     range: vehicleData.range,
                     charger_type: vehicleData.charger_type,
-                    battery_size_kwh: vehicleData.battery_size,
+                    battery_size_kwh: vehicleData.battery_size_kwh,
                     vehicle_company: vehicleData.vehicle_company,
-                    image_base64: imageBase64 // Add formatted image
+                    vehicle_image: vehicleData.vehicle_image
                 } : null,
             };
         }));
 
-        logger.info(`Vehicles with details retrieved successfully for user: ${user_id}`);
+
+        logger.loggerSuccess(`Vehicles with details retrieved successfully for user: ${user_id}`);
 
         return res.status(200).json({
             error: false,
@@ -690,7 +982,7 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
         });
 
     } catch (error) {
-        logger.error(`Error fetching vehicles for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
+        logger.loggerSuccess(`Error fetching vehicles for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",
@@ -700,138 +992,105 @@ const fetchSavedVehiclesOfUser = async (req, res) => {
 };
 
 
-// STATIONS //TODO  -  implement this after map module
-// SAVE STATIONS
-// Save Stations
-const SaveStations = async (req, res) => {
+// FQQ's
+const extractKeywords = (message) => {
+    const tokens = tokenizer.tokenize(message.toLowerCase());
+    // Optional: Filter common stopwords (you can enhance this)
+    const stopwords = ["i", "need", "to", "know", "about", "the", "and", "a", "of", "is", "in", "on", "for"];
+    return tokens.filter(token => !stopwords.includes(token));
+};
+const fetchFAQsFromDB = async (category, keywords) => {
     try {
-        const { user_id, email_id, LatLong, address, landmark, status } = req.body;
+        const faqsCollection = db.collection("faq_datas");
 
-        // Validate request body
-        if (!user_id || !email_id || !LatLong || !address || !status === undefined) {
-            return res.status(400).json({
-                error: true,
-                message: 'Missing required fields: user_id, email_id, LatLong, address, or status',
-            });
-        }
+        const keywordConditions = keywords.map(kw => ({
+            $or: [
+                { question: { $regex: kw, $options: 'i' } },
+                { answer: { $regex: kw, $options: 'i' } }
+            ]
+        }));
 
+        const query = {
+            ...(category && category !== 'faq' && { category }),
+            ...(keywordConditions.length && { $and: keywordConditions })
+        };
 
-        if (!db) {
-            return res.status(500).json({
-                error: true,
-                message: 'Database connection failed. Please try again later.',
-            });
-        }
-        const usersCollection = db.collection('users');
-
-        // Find user by user_id and email_id
-        const user = await usersCollection.findOne({ user_id, email_id });
-
-        if (!user) {
-            return res.status(404).json({
-                error: true,
-                message: 'User not found',
-            });
-        }
-
-        let updatedFavStations = user.favStations || [];
-
-        // Check if station already exists in favStations
-        const index = updatedFavStations.findIndex(station => station.LatLong === LatLong);
-
-        if (index !== -1) {
-            if (status === false) {
-                // Remove station if status is false
-                logger.info(`Removing favorite station for user ${user_id} at ${LatLong}`);
-                updatedFavStations.splice(index, 1);
-            } else {
-                // Update status if station exists
-                logger.info(`Updating favorite station status for user ${user_id} at ${LatLong}`);
-                updatedFavStations[index].status = status;
-            }
-        } else if (status === true) {
-            // Add new station if it does not exist
-            logger.info(`Adding new favorite station for user ${user_id} at ${LatLong}`);
-            updatedFavStations.push({ LatLong, address, landmark, status });
-        }
-
-        // Update the user's favorite stations array
-        const updateResult = await usersCollection.updateOne(
-            { user_id, email_id },
-            { $set: { favStations: updatedFavStations } }
-        );
-
-        logger.info(`Favorite stations updated successfully for user ${user_id}`);
-
-        return res.status(200).json({
-            error: false,
-            message: status ? 'Favorite station updated successfully' : 'Favorite station removed successfully',
-            updatedFavStations,
-        });
-
+        const faqs = await faqsCollection.find(query).toArray();
+        return faqs;
     } catch (error) {
-        logger.error(`Error updating favorite station for user_id=${req.body.user_id}, email_id=${req.body.email_id}: ${error.message}`, error);
-        return res.status(500).json({
-            error: true,
-            message: 'Internal Server Error',
-            error: error.message,
-        });
+        console.error("Error fetching FAQs from DB:", error);
+        throw new Error("Failed to fetch FAQs");
     }
 };
-// fetch Stations 
-const fetchSavedStations = async (req, res) => {
-    try {
-        const { user_id, email_id } = req.body;
+const detectIntentCategory = (message) => {
+    const tokens = tokenizer.tokenize(message.toLowerCase());
 
-        // Validate request parameters
-        if (!user_id || isNaN(user_id) || !email_id || typeof email_id !== 'string' || email_id.trim() === '') {
+    if (tokens.includes("pay") || tokens.includes("payment") || tokens.includes("price") || tokens.includes("charge")) {
+        return "payment";
+    }
+
+    if (tokens.includes("charging") || tokens.includes("station") || tokens.includes("plug")) {
+        return "charging";
+    }
+
+    if (tokens.includes("account") || tokens.includes("profile") || tokens.includes("login")) {
+        return "account";
+    }
+
+    if (tokens.includes("faq") || tokens.includes("question") || tokens.includes("help")) {
+        return "faq";
+    }
+
+    return "general";
+};
+const chatbotResponse = async (req, res) => {
+    try {
+        const userMessage = req.body.message?.toLowerCase()?.trim();
+        let responseMessage = '';
+
+        if (!userMessage) {
             return res.status(400).json({
                 error: true,
-                message: 'Invalid input: user_id must be a valid number and email_id must be a non-empty string',
+                message: "Message is required in the request body."
             });
         }
 
-
-        if (!db) {
-            return res.status(500).json({
-                error: true,
-                message: 'Database connection failed. Please try again later.',
-            });
-        }
-        const usersCollection = db.collection("users");
-
-
-        // Find user and retrieve favorite stations
-        const user = await usersCollection.findOne(
-            { user_id, email_id },
-            { projection: { favStations: 1, _id: 0 } }
-        );
-
-        if (!user) {
-            return res.status(404).json({
-                error: true,
-                message: "User not found",
+        // Greetings
+        if (["hi", "hello", "hey", "good morning", "good evening"].some(greet => userMessage.includes(greet))) {
+            return res.status(200).json({
+                error: false,
+                message: "Hi there! 👋 How can I help you today?"
             });
         }
 
-        logger.info(`Favorite stations retrieved successfully for user: ${user_id}`);
+        // Detect intent and extract keywords
+        const category = detectIntentCategory(userMessage);
+        const keywords = extractKeywords(userMessage);
+        const faqs = await fetchFAQsFromDB(category, keywords);
+
+        if (faqs.length > 0) {
+            const topFAQs = faqs.slice(0, 3);
+            responseMessage = topFAQs.map(faq =>
+                `🔹 **${faq.question}**\n➡️ ${faq.answer}`
+            ).join("\n\n");
+        } else {
+            responseMessage = `🤔 I couldn't find an exact answer to your question.\nWould you like to try rephrasing, or tell me more about what you're looking for?`;
+        }
 
         return res.status(200).json({
             error: false,
-            message: "Favorite stations retrieved successfully",
-            favStations: user.favStations || [],
+            message: responseMessage
         });
 
     } catch (error) {
-        logger.error(`Error fetching favorite stations for user_id=${req.body?.user_id}, email_id=${req.body?.email_id}: ${error.message}`, { error });
+        console.error("Error in chatbot response:", error.message);
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",
-            error: error.message,
+            error_details: error.message
         });
     }
 };
-
 
 
 // ACCOUNT
@@ -844,7 +1103,7 @@ const deleteAccount = async (req, res) => {
         if (!email_id || typeof email_id !== 'string' ||
             !user_id || !Number.isInteger(Number(user_id)) ||
             !reason || typeof reason !== 'string') {
-            return res.status(401).json({
+            return res.status(400).json({
                 error: true,
                 message: 'Invalid input: User ID must be an integer, and Email ID & reason must be strings. All fields are required.'
             });
@@ -879,20 +1138,20 @@ const deleteAccount = async (req, res) => {
         );
 
         if (updateResult.matchedCount === 0) {
-            logger.info(`${email_id} - Failed to delete account, Please try again later !`);
+            logger.loggerWarn(`${email_id} - Failed to delete account, Please try again later !`);
             return res.status(401).json({ error: true, message: 'Failed to delete account, Please try again later !' });
         }
 
         const sendEmail = await emailer.EmailConfig(email_id, mailHead = 'deleteAccount');
 
         if (sendEmail) {
-            logger.info(`${email_id} - Delete account mail sent.`);
+            logger.loggerInfo(`${email_id} - Delete account mail sent.`);
         }
 
-        logger.info(`${email_id} - Account deleted successfully !`);
+        logger.loggerSuccess(`${email_id} - Account deleted successfully !`);
         return res.status(200).json({ error: false, message: `Account deleted successfully !` });
     } catch (error) {
-        logger.info(`deleteAccount - ${error.message}`);
+        logger.loggerError(`deleteAccount - ${error.message}`);
         res.status(500).json({ error: true, message: error.message });
     }
 }
@@ -908,14 +1167,15 @@ module.exports = {
     // DEVICES
     SaveDevices,
     fetchSavedDevices,
+    RemoveDevice,
     SaveVehiclesOfUser,
     fetchSavedVehiclesOfUser,
     // VEHCILE
     savevehicleModel,
+    RemoveVehicleOfUser,
     getAllvehicleModels,
-    // STATIONS
-    SaveStations,
-    fetchSavedStations,
+    // FAQ's
+    chatbotResponse,
     // ACCOUNT
     deleteAccount
 };

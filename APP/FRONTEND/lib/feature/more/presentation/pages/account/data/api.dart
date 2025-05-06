@@ -57,8 +57,11 @@ class AccountAPICalls {
         throw TimeoutException(408, 'Request timed out. Please try again.');
       });
       return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');

@@ -2,25 +2,45 @@ import 'package:flutter/foundation.dart';
 
 class iOnHiveCore {
   // Define base URLs for each environment
-  static const String prodBaseUrl = 'http://192.168.1.23:3003';
-  static const String devBaseUrl = 'http://192.168.1.23:3003';
-  static const String testingBaseUrl = 'http://192.168.1.23:3003';
+  static const String prodBaseUrl = 'http://192.168.1.9:3003';
+  static const String devBaseUrl = 'http://192.168.1.9:3003';
+  static const String testingBaseUrl = 'http://192.168.1.9:3003';
 
-  // Dynamically select the base URL based on the environment
+  // Define WebSocket URLs for each environment
+  static const String prodWsUrl = 'ws://192.168.1.9:7004';
+  static const String devWsUrl = 'ws://192.168.1.9:7004';
+  static const String testingWsUrl = 'ws://192.168.1.9:7004';
+
+  // Dynamically select URLs based on the environment
   static final String baseUrl = _getBaseUrl();
+  static final String webSocketUrl = _getWebSocketUrl();
 
   // Private method to determine the base URL
   static String _getBaseUrl() {
     if (kDebugMode) {
-      // Debug mode
       return testingBaseUrl;
     } else if (kProfileMode) {
-      // Profile mode
       return devBaseUrl;
     } else if (kReleaseMode) {
-      // Release mode
       return prodBaseUrl;
     }
-    return prodBaseUrl; // Default to production URL as a fallback
+    return prodBaseUrl;
+  }
+
+  // Private method to determine WebSocket URL
+  static String _getWebSocketUrl() {
+    if (kDebugMode) {
+      return testingWsUrl;
+    } else if (kProfileMode) {
+      return devWsUrl;
+    } else if (kReleaseMode) {
+      return prodWsUrl;
+    }
+    return prodWsUrl;
+  }
+
+  // Helper method to get charging-specific WebSocket URL
+  static String getChargingWebSocketUrl(String chargerId, int connectorId) {
+    return '${webSocketUrl}/charging/$chargerId/$connectorId';
   }
 }

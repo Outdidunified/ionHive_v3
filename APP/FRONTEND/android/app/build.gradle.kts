@@ -45,12 +45,23 @@ ndkVersion = "27.0.12077973"
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false  // Disable minification
+            isShrinkResources = false  // Disable resource shrinking
+            // No proguard files needed
         }
 
         debug {
-            signingConfig = signingConfigs.getByName("debug")  
+            signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false
+            isShrinkResources = false  // Disable resource shrinking
+            // No proguard files needed
         }
     }
+}
+
+dependencies {
+    // Add the androidx.startup dependency for initializing components
+    implementation("androidx.startup:startup-runtime:1.1.1")
 }
 
 flutter {

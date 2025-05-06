@@ -38,11 +38,29 @@ class HeaderAPICalls {
     );
   }
 
-  Future<Map<String, dynamic>> completeProfile(String username, int user_id,
-      String email, int phone_number, String authToken) async {
+  Future<Map<String, dynamic>> completeProfile(
+    String username,
+    int user_id,
+    String email,
+    int? phone_number,
+    String authToken,
+  ) async {
     final url = HeaderUrl.CompleteProfile;
 
     try {
+      // Create request body based on whether phone_number is provided
+      Map<String, dynamic> requestBody = {
+        "username": username,
+        "email_id": email,
+        "user_id": user_id,
+        "phone_number": phone_number,
+      };
+
+      // Only add phone_number to the request if it's not null
+      // if (phone_number != null) {
+      //   requestBody["phone_number"] = phone_number;
+      // }
+
       final response = await http
           .post(
         Uri.parse(url),
@@ -50,19 +68,98 @@ class HeaderAPICalls {
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
-        body: jsonEncode({
-          "username": username,
-          'email_id': email,
-          'phone_number': phone_number,
-          'user_id': user_id
-        }),
+        body: jsonEncode(requestBody),
       )
-          .timeout(const Duration(seconds: 10), onTimeout: () {
-        throw TimeoutException(408, 'Request timed out. Please try again.');
-      });
+          .timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw TimeoutException(408, 'Request timed out. Please try again.');
+        },
+      );
       return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
     } on http.ClientException {
-      throw HttpException(503, 'Please check your internet connection.');
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchuserprofile(
+      int user_id, String email, String authToken) async {
+    final url = HeaderUrl.fetchprofile;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({'email_id': email, 'user_id': user_id}),
+      );
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchwalletblanace(
+      int user_id, String email, String authToken) async {
+    final url = HeaderUrl.fetchwalletbalance;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({'email_id': email, 'user_id': user_id}),
+      );
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchtotalsessions(
+      int user_id, String email, String authToken) async {
+    final url = HeaderUrl.fetchtotalsessions;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({'email_id': email, 'user_id': user_id}),
+      );
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
       throw HttpException(500, '$e');
