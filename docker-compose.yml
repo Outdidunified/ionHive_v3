@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  admin-frontend:
+    build: ./ADMIN/FRONTEND
+    ports:
+      - "3000:3000"
+    depends_on:
+      - admin-backend
+    restart: always
+    networks:
+      - appnet
+
+  admin-backend:
+    build: ./ADMIN/BACKEND
+    ports:
+      - "3001:3001"
+    restart: always
+    networks:
+      - appnet
+
+networks:
+  appnet:
