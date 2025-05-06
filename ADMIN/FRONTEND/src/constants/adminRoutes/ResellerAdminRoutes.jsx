@@ -16,7 +16,7 @@ import CreateClients from '../../roles/reselleradmin/page/Manageclient/Createcli
 import Viewclient from '../../roles/reselleradmin/page/Manageclient/viewclient';
 import Updateclient from '../../roles/reselleradmin/page/Manageclient/updateclient';
 import Assigntoass from '../../roles/reselleradmin/page/Manageclient/Assigntoass';
-import AssignedDevicesClient from '../../roles/reselleradmin/page/Manageclient/AssignedDevicesclient';
+import AssignedDevicesClient from '../../roles/reselleradmin/page/Manageclient/AssignedDevicesClient';
 import Sessionhistoryclient from '../../roles/reselleradmin/page/Manageclient/Sessionhistoryclient';
 
 //wallet

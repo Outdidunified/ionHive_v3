@@ -13,7 +13,7 @@ import ManageTagID from '../../roles/associationadmin/page/ManageTagID/ManageTag
 import Withdraw from '../../roles/associationadmin/page/Withdraw/Withdraw';
 import Profile from '../../roles/associationadmin/page/Profile/Profile';
 import Header from '../../roles/associationadmin/components/Header';
-import Assignuser from '../../roles/associationadmin/page/AssignUser/Assignuser';
+import Assignuser from '../../roles/associationadmin/page/Assignuser/Assignuser';
 import DeviceReport from '../../roles/associationadmin/page/ManageReport/DeviceReport';
 import RevenueReport from '../../roles/associationadmin/page/ManageReport/RevenueReport';
 
