@@ -104,4 +104,111 @@ class Chargingpageapicalls {
       throw HttpException(500, '$e');
     }
   }
+
+  Future<Map<String, dynamic>> Startcharging(int user_id, String email,
+      String authToken, int connector_id, String charger_id,int connector_type) async {
+    final url = Chargingpageurl.startcharging;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'connector_id': connector_id,
+          'charger_id': charger_id,
+          'connector_type':connector_type
+        }),
+      );
+      final data = jsonDecode(response.body);
+      debugPrint('fetching start charging  body : $data');
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+  Future<Map<String, dynamic>> Stopcharging(int user_id, String email,
+      String authToken, int connector_id, String charger_id,int connector_type) async {
+    final url = Chargingpageurl.stopcharging;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'connector_id': connector_id,
+          'charger_id': charger_id,
+          'connector_type':connector_type
+        }),
+      );
+      final data = jsonDecode(response.body);
+      debugPrint('fetching stop charging   body : $data');
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
+  Future<Map<String, dynamic>> Autostop(int user_id, String email,
+      String authToken, int updateUserTimeVal,int updateUserUnitVal,int updateUserPriceVal ,bool updateUserTime_isChecked,bool updateUserUnit_isChecked,bool updateUserPrice_isChecked ) async {
+    final url = Chargingpageurl.autostop;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'updateUserTimeVal': updateUserTimeVal,
+          'updateUserUnitVal': updateUserUnitVal,
+          'updateUserPriceVal':updateUserPriceVal,
+          'updateUserTime_isChecked':updateUserTime_isChecked,
+          'updateUserUnit_isChecked':updateUserUnit_isChecked,
+          'updateUserPrice_isChecked':updateUserPrice_isChecked
+
+
+        }),
+      );
+      final data = jsonDecode(response.body);
+      debugPrint('fetching update auto stop    body : $data');
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
 }
