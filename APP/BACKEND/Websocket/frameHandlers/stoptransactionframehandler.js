@@ -109,7 +109,8 @@ const handleStopTransaction = async (
     startedChargingSet,
     chargerStopTime,
     meterValuesMap,
-    chargingSessionID
+    chargingSessionID,
+    chargerStartTime
 ) => {
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId];

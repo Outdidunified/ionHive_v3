@@ -1,7 +1,7 @@
 const dbService = require("../services/dbService");
 const logger = require('../../utils/logger');
 const { framevalidation } = require("../validation/framevalidation");
-// const { broadcastMessage } = require("../WebsocketHandler");
+const { sendForceDisconnect } = require("../utils/broadcastUtils");
 
 const validateStatusnotification = (data) => {
     return framevalidation(data, "StatusNotification.json");
@@ -94,15 +94,9 @@ const handleStatusNotification = async (
             timeoutId = setTimeout(async () => {
                 const result = await dbService.updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
                 // if (result) {
-                //     // Custom frame to broadcast when update is successful
-                //     const customFrame = {
-                //         type: "forceDisconnect",
-                //         connectorId: connectorId,
-                //         message: "Session cleared. Please return to home screen."
-                //     };
-
-                //     broadcastMessage(uniqueIdentifier, customFrame, ws, ClientWss);
-                //     logger.loggerInfo(`Broadcasted disconnect message for charger ${uniqueIdentifier}, connector ${connectorId}`);
+                //     // Send force disconnect message using our utility function
+                //     sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
+                //         "No action attempted. Automatically redirecting to home page.");
                 // }
 
                 logger.loggerInfo(`ChargerID ${uniqueIdentifier} - End charging session ${result ? "updated" : "not updated"}`);

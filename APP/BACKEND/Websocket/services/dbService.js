@@ -1,6 +1,8 @@
 const db_conn = require('../../config/db');
 const logger = require('../../utils/logger');
 let db;
+let client;
+
 const connectToDatabase = async () => {
     try {
         if (!db) {
@@ -461,29 +463,88 @@ const checkAuthorization = async (charger_id, idTag) => {
         return { status: "Error" };
     }
 };
+
+// const updateChargerTransaction = async (charger_id, updateFields) => {
+//     console.log("updateFields:", updateFields);
+//     console.log("charger_id:", charger_id);
+//     try {
+//         if (!db) {
+//             db = await connectToDatabase();
+//             if (!db) {
+//                 logger.loggerError('Failed to establish database connection.');
+//                 return { status: "Error", message: "Database connection failed" };
+//             }
+//         }
+
+//         const chargerDetailsCollection = db.collection('charger_details');
+
+//         // Normalize charger_id for comparison (trim and ensure consistent case)
+//         const normalizedChargerId = charger_id.trim().toUpperCase();
+//         logger.loggerDebug(`Querying charger_details with charger_id: ${normalizedChargerId}`);
+
+//         // Perform the update operation
+//         const result = await chargerDetailsCollection.findOneAndUpdate(
+//             { charger_id: normalizedChargerId },
+//             { $set: updateFields },
+//             { returnDocument: 'after' }
+//         );
+
+//         if (!result.value) {
+//             // Log all charger IDs in the collection for debugging
+//             const allChargers = await chargerDetailsCollection.find({}, { projection: { charger_id: 1 } }).toArray();
+//             logger.loggerError(`No charger found with charger_id: ${normalizedChargerId}. Available charger IDs: ${JSON.stringify(allChargers)}`);
+//             return { status: "Error", message: "No charger found" };
+//         }
+
+//         logger.loggerInfo(`Updated charger transaction for charger_id: ${normalizedChargerId}`);
+//         return { status: "Success", updatedData: result.value };
+//     } catch (error) {
+//         logger.loggerError(`Error updating charger transaction for charger_id ${charger_id}: ${error.message}`);
+//         return { status: "Error", message: error.message };
+//     }
+// };
+
+
 const updateChargerTransaction = async (charger_id, updateFields) => {
+    console.log("updateFields:", updateFields);
+    console.log("charger_id:", charger_id);
     try {
         if (!db) {
             db = await connectToDatabase();
+            if (!db) {
+                logger.loggerError('Failed to establish database connection.');
+                return { status: "Error", message: "Database connection failed" };
+            }
         }
 
         const chargerDetailsCollection = db.collection('charger_details');
 
-        // Perform the update operation
-        const result = await chargerDetailsCollection.findOneAndUpdate(
-            { charger_id: charger_id },
-            { $set: updateFields },
-            { returnDocument: 'after' }
-        );
+        const normalizedChargerId = charger_id.trim().toUpperCase();
 
-        if (!result.value) {
-            logger.loggerError(`No charger found with charger_id: ${charger_id}`);
+        // Find the document
+        const charger = await chargerDetailsCollection.findOne({ charger_id: normalizedChargerId });
+        if (!charger) {
+            const allChargers = await chargerDetailsCollection.find({}, { projection: { charger_id: 1 } }).toArray();
+            logger.loggerError(`No charger found with charger_id: ${normalizedChargerId}. Available charger IDs: ${JSON.stringify(allChargers)}`);
             return { status: "Error", message: "No charger found" };
         }
 
-        logger.loggerInfo(`Updated charger transaction for charger_id: ${charger_id}`);
-        return { status: "Success", updatedData: result.value };
+        // Update the document
+        const updateResult = await chargerDetailsCollection.updateOne(
+            { charger_id: normalizedChargerId },
+            { $set: updateFields }
+        );
 
+        if (updateResult.matchedCount === 0) {
+            logger.loggerError(`Update failed: No charger matched with charger_id: ${normalizedChargerId}`);
+            return { status: "Error", message: "No charger matched during update" };
+        }
+
+        // Fetch the updated document
+        const updatedCharger = await chargerDetailsCollection.findOne({ charger_id: normalizedChargerId });
+
+        logger.loggerInfo(`Updated charger transaction for charger_id: ${normalizedChargerId}`);
+        return { status: "Success", updatedData: updatedCharger };
     } catch (error) {
         logger.loggerError(`Error updating charger transaction for charger_id ${charger_id}: ${error.message}`);
         return { status: "Error", message: error.message };
@@ -778,6 +839,27 @@ const updateInUse = async (charger_id, idTag, connectorId) => {
     }
 };
 
+/**
+ * Close the database connection
+ * 
+ * @returns {Promise<boolean>} - Whether the connection was closed successfully
+ */
+
+
+const closeConnection = async () => {
+    try {
+        if (client && client.isConnected()) {
+            await client.close();
+            logger.loggerInfo('Database connection closed successfully');
+            return true;
+        }
+        return false;
+    } catch (error) {
+        logger.loggerError(`Error closing database connection: ${error.message}`);
+        return false;
+    }
+};
+
 module.exports = {
     connectToDatabase,
     updateChargerIP,
@@ -798,5 +880,6 @@ module.exports = {
     getPricePerUnit,
     getConnectorId,
     updateInUse,
-    getUserVehicleData
+    getUserVehicleData,
+    closeConnection
 };

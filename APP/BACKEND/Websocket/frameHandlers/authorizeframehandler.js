@@ -14,7 +14,7 @@ const handleAuthorize = async (uniqueIdentifier, requestPayload, requestId, wsCo
         // Validate request payload
         const validationResult = validateAuthorize(requestPayload);
         if (!validationResult.isValid) {
-            logger.loggerError(`Authorization validation failed: ${JSON.stringify(validationResult.errors)}`);
+            logger.loggerError(`Authorization validation failed: Frame Recived - ${JSON.stringify(requestPayload)}, Errors: ${JSON.stringify(validationResult.errors)}`);
             response[2] = { idTagInfo: { status: "Invalid" } };
 
             // Add metadata for internal use

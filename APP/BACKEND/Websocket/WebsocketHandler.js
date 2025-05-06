@@ -371,7 +371,8 @@ const handleIncomingMessage = async (
                     startedChargingSet,
                     chargerStopTime,
                     meterValuesMap,
-                    chargingSessionID
+                    chargingSessionID,
+                    chargerStartTime
                 );
                 // Check if there's metadata with broadcast data
                 if (response.metadata && response.metadata.broadcastData && response.metadata.statusNotification) {
@@ -451,19 +452,8 @@ const handleIncomingMessage = async (
     }
 };
 
-const broadcastMessage = (DeviceID, message, sender, ClientWss) => {
-    const jsonMessage = JSON.stringify({ DeviceID, message });
-
-    ClientWss.clients.forEach(client => {
-        if (client !== sender && client.readyState === WebSocket.OPEN) {
-            client.send(jsonMessage, (error) => {
-                if (error) {
-                    logger.loggerError(`Error sending message: ${error.message}`);
-                }
-            });
-        }
-    });
-};
+// Import the broadcast utilities to avoid circular dependencies
+const { broadcastMessage, sendForceDisconnect } = require('./utils/broadcastUtils');
 
 /**
  * Enhanced WebSocket error handler with comprehensive error handling and recovery
@@ -626,4 +616,211 @@ const broadcastDisconnectEvent = (uniqueIdentifier, status, reason) => {
     logger.loggerInfo(`Charger ${uniqueIdentifier} disconnected: ${status} - ${reason}`);
 };
 
-module.exports = { handleWebSocketConnection, broadcastMessage };
+/**
+ * Send charger data to a specific client
+ * 
+ * @param {string} chargerId - The charger ID
+ * @param {string} clientId - The client ID to target
+ * @param {object} data - The data to send
+ * @param {WebSocketServer} ClientWss - The client WebSocket server
+ * @returns {boolean} - Whether the message was sent successfully
+ */
+const sendChargerDataToClient = (chargerId, clientId, data, ClientWss) => {
+    if (!ClientWss) {
+        logger.loggerError(`Cannot send charger data: ClientWss is not available`);
+        return false;
+    }
+
+    let targetFound = false;
+
+    // Prepare the message with connection data
+    const messageData = {
+        DeviceID: chargerId,
+        message: data,
+        timestamp: new Date().toISOString(),
+        connectionData: {
+            chargerId: chargerId,
+            isConnected: true,
+            connectionType: "websocket",
+            lastActivity: new Date().toISOString()
+        }
+    };
+
+    const jsonMessage = JSON.stringify(messageData);
+
+    // Find the specific client and send the message
+    ClientWss.clients.forEach(client => {
+        if (client.clientId === clientId && client.readyState === WebSocket.OPEN) {
+            client.send(jsonMessage, (error) => {
+                if (error) {
+                    logger.loggerError(`Error sending message to client ${clientId}: ${error.message}`);
+                } else {
+                    logger.loggerSuccess(`Successfully sent charger ${chargerId} data to client ${clientId}`);
+                    targetFound = true;
+                }
+            });
+        }
+    });
+
+    if (!targetFound) {
+        logger.loggerWarn(`Client ${clientId} not found or not in OPEN state`);
+    }
+
+    return targetFound;
+};
+
+/**
+ * Close all active WebSocket connections
+ * 
+ * @returns {Promise<void>}
+ */
+const closeAllConnections = async () => {
+    return new Promise((resolve) => {
+        try {
+            let closedCount = 0;
+            let totalConnections = 0;
+
+            // Close all charger connections
+            if (global.wsConnections && global.wsConnections.size > 0) {
+                totalConnections += global.wsConnections.size;
+                logger.loggerInfo(`Closing ${global.wsConnections.size} charger connections...`);
+
+                // Create an array of promises for closing connections
+                const closePromises = [];
+
+                global.wsConnections.forEach((ws, chargerId) => {
+                    closePromises.push(new Promise((resolveClose) => {
+                        try {
+                            if (ws && ws.readyState === WebSocket.OPEN) {
+                                // Send a final message to notify the charger
+                                try {
+                                    const finalMessage = JSON.stringify([
+                                        2, // Call message type
+                                        "server_shutdown",
+                                        "Heartbeat",
+                                        {}
+                                    ]);
+                                    ws.send(finalMessage);
+                                } catch (sendErr) {
+                                    // Ignore send errors during shutdown
+                                }
+
+                                // Set a timeout to force close if graceful close doesn't work
+                                const forceCloseTimeout = setTimeout(() => {
+                                    try {
+                                        if (ws.readyState !== WebSocket.CLOSED) {
+                                            ws.terminate();
+                                            logger.loggerWarn(`Force terminated connection for charger ${chargerId}`);
+                                        }
+                                    } catch (err) {
+                                        // Ignore errors during force termination
+                                    }
+                                    resolveClose();
+                                }, 1000);
+
+                                // Try graceful close
+                                ws.close(1001, 'Server shutting down');
+
+                                // Listen for close event
+                                ws.on('close', () => {
+                                    clearTimeout(forceCloseTimeout);
+                                    closedCount++;
+                                    logger.loggerInfo(`Closed connection for charger ${chargerId}`);
+                                    resolveClose();
+                                });
+
+                                // Also listen for error event
+                                ws.on('error', (err) => {
+                                    logger.loggerError(`Error during close for charger ${chargerId}: ${err.message}`);
+                                    clearTimeout(forceCloseTimeout);
+                                    try {
+                                        ws.terminate();
+                                    } catch (termErr) {
+                                        // Ignore terminate errors
+                                    }
+                                    resolveClose();
+                                });
+                            } else {
+                                // Connection not open, just resolve
+                                resolveClose();
+                            }
+                        } catch (err) {
+                            logger.loggerError(`Error closing connection for charger ${chargerId}: ${err.message}`);
+                            resolveClose();
+                        }
+                    }));
+                });
+
+                // Wait for all connections to close (with a timeout)
+                Promise.all(closePromises).then(() => {
+                    logger.loggerInfo(`Closed all charger connections`);
+                });
+            }
+
+            // Close all client connections
+            if (global.ClientWss && global.ClientWss.clients && global.ClientWss.clients.size > 0) {
+                totalConnections += global.ClientWss.clients.size;
+                logger.loggerInfo(`Closing ${global.ClientWss.clients.size} client connections...`);
+
+                global.ClientWss.clients.forEach((client) => {
+                    try {
+                        if (client.readyState === WebSocket.OPEN) {
+                            // Send a final message to notify the client
+                            try {
+                                const finalMessage = JSON.stringify({
+                                    type: "server_shutdown",
+                                    message: "Server is shutting down. Please reconnect later."
+                                });
+                                client.send(finalMessage);
+                            } catch (sendErr) {
+                                // Ignore send errors during shutdown
+                            }
+
+                            client.close(1001, 'Server shutting down');
+                            closedCount++;
+                        }
+                    } catch (err) {
+                        logger.loggerError(`Error closing client connection: ${err.message}`);
+                    }
+                });
+            }
+
+            // Clear all maps and collections
+            try {
+                if (global.wsConnections) global.wsConnections.clear();
+                if (global.clientConnections) global.clientConnections.clear();
+                if (global.clients) global.clients.clear();
+                if (global.OCPPResponseMap) global.OCPPResponseMap.clear();
+                if (global.meterValuesMap) global.meterValuesMap.clear();
+                if (global.sessionFlags) global.sessionFlags.clear();
+                if (global.charging_states) global.charging_states.clear();
+                if (global.startedChargingSet) global.startedChargingSet.clear();
+                if (global.chargingSessionID) global.chargingSessionID.clear();
+                if (global.chargerStartTime) global.chargerStartTime.clear();
+                if (global.chargerStopTime) global.chargerStopTime.clear();
+
+                logger.loggerInfo('Cleared all connection maps and data structures');
+            } catch (clearErr) {
+                logger.loggerError(`Error clearing maps: ${clearErr.message}`);
+            }
+
+            logger.loggerInfo(`Closed ${closedCount} out of ${totalConnections} connections`);
+
+            // Give a short delay to allow final messages to be sent
+            setTimeout(() => {
+                resolve();
+            }, 500);
+        } catch (error) {
+            logger.loggerError(`Error in closeAllConnections: ${error.message}`);
+            resolve(); // Resolve anyway to continue shutdown
+        }
+    });
+};
+
+module.exports = {
+    handleWebSocketConnection,
+    broadcastMessage,
+    sendForceDisconnect,
+    sendChargerDataToClient,
+    closeAllConnections
+};

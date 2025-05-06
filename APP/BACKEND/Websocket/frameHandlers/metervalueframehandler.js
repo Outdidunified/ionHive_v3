@@ -34,7 +34,7 @@ const handleMeterValues = async (uniqueIdentifier, requestPayload, requestId, ws
         const clientIpAddress = sendTo?.socket?.remoteAddress || "unknown";
 
         // Get meter values for this session using the helper function
-        let meterValues = getMeterValues(key);
+        let meterValues = getMeterValues(key, meterValuesMap);
 
         let autostopSettings;
 
@@ -147,19 +147,47 @@ const processMeterValues = async (firstMeter, lastMeter, settings, identifier, c
 
         // Add broadcast data to response for WebsocketHandler to handle
         if (ClientWss && ws) {
-            // Create a JSON message to broadcast
-            const jsonMessage = JSON.stringify({ DeviceID: identifier, message: sendLivePrice });
+            try {
+                // Import the broadcastMessage function from our utility module
+                const { broadcastMessage } = require('../utils/broadcastUtils');
 
-            // Broadcast to all clients except the sender
-            ClientWss.clients.forEach(client => {
-                if (client !== ws && client.readyState === 1) { // 1 = WebSocket.OPEN
-                    client.send(jsonMessage, (error) => {
-                        if (error) {
-                            logger.loggerError(`Error sending message: ${error.message}`);
-                        }
-                    });
-                }
-            });
+                // Use the enhanced broadcastMessage function with connection data
+                broadcastMessage(identifier, sendLivePrice, ws, ClientWss, {
+                    includeConnectionData: true,
+                    connectorId: connector
+                    // You can add targetClientId here if you want to target a specific client
+                });
+
+                logger.loggerInfo(`Successfully broadcasted live price and vehicle analytics for ${identifier}`);
+            } catch (error) {
+                logger.loggerError(`Error broadcasting message: ${error.message}`);
+
+                // Fallback to direct broadcast if the enhanced function fails
+                const jsonMessage = JSON.stringify({
+                    DeviceID: identifier,
+                    message: sendLivePrice,
+                    timestamp: new Date().toISOString(),
+                    connectorId: connector,
+                    connectionData: {
+                        chargerId: identifier,
+                        connectorId: connector,
+                        isConnected: true,
+                        connectionType: "websocket",
+                        lastActivity: new Date().toISOString()
+                    }
+                });
+
+                // Broadcast to all clients except the sender
+                ClientWss.clients.forEach(client => {
+                    if (client !== ws && client.readyState === 1) { // 1 = WebSocket.OPEN
+                        client.send(jsonMessage, (error) => {
+                            if (error) {
+                                logger.loggerError(`Error sending message: ${error.message}`);
+                            }
+                        });
+                    }
+                });
+            }
         }
     } catch (error) {
         logger.loggerError(`Error in processMeterValues: ${error.message}`);
@@ -197,7 +225,7 @@ const extractMeterValue = (meterValueArray) => {
 };
 
 // Helper function to get meter values from the map
-const getMeterValues = (key) => {
+const getMeterValues = (key, meterValuesMap) => {
     if (!meterValuesMap.has(key)) {
         meterValuesMap.set(key, {});
     }
