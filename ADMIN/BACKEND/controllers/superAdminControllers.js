@@ -1384,9 +1384,19 @@ const CreateReseller = async (req, res) => {
         });
 
         if (existingReseller) {
+            const duplicateFields = [];
+        
+            if (existingReseller.reseller_email_id === reseller_email_id) {
+                duplicateFields.push("Email ID");
+            }
+        
+            if (existingReseller.reseller_name === reseller_name) {
+                duplicateFields.push("Reseller Name");
+            }
+        
             return res.status(400).json({
                 status: 'Failed',
-                message: 'Reseller name or Email ID already exists'
+                message: `${duplicateFields.join(" and ")} already exists`
             });
         }
 

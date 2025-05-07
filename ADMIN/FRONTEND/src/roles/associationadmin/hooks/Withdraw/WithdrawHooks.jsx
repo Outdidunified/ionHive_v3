@@ -141,8 +141,8 @@ const useWithdraw = (userInfo) => {
     
         setFormData((prevData) => ({
             ...prevData,
-            user_id: userInfo?.data?.user_id || prevData.user_id,
-            created_by: userInfo?.data?.email_id || prevData.created_by,
+            user_id: userInfo?.user_id || prevData.user_id,
+            created_by: userInfo?.email_id || prevData.created_by,
             [name]: uppercasedValue, 
         }));
     

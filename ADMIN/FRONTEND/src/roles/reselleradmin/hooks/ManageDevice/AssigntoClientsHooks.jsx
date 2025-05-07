@@ -146,14 +146,14 @@ const useAssigntoclients = ( userInfo ) => {
           });
       
           if (response.data.status === 'Success') {
-             showSuccessAlert('Charger Assigned Successfully', 2000);
+             showSuccessAlert('Charger Assigned Successfully');
             navigate('/reselleradmin/Allocateddevice');
           } else {
-             showErrorAlert('Charger Not Assigned', response.data.message || 'Please try again.', 2000);
+             showErrorAlert('Charger Not Assigned', response.data.message || 'Please try again.');
           }
         } catch (error) {
           const errorMessage = error?.response?.data?.message || 'Please try again later.';
-           showErrorAlert('Error assigning charger', errorMessage, 2000);
+           showErrorAlert('Error assigning charger', errorMessage);
         } finally {
           setIsSubmitting(false); // End loading
         }

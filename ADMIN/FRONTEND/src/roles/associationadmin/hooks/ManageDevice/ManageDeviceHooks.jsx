@@ -179,9 +179,11 @@ const useManageDevice = (userInfo) => {
     // Close Modal and Reset States
     const closeModal = () => {
         setShowModal(false);
-        setSelectedFinanceId(null); // Reset selectedFinanceId when closing
+        setSelectedFinanceId("");  // Reset the finance selection
+        setSelectedChargerDitails("");  // Reset the charger details
         setIsEdited(false);
     };
+    
 
     // Handle Form Submission
     const handleSubmit = async (e) => {
