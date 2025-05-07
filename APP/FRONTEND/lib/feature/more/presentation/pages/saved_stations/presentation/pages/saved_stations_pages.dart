@@ -142,7 +142,7 @@ class SavedStationsPages extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // Navigate to LandingPage and set pageIndex to 0
-                    Get.to(() => LandingPage(),
+                    Get.offAll(() => LandingPage(),
                         transition: Transition.rightToLeft,
                         duration: const Duration(milliseconds: 300));
                     final LandingPageController landingController =

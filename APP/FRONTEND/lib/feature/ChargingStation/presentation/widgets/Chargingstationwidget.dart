@@ -775,7 +775,7 @@ class ShimmerLoading extends StatelessWidget {
         children: [
           _buildCardLoading(context),
           const SizedBox(height: 20),
-          _buildCardLoading(context),
+          // _buildCardLoading(context),
           const SizedBox(height: 20),
         ],
       ),

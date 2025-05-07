@@ -1,12 +1,253 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import 'package:ionhive/core/Networks/websocket_service.dart';
+import 'package:ionhive/core/controllers/session_controller.dart';
+import 'package:ionhive/core/core.dart';
+import 'package:ionhive/feature/Chargingpage/domain/models/Chargingpage_model.dart';
+import 'package:ionhive/feature/Chargingpage/domain/repositories/Chargingpage_repositories.dart';
 import 'package:ionhive/feature/Chargingpage/presentation/controllers/Chargingpage_controller.dart';
 import 'package:ionhive/feature/Chargingpage/presentation/pages/status_helper.dart';
+import 'package:ionhive/feature/landing_page.dart';
 import 'package:slider_button/slider_button.dart';
 import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
 import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
+
+// Standalone function for showing the auto-stop settings modal
+void _showAutoStopSettingsModal(BuildContext context) {
+  RxBool isTimeEnabled = false.obs;
+  RxBool isUnitEnabled = false.obs;
+  RxBool isPriceEnabled = false.obs;
+
+  TextEditingController timeController = TextEditingController();
+  TextEditingController unitController = TextEditingController();
+  TextEditingController priceController = TextEditingController();
+
+  Get.bottomSheet(
+    Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Set Your Auto Stop',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Obx(() => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Time',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              Switch(
+                value: isTimeEnabled.value,
+                onChanged: (value) {
+                  isTimeEnabled.value = value;
+                  if (!value) timeController.clear();
+                },
+                activeColor: Colors.indigo,
+              ),
+            ],
+          )),
+          Obx(() => isTimeEnabled.value
+              ? Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: timeController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  decoration: InputDecoration(
+                    labelText: 'Enter Time',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'mins',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ],
+          )
+              : const SizedBox.shrink()),
+          const SizedBox(height: 20),
+          Obx(() => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Unit',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              Switch(
+                value: isUnitEnabled.value,
+                onChanged: (value) {
+                  isUnitEnabled.value = value;
+                  if (!value) unitController.clear();
+                },
+                activeColor: Colors.indigo,
+              ),
+            ],
+          )),
+          Obx(() => isUnitEnabled.value
+              ? Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: unitController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  decoration: InputDecoration(
+                    labelText: 'Enter Unit',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'unit',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ],
+          )
+              : const SizedBox.shrink()),
+          const SizedBox(height: 20),
+          Obx(() => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Price',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              Switch(
+                value: isPriceEnabled.value,
+                onChanged: (value) {
+                  isPriceEnabled.value = value;
+                  if (!value) priceController.clear();
+                },
+                activeColor: Colors.indigo,
+              ),
+            ],
+          )),
+          Obx(() => isPriceEnabled.value
+              ? Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: priceController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    TextInputFormatter.withFunction((oldValue, newValue) {
+                      final parts = newValue.text.split('.');
+                      if (parts.length > 2) {
+                        return oldValue;
+                      }
+                      if (parts.length == 2 && parts[1].length > 3) {
+                        return oldValue;
+                      }
+                      return newValue;
+                    }),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: 'Enter Price',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Rs',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ],
+          )
+              : const SizedBox.shrink()),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                if (isTimeEnabled.value && timeController.text.isNotEmpty) {
+                  final time = int.tryParse(timeController.text);
+                  if (time == null || time < 1) {
+                    Get.snackbar('Error', 'Time must be at least 1 minute');
+                    return;
+                  }
+                }
+                if (isPriceEnabled.value && priceController.text.isNotEmpty) {
+                  final price = double.tryParse(priceController.text);
+                  if (price == null || price <= 0) {
+                    Get.snackbar('Error', 'Price must be a positive number');
+                    return;
+                  }
+                }
+                if (isUnitEnabled.value && unitController.text.isNotEmpty) {
+                  final unit = int.tryParse(unitController.text);
+                  if (unit == null || unit < 1) {
+                    Get.snackbar('Error', 'Unit must be at least 1');
+                    return;
+                  }
+                }
+                Map<String, dynamic> autoStopSettings = {};
+                if (isTimeEnabled.value && timeController.text.isNotEmpty) {
+                  autoStopSettings['time'] = int.tryParse(timeController.text);
+                }
+                if (isUnitEnabled.value && unitController.text.isNotEmpty) {
+                  autoStopSettings['unit'] = int.tryParse(unitController.text);
+                }
+                if (isPriceEnabled.value && priceController.text.isNotEmpty) {
+                  autoStopSettings['price'] = double.tryParse(priceController.text);
+                }
+                debugPrint('Auto-stop settings: $autoStopSettings');
+                Get.back();
+                Get.snackbar('Success', 'Auto-stop settings saved');
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Save',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+    isScrollControlled: true,
+  );
+}
 
 class ChargingPage extends StatelessWidget {
   final String chargerId;
@@ -24,243 +265,13 @@ class ChargingPage extends StatelessWidget {
     this.unitPrice = 0.0,
   });
 
-  void _showAutoStopSettingsModal(BuildContext context) {
-    RxBool isTimeEnabled = false.obs;
-    RxBool isUnitEnabled = false.obs;
-    RxBool isPriceEnabled = false.obs;
-
-    TextEditingController timeController = TextEditingController();
-    TextEditingController unitController = TextEditingController();
-    TextEditingController priceController = TextEditingController();
-
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Set Your Auto Stop',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Obx(() => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Time',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Switch(
-                  value: isTimeEnabled.value,
-                  onChanged: (value) {
-                    isTimeEnabled.value = value;
-                    if (!value) timeController.clear();
-                  },
-                  activeColor: Colors.indigo,
-                ),
-              ],
-            )),
-            Obx(() => isTimeEnabled.value
-                ? Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: timeController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    decoration: InputDecoration(
-                      labelText: 'Enter Time',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'mins',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            )
-                : const SizedBox.shrink()),
-            const SizedBox(height: 20),
-            Obx(() => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Unit',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Switch(
-                  value: isUnitEnabled.value,
-                  onChanged: (value) {
-                    isUnitEnabled.value = value;
-                    if (!value) unitController.clear();
-                  },
-                  activeColor: Colors.indigo,
-                ),
-              ],
-            )),
-            Obx(() => isUnitEnabled.value
-                ? Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: unitController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    decoration: InputDecoration(
-                      labelText: 'Enter Unit',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'unit',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            )
-                : const SizedBox.shrink()),
-            const SizedBox(height: 20),
-            Obx(() => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Price',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                Switch(
-                  value: isPriceEnabled.value,
-                  onChanged: (value) {
-                    isPriceEnabled.value = value;
-                    if (!value) priceController.clear();
-                  },
-                  activeColor: Colors.indigo,
-                ),
-              ],
-            )),
-            Obx(() => isPriceEnabled.value
-                ? Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: priceController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      TextInputFormatter.withFunction((oldValue, newValue) {
-                        final parts = newValue.text.split('.');
-                        if (parts.length > 2) {
-                          return oldValue;
-                        }
-                        if (parts.length == 2 && parts[1].length > 3) {
-                          return oldValue;
-                        }
-                        return newValue;
-                      }),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: 'Enter Price',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'Rs',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            )
-                : const SizedBox.shrink()),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (isTimeEnabled.value && timeController.text.isNotEmpty) {
-                    final time = int.tryParse(timeController.text);
-                    if (time == null || time < 1) {
-                      Get.snackbar('Error', 'Time must be at least 1 minute');
-                      return;
-                    }
-                  }
-                  if (isPriceEnabled.value && priceController.text.isNotEmpty) {
-                    final price = double.tryParse(priceController.text);
-                    if (price == null || price <= 0) {
-                      Get.snackbar('Error', 'Price must be a positive number');
-                      return;
-                    }
-                  }
-                  if (isUnitEnabled.value && unitController.text.isNotEmpty) {
-                    final unit = int.tryParse(unitController.text);
-                    if (unit == null || unit < 1) {
-                      Get.snackbar('Error', 'Unit must be at least 1');
-                      return;
-                    }
-                  }
-                  Map<String, dynamic> autoStopSettings = {};
-                  if (isTimeEnabled.value && timeController.text.isNotEmpty) {
-                    autoStopSettings['time'] = int.tryParse(timeController.text);
-                  }
-                  if (isUnitEnabled.value && unitController.text.isNotEmpty) {
-                    autoStopSettings['unit'] = int.tryParse(unitController.text);
-                  }
-                  if (isPriceEnabled.value && priceController.text.isNotEmpty) {
-                    autoStopSettings['price'] = double.tryParse(priceController.text);
-                  }
-                  debugPrint('Auto-stop settings: $autoStopSettings');
-                  Get.back();
-                  Get.snackbar('Success', 'Auto-stop settings saved');
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Save',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final connectorType = connectorDetails['type'] is int
         ? connectorDetails['type'] as int
         : int.tryParse(connectorDetails['type'].toString()) ?? 0;
 
+    // Initialize the controller
     final controller = Get.put(
       ChargingPageController()
         ..chargerId = chargerId
@@ -280,16 +291,7 @@ class ChargingPage extends StatelessWidget {
 
     return WillPopScope(
       onWillPop: () async {
-        controller.isLoading.value = true;
-        try {
-          await controller.endChargingSession(
-            connectorId: int.parse(connectorId),
-            chargerId: chargerId,
-          );
-          return true;
-        } catch (e) {
-          return false;
-        }
+        return false;
       },
       child: Obx(() => LoadingOverlay(
         isLoading: controller.isLoading.value || controller.isEndingSession.value,
@@ -319,7 +321,8 @@ class ChargingPage extends StatelessWidget {
                                       connectorId: int.parse(connectorId),
                                       chargerId: chargerId,
                                     );
-                                    Get.delete<ChargingPageController>(tag: '$chargerId-$connectorId');
+                                    Get.delete<ChargingPageController>(
+                                        tag: '$chargerId-$connectorId');
                                   } catch (e) {
                                     // Error handling is done in endChargingSession
                                   }
@@ -356,6 +359,8 @@ class ChargingPage extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: controller.isWebSocketConnected.value
                                 ? Colors.green.withOpacity(0.1)
+                                : controller.isReconnecting.value
+                                ? Colors.orange.withOpacity(0.1)
                                 : Colors.red.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -365,9 +370,13 @@ class ChargingPage extends StatelessWidget {
                               Icon(
                                 controller.isWebSocketConnected.value
                                     ? Icons.wifi
+                                    : controller.isReconnecting.value
+                                    ? Icons.sync
                                     : Icons.wifi_off,
                                 color: controller.isWebSocketConnected.value
                                     ? Colors.green
+                                    : controller.isReconnecting.value
+                                    ? Colors.orange
                                     : Colors.red,
                                 size: 16,
                               ),
@@ -375,10 +384,14 @@ class ChargingPage extends StatelessWidget {
                               Text(
                                 controller.isWebSocketConnected.value
                                     ? 'Live Data Connected'
+                                    : controller.isReconnecting.value
+                                    ? 'Reconnecting...'
                                     : 'Live Data Disconnected',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: controller.isWebSocketConnected.value
                                       ? Colors.green
+                                      : controller.isReconnecting.value
+                                      ? Colors.orange
                                       : Colors.red,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -452,12 +465,15 @@ class ChargingPage extends StatelessWidget {
                         ),
                         Container(
                           height: screenHeight * 0.2,
-                          width: double.infinity,
+                          width: MediaQuery.of(context).size.width,
+                          padding: EdgeInsets.zero,
+                          margin: EdgeInsets.zero,
                           child: Image.asset(
                             Theme.of(context).brightness == Brightness.dark
                                 ? 'assets/Image/evblack3.png'
                                 : 'assets/Image/evwhite.png',
                             fit: BoxFit.cover,
+                            width: MediaQuery.of(context).size.width,
                           ),
                         ),
                         Container(
@@ -547,15 +563,15 @@ class ChargingPage extends StatelessWidget {
                                   physics: const NeverScrollableScrollPhysics(),
                                   crossAxisCount: 2,
                                   childAspectRatio: 2.5,
-                                  crossAxisSpacing: screenWidth * 0.02,
+                                  crossAxisSpacing: screenWidth * 0.3,
                                   mainAxisSpacing: screenHeight * 0.01,
                                   children: [
                                     _buildDetailItem(
                                       context,
-                                      'Capacity',
-                                      '${data.chargerCapacity} kW',
+                                      'Last Updated',
+                                      data.timestampIST,
                                       Image.asset(
-                                        'assets/icons/power.png',
+                                        'assets/icons/24-hour.png',
                                         width: 20,
                                         height: 20,
                                         color: Theme.of(context).iconTheme.color,
@@ -563,10 +579,10 @@ class ChargingPage extends StatelessWidget {
                                     ),
                                     _buildDetailItem(
                                       context,
-                                      'Last Updated',
-                                      data.timestampIST,
+                                      'Capacity',
+                                      '${data.chargerCapacity} kW',
                                       Image.asset(
-                                        'assets/icons/24-hour.png',
+                                        'assets/icons/power.png',
                                         width: 20,
                                         height: 20,
                                         color: Theme.of(context).iconTheme.color,
@@ -591,7 +607,7 @@ class ChargingPage extends StatelessWidget {
                                   Container(
                                     padding: EdgeInsets.all(screenWidth * 0.02),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.shade100, // Light grey background
+                                      color: Colors.grey.shade100,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Column(
@@ -604,7 +620,6 @@ class ChargingPage extends StatelessWidget {
                                           crossAxisSpacing: screenWidth * 0.02,
                                           mainAxisSpacing: screenHeight * 0.01,
                                           children: [
-                                            // First Box: Energy
                                             if (controller.energy.value != null)
                                               _buildMeterValueItem(
                                                 context,
@@ -613,16 +628,14 @@ class ChargingPage extends StatelessWidget {
                                                 'kWh',
                                                 Colors.purpleAccent.withOpacity(0.1),
                                               ),
-                                            // Second Box: Live Price with Animation
                                             if (controller.energy.value != null)
                                               _buildLivePriceItem(
                                                 context,
                                                 'Live Price',
-                                                controller.energy.value! * unitPrice,
+                                                controller.livePrice.value,
                                                 'Rs',
                                                 Colors.cyanAccent.withOpacity(0.1),
                                               ),
-                                            // Third Box: Current
                                             if (controller.current.value != null)
                                               _buildMeterValueItem(
                                                 context,
@@ -631,7 +644,6 @@ class ChargingPage extends StatelessWidget {
                                                 'A',
                                                 Colors.orangeAccent.withOpacity(0.1),
                                               ),
-                                            // Fourth Box: Speed (Power)
                                             if (controller.power.value != null)
                                               _buildMeterValueItem(
                                                 context,
@@ -659,25 +671,24 @@ class ChargingPage extends StatelessWidget {
                                     ),
                                   ),
                                 ],
-                                if (data.chargerStatus == 'Charging' && controller.showMeterValues.value && hasMeterValues) ...[
+                                if (data.chargerStatus == 'Charging' &&
+                                    controller.showMeterValues.value &&
+                                    hasMeterValues) ...[
                                   SizedBox(height: screenHeight * 0.02),
                                   Container(
                                     width: double.infinity,
+                                    padding: EdgeInsets.symmetric(horizontal: 10),
                                     child: SliderButton(
                                       action: () async {
                                         if (controller.isLoading.value || controller.isEndingSession.value) {
                                           return false;
                                         }
                                         controller.isEndingSession.value = true;
-                                        await Future.delayed(const Duration(seconds: 2));
                                         try {
-                                          controller.isPageActive(false);
-                                          controller.disconnectWebSocket();
                                           await controller.stopchargingsession(
                                             connectorId: int.parse(connectorId),
                                             chargerId: chargerId,
                                           );
-                                          Get.delete<ChargingPageController>(tag: '$chargerId-$connectorId');
                                         } catch (e) {
                                           // Error handling is done in stopchargingsession
                                         }
@@ -817,24 +828,28 @@ class ChargingPage extends StatelessWidget {
           child: icon,
         ),
         SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              title,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.hintColor,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.hintColor,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            Text(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isError ? Colors.red : null,
+              Text(
+                value,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isError ? Colors.red : null,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

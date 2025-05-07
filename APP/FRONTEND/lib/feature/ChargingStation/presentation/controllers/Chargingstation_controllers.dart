@@ -190,9 +190,7 @@ $mapUrl
       chargerDetails.value =
           updatedChargerDetails; // Assign new list to trigger reactivity
       selectedConnectorIndex.value = -1; // Reset global selection
-      CustomSnackbar.showSuccess(
-        message: response.message,
-      );
+      debugPrint(response.message);
     } catch (e) {
       CustomSnackbar.showError(
         message: e.toString().contains("Exception:")

@@ -970,7 +970,11 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       Get.back();
-                      Get.to(() => ChargingStationPage(station: station));
+                      Get.to(
+                        () => ChargingStationPage(station: station),
+                        transition: Transition.rightToLeft,
+                        duration: const Duration(milliseconds: 300),
+                      );
                     },
                     icon: const Icon(Icons.info_outline),
                     label: const Text('Details'),

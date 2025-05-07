@@ -358,7 +358,7 @@ class ChargingStationPage extends StatelessWidget {
             top: screenHeight * 0.05,
             left: screenWidth * 0.04,
             child: GestureDetector(
-              onTap: () => Navigator.pop(context),
+              onTap: () => Get.back(),
               child: Container(
                 padding: EdgeInsets.all(screenWidth * 0.02),
                 decoration: BoxDecoration(

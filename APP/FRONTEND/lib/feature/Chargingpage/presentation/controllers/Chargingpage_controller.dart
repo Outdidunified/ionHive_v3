@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -22,6 +23,7 @@ class ChargingPageController extends GetxController {
   var isWebSocketConnected = false.obs;
   var webSocketError = ''.obs;
   var isPageActive = true.obs;
+  var isReconnecting = false.obs;
 
   // Static variables to track the active WebSocket connection
   static String? _activeChargerId;
@@ -38,7 +40,6 @@ class ChargingPageController extends GetxController {
 
   RxDouble livePrice = 0.0.obs;
 
-
   // New variables for "Started At" timestamp and meter values visibility
   var startedAt = Rx<DateTime?>(null);
   var showMeterValues = true.obs;
@@ -46,8 +47,6 @@ class ChargingPageController extends GetxController {
   late final String chargerId;
   late final int connectorId;
   late final int connectorType;
-
-
 
   @override
   void onInit() {
@@ -61,7 +60,8 @@ class ChargingPageController extends GetxController {
 
   @override
   void onClose() {
-    debugPrint('ChargingPageController: onClose called - closing WebSocket connection');
+    debugPrint(
+        'ChargingPageController: onClose called - closing WebSocket connection');
     isPageActive(false);
     disconnectWebSocket();
     super.onClose();
@@ -69,7 +69,8 @@ class ChargingPageController extends GetxController {
 
   @override
   void dispose() {
-    debugPrint('ChargingPageController: dispose called - closing WebSocket connection');
+    debugPrint(
+        'ChargingPageController: dispose called - closing WebSocket connection');
     isPageActive(false);
     disconnectWebSocket();
     super.dispose();
@@ -77,9 +78,11 @@ class ChargingPageController extends GetxController {
 
   void initWebSocket() {
     try {
+      // Always close any existing connection for a different charger/connector
       if (_activeChargerId != null &&
           _activeConnectorId != null &&
-          (_activeChargerId != chargerId || _activeConnectorId != connectorId)) {
+          (_activeChargerId != chargerId ||
+              _activeConnectorId != connectorId)) {
         debugPrint(
             'Existing WebSocket connection found for chargerId: $_activeChargerId, connectorId: $_activeConnectorId. Closing it.');
         _activeWebSocketService?.disconnect();
@@ -88,57 +91,119 @@ class ChargingPageController extends GetxController {
         _activeConnectorId = null;
       }
 
-      if (_activeChargerId == chargerId && _activeConnectorId == connectorId) {
-        debugPrint('Reusing existing WebSocket connection for chargerId: $chargerId, connectorId: $connectorId');
-        _webSocketService = _activeWebSocketService;
-        isWebSocketConnected(_webSocketService!.isConnected);
-        return;
+      // Check if we can reuse an existing connection
+      bool canReuseConnection = false;
+      if (_activeChargerId == chargerId &&
+          _activeConnectorId == connectorId &&
+          _activeWebSocketService != null) {
+        // Only reuse if the connection is actually active
+        if (_activeWebSocketService!.isConnectionActive()) {
+          debugPrint(
+              'Reusing existing WebSocket connection for chargerId: $chargerId, connectorId: $connectorId');
+          _webSocketService = _activeWebSocketService;
+          isWebSocketConnected(true);
+          isReconnecting(false);
+          canReuseConnection = true;
+        } else {
+          debugPrint(
+              'Existing connection found but not active, creating new connection');
+          _activeWebSocketService?.disconnect();
+          _activeWebSocketService = null;
+          _activeChargerId = null;
+          _activeConnectorId = null;
+        }
       }
 
-      disconnectWebSocket();
+      if (!canReuseConnection) {
+        // Clean up any existing connection for this controller
+        disconnectWebSocket();
 
-      final wsUrl = iOnHiveCore.getChargingWebSocketUrl(chargerId, connectorId);
-      debugPrint('Connecting to WebSocket: $wsUrl');
+        // Create a new connection
+        final wsUrl =
+            iOnHiveCore.getChargingWebSocketUrl(chargerId, connectorId);
+        debugPrint('Creating new WebSocket connection to: $wsUrl');
 
-      _webSocketService = WebSocketService(wsUrl);
-      _webSocketService!.connect();
-      isWebSocketConnected(_webSocketService!.isConnected);
+        _webSocketService = WebSocketService(wsUrl);
+        _webSocketService!.connect();
 
-      _activeWebSocketService = _webSocketService;
-      _activeChargerId = chargerId;
-      _activeConnectorId = connectorId;
+        // Update connection status
+        isWebSocketConnected(_webSocketService!.isConnected);
+        if (_webSocketService!.isConnected) {
+          isReconnecting(false);
+        } else {
+          isReconnecting(true);
+        }
 
+        // Store as the active connection
+        _activeWebSocketService = _webSocketService;
+        _activeChargerId = chargerId;
+        _activeConnectorId = connectorId;
+      }
+
+      // Set up stream listener
       _webSocketService!.stream.listen(
-            (dynamic message) {
+        (dynamic message) {
+          debugPrint('WebSocket message received in controller');
           handleWebSocketMessage(message);
+          // Confirm connection is working when we receive messages
+          isWebSocketConnected(true);
+          isReconnecting(false);
         },
         onError: (error) {
-          debugPrint('WebSocket error: $error');
+          debugPrint('WebSocket error in controller: $error');
           webSocketError.value = error.toString();
           isWebSocketConnected(false);
-          Future.delayed(const Duration(seconds: 3), () {
-            if (!isWebSocketConnected.value && isPageActive.value) {
-              debugPrint('Attempting to reconnect WebSocket after error');
-              initWebSocket();
-            }
-          });
+          isReconnecting(true);
+
+          // Schedule reconnection attempt
+          _scheduleReconnection();
         },
         onDone: () {
-          debugPrint('WebSocket connection closed');
+          debugPrint('WebSocket connection closed in controller');
           isWebSocketConnected(false);
-          Future.delayed(const Duration(seconds: 3), () {
-            if (!isWebSocketConnected.value && isPageActive.value) {
-              debugPrint('Attempting to reconnect WebSocket after connection closed');
-              initWebSocket();
-            }
-          });
+          isReconnecting(true);
+
+          // Schedule reconnection attempt
+          _scheduleReconnection();
         },
       );
+
+      // Periodically check if the connection is still active
+      Timer.periodic(Duration(seconds: 30), (timer) {
+        if (!isPageActive.value) {
+          timer.cancel();
+          return;
+        }
+
+        if (_webSocketService != null &&
+            !_webSocketService!.isConnectionActive()) {
+          debugPrint(
+              'Periodic check: WebSocket connection is not active, reconnecting...');
+          isWebSocketConnected(false);
+          isReconnecting(true);
+          _scheduleReconnection();
+        }
+      });
     } catch (e) {
       debugPrint('Failed to initialize WebSocket: $e');
       webSocketError.value = e.toString();
       isWebSocketConnected(false);
+      isReconnecting(true);
+
+      // Schedule reconnection attempt
+      _scheduleReconnection();
     }
+  }
+
+  void _scheduleReconnection() {
+    if (!isPageActive.value) return;
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!isWebSocketConnected.value && isPageActive.value) {
+        debugPrint('Attempting to reconnect WebSocket');
+        initWebSocket();
+      }
+    });
   }
 
   void disconnectWebSocket() {
@@ -150,13 +215,16 @@ class ChargingPageController extends GetxController {
       } catch (e) {
         debugPrint('Error disconnecting WebSocket: $e');
       } finally {
-        if (_activeChargerId == chargerId && _activeConnectorId == connectorId) {
+        // Only clear the static references if they match this controller's charger/connector
+        if (_activeChargerId == chargerId &&
+            _activeConnectorId == connectorId) {
           _activeWebSocketService = null;
           _activeChargerId = null;
           _activeConnectorId = null;
         }
         _webSocketService = null;
         isWebSocketConnected(false);
+        isReconnecting(false);
       }
     }
   }
@@ -166,9 +234,11 @@ class ChargingPageController extends GetxController {
       final Map<String, dynamic> data = jsonDecode(message);
       debugPrint('WebSocket message received: $data');
 
+      // First check if this message is for our charger
       final messageChargerId = data['DeviceID']?.toString();
       if (messageChargerId != null && messageChargerId != chargerId) {
-        debugPrint('Ignoring message for chargerId: $messageChargerId (current chargerId: $chargerId)');
+        debugPrint(
+            'Ignoring message for chargerId: $messageChargerId (current chargerId: $chargerId)');
         return;
       }
 
@@ -183,6 +253,20 @@ class ChargingPageController extends GetxController {
           final messageType = messageArray[2];
           final messageData = messageArray[3] as Map<String, dynamic>;
 
+          // For connector-specific messages, check if it's for our connector
+          if (messageData.containsKey('connectorId')) {
+            final int msgConnectorId = messageData['connectorId'] is String
+                ? int.tryParse(messageData['connectorId']) ?? 0
+                : messageData['connectorId'] ?? 0;
+
+            if (msgConnectorId != connectorId) {
+              debugPrint(
+                  'Ignoring message for connector: $msgConnectorId (current connector: $connectorId)');
+              return;
+            }
+          }
+
+          // Process the message only if it's for our charger and connector
           if (messageType == 'StatusNotification') {
             handleStatusNotification(deviceId, messageData);
           } else if (messageType == 'Heartbeat') {
@@ -196,8 +280,9 @@ class ChargingPageController extends GetxController {
           } else if (messageType == 'StopTransaction') {
             handleStopTransaction(messageData);
           } else if (messageType == 'ChargerLivePrice') {
-            final data = message['message'][3];
-            livePrice.value = (data['livePrice'] as num?)?.toDouble() ?? 0.0;
+            final priceData = messageArray[3];
+            livePrice.value =
+                (priceData['livePrice'] as num?)?.toDouble() ?? 0.0;
           }
         }
       }
@@ -206,25 +291,42 @@ class ChargingPageController extends GetxController {
     }
   }
 
-  void handleStatusNotification(String deviceId, Map<String, dynamic> messageData) {
+  void handleStatusNotification(
+      String deviceId, Map<String, dynamic> messageData) {
     final int notificationConnectorId = messageData['connectorId'] is String
         ? int.tryParse(messageData['connectorId']) ?? 0
         : messageData['connectorId'] ?? 0;
 
     if (notificationConnectorId == connectorId) {
-      debugPrint('Processing status notification for our connector: $messageData');
+      debugPrint(
+          'Processing status notification for our connector: $messageData');
 
       final currentData = chargingData.value;
       if (currentData != null) {
+        final newStatus = mapOcppStatusToChargerStatus(messageData['status']);
         final updatedData = currentData.copyWith(
-          chargerStatus: mapOcppStatusToChargerStatus(messageData['status']),
+          chargerStatus: newStatus,
           timestamp: DateTime.parse(messageData['timestamp']),
           errorCode: messageData['errorCode'] ?? currentData.errorCode,
         );
 
         chargingData.value = updatedData;
 
-        if (updatedData.chargerStatus != 'Charging') {
+        // Handle different status conditions
+        if (newStatus == 'Finishing') {
+          // Don't disconnect WebSocket yet, but prepare for bill generation
+          debugPrint('Charger is finishing, preparing for bill generation');
+        } else if (newStatus == 'Faulted') {
+          // If charger was previously charging and now faulted, generate bill
+          if (energy.value != null && energy.value! > 0) {
+            debugPrint(
+                'Charger faulted during active charging, will generate bill');
+          } else {
+            debugPrint(
+                'Charger faulted before charging started, no bill needed');
+            // No need to generate bill if charging never started
+          }
+        } else if (newStatus != 'Charging') {
           clearMetrics();
         }
       }
@@ -286,7 +388,8 @@ class ChargingPageController extends GetxController {
     powerFactor.value = null;
   }
 
-  void handleForceDisconnect(String deviceId, Map<String, dynamic> messageData) {
+  void handleForceDisconnect(
+      String deviceId, Map<String, dynamic> messageData) {
     final int notificationConnectorId = messageData['connectorId'] is String
         ? int.tryParse(messageData['connectorId']) ?? 0
         : messageData['connectorId'] ?? 0;
@@ -376,10 +479,27 @@ class ChargingPageController extends GetxController {
     required String chargerId,
   }) async {
     try {
-      isLoading(true);
+      isEndingSession(true);
       final authToken = sessionController.token.value;
       final userId = sessionController.userId.value;
       final emailId = sessionController.emailId.value;
+
+      // Check if we should generate a bill based on charger status
+      final currentStatus = chargingData.value?.chargerStatus;
+      final shouldGenerateBill = currentStatus == 'Finishing' ||
+          (currentStatus == 'Faulted' &&
+              energy.value != null &&
+              energy.value! > 0);
+
+      debugPrint(
+          'Ending charging session. Status: $currentStatus, Generate bill: $shouldGenerateBill');
+
+      // Don't close the WebSocket connection if the charger is in "Finishing" state
+      // This allows us to receive the final meter values and status updates
+      if (currentStatus != 'Finishing') {
+        isPageActive(false);
+        disconnectWebSocket();
+      }
 
       await _repo.endchargingsession(
         userId,
@@ -388,12 +508,18 @@ class ChargingPageController extends GetxController {
         connectorId,
         chargerId,
       );
-      isLoading(false);
-      Get.off(() => LandingPage());
+
+      // If we're in "Finishing" state, we'll wait for the final status update
+      // before navigating away from the page
+      if (currentStatus != 'Finishing') {
+        Get.off(() => LandingPage());
+      }
     } catch (e) {
-      isLoading(false);
       Get.snackbar('Error', 'Failed to end charging session: $e');
       rethrow;
+    } finally {
+      isEndingSession(false);
+      isLoading(false);
     }
   }
 
@@ -417,7 +543,8 @@ class ChargingPageController extends GetxController {
       );
 
       startedAt.value = DateTime.now(); // Set the "Started At" timestamp
-      showMeterValues.value = true; // Ensure meter values are visible after starting
+      showMeterValues.value =
+          true; // Ensure meter values are visible after starting
       await fetchLastStatusData();
     } catch (e) {
       Get.snackbar('Error', 'Failed to start charging session: $e');
