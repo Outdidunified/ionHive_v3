@@ -67,17 +67,10 @@ const useManageDevice = (userInfo) => {
         setPosts(filtered); // Update posts with filtered data
     };
     
-    
-    
-    
-    // Update table data 'data', and 'filteredData' 
     useEffect(() => {
         setPosts(data); // set posts when data is fetched
     }, [data]);
     
-
-  
-    // DeActivate Function
     const changeDeActivate = async (e, dataItem) => {
         e.preventDefault();
         try {
@@ -172,9 +165,14 @@ const useManageDevice = (userInfo) => {
     
     // Handle Finance Selection
     const handleFinanceChange = (e) => {
-        setSelectedFinanceId(e.target.value);
-        setIsEdited(true);
+        const selectedValue = e.target.value;
+        setSelectedFinanceId(selectedValue);
+    
+        // Compare with the original finance_id (as string, for consistent comparison)
+        const originalFinanceId = selectedChargerDitails?.finance_id?.toString() || "";
+        setIsEdited(selectedValue !== originalFinanceId);
     };
+    
     
     // Close Modal and Reset States
     const closeModal = () => {

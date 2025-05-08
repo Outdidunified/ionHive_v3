@@ -1,4 +1,3 @@
-// src/hooks/useManageDevice.js
 import { useState, useEffect, useRef, useCallback } from 'react';
 import axiosInstance from '../../../../utils/utils';
 import { useNavigate } from 'react-router-dom';
@@ -158,41 +157,49 @@ const useAddManageDevice = (userInfo) => {
         updateConnectors({ ...updatedConnectors[index], index });
     };
 
-const addManageDevice = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    const addManageDevice = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+      
+        // Validate charger ID
+        const chargerIDRegex = /^[a-zA-Z0-9]{1,20}$/;
+        if (!charger_id) {
+          setErrorMessage("Charger ID can't be empty.");
+          setLoading(false);
+          return;
+        }
+        if (!chargerIDRegex.test(charger_id)) {
+          setErrorMessage('Oops! Charger ID must be a maximum of 20 characters.');
+          setLoading(false);
+          return;
+        }
+      
+        // Validate vendor
+        const vendorRegex = /^[a-zA-Z0-9 ]{1,20}$/;
+        if (!vendor) {
+          setErrorMessage("Vendor name can't be empty.");
+          setLoading(false);
+          return;
+        }
+        if (!vendorRegex.test(vendor)) {
+          setErrorMessage('Oops! Vendor name must be 1 to 20 characters and contain alphanumeric characters.');
+          setLoading(false);
+          return;
+        }
+      
+const validConnectors = connectors.filter(conn => conn.connector_type && conn.typeOptions.length > 0);
+if (validConnectors.length === 0) {
+  showErrorAlert("No Connectors Found", "Connectors not available");
+  setLoading(false);
+  return;
+}
 
-    // Validate charger ID
-    const chargerIDRegex = /^[a-zA-Z0-9]{1,20}$/;
-    if (!charger_id) {
-        setErrorMessage("Charger ID can't be empty.");
-        setLoading(false);
-        return;
-    }
-    if (!chargerIDRegex.test(charger_id)) {
-        setErrorMessage('Oops! Charger ID must be a maximum of 20 characters.');
-        setLoading(false);
-        return;
-    }
-
-    // Validate vendor
-    const vendorRegex = /^[a-zA-Z0-9 ]{1,20}$/;
-    if (!vendor) {
-        setErrorMessage("Vendor name can't be empty.");
-        setLoading(false);
-        return;
-    }
-    if (!vendorRegex.test(vendor)) {
-        setErrorMessage('Oops! Vendor name must be 1 to 20 characters and contain alphanumeric and number.');
-        setLoading(false);
-        return;
-    }
-
-    try {
-        const max_current = parseInt(maxCurrent);
-        const max_power = parseInt(maxPower);
-
-        const payload = {
+      
+        try {
+          const max_current = parseInt(maxCurrent);
+          const max_power = parseInt(maxPower);
+      
+          const payload = {
             charger_id,
             charger_model,
             charger_type: selectChargerType,
@@ -203,14 +210,14 @@ const addManageDevice = async (e) => {
             bluetooth_module,
             wifi_module,
             created_by: userInfo.email_id,
-        };
-
-        const response = await axiosInstance.post('/superadmin/CreateCharger', payload);
-        setLoading(false);
-
-        if (response.data.status === 'Success') {
+          };
+      
+          const response = await axiosInstance.post('/superadmin/CreateCharger', payload);
+          setLoading(false);
+      
+          if (response.data.status === 'Success') {
             showSuccessAlert("Charger added successfully");
-
+      
             // Reset form fields
             setChargerID('');
             setModel('');
@@ -221,23 +228,19 @@ const addManageDevice = async (e) => {
             setWiFiModule('');
             setBluetoothModule('');
             setConnectors([{ connector_id: 1, connector_type: '', type_name: '', typeOptions: [] }]);
-
+      
             backManageDevice();
-        } else {
+          } else {
             showErrorAlert("Error", `Failed to add charger: ${response.data.message}`);
+          }
+        } catch (error) {
+          setLoading(false);
+          const errorMessage = error?.response?.data?.message || error.message;
+          showErrorAlert("Error", `An error occurred while adding the charger: ${errorMessage}`);
         }
-    } catch (error) {
-        setLoading(false);
+      };
+      
 
-        const errorMessage = error?.response?.data?.message || error.message;
-        showErrorAlert("Error", `An error occurred while adding the charger: ${errorMessage}`);
-    }
-};
-
-    
-    
-    
-    
     
     useEffect(() => {
         if (!fetchDataCalled.current) {

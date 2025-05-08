@@ -305,6 +305,7 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                         <ReusableButton
                                                             type="submit"
                                                             loading={loading}
+                                     
                                                             className="mr-2"
                                                         >
                                                             Add

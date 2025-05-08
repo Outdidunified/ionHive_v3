@@ -15,12 +15,13 @@ const useAssignCharger = (dataItem) => {
                     reseller_id: dataItem.reseller_id
                 });
     
-                if (response.data.status === 'Success') {
+                if (response.data.success) {
                     setData(response.data.data);
-                    setFilteredData(response.data.data); // Initialize filtered data with all data
+                    setFilteredData(response.data.data);
                 } else {
                     console.error('Failed to fetch assigned chargers');
                 }
+                
             } catch (error) {
                 console.error('An error occurred while fetching assigned chargers');
                 console.error('Error:', error);
