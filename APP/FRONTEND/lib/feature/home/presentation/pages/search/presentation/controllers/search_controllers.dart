@@ -546,10 +546,10 @@ class SearchpageController extends GetxController {
       if (!response.error) {
         debugPrint("Unit Price: ${response.unitPrice}");
 
-        CustomSnackbar.showSuccess(
-          message: 'Charging started with Connector $connectorId',
-          duration: const Duration(seconds: 3),
-        );
+        // CustomSnackbar.showSuccess(
+        //   message: 'Charging started with Connector $connectorId',
+        //   duration: const Duration(seconds: 3),
+        // );
 
         await Future.delayed(const Duration(seconds: 3));
         Get.back();

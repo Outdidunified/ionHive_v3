@@ -379,4 +379,6 @@ $mapUrl
         ['selectedConnectorIndex']; // Update global state
     update(['connectors']); // Ensure UI updates
   }
+
+
 }

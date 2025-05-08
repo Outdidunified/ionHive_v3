@@ -13,7 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 class ChargingStationPage extends StatelessWidget {
   final Map<String, dynamic> station;
   final ChargingStationController controller =
-      Get.put(ChargingStationController());
+  Get.put(ChargingStationController());
   final searchpageController = Get.find<SearchpageController>();
 
   // Controller to manage the Google Map
@@ -50,7 +50,7 @@ class ChargingStationPage extends StatelessWidget {
         'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
     final shareText = 'Check out this charging station at $address: $url';
     final uri =
-        Uri.parse('mailto:?subject=Charging Station Location&body=$shareText');
+    Uri.parse('mailto:?subject=Charging Station Location&body=$shareText');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
@@ -59,11 +59,365 @@ class ChargingStationPage extends StatelessWidget {
     }
   }
 
+  // Define map styles for light and dark themes
+  static const String _lightMapStyle = '''
+  [
+    {
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#f5f5f5"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.icon",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#616161"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#f5f5f5"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.land_parcel",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#bdbdbd"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#eeeeee"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#e5e5e5"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#9e9e9e"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#ffffff"
+        }
+      ]
+    },
+    {
+      "featureType": "road.arterial",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#dadada"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#616161"
+        }
+      ]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#9e9e9e"
+        }
+      ]
+    },
+    {
+      "featureType": "transit.line",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#e5e5e5"
+        }
+      ]
+    },
+    {
+      "featureType": "transit.station",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#eeeeee"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#c9c9c9"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#9e9e9e"
+        }
+      ]
+    }
+  ]
+  ''';
+
+  static const String _darkMapStyle = '''
+  [
+    {
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#212121"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.icon",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#212121"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.country",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#9e9e9e"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.land_parcel",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.locality",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#bdbdbd"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#181818"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#616161"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#1b1b1b"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry.fill",
+      "stylers": [
+        {
+          "color": "#2c2c2c"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#8a8a8a"
+        }
+      ]
+    },
+    {
+      "featureType": "road.arterial",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#373737"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#3c3c3c"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway.controlled_access",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#4e4e4e"
+        }
+      ]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#616161"
+        }
+      ]
+    },
+    {
+      "featureType": "transit",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#000000"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#3d3d3d"
+        }
+      ]
+    }
+  ]
+  ''';
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
+    final theme = Theme.of(context);
     debugPrint('station: $station');
 
     // Safely access controller.station, assuming it's an Rx object
@@ -103,6 +457,7 @@ class ChargingStationPage extends StatelessWidget {
         longitude <= 180);
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Content
@@ -123,7 +478,7 @@ class ChargingStationPage extends StatelessWidget {
                 availability: availability,
               ),
               Divider(
-                color: Colors.grey.shade400,
+                color: theme.dividerColor,
                 thickness: screenHeight * 0.0005,
                 height: screenHeight * 0.01,
                 indent: screenWidth * 0.03,
@@ -139,14 +494,11 @@ class ChargingStationPage extends StatelessWidget {
                       children: [
                         // Charger Tab Content
                         Builder(builder: (context) {
-                          // Use a Builder to create a new build context
                           return Obx(() {
-                            // Check loading state
                             if (controller.isLoading.value) {
                               return const ShimmerLoading();
                             }
 
-                            // Safely access charger details
                             final details = controller.chargerDetails;
 
                             return ListView(
@@ -157,7 +509,6 @@ class ChargingStationPage extends StatelessWidget {
                                     final i = entry.key;
                                     final detail = entry.value;
 
-                                    // Safely handle null or invalid data
                                     if (detail == null ||
                                         !(detail is Map<String, dynamic>)) {
                                       return const SizedBox.shrink();
@@ -166,48 +517,48 @@ class ChargingStationPage extends StatelessWidget {
                                     return Column(
                                       children: [
                                         GestureDetector(
-                                          onTap: () => controller
-                                              .toggleChargerDetails(i),
+                                          onTap: () =>
+                                              controller.toggleChargerDetails(i),
                                           child: ChargerCard(
                                             title:
-                                                '${detail['address'] ?? 'Charger'} ${i + 1}',
+                                            '${detail['address'] ?? 'Charger'} ${i + 1}',
                                             power:
-                                                '${detail['max_power'] ?? 'N/A'}W',
+                                            '${detail['max_power'] ?? 'N/A'}W',
                                             price:
-                                                '₹ ${i == 0 ? '24' : '21'}/kWh',
+                                            '₹ ${detail['unitPrice']??'-'}/kWh',
                                             lastUsed: '24/04/2025',
                                             sessions: i == 0 ? '1k+' : null,
                                             vendor:
-                                                detail['vendor'] ?? 'Unknown',
+                                            detail['vendor'] ?? 'Unknown',
                                             chargerId:
-                                                detail['charger_id'] ?? 'N/A',
+                                            detail['charger_id'] ?? 'N/A',
                                             chargerType:
-                                                detail['charger_type'] ?? 'N/A',
+                                            detail['charger_type'] ?? 'N/A',
                                             connectors:
-                                                detail['connectors'] != null
-                                                    ? (detail['connectors']
-                                                            as List<dynamic>)
-                                                        .map((connector) {
-                                                        return ConnectorInfo(
-                                                          name: connector[
-                                                                      'connector_id']
-                                                                  ?.toString() ??
-                                                              'N/A',
-                                                          type: connector[
-                                                                      'connector_type']
-                                                                  ?.toString() ??
-                                                              'N/A',
-                                                          power:
-                                                              '${detail['max_power'] ?? 'N/A'}W',
-                                                          status: connector[
-                                                                  'charger_status'] ??
-                                                              ' - ',
-                                                        );
-                                                      }).toList()
-                                                    : [],
+                                            detail['connectors'] != null
+                                                ? (detail['connectors']
+                                            as List<dynamic>)
+                                                .map((connector) {
+                                              return ConnectorInfo(
+                                                name: connector[
+                                                'connector_id']
+                                                    ?.toString() ??
+                                                    'N/A',
+                                                type: connector[
+                                                'connector_type']
+                                                    ?.toString() ??
+                                                    'N/A',
+                                                power:
+                                                '${detail['max_power'] ?? 'N/A'}W',
+                                                status: connector[
+                                                'charger_status'] ??
+                                                    ' - ',
+                                              );
+                                            }).toList()
+                                                : [],
                                             isExpanded: controller
-                                                    .expandedChargerIndex
-                                                    .value ==
+                                                .expandedChargerIndex
+                                                .value ==
                                                 i,
                                             index: i,
                                           ),
@@ -226,14 +577,15 @@ class ChargingStationPage extends StatelessWidget {
                                           'assets/icons/saved_device.png',
                                           width: screenWidth * 0.1,
                                           height: screenWidth * 0.1,
-                                          color: Colors.grey,
+                                          color:
+                                          theme.iconTheme.color?.withOpacity(0.5),
                                         ),
                                         SizedBox(height: screenHeight * 0.02),
                                         Text(
                                           'There are no chargers available in this station',
-                                          style: TextStyle(
-                                            fontSize: screenWidth * 0.045,
-                                            color: Colors.grey,
+                                          style: theme.textTheme.bodyLarge?.copyWith(
+                                            color: theme.textTheme.bodyLarge?.color
+                                                ?.withOpacity(0.6),
                                             fontWeight: FontWeight.w500,
                                           ),
                                           textAlign: TextAlign.center,
@@ -248,64 +600,89 @@ class ChargingStationPage extends StatelessWidget {
                           });
                         }),
                         // Details Tab Content (Google Map)
-                        Container(
-                          padding: EdgeInsets.all(screenWidth * 0.04),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Station Location',
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.045,
-                                  fontWeight: FontWeight.bold,
+                        SingleChildScrollView(
+                          child: Container(
+                            padding: EdgeInsets.all(screenWidth * 0.04),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Station Location',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.textTheme.titleLarge?.color,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: screenHeight * 0.02),
-                              Container(
-                                height: screenHeight * 0.4,
-                                decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
-                                  borderRadius:
-                                      BorderRadius.circular(screenWidth * 0.02),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(screenWidth * 0.02),
-                                  child: areCoordinatesValid
-                                      ? GoogleMap(
-                                          initialCameraPosition: CameraPosition(
-                                            target: LatLng(latitude, longitude),
-                                            zoom: 15,
-                                          ),
-                                          markers: {
-                                            Marker(
-                                              markerId:
-                                                  const MarkerId('station'),
-                                              position:
-                                                  LatLng(latitude, longitude),
-                                              infoWindow: InfoWindow(
-                                                title: stationAddress,
-                                                snippet: 'Tap for actions',
-                                                onTap: () {
-                                                  showModalBottomSheet(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        Container(
+                                SizedBox(height: screenHeight * 0.02),
+                                Container(
+                                  height: screenHeight * 0.4,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: theme.dividerColor),
+                                    borderRadius:
+                                    BorderRadius.circular(screenWidth * 0.02),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius:
+                                    BorderRadius.circular(screenWidth * 0.02),
+                                    child: areCoordinatesValid
+                                        ? GoogleMap(
+                                      initialCameraPosition: CameraPosition(
+                                        target: LatLng(latitude, longitude),
+                                        zoom: 15,
+                                      ),
+                                      markers: {
+                                        Marker(
+                                          markerId:
+                                          const MarkerId('station'),
+                                          position:
+                                          LatLng(latitude, longitude),
+                                          icon: BitmapDescriptor
+                                              .defaultMarkerWithHue(
+                                              BitmapDescriptor.hueRed),
+                                          infoWindow: InfoWindow(
+                                            title: stationAddress,
+                                            snippet: 'Tap for actions',
+                                            onTap: () {
+                                              showModalBottomSheet(
+                                                context: context,
+                                                backgroundColor:
+                                                theme.cardTheme.color,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.vertical(
+                                                      top: Radius.circular(
+                                                          screenWidth *
+                                                              0.04)),
+                                                ),
+                                                builder: (context) =>
+                                                    Container(
                                                       padding: EdgeInsets.all(
                                                           screenWidth * 0.04),
                                                       child: Column(
                                                         mainAxisSize:
-                                                            MainAxisSize.min,
+                                                        MainAxisSize.min,
                                                         children: [
                                                           ListTile(
                                                             leading: Icon(
-                                                                Icons
-                                                                    .directions,
-                                                                color: Colors
-                                                                    .blue),
+                                                              Icons.directions,
+                                                              color: theme
+                                                                  .primaryColor,
+                                                            ),
                                                             title: Text(
-                                                                'Get Directions'),
+                                                              'Get Directions',
+                                                              style: theme
+                                                                  .textTheme
+                                                                  .bodyLarge
+                                                                  ?.copyWith(
+                                                                fontWeight:
+                                                                FontWeight
+                                                                    .w600,
+                                                                color: theme
+                                                                    .textTheme
+                                                                    .bodyLarge
+                                                                    ?.color,
+                                                              ),
+                                                            ),
                                                             onTap: () {
                                                               Navigator.pop(
                                                                   context);
@@ -316,11 +693,25 @@ class ChargingStationPage extends StatelessWidget {
                                                           ),
                                                           ListTile(
                                                             leading: Icon(
-                                                                Icons.share,
-                                                                color: Colors
-                                                                    .green),
+                                                              Icons.share,
+                                                              color: theme
+                                                                  .primaryColor,
+                                                            ),
                                                             title: Text(
-                                                                'Share Location'),
+                                                              'Share Location',
+                                                              style: theme
+                                                                  .textTheme
+                                                                  .bodyLarge
+                                                                  ?.copyWith(
+                                                                fontWeight:
+                                                                FontWeight
+                                                                    .w600,
+                                                                color: theme
+                                                                    .textTheme
+                                                                    .bodyLarge
+                                                                    ?.color,
+                                                              ),
+                                                            ),
                                                             onTap: () {
                                                               Navigator.pop(
                                                                   context);
@@ -333,51 +724,67 @@ class ChargingStationPage extends StatelessWidget {
                                                         ],
                                                       ),
                                                     ),
-                                                  );
-                                                },
-                                              ),
-                                              onTap: () {
-                                                _mapController
-                                                    ?.showMarkerInfoWindow(
-                                                        const MarkerId(
-                                                            'station'));
-                                              },
-                                            ),
-                                          },
-                                          onMapCreated: (GoogleMapController
-                                              mapController) {
-                                            debugPrint('Google Map created');
-                                            _mapController = mapController;
-                                            mapController.showMarkerInfoWindow(
-                                                const MarkerId('station'));
-                                          },
-                                        )
-                                      : Center(
-                                          child: Text(
-                                            'Invalid coordinates for this station',
-                                            style: TextStyle(
-                                              fontSize: screenWidth * 0.04,
-                                              color: Colors.grey,
-                                            ),
+                                              );
+                                            },
                                           ),
+                                          onTap: () {
+                                            _mapController
+                                                ?.showMarkerInfoWindow(
+                                                const MarkerId(
+                                                    'station'));
+                                          },
                                         ),
+                                      },
+                                      onMapCreated: (GoogleMapController
+                                      mapController) {
+                                        debugPrint('Google Map created');
+                                        _mapController = mapController;
+                                        // Apply map style based on theme
+                                        if (theme.brightness ==
+                                            Brightness.dark) {
+                                          mapController
+                                              .setMapStyle(_darkMapStyle);
+                                        } else {
+                                          mapController
+                                              .setMapStyle(_lightMapStyle);
+                                        }
+                                        mapController.showMarkerInfoWindow(
+                                            const MarkerId('station'));
+                                      },
+                                    )
+                                        : Center(
+                                      child: Text(
+                                        'Invalid coordinates for this station',
+                                        style: theme.textTheme.bodyLarge
+                                            ?.copyWith(
+                                          color: theme.textTheme.bodyLarge
+                                              ?.color
+                                              ?.withOpacity(0.6),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: screenHeight * 0.02),
-                              Text(
-                                'Address: $stationAddress',
-                                style: TextStyle(fontSize: screenWidth * 0.035),
-                              ),
-                            ],
+                                SizedBox(height: screenHeight * 0.02),
+                                Text(
+                                  'Address: $stationAddress',
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: theme.textTheme.bodyLarge?.color
+                                        ?.withOpacity(0.8),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         // Reviews Tab Content (Disabled Navigation)
                         Center(
                           child: Text(
                             'Reviews feature coming soon!',
-                            style: TextStyle(
-                                fontSize: screenWidth * 0.04,
-                                color: Colors.grey),
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color:
+                              theme.textTheme.bodyLarge?.color?.withOpacity(0.6),
+                            ),
                           ),
                         ),
                       ],
@@ -396,7 +803,7 @@ class ChargingStationPage extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(screenWidth * 0.02),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: theme.colorScheme.surface.withOpacity(0.3),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -418,7 +825,7 @@ class ChargingStationPage extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(screenWidth * 0.02),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: theme.colorScheme.surface.withOpacity(0.3),
                   shape: BoxShape.circle,
                 ),
                 child: Image.asset(
@@ -443,7 +850,7 @@ class ChargingStationPage extends StatelessWidget {
                 height: screenWidth * 0.08,
                 width: screenWidth * 0.08,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: theme.colorScheme.surface.withOpacity(0.3),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -467,7 +874,7 @@ class ChargingStationPage extends StatelessWidget {
               final charger = selectedConnector.value;
               final connectorIndex = charger['selectedConnectorIndex'];
               final connector =
-                  (charger['connectors'] as List<dynamic>)[connectorIndex];
+              (charger['connectors'] as List<dynamic>)[connectorIndex];
               return Positioned(
                 left: 0,
                 right: 0,
@@ -476,54 +883,67 @@ class ChargingStationPage extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: theme.primaryColor,
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black26,
+                          color: theme.shadowColor.withOpacity(0.2),
                           blurRadius: 10,
                           offset: Offset(0, 4),
                         ),
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Make sure you have valid data before calling the controller method
-                        if (charger != null && connector != null) {
-                          searchpageController.handleStartCharging(
-                            chargerId: charger['charger_id'],
-                            chargerDetails: charger,
-                            selectedConnectorId:
-                                connector['connector_id'].toString(),
-                            connectorDetailsMap: {
-                              'type': connector['connector_type'].toString(),
-                              'power':
-                                  charger['max_power']?.toString() ?? 'N/A',
-                              'status': connector['charger_status'] ?? ' - ',
-                            },
-                          );
-                        } else {
-                          debugPrint("Charger or Connector data is missing");
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: EdgeInsets.symmetric(
-                            vertical: screenHeight * 0.015),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    child: Obx(() {
+                      final isLoading = searchpageController.isLoading.value;
+                      return ElevatedButton(
+                        onPressed: isLoading
+                            ? null // Disable the button while loading
+                            : () {
+                          if (charger != null && connector != null) {
+                            searchpageController.handleStartCharging(
+                              chargerId: charger['charger_id'],
+                              chargerDetails: charger,
+                              selectedConnectorId:
+                              connector['connector_id'].toString(),
+                              connectorDetailsMap: {
+                                'type':
+                                connector['connector_type'].toString(),
+                                'power':
+                                charger['max_power']?.toString() ??
+                                    'N/A',
+                                'status':
+                                connector['charger_status'] ?? ' - ',
+                              },
+                            );
+                          } else {
+                            debugPrint(
+                                "Charger or Connector data is missing");
+                            Get.snackbar(
+                              'Error',
+                              'Charger or Connector data is missing',
+                              backgroundColor: theme.colorScheme.error,
+                              colorText: theme.colorScheme.onError,
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.015),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        'Charge Now',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: screenWidth * 0.045,
-                          fontWeight: FontWeight.bold,
+                        child: Text(
+                          isLoading ? 'Processing...' : 'Charge Now',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    }),
                   ),
                 ),
               );

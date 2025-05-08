@@ -636,7 +636,7 @@ class ChargingPage extends StatelessWidget {
                                   ),
                                 ),
                               ],
-                              if (data.chargerStatus == 'Charging' && controller.showMeterValues.value && hasMeterValues) ...[
+                              if (data.chargerStatus == 'Charging' ) ...[
                                 SizedBox(height: screenHeight * 0.02),
                                 Container(
                                   width: double.infinity,
