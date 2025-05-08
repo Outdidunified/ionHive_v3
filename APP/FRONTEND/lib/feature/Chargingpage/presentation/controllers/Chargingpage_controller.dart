@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:ionhive/core/Networks/websocket_service.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/core/core.dart';
@@ -9,6 +10,7 @@ import 'package:ionhive/feature/Chargingpage/domain/models/Chargingpage_model.da
 import 'package:ionhive/feature/Chargingpage/domain/repositories/Chargingpage_repositories.dart';
 import 'package:ionhive/feature/landing_page.dart';
 import 'package:flutter/material.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class ChargingPageController extends GetxController {
   final Chargingpagerepo _repo = Chargingpagerepo();
@@ -120,7 +122,7 @@ class ChargingPageController extends GetxController {
 
         // Create a new connection
         final wsUrl =
-            iOnHiveCore.getChargingWebSocketUrl(chargerId, connectorId);
+        iOnHiveCore.getChargingWebSocketUrl(chargerId, connectorId);
         debugPrint('Creating new WebSocket connection to: $wsUrl');
 
         _webSocketService = WebSocketService(wsUrl);
@@ -142,7 +144,7 @@ class ChargingPageController extends GetxController {
 
       // Set up stream listener
       _webSocketService!.stream.listen(
-        (dynamic message) {
+            (dynamic message) {
           debugPrint('WebSocket message received in controller');
           handleWebSocketMessage(message);
           // Confirm connection is working when we receive messages
@@ -466,11 +468,11 @@ class ChargingPageController extends GetxController {
       );
 
       chargingData.value = response.data;
-      isInitialLoading(false);
     } catch (e) {
-      isInitialLoading(false);
-      Get.snackbar('Error', 'Failed to fetch charging data: $e');
+      CustomSnackbar.showError(message: 'Failed to fetch charging data: $e');
       rethrow;
+    } finally {
+      isInitialLoading(false);
     }
   }
 
@@ -515,7 +517,7 @@ class ChargingPageController extends GetxController {
         Get.off(() => LandingPage());
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to end charging session: $e');
+      CustomSnackbar.showError(message: 'Failed to end charging session: $e');
       rethrow;
     } finally {
       isEndingSession(false);
@@ -533,6 +535,7 @@ class ChargingPageController extends GetxController {
       final userId = sessionController.userId.value;
       final emailId = sessionController.emailId.value;
 
+      // Start the charging session
       await _repo.StartCharging(
         userId,
         emailId,
@@ -542,12 +545,37 @@ class ChargingPageController extends GetxController {
         connectorType,
       );
 
-      startedAt.value = DateTime.now(); // Set the "Started At" timestamp
-      showMeterValues.value =
-          true; // Ensure meter values are visible after starting
+      // Fetch the start timestamp using Startedat
+      final startedAtResponse = await _repo.Startedat(
+        userId,
+        emailId,
+        authToken,
+        connectorId,
+        chargerId,
+        connectorType,
+      );
+
+      // Check the response
+      if (startedAtResponse.error) {
+        CustomSnackbar.showError(message: 'Failed to fetch start time: ${startedAtResponse.message}');
+      } else {
+        // Parse the timestamp from the data field (ISO 8601 format)
+        try {
+          if (startedAtResponse.data != null) {
+            final startedAtValue = DateTime.parse(startedAtResponse.data!);
+            startedAt.value = startedAtValue;
+          } else {
+            CustomSnackbar.showError(message: 'Start time data is missing');
+          }
+        } catch (e) {
+          CustomSnackbar.showError(message: 'Failed to parse start time: $e');
+        }
+      }
+
+      showMeterValues.value = true; // Ensure meter values are visible after starting
       await fetchLastStatusData();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to start charging session: $e');
+      CustomSnackbar.showError(message: 'Failed to start charging session: $e');
       rethrow;
     } finally {
       isLoading(false);
@@ -577,7 +605,53 @@ class ChargingPageController extends GetxController {
       startedAt.value = null; // Clear the "Started At" timestamp
       await fetchLastStatusData();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to stop charging session: $e');
+      CustomSnackbar.showError(message: 'Failed to stop charging session: $e');
+      rethrow;
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  Future<void> updateAutoStopSettings(Map<String, dynamic> settings) async {
+    try {
+      isLoading(true);
+      final authToken = sessionController.token.value;
+      final userId = sessionController.userId.value;
+      final emailId = sessionController.emailId.value;
+
+      debugPrint(
+          'updateUserTimeVal: ${settings['autostop_time']}, '
+              'updateUserUnitVal: ${settings['autostop_unit']}, '
+              'updateUserPriceVal: ${settings['autostop_price']}, '
+              'updateUserTime_isChecked: ${settings['autostop_time_is_checked']}, '
+              'updateUserUnit_isChecked: ${settings['autostop_unit_is_checked']}, '
+              'updateUserPrice_isChecked: ${settings['autostop_price_is_checked']}');
+
+      await _repo.updateAutoStopSettings(
+        user_id: userId,
+        email: emailId,
+        authToken: authToken,
+        updateUserTimeVal: settings['autostop_time'] as int?,
+        updateUserUnitVal: settings['autostop_unit'] as int?,
+        updateUserPriceVal: settings['autostop_price'] as double?,
+        updateUserTime_isChecked: settings['autostop_time_is_checked'] as bool,
+        updateUserUnit_isChecked: settings['autostop_unit_is_checked'] as bool,
+        updateUserPrice_isChecked: settings['autostop_price_is_checked'] as bool,
+      );
+
+      // Refresh data after update
+      await fetchLastStatusData();
+
+      // Show success message
+      CustomSnackbar.showSuccess(message: 'Auto-stop settings updated');
+
+      // Close the bottom sheet after the snackbar duration (2 seconds)
+      Future.delayed(const Duration(seconds: 2), () {
+        debugPrint('Closing modal after success snackbar');
+        Get.close(1); // Close the bottom sheet
+      });
+    } catch (e) {
+      CustomSnackbar.showError(message: 'Failed to update settings: $e');
       rethrow;
     } finally {
       isLoading(false);

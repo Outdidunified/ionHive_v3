@@ -427,10 +427,16 @@ class AddCreditsPage extends StatelessWidget {
                 : null,
           ),
           child: Obx(() {
+            // Get the latest balance value
             final balanceStr = walletController.walletBalance.value;
+            debugPrint('Current wallet balance in UI: $balanceStr');
+
+            // Parse the balance string to a double
             final balance =
                 double.tryParse(balanceStr.replaceAll('Rs.', '').trim()) ?? 0.0;
-            final progress = balance / 10000.0;
+
+            // Calculate progress percentage (capped at 100%)
+            final progress = (balance / 10000.0).clamp(0.0, 1.0);
             final percentage = (progress * 100).toStringAsFixed(0);
 
             return Column(
@@ -518,7 +524,6 @@ class AddCreditsPage extends StatelessWidget {
             );
           }),
         ),
-
       ],
     );
   }

@@ -280,16 +280,48 @@ const handleIncomingMessage = async (
     chargerStopTime,
     clientIpAddress
 ) => {
+    // Utility function to check if value is an object
+    const isObject = (value) => {
+        return value !== null && typeof value === "object" && !Array.isArray(value);
+    };
     try {
         // Update connection status on any message
         ws.isAlive = true;
         ws.lastHeartbeat = Date.now();
         const requestData = JSON.parse(message);
         logger.loggerDebug(`Received message from ${uniqueIdentifier}: ${message}`);
+        // Validate message format
+        if (!Array.isArray(requestData)) {
+            const errorResponse = [4, "", "FormatViolation", "Invalid message format: not an array", {}];
+            const errorResponseStr = JSON.stringify(errorResponse);
+            logger.loggerInfo(`Sending format validation error to ${uniqueIdentifier}: ${errorResponseStr}`);
+            return ws.send(errorResponseStr);
+        }
 
-        if (!Array.isArray(requestData) || requestData.length < 4) {
-            // Correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
-            const errorResponse = [3, requestData[1], { status: "Rejected", errors: ["Invalid message format"] }];
+        const messageTypeId = requestData[0];
+        if (
+            (messageTypeId === 2 && requestData.length !== 4) || // CALL: [2, UniqueId, Action, Payload]
+            (messageTypeId === 3 && requestData.length !== 3) || // CALLRESULT: [3, UniqueId, Payload]
+            (messageTypeId === 4 && requestData.length !== 5) || // CALLERROR: [4, UniqueId, ErrorCode, ErrorDescription, ErrorDetails]
+            ![2, 3, 4].includes(messageTypeId) // Invalid MessageTypeId
+        ) {
+            const errorResponse = [4, requestData[1] || "", "FormatViolation", `Invalid message format: incorrect length or type for message type ${messageTypeId}`, {}];
+            const errorResponseStr = JSON.stringify(errorResponse);
+            logger.loggerInfo(`Sending format validation error to ${uniqueIdentifier}: ${errorResponseStr}`);
+            return ws.send(errorResponseStr);
+        }
+
+        // Additional validation for CALL messages
+        if (messageTypeId === 2 && (typeof requestData[1] !== "string" || typeof requestData[2] !== "string" || !isObject(requestData[3]))) {
+            const errorResponse = [4, requestData[1] || "", "FormatViolation", "Invalid CALL: invalid UniqueId, Action, or Payload", {}];
+            const errorResponseStr = JSON.stringify(errorResponse);
+            logger.loggerInfo(`Sending format validation error to ${uniqueIdentifier}: ${errorResponseStr}`);
+            return ws.send(errorResponseStr);
+        }
+
+        // Additional validation for CALLRESULT messages
+        if (messageTypeId === 3 && (typeof requestData[1] !== "string" || !isObject(requestData[2]))) {
+            const errorResponse = [4, requestData[1] || "", "FormatViolation", "Invalid CALLRESULT: invalid UniqueId or Payload", {}];
             const errorResponseStr = JSON.stringify(errorResponse);
             logger.loggerInfo(`Sending format validation error to ${uniqueIdentifier}: ${errorResponseStr}`);
             return ws.send(errorResponseStr);
@@ -454,6 +486,8 @@ const handleIncomingMessage = async (
 
 // Import the broadcast utilities to avoid circular dependencies
 const { broadcastMessage, sendForceDisconnect } = require('./utils/broadcastUtils');
+const clientConnectionUtils = require('./utils/clientConnectionUtils');
+const timeUtils = require('../utils/timeUtils');
 
 /**
  * Enhanced WebSocket error handler with comprehensive error handling and recovery
@@ -799,6 +833,14 @@ const closeAllConnections = async () => {
                 if (global.chargerStartTime) global.chargerStartTime.clear();
                 if (global.chargerStopTime) global.chargerStopTime.clear();
 
+                // Clear client subscriptions
+                try {
+                    clientConnectionUtils.clearAllSubscriptions();
+                    logger.loggerInfo('Cleared all client subscriptions');
+                } catch (subErr) {
+                    logger.loggerError(`Error clearing client subscriptions: ${subErr.message}`);
+                }
+
                 logger.loggerInfo('Cleared all connection maps and data structures');
             } catch (clearErr) {
                 logger.loggerError(`Error clearing maps: ${clearErr.message}`);
@@ -817,10 +859,15 @@ const closeAllConnections = async () => {
     });
 };
 
+// We'll use clientConnectionUtils.broadcastToSubscribedClients directly instead of wrapping it
+// This helps avoid circular dependencies
+
 module.exports = {
     handleWebSocketConnection,
     broadcastMessage,
     sendForceDisconnect,
     sendChargerDataToClient,
     closeAllConnections
+    // We're not re-exporting client connection utilities to avoid circular dependencies
+    // Use clientConnectionUtils directly instead
 };

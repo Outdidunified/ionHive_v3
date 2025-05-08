@@ -84,8 +84,13 @@ class AddCreditsController extends GetxController
       final authToken = sessionController.token.value;
       final amount = _lastPaymentAmount;
 
-      // Update wallet balance in the background
-      walletController.fetchwalletbalance();
+      if (amount != null && amount > 0) {
+        // Update wallet balance immediately in the UI
+        walletController.updateBalanceAfterPayment(amount);
+      } else {
+        // Fallback to fetching from server if amount is invalid
+        walletController.fetchwalletbalance();
+      }
 
       // Navigate immediately
       Get.until((route) => route.isFirst || Get.currentRoute == '/wallet');
@@ -122,8 +127,11 @@ class AddCreditsController extends GetxController
     } catch (error) {
       debugPrint('Error saving payment details: $error');
       CustomSnackbar.showError(
-        message: 'issue in processing payment. Please try again.',
+        message: 'Issue in processing payment. Please try again.',
       );
+
+      // Ensure wallet balance is updated even if there's an error
+      walletController.fetchwalletbalance();
     } finally {
       isLoading.value = false;
     }

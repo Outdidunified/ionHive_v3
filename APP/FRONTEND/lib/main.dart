@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ionhive/core/View/NoInternetScreen.dart';
 import 'package:ionhive/core/controllers/session_controller.dart'; // Session Controller
 import 'package:ionhive/core/splash_screen.dart';
+import 'package:ionhive/feature/Chargingpage/presentation/controllers/LivePriceController.dart';
 import 'package:ionhive/feature/auth/presentation/pages/GettingStarted%20page.dart';
 import 'package:ionhive/feature/auth/presentation/pages/login_page.dart'; // Login Page
 import 'package:ionhive/feature/home/presentation/controllers/home_controller.dart';
@@ -47,6 +48,7 @@ void main() async {
   Get.put(ConnectivityController());
   Get.put(VehicleController());
   Get.put(SearchpageController());
+  Get.put(LivePriceController());
 
   runApp(const IonHive());
 }

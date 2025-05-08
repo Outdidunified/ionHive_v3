@@ -1,6 +1,7 @@
 const db_conn = require('../config/db');
 const logger = require('../utils/logger');
 const { wsConnections } = require('../data/MapModules');
+const dbService = require('../Websocket/services/dbService');
 
 let db;
 const initializeDB = async () => {
@@ -564,26 +565,12 @@ const updateConnectorUser = async (req, res) => {
             if (!financeRecord) {
                 logger.loggerWarn(`Finance details for finance_id ${chargerDetails.finance_id} not found.`);
             } else {
-                const EB_fee = parseFloat(financeRecord.eb_charge || 0) + parseFloat(financeRecord.margin || 0);
-                const additionalCharges = [
-                    parseFloat(financeRecord.parking_fee || 0),
-                    parseFloat(financeRecord.convenience_fee || 0),
-                    parseFloat(financeRecord.station_fee || 0),
-                    parseFloat(financeRecord.processing_fee || 0),
-                    parseFloat(financeRecord.service_fee || 0)
-                ];
-                const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + charge, 0);
-                const TotalEBPrice = (EB_fee + totalAdditionalCharges);
-
-                const gstPercentage = financeRecord.gst || 0;
-                const gstAmount = (TotalEBPrice * gstPercentage) / 100;
-                const totalPrice = TotalEBPrice + gstAmount;
-                const roundedTotalPrice = Math.round(totalPrice * 100) / 100;
+                const pricePerUnit = await dbService.getPricePerUnit(charger_id, connector_id);
 
                 return res.status(200).json({
                     error: false,
                     message: 'Success',
-                    unitPrice: roundedTotalPrice
+                    unitPrice: pricePerUnit
                 });
             }
         }
