@@ -51,6 +51,8 @@ class Saveddeviceapicalls {
         },
         body: jsonEncode({'email_id': email, 'user_id': user_id}),
       );
+      final data = jsonDecode(response.body);
+      debugPrint('fetching fetchsaveddevice  body : $data');
 
       return _handleResponse(response);
     } on TimeoutException {

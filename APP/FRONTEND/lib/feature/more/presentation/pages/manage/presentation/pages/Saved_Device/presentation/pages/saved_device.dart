@@ -198,12 +198,41 @@ class SavedDevicepage extends StatelessWidget {
           Obx(() {
             if (savedController.selectedConnector['connectorIndex'] != -1) {
               final chargerId = savedController.selectedConnector['chargerId'];
-              final selectedDevice = savedController.savedDevices.firstWhere(
-                  (device) => device['charger_id'].toString() == chargerId);
+
+              // Safely find the selected device
+              final selectedDeviceIndex = savedController.savedDevices
+                  .indexWhere(
+                      (device) => device['charger_id'].toString() == chargerId);
+
+              // Check if device exists
+              if (selectedDeviceIndex == -1 ||
+                  savedController.savedDevices.isEmpty) {
+                // Reset the selected connector if the device no longer exists
+                savedController.selectedConnector.value = {
+                  'chargerId': '',
+                  'connectorIndex': -1,
+                };
+                return const SizedBox.shrink();
+              }
+
+              final selectedDevice =
+                  savedController.savedDevices[selectedDeviceIndex];
               final connectorIndex =
                   savedController.selectedConnector['connectorIndex'];
-              final connector = (selectedDevice['connectors']
-                  as List<dynamic>)[connectorIndex];
+
+              // Safely access connectors
+              final connectors =
+                  selectedDevice['connectors'] as List<dynamic>? ?? [];
+              if (connectorIndex < 0 || connectorIndex >= connectors.length) {
+                // Reset the selected connector if the connector index is invalid
+                savedController.selectedConnector.value = {
+                  'chargerId': '',
+                  'connectorIndex': -1,
+                };
+                return const SizedBox.shrink();
+              }
+
+              final connector = connectors[connectorIndex];
 
               return Positioned(
                 left: 0,
@@ -225,21 +254,16 @@ class SavedDevicepage extends StatelessWidget {
                     ),
                     child: ElevatedButton(
                       onPressed: () {
-                        // Make sure you have valid data before calling the controller method
-                        if (selectedDevice != null && connector != null) {
-                          searchpageController.handleStartCharging(
-                            chargerId: selectedDevice['charger_id'],
-                            chargerDetails: selectedDevice,
-                            selectedConnectorId:
-                                connector['connector_id'].toString(),
-                            connectorDetailsMap: {
-                              'type': connector['connector_type'].toString(),
-                              'status': connector['charger_status'] ?? ' - ',
-                            },
-                          );
-                        } else {
-                          debugPrint("Charger or Connector data is missing");
-                        }
+                        searchpageController.handleStartCharging(
+                          chargerId: selectedDevice['charger_id'],
+                          chargerDetails: selectedDevice,
+                          selectedConnectorId:
+                              connector['connector_id'].toString(),
+                          connectorDetailsMap: {
+                            'type': connector['connector_type'].toString(),
+                            'status': connector['charger_status'] ?? ' - ',
+                          },
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
@@ -393,15 +417,8 @@ class DeviceCard extends StatelessWidget {
                                   debugPrint(
                                       'Successfully removed charger: $chargerId');
 
-                                  // Find and remove the specific device by chargerId
-                                  final deviceIndex =
-                                      savedController.savedDevices.indexWhere(
-                                          (d) => d['charger_id'] == chargerId);
-                                  if (deviceIndex != -1) {
-                                    savedController.savedDevices
-                                        .removeAt(deviceIndex);
-                                    savedController.update();
-                                  }
+                                  // Use the controller's method to safely remove the device
+                                  savedController.removeDevice(chargerId);
                                 } catch (e) {
                                   debugPrint("Error removing charger: $e");
                                   CustomSnackbar.showError(

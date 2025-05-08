@@ -24,6 +24,9 @@ class WalletController extends GetxController {
   // Reactive variables for progress metrics
   final Rx<ProgressMetrics> progressMetrics = ProgressMetrics.empty().obs;
 
+  // Flag to track if a balance update is in progress
+  final RxBool isUpdating = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -145,6 +148,66 @@ class WalletController extends GetxController {
 
   double getCarbonFootprintReductionProgress() {
     return progressMetrics.value.carbonFootprintReduction.percentage / 100;
+  }
+
+  /// Updates the wallet balance directly after a successful payment
+  /// This is faster than fetching from the server and provides immediate feedback
+  void updateBalanceAfterPayment(double amount) {
+    try {
+      // Parse current balance
+      final currentBalanceStr =
+          walletBalance.value.replaceAll('Rs.', '').trim();
+      final currentBalance = double.tryParse(currentBalanceStr) ?? 0.0;
+
+      // Calculate new balance
+      final newBalance = currentBalance + amount;
+
+      // Update the balance
+      walletBalance.value = 'Rs.${newBalance.toStringAsFixed(2)}';
+
+      // Update credited amount
+      final currentCreditedStr =
+          totalCredited.value.replaceAll('Rs.', '').trim();
+      final currentCredited = double.tryParse(currentCreditedStr) ?? 0.0;
+      totalCredited.value =
+          'Rs.${(currentCredited + amount).toStringAsFixed(2)}';
+
+      // Update credited count
+      creditedCount.value = creditedCount.value + 1;
+
+      // Set hasInitialData to true if it wasn't already
+      if (!hasInitialData.value) {
+        hasInitialData.value = true;
+      }
+
+      debugPrint('Wallet balance updated locally to: ${walletBalance.value}');
+
+      // Fetch the actual balance from server in the background
+      // This ensures the UI is updated immediately while also ensuring data consistency
+      _fetchBalanceInBackground();
+    } catch (e) {
+      debugPrint('Error updating balance locally: $e');
+      // If local update fails, fall back to server fetch
+      fetchwalletbalance();
+    }
+  }
+
+  /// Fetches the wallet balance from the server in the background
+  /// This ensures data consistency after a local update
+  Future<void> _fetchBalanceInBackground() async {
+    // Avoid multiple simultaneous background updates
+    if (isUpdating.value) return;
+
+    isUpdating.value = true;
+    try {
+      // Add a small delay to ensure the payment has been processed on the server
+      await Future.delayed(const Duration(seconds: 2));
+      await fetchwalletbalance();
+    } catch (e) {
+      debugPrint('Background balance update failed: $e');
+    } finally {
+      isUpdating.value = false;
+    }
   }
 
   @override

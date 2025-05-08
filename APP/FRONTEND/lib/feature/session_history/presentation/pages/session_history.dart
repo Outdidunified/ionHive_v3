@@ -462,12 +462,16 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
         itemCount: controller.sessions.length,
         itemBuilder: (context, index) {
           final session = controller.sessions[index];
-          final startDate =
-              DateFormat('MMM dd, yyyy').format(session.startTime);
-          final startTime = DateFormat('hh:mm a').format(session.startTime);
-          final endTime = session.stopTime != null
-              ? DateFormat('hh:mm a').format(session.stopTime!)
-              : 'In Progress';
+          // Convert and format start date in IST
+          final istStartTime = session.startTime.toUtc().add(Duration(hours: 5, minutes: 30));
+          final startDate = DateFormat('MMM dd, yyyy').format(istStartTime);
+          final startTime = DateFormat('hh:mm a').format(istStartTime);
+
+// Convert and format stop time in IST, if available
+          String endTime = 'In Progress';
+          if (session.stopTime != null) {
+            final istStopTime = session.stopTime!.toUtc().add(Duration(hours: 5, minutes: 30));
+            endTime = DateFormat('hh:mm a').format(istStopTime);}
 
           String duration = '';
           if (session.stopTime != null) {

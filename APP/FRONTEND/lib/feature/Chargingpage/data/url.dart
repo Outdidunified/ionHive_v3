@@ -7,13 +7,6 @@ class Chargingpageurl{
   static final String startcharging = '${iOnHiveCore.baseUrl}/chargingsession/start';
   static final String stopcharging = '${iOnHiveCore.baseUrl}/chargingsession/stop';
   static final String autostop = '${iOnHiveCore.baseUrl}/chargingsession/updateAutoStopSettings';
-
-
-
-
-
-
-
-
+  static final String startedat = '${iOnHiveCore.baseUrl}/chargingsession/fetchStartedAt';
 
 }

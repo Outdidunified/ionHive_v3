@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/transactions/presentation/pages/paymenthistory.dart';
@@ -15,7 +16,7 @@ class WalletPage extends StatefulWidget {
 }
 
 class _WalletPageState extends State<WalletPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   final sessionController = Get.find<SessionController>();
   final walletController =
       Get.put(WalletController(), permanent: true, tag: 'wallet');
@@ -23,12 +24,41 @@ class _WalletPageState extends State<WalletPage>
   @override
   void initState() {
     super.initState();
+
+    // Register this object as an observer
+    WidgetsBinding.instance.addObserver(this);
+
     // Fetch data when the widget is first created
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         walletController.fetchwalletbalance();
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh data when dependencies change (like returning to this page)
+    if (mounted) {
+      walletController.fetchwalletbalance();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh data when app is resumed from background
+    if (state == AppLifecycleState.resumed && mounted) {
+      debugPrint('App resumed, refreshing wallet balance');
+      walletController.fetchwalletbalance();
+    }
+  }
+
+  @override
+  void dispose() {
+    // Unregister this object as an observer
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
