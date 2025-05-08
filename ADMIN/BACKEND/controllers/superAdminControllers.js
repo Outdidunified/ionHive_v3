@@ -1182,19 +1182,17 @@ async function FetchAssignedClients(req, res) {
 }
 
 // FetchChargerDetailsWithSession
-async function FetchChargerDetailsWithSession(req) {
+async function FetchChargerDetailsWithSession(req, res) {
     try {
         const { reseller_id } = req.body;
 
-        // Validate reseller_id
         if (!reseller_id) {
-            return { error: true, status: 400, message: 'Reseller ID is required' };
+            return res.status(400).json({ success: false, message: 'Reseller ID is required' });
         }
 
         const db = await database.connectToDatabase();
         const chargerCollection = db.collection("charger_details");
 
-        // Aggregation pipeline to fetch charger details with sorted session data
         const result = await chargerCollection.aggregate([
             {
                 $match: { assigned_reseller_id: reseller_id }
@@ -1241,21 +1239,21 @@ async function FetchChargerDetailsWithSession(req) {
         ]).toArray();
 
         if (!result || result.length === 0) {
-            return { error: true, status: 404, message: 'No chargers found for the specified reseller_id' };
+            return res.status(404).json({ success: false, message: 'No chargers found for the specified reseller_id' });
         }
 
-        // Sort sessiondata within each chargerID based on the first session's stop_time
+        // Sort sessiondata manually if needed
         result.forEach(charger => {
             if (charger.sessiondata.length > 1) {
                 charger.sessiondata.sort((a, b) => new Date(b.stop_time) - new Date(a.stop_time));
             }
         });
 
-        return { error: false, status: 200, message: result };
+        return res.status(200).json({ success: true, data: result });
 
     } catch (error) {
         console.error('Controller error:', error);
-        return { error: true, status: 500, message: 'Internal Server Error' };
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 }
 
@@ -1662,13 +1660,33 @@ const FetchResellerForSelection = async (req, res) => {
 // Controller to Create a New User
 const CreateUser = async (req, res) => {
     try {
-        const { role_id, reseller_id, username, email_id, password, phone_no, wallet_bal, created_by } = req.body;
+        const {
+            role_id,
+            reseller_id,
+            username,
+            email_id,
+            password,
+            phone_no,
+            wallet_bal,
+            created_by
+        } = req.body;
 
         // Required fields validation
-        if (!username || !role_id || !email_id || !password || !created_by) {
+        if (!username || !role_id || !email_id || password === undefined || !created_by) {
             return res.status(400).json({
                 status: 'Failed',
                 message: 'Username, Role ID, Email ID, Password, and Created By are required'
+            });
+        }
+
+        // Ensure password is a valid number
+        const numericPassword = parseInt(password, 10);
+
+        // Validate if the password is a number
+        if (isNaN(numericPassword)) {
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'Password must be a numeric value'
             });
         }
 
@@ -1676,7 +1694,7 @@ const CreateUser = async (req, res) => {
         const Users = db.collection("users");
         const UserRole = db.collection("user_roles");
 
-        // Check if the role exists
+        // Validate if the role exists
         const existingRole = await UserRole.findOne({ role_id: parseInt(role_id) });
         if (!existingRole) {
             return res.status(400).json({
@@ -1685,8 +1703,11 @@ const CreateUser = async (req, res) => {
             });
         }
 
-        // Check if user with the same role and email already exists
-        const existingUser = await Users.findOne({ role_id: parseInt(role_id), email_id });
+        // Check if a user with the same role and email exists
+        const existingUser = await Users.findOne({
+            role_id: parseInt(role_id),
+            email_id
+        });
         if (existingUser) {
             return res.status(400).json({
                 status: 'Failed',
@@ -1698,7 +1719,7 @@ const CreateUser = async (req, res) => {
         const lastUser = await Users.find().sort({ user_id: -1 }).limit(1).toArray();
         const newUserId = lastUser.length ? lastUser[0].user_id + 1 : 1;
 
-        // Insert user
+        // Insert new user
         const insertResult = await Users.insertOne({
             role_id: parseInt(role_id),
             reseller_id: reseller_id || null,
@@ -1709,7 +1730,7 @@ const CreateUser = async (req, res) => {
             assigned_association: null,
             username,
             email_id,
-            password: password.toString(), // store hashed password ideally!
+            password: numericPassword,  // Store the password as a number
             phone_no: phone_no || null,
             wallet_bal: parseFloat(wallet_bal) || 0,
             autostop_time: null,
@@ -1752,9 +1773,9 @@ const CreateUser = async (req, res) => {
 const UpdateUser = async (req, res) => {
     try {
         const { user_id, username, phone_no, password, wallet_bal, modified_by, status } = req.body;
-
+        
         // Input validation
-        if (!user_id || !username || !password || !modified_by) {
+        if (!user_id || !username || password === undefined || !modified_by) {
             return res.status(400).json({
                 status: 'Failed',
                 message: 'User ID, Username, Password, and Modified By are required'
@@ -1773,7 +1794,18 @@ const UpdateUser = async (req, res) => {
             });
         }
 
-        // Update user
+        // Ensure password is an integer
+        const numericPassword = parseInt(password, 10);
+
+        // Validate if password is a valid number
+        if (isNaN(numericPassword)) {
+            return res.status(400).json({
+                status: 'Failed',
+                message: 'Password must be a numeric value'
+            });
+        }
+
+        // Update user details
         const updateResult = await Users.updateOne(
             { user_id: parseInt(user_id) },
             {
@@ -1782,13 +1814,14 @@ const UpdateUser = async (req, res) => {
                     phone_no: phone_no || existingUser.phone_no,
                     wallet_bal: wallet_bal !== undefined ? parseFloat(wallet_bal) : existingUser.wallet_bal,
                     modified_date: new Date(),
-                    password: password.toString(), // Ideally, hash the password
+                    password: numericPassword,  // Store the password as a number (int)
                     modified_by,
                     status: status !== undefined ? status : existingUser.status
                 }
             }
         );
 
+        // If no documents were modified, it means no changes were made
         if (updateResult.modifiedCount === 0) {
             return res.status(400).json({
                 status: 'Failed',
@@ -1796,6 +1829,7 @@ const UpdateUser = async (req, res) => {
             });
         }
 
+        // Return success response
         return res.status(200).json({
             status: 'Success',
             message: 'User updated successfully'
@@ -2371,44 +2405,38 @@ async function FetchPaymentNotification(req, res) {
 }
 
 // Function to MarkNotificationRead
-async function MarkNotificationRead(_id, superadmin_notification_status) {
+async function MarkNotificationRead(req, res) {
+    const { _id, superadmin_notification_status } = req.body;
+
     try {
-        // Connect to the database
         const db = await database.connectToDatabase();
         const withdrawalCollection = db.collection("withdrawal_details");
-
-        // Convert _id to ObjectId
         const objectId = new ObjectId(_id);
 
-        // Fetch the current status of the notification
         const withdrawal = await withdrawalCollection.findOne({ _id: objectId });
 
-        // Check if it's already marked as "read"
-        if (withdrawal.superadmin_notification_status === "read") {
-            return { status: 'Failed', message: 'Notification already marked as read' };
+        if (!withdrawal) {
+            return res.status(404).json({ status: 'Failed', message: 'Notification not found' });
         }
 
-        // Prepare update fields
-        let updateFields = {
-            superadmin_notification_status
-        };
+        if (withdrawal.superadmin_notification_status === "read") {
+            return res.json({ status: 'Failed', message: 'Notification already marked as read' });
+        }
 
-        // Update the withdrawal request
         const updateResult = await withdrawalCollection.updateOne(
             { _id: objectId },
-            { $set: updateFields }
+            { $set: { superadmin_notification_status } }
         );
 
-        // Check if the update was successful
         if (updateResult.modifiedCount > 0) {
-            return { status: 'Success', message: 'Mark notification read successfully' };
+            return res.json({ status: 'Success', message: 'Mark notification read successfully' });
         } else {
-            return { status: 'Failed', message: 'No changes made or update failed' };
+            return res.json({ status: 'Failed', message: 'No changes made or update failed' });
         }
 
     } catch (error) {
-        console.error('Error in markNotificationRead function:', error);
-        return { status: 'Failed', message: `Internal server error: ${error.message}` };
+        console.error('Error in MarkNotificationRead:', error);
+        return res.status(500).json({ status: 'Failed', message: `Internal server error: ${error.message}` });
     }
 }
 
