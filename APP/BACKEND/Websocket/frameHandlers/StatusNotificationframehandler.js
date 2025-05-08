@@ -2,6 +2,8 @@ const dbService = require("../services/dbService");
 const logger = require('../../utils/logger');
 const { framevalidation } = require("../validation/framevalidation");
 const { sendForceDisconnect } = require("../utils/broadcastUtils");
+const clientConnectionUtils = require("../utils/clientConnectionUtils");
+const timeUtils = require('../../utils/timeUtils');
 
 const validateStatusnotification = (data) => {
     return framevalidation(data, "StatusNotification.json");
@@ -26,7 +28,7 @@ const handleStatusNotification = async (
     ws,
     ClientWss
 ) => {
-    const formattedDate = new Date().toISOString();
+    const formattedDate = timeUtils.getCurrentIST();
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId, {}];
     let timeoutId;
@@ -87,23 +89,52 @@ const handleStatusNotification = async (
 
         let chargerErrorCode = errorCode === "NoError" ? errorCode : vendorErrorCode || errorCode;
 
+        // Broadcast status change to specific clients subscribed to this charger and connector
+        try {
+            // Create a status update message
+            const statusUpdate = {
+                type: "statusUpdate",
+                status: status,
+                errorCode: chargerErrorCode,
+                timestamp: formattedDate,
+                connectorId: connectorId,
+                info: {
+                    chargerModel: requestPayload.info || null,
+                    vendorId: requestPayload.vendorId || null,
+                    vendorErrorCode: vendorErrorCode || null
+                }
+            };
+
+            // Broadcast to specific clients subscribed to this charger and connector
+            logger.loggerInfo(`Broadcasting status update for charger ${uniqueIdentifier}, connector ${connectorId}: ${status}`);
+            clientConnectionUtils.broadcastToSubscribedClients(uniqueIdentifier, connectorId, statusUpdate, ClientWss, ws);
+        } catch (broadcastError) {
+            logger.loggerError(`Error broadcasting status update: ${broadcastError.message}`);
+        }
+
         if (status === "Available") {
             if (timeoutId) {
                 clearTimeout(timeoutId);
             }
             timeoutId = setTimeout(async () => {
                 const result = await dbService.updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
-                // if (result) {
-                //     // Send force disconnect message using our utility function
-                //     sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
-                //         "No action attempted. Automatically redirecting to home page.");
-                // }
+                if (result) {
+                    // Send force disconnect message using our utility function
+                    sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
+                        "No action attempted. Automatically redirecting to home page.");
+                }
 
                 logger.loggerInfo(`ChargerID ${uniqueIdentifier} - End charging session ${result ? "updated" : "not updated"}`);
             }, 50000);
 
             await dbService.deleteMeterValues(key, meterValuesMap);
             await dbService.NullTagIDInStatus(uniqueIdentifier, connectorId);
+        } else {
+            if (timeoutId !== undefined) {
+                clearTimeout(timeoutId);
+                timeoutId = undefined; // Reset the timeout reference
+            }
+
         }
 
         if (status === "Preparing") {

@@ -64,6 +64,15 @@ const fetchLastStatus = async (req, res) => {
         const convertedCapacity = fetchCapacity.max_power / 1000;
 
 
+        const time_val = user.autostop_time;
+        const isTimeChecked = user.autostop_time_is_checked;
+        const unit_val = user.autostop_unit;
+        const isUnitChecked = user.autostop_unit_is_checked;
+        const price_val = user.autostop_price;
+        const isPriceChecked = user.autostop_price_is_checked;
+        const wallet_balance = parseFloat(user.wallet_bal).toFixed(3);
+
+
         if (latestStatus) {
             const responseData = {
                 charger_id: latestStatus.charger_id,
@@ -82,7 +91,17 @@ const fetchLastStatus = async (req, res) => {
                     hour12: true,
                 }),
                 error_code: latestStatus.error_code,
-                ChargerCapacity: convertedCapacity
+                ChargerCapacity: convertedCapacity,
+                user_id: user.user_id,
+                email_id: user.email_id,
+                wallet_balance: wallet_balance,
+                autostop_time: time_val,
+                autostop_time_is_checked: isTimeChecked,
+                autostop_unit: unit_val,
+                autostop_unit_is_checked: isUnitChecked,
+                autostop_price: price_val,
+                autostop_price_is_checked: isPriceChecked,
+
             };
             logger.loggerSuccess(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - Last status fetched successfully`);
             return res.status(200).json({

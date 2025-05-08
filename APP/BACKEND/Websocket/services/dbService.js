@@ -633,12 +633,16 @@ const getAutostop = async (useremsil) => {
     }
 }
 const getPricePerUnit = async (uniqueIdentifier, connectorId) => {
+    let db;
     try {
         if (!db) {
             db = await connectToDatabase();
         }
 
         const chargerDetailsCollection = db.collection('charger_details');
+        const financeDetailsCollection = db.collection('financeDetails');
+
+        // Fetch charger details
         const charger = await chargerDetailsCollection.findOne({ charger_id: uniqueIdentifier });
 
         if (!charger) {
@@ -646,14 +650,60 @@ const getPricePerUnit = async (uniqueIdentifier, connectorId) => {
             return 0;
         }
 
-        // Get the price for the specific connector or default price
+        // Get the base price for the specific connector or default price
         const priceField = `price_for_connector_${connectorId}`;
-        const price = charger[priceField] || charger.default_price || 0;
+        const basePricePerUnit = parseFloat(charger[priceField] || charger.default_price || 0);
 
-        return parseFloat(price);
+        // Check if finance details are linked
+        if (!charger.finance_id) {
+            logger.loggerWarn(`Finance details not defined for charger ${uniqueIdentifier}`);
+            return basePricePerUnit; // Return base price if no finance details
+        }
+
+        // Fetch finance details
+        const financeDetails = await financeDetailsCollection.findOne({ finance_id: charger.finance_id });
+
+        if (!financeDetails) {
+            logger.loggerWarn(`Finance details for finance_id ${charger.finance_id} not found`);
+            return basePricePerUnit; // Return base price if finance details not found
+        }
+
+        // List of additional charges (excluding GST)
+        const additionalCharges = [
+            parseFloat(financeDetails.eb_charge || 0),
+            parseFloat(financeDetails.margin || 0),
+            parseFloat(financeDetails.parking_fee || 0),
+            parseFloat(financeDetails.convenience_fee || 0),
+            parseFloat(financeDetails.station_fee || 0),
+            parseFloat(financeDetails.processing_fee || 0),
+            parseFloat(financeDetails.service_fee || 0)
+        ];
+
+        // Calculate total additional charges per unit
+        const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + charge, 0);
+
+        // Base price per unit including additional charges
+        const priceWithCharges = basePricePerUnit + totalAdditionalCharges;
+
+        // Apply GST
+        const gstPercentage = parseFloat(financeDetails.gst || 0);
+        const gstAmount = (priceWithCharges * gstPercentage) / 100;
+
+        // Total price per unit (base price + additional charges + GST)
+        const totalPricePerUnit = priceWithCharges + gstAmount;
+
+        // Round to 2 decimal places
+        const roundedPricePerUnit = parseFloat(totalPricePerUnit.toFixed(2));
+
+        logger.loggerInfo(`Calculated price per unit for charger ${uniqueIdentifier}, connector ${connectorId}: ${roundedPricePerUnit}`);
+        return roundedPricePerUnit;
+
     } catch (error) {
         logger.loggerError(`Error in getPricePerUnit: ${error.message}`);
         return 0;
+    } finally {
+        // Optional: Close database connection if needed
+        // if (db) await db.close();
     }
 };
 /**
@@ -751,7 +801,7 @@ const SaveChargerValue = async (chargerValue) => {
             db = await connectToDatabase();
         }
 
-        const collection = db.collection('charger_values');
+        const collection = db.collection('charger_meter_values');
         const chargerValueObj = JSON.parse(chargerValue);
 
         // Add timestamp if not present
