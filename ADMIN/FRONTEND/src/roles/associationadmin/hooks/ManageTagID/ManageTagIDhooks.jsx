@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { showSuccessAlert, showErrorAlert } from '../../../../utils/alert' // Import alert functions
 import axiosInstance from '../../../../utils/utils';
+import dayjs from 'dayjs';
 
 
 const useManageTagID = (userInfo) => {
@@ -103,41 +104,48 @@ const useManageTagID = (userInfo) => {
     const [add_tag_id, setTagID] = useState('');
     const [add_tag_id_expiry_date, setTagIDExpiryDate] = useState('');
 
-
-const addTagID = async (e) => {
-    e.preventDefault();
-    try {
-        setIsLoading(true);
-
-        const response = await axiosInstance.post('/associationadmin/CreateTagID', {
-            tag_id: add_tag_id, 
-            tag_id_expiry_date: add_tag_id_expiry_date, 
-            created_by: userInfo.email_id, 
-            association_id: userInfo.association_id
-        });
-
-        if (response.status === 200) {
-            showSuccessAlert("TagID added successfully");
-            setTagID('');
-            setTagIDExpiryDate('');
-            setShowAddForm(false);
-            closeAddModal();
-            fetchTagID();
-            setTheadsticky('sticky');
-            setTheadfixed('fixed');
-            setTheadBackgroundColor('white');
-        } else {
-            const responseData = response.data;
-            showErrorAlert("Error", "Failed to add TagID, " + responseData.message);
+    const addTagID = async (e) => {
+        e.preventDefault();
+        try {
+            setIsLoading(true);
+    
+            const response = await axiosInstance.post('/associationadmin/CreateTagID', {
+                tag_id: add_tag_id, 
+                tag_id_expiry_date: add_tag_id_expiry_date, 
+                created_by: userInfo.email_id, 
+                association_id: userInfo.association_id
+            });
+    
+            if (response.status === 200) {
+                showSuccessAlert("TagID added successfully");
+                setTagID('');
+                setTagIDExpiryDate('');
+                setShowAddForm(false);
+                closeAddModal();
+                fetchTagID();
+                setTheadsticky('sticky');
+                setTheadfixed('fixed');
+                setTheadBackgroundColor('white');
+            } else {
+                const responseData = response.data;
+                // Handle failed response with specific error message
+                showErrorAlert("Error", responseData.message || "Failed to add TagID");
+            }
+        } catch (error) {
+            console.error("Error adding TagID:", error);
+            // Handle error response with specific message
+            if (error.response && error.response.data) {
+                const errorMessage = error.response.data.message || "An error occurred while adding TagID";
+                showErrorAlert("Error", errorMessage);
+            } else {
+                // Generic error message if no specific error message is available
+                showErrorAlert("Error", "An error occurred while adding TagID");
+            }
+        } finally {
+            setIsLoading(false);
         }
-    } catch (error) {
-        console.error("Error adding TagID:", error);
-        showErrorAlert("Error", "An error occurred while adding TagID");
-    } finally {
-        setIsLoading(false);
-    }
-};
-
+    };
+    
     // Edit user role start 
     const [showEditForm, setShowEditForm] = useState(false);
     const [dataItem, setEditDataItem] = useState(null);
@@ -298,6 +306,26 @@ const changeActivate = async (e, id) => {
         // Format the date and time string for the datetime-local input
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
+
+    function formatTimestamp(originalTimestamp) {
+        const date = new Date(originalTimestamp);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        hours = String(hours).padStart(2, '0');
+    
+        const formattedDate = `${day}/${month}/${year} ${hours}:${minutes}:${seconds} ${ampm}`;
+        return formattedDate;
+    }
+
+
     return {
         data, setData,
         loading, setLoading,
@@ -322,7 +350,7 @@ const changeActivate = async (e, id) => {
         tag_id_expiry_date, setEditTagIDExpiryDate,
         editTagID, changeDeActivate,
         changeActivate, formatDateForInput,
-        getMinDate, isloading, editloading
+        getMinDate, isloading, editloading,formatTimestamp
 
     }
 }

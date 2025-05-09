@@ -58,7 +58,6 @@ const useEditManageDevice = (userInfo) => {
         navigate('/associationadmin/ManageDevice');
     };
 
-
     const editManageDevice = async (e) => {
         e.preventDefault();
         setIsLoading(true); // Start loading
@@ -76,8 +75,10 @@ const useEditManageDevice = (userInfo) => {
                 modified_by: userInfo.email_id
             });
     
-            if (response.status === 200) {
-                showSuccessAlert("Device updated successfully"); // Use success alert helper
+            const data = response.data;
+    
+            if (response.status === 200 && data.status === "Success") {
+                showSuccessAlert("Device updated successfully");
                 setLatitude('');
                 setLongitude('');
                 setWifiUsername('');
@@ -85,15 +86,23 @@ const useEditManageDevice = (userInfo) => {
                 setAddress('');
                 editBackManageDevice();
             } else {
-                showErrorAlert("Error", "Failed to update device"); // Use error alert helper
+                // If 200 but not "Success"
+                showErrorAlert("Error", data.message || "Failed to update device");
             }
         } catch (error) {
             console.error('Error updating device:', error);
-            showErrorAlert("Error", "An error occurred while updating the device"); // Use error alert helper
+    
+            if (error.response && error.response.data) {
+                showErrorAlert("Error", error.response.data.message || "An error occurred while updating the device");
+            } else {
+                showErrorAlert("Error", "Something went wrong. Please try again.");
+            }
         } finally {
             setIsLoading(false); // Stop loading
         }
     };
+    
+    
     
 
     useEffect(() => {

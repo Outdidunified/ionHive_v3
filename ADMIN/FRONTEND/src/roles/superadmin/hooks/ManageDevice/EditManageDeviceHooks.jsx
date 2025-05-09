@@ -262,14 +262,6 @@ const editManageDevice = async (e) => {
     return;
   }
 
-  const validConnectors = connectors.filter(conn => conn.connector_type && conn.typeOptions.length > 0);
-  if (validConnectors.length === 0) {
-    showErrorAlert("No Connectors Found", "Connectors not available");
-    setLoading(false);
-    return;
-  }
-  
-
   try {
     setLoading(true);
 
