@@ -337,7 +337,6 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
     try {
         const { user_id, email_id, station_id, location_id } = req.body;
 
-
         // Validate input
         if (!user_id || !email_id || !station_id || !location_id) {
             return res.status(400).json({
@@ -366,6 +365,7 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
         const chargersCollection = db.collection("charger_details");
         const socketGunConfigCollection = db.collection("socket_gun_config");
         const chargerStatusCollection = db.collection("charger_status");
+        const financeDetailsCollection = db.collection("financeDetails");
 
         // Fetch station's chargers
         const station = await stationsCollection.findOne(
@@ -415,17 +415,15 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
             { projection: { _id: 0, charger_id: 1, connector_id: 1, charger_status: 1 } }
         ).toArray();
 
-        // Process charger configurations dynamically
-        const chargersWithConfig = chargerDetails.map(charger => {
+        // Process charger configurations dynamically, including pricePerUnit
+        const chargersWithConfig = await Promise.all(chargerDetails.map(async charger => {
             const config = socketGunConfigs.find(cfg => cfg.charger_id === charger.charger_id) || {};
 
-            // Extract all connector types dynamically
             const connectors = Object.keys(config)
                 .filter(key => /^connector_\d+_type$/.test(key))
                 .map((key, index) => {
                     const connectorIndex = key.match(/\d+/)[0];
 
-                    // Find matching status from charger_status collection
                     const matchingStatus = chargerStatuses.find(
                         status => status.charger_id === charger.charger_id && status.connector_id === parseInt(connectorIndex)
                     );
@@ -434,15 +432,65 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
                         connector_id: parseInt(connectorIndex),
                         connector_type: config[key] || null,
                         connector_type_name: config[`connector_${connectorIndex}_type_name`] || null,
-                        charger_status: matchingStatus ? matchingStatus.charger_status : " - " // Assign status if found
+                        charger_status: matchingStatus ? matchingStatus.charger_status : " - "
                     };
                 });
 
+            let unitPrice = null;
+            let priceDetails = {};
+
+            if (charger.finance_id) {
+                const financeRecord = await financeDetailsCollection.findOne({ finance_id: charger.finance_id });
+
+                if (financeRecord) {
+                    const EB_fee = parseFloat(financeRecord.eb_charge) + parseFloat(financeRecord.margin);
+
+                    const additionalCharges = [
+                        parseFloat(financeRecord.parking_fee),
+                        parseFloat(financeRecord.convenience_fee),
+                        parseFloat(financeRecord.station_fee),
+                        parseFloat(financeRecord.processing_fee),
+                        parseFloat(financeRecord.service_fee)
+                    ];
+
+                    const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + (charge || 0), 0);
+
+                    const totalEBPrice = EB_fee + totalAdditionalCharges;
+
+                    const gstPercentage = financeRecord.gst;
+                    const gstAmount = (totalEBPrice * gstPercentage) / 100;
+
+                    unitPrice = totalEBPrice + gstAmount;
+
+                    priceDetails = {
+                        EB_Fee: EB_fee.toFixed(2),
+                        Parking_fee: parseFloat(financeRecord.parking_fee).toFixed(2),
+                        Convenience_fee: parseFloat(financeRecord.convenience_fee).toFixed(2),
+                        Station_fee: parseFloat(financeRecord.station_fee).toFixed(2),
+                        Processing_fee: parseFloat(financeRecord.processing_fee).toFixed(2),
+                        Service_fee: parseFloat(financeRecord.service_fee).toFixed(2),
+                        GST: gstAmount.toFixed(2),
+                        GST_Percentage: gstPercentage
+                    };
+
+                    // Replace "NaN" values in priceDetails with "0.00"
+                    Object.keys(priceDetails).forEach(key => {
+                        if (priceDetails[key] === "NaN") {
+                            priceDetails[key] = "0.00";
+                        }
+                    });
+                }
+            }
+
             return {
                 ...charger,
+                unitPrice: unitPrice ? unitPrice.toFixed(2) : "0.00", // Ensure unitPrice is never null or undefined
+                priceDetails,
                 connectors
             };
-        });
+        }));
+
+
 
         logger.loggerSuccess(`Successfully retrieved charger details for station_id: ${station_id}`);
         return res.status(200).json({
@@ -565,7 +613,7 @@ const updateConnectorUser = async (req, res) => {
             if (!financeRecord) {
                 logger.loggerWarn(`Finance details for finance_id ${chargerDetails.finance_id} not found.`);
             } else {
-                const pricePerUnit = await dbService.getPricePerUnit(charger_id, connector_id);
+                const pricePerUnit = await dbService.getPricePerUnit(charger_id);
 
                 return res.status(200).json({
                     error: false,

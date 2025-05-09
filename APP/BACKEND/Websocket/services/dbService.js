@@ -464,46 +464,6 @@ const checkAuthorization = async (charger_id, idTag) => {
     }
 };
 
-// const updateChargerTransaction = async (charger_id, updateFields) => {
-//     console.log("updateFields:", updateFields);
-//     console.log("charger_id:", charger_id);
-//     try {
-//         if (!db) {
-//             db = await connectToDatabase();
-//             if (!db) {
-//                 logger.loggerError('Failed to establish database connection.');
-//                 return { status: "Error", message: "Database connection failed" };
-//             }
-//         }
-
-//         const chargerDetailsCollection = db.collection('charger_details');
-
-//         // Normalize charger_id for comparison (trim and ensure consistent case)
-//         const normalizedChargerId = charger_id.trim().toUpperCase();
-//         logger.loggerDebug(`Querying charger_details with charger_id: ${normalizedChargerId}`);
-
-//         // Perform the update operation
-//         const result = await chargerDetailsCollection.findOneAndUpdate(
-//             { charger_id: normalizedChargerId },
-//             { $set: updateFields },
-//             { returnDocument: 'after' }
-//         );
-
-//         if (!result.value) {
-//             // Log all charger IDs in the collection for debugging
-//             const allChargers = await chargerDetailsCollection.find({}, { projection: { charger_id: 1 } }).toArray();
-//             logger.loggerError(`No charger found with charger_id: ${normalizedChargerId}. Available charger IDs: ${JSON.stringify(allChargers)}`);
-//             return { status: "Error", message: "No charger found" };
-//         }
-
-//         logger.loggerInfo(`Updated charger transaction for charger_id: ${normalizedChargerId}`);
-//         return { status: "Success", updatedData: result.value };
-//     } catch (error) {
-//         logger.loggerError(`Error updating charger transaction for charger_id ${charger_id}: ${error.message}`);
-//         return { status: "Error", message: error.message };
-//     }
-// };
-
 
 const updateChargerTransaction = async (charger_id, updateFields) => {
     console.log("updateFields:", updateFields);

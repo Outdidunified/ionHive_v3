@@ -121,7 +121,7 @@ const fetchSavedSearchFilter = async (req, res) => {
         const usersCollection = db.collection('users');
         const chargerDetailsCollection = db.collection('charger_details');
         const chargerStatusCollection = db.collection('charger_status');
-        const financeDetailsCollection = db.collection('finance_details');
+        const financeDetailsCollection = db.collection('financeDetails');
 
         // Find user and retrieve favorite chargers
         const user = await usersCollection.findOne(
@@ -159,7 +159,7 @@ const fetchSavedSearchFilter = async (req, res) => {
                 const financeRecord = await financeDetailsCollection.findOne({ finance_id: charger.finance_id });
 
                 if (financeRecord) {
-                    const pricePerUnit = await dbService.getPricePerUnit(charger_id, connector_id);
+                    const pricePerUnit = await dbService.getPricePerUnit(chargerId);
 
                     unitPrice = pricePerUnit;
                 }
@@ -428,7 +428,7 @@ const fetchActiveChargersOfUser = async (req, res) => {
                 if (financeId) {
                     const financeRecord = await financeDetailsCollection.findOne({ finance_id: financeId });
                     if (financeRecord) {
-                        const pricePerUnit = await dbService.getPricePerUnit(charger_id, connector_id);
+                        const pricePerUnit = await dbService.getPricePerUnit(chargerId);
                         // Final price after adding GST
                         unitPrice = pricePerUnit;
                     }

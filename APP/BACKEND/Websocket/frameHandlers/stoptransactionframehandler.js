@@ -117,6 +117,7 @@ async function updateSessionDetails(sessionID, totalUnit, financeDetails, client
 
         // Now we update the device_session_details with the breakdown of charges and commissions for total units consumed
         if (sessionID) {
+            console.log(`SessionID - ${sessionID}`);
             const updateSessionResult = await DeviceSessionDetailsCollection.updateOne(
                 { session_id: sessionID },
                 {
@@ -154,48 +155,52 @@ async function updateSessionDetails(sessionID, totalUnit, financeDetails, client
 }
 
 // Update wallet balance for different entities
-async function updateWallet(collection, id, amount, entityType, isAddition = true) {
+async function updateWallet(collection, id, amount, type, isAddition = true) {
     try {
-        const idField = entityType === 'association'
-            ? 'association_id'
-            : entityType === 'client'
-                ? 'client_id'
-                : 'reseller_id';
-
+        const walletField = `${type}_wallet`;
+        const idField = `${type}_id`;
         const numericAmount = parseFloat(amount.toFixed(2));
 
-        // Fetch current balance
-        const doc = await collection.findOne({ [idField]: id });
-        const currentBalance = parseFloat(doc?.wallet_bal) || 0;
-
-        let updatedBalance = isAddition
-            ? currentBalance + numericAmount
-            : currentBalance - numericAmount;
-
-        updatedBalance = parseFloat(updatedBalance.toFixed(2));
-
-        // Prevent negative balance
-        if (updatedBalance < 0) {
-            logger.loggerWarn(`Cannot ${isAddition ? 'credit' : 'debit'} ${numericAmount} from ${entityType} wallet (ID: ${id}). Balance would go negative.`);
+        // Retrieve the current wallet value
+        const getWallet = await collection.findOne({ [idField]: id });
+        if (!getWallet) {
+            logger.loggerWarn(`No ${type} record found for ID: ${id}`);
             return false;
         }
 
-        // Perform update
-        const result = await collection.updateOne(
+        const currentWallet = parseFloat(getWallet[walletField]) || 0;
+        logger.loggerInfo(`updateWallet - ${walletField} (current): ${currentWallet}`);
+
+        let updatedWallet = isAddition
+            ? currentWallet + numericAmount
+            : currentWallet - numericAmount;
+
+        // Round to two decimals
+        updatedWallet = parseFloat(updatedWallet.toFixed(2));
+        logger.loggerInfo(`updateWallet - ${walletField} (updated): ${updatedWallet}`);
+
+        // Ensure the wallet doesn't go negative
+        if (updatedWallet < 0) {
+            logger.loggerWarn(`Cannot ${isAddition ? 'credit' : 'debit'} ${numericAmount} to/from ${type} wallet for ID: ${id}. Balance would go negative.`);
+            return false;
+        }
+
+        // Update the wallet in the database
+        const updateResult = await collection.updateOne(
             { [idField]: id },
-            { $set: { wallet_bal: updatedBalance } }
+            { $set: { [walletField]: updatedWallet } }
         );
 
-        if (result.modifiedCount > 0) {
-            logger.loggerSuccess(`${entityType} wallet ${isAddition ? 'credited' : 'debited'} with ${numericAmount}. New balance: ${updatedBalance}`);
+        if (updateResult.modifiedCount > 0) {
+            logger.loggerSuccess(`${type} wallet successfully ${isAddition ? 'credited' : 'debited'} by ${numericAmount}. New balance: ${updatedWallet}`);
             return true;
         } else {
-            logger.loggerWarn(`Failed to update ${entityType} wallet (ID: ${id}). No changes made.`);
+            logger.loggerWarn(`Failed to update ${type} wallet for ID: ${id}. No changes were made.`);
             return false;
         }
     } catch (error) {
-        logger.loggerError(`Error updating ${entityType} wallet (ID: ${id}): ${error.message}`);
-        return false;
+        logger.loggerError(`Error updating ${type} wallet for ID: ${id}: ${error.message}`);
+        throw new Error(`Unable to update ${type} wallet for ID: ${id}`);
     }
 }
 
@@ -275,7 +280,7 @@ async function UpdateCommissionToWallet(sessionPrice, uniqueIdentifier, sessionI
             }
         }
 
-        await updateSessionDetails(sessionID, unit, FinanceDetails, clientCommission, resellerCommission);
+        await updateSessionDetails(parseInt(sessionID), unit, FinanceDetails, clientCommission, resellerCommission);
 
         if (resellerCommissionUpdate && (clientCommissionUpdate || clientCommission === 0) && AssociationPriceUpdate) {
             logger.loggerSuccess(`All commissions updated successfully!`);
@@ -374,14 +379,14 @@ const createChargingSession = async (uniqueIdentifier, connectorId, startTime, u
         const sessionData = {
             charger_id: uniqueIdentifier,
             connector_id: parseInt(connectorId),
+            connector_type: connectorType || 'Unknown',
+            session_id: sessionId,
+            email_id: user,
             start_time: startTime,
             stop_time: null, // This will be updated when charging stops
             unit_consummed: 0, // Will be updated when charging stops
             price: 0, // Will be updated when charging stops
             unit_price: pricePerUnit,
-            email_id: user,
-            session_id: sessionId,
-            connector_type: connectorType || 'Unknown',
             error_code: 'NoError',
             location: chargerDetails ? chargerDetails.landmark : 'Unknown',
             created_date: new Date(),
@@ -417,7 +422,7 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
 
         const formattedPrice = isNaN(sessionPrice) || sessionPrice === 'NaN' ? 0 : parseFloat(sessionPrice).toFixed(2);
 
-        logger.loggerInfo(`Session details - Start: ${startTime}, Stop: ${stopTime}, Unit: ${formattedUnit}, Price: ${formattedPrice}`);
+        logger.loggerInfo(`Session details Session ID: ${sessionId} - Start: ${startTime}, Stop: ${stopTime}, Unit: ${formattedUnit}, Price: ${formattedPrice}`);
 
         // Check if a document with the same session ID already exists
         const existingSession = await db.collection('device_session_details').findOne({
@@ -758,28 +763,6 @@ const handleStopTransaction = async (
                 chargerStopTime.set(key, null);
             }
         }
-
-        // // Prepare status notification for broadcasting
-        // const statusNotification = [
-        //     2,
-        //     requestId,
-        //     "StatusNotification",
-        //     {
-        //         connectorId: parseInt(connectorId),
-        //         errorCode: "NoError",
-        //         status: "Available",
-        //         timestamp: new Date().toISOString()
-        //     }
-        // ];
-
-        // // Add metadata with broadcast data for internal use
-        // response.metadata = {
-        //     success: true,
-        //     broadcastData: true,
-        //     statusNotification: statusNotification
-        // };
-
-        // logger.loggerSuccess("StatusNotification ready for broadcast.");
 
     } catch (error) {
         logger.loggerError(`Error in handleStopTransaction: ${error.message}`);

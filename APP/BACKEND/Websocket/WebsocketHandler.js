@@ -369,7 +369,7 @@ const handleIncomingMessage = async (
                 break;
 
             case "StartTransaction":
-                response = await frameHandler.handleStartTransaction(uniqueIdentifier, requestPayload, requestId, wsConnections);
+                response = await frameHandler.handleStartTransaction(uniqueIdentifier, requestPayload, requestId, wsConnections, chargingSessionID);
                 // Check if there's metadata with broadcast data
                 if (response.metadata && response.metadata.broadcastData && response.metadata.authData) {
                     const broadcastData = response.metadata.authData;

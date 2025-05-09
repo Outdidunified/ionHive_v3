@@ -9,7 +9,7 @@ const validateStatusnotification = (data) => {
     return framevalidation(data, "StatusNotification.json");
 };
 
-function generateRandomTransactionId() {
+function generateRandomSessionId() {
     return Math.floor(1000000 + Math.random() * 9000000); // Generates a random number between 1000000 and 9999999
 }
 
@@ -33,6 +33,7 @@ const handleStatusNotification = async (
     let response = [3, requestId, {}];
     let timeoutId;
     let db;
+    let GenerateChargingSessionID;
 
     try {
         db = await dbService.connectToDatabase();
@@ -150,7 +151,9 @@ const handleStatusNotification = async (
             charging_states.set(key, true);
             chargerStartTime.set(key, timestamp);
             startedChargingSet.add(key);
-            chargingSessionID.set(key, generateRandomTransactionId());
+            GenerateChargingSessionID = generateRandomSessionId();
+            chargingSessionID.set(key, GenerateChargingSessionID);
+            console.log(chargingSessionID.set(key, GenerateChargingSessionID))
         }
 
         if (["SuspendedEV", "Faulted", "Unavailable"].includes(status) && charging_states.get(key)) {

@@ -12,11 +12,12 @@ const generateRandomTransactionId = () => {
     return Math.floor(100000 + Math.random() * 900000); // Random 6-digit transaction ID
 };
 
-const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestId, wsConnections) => {
+const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestId, wsConnections, chargingSessionID) => {
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId];
 
     try {
+
         // Validate request payload
         const validationResult = validateStartTransaction(requestPayload);
         if (!validationResult.isValid) {
@@ -108,6 +109,11 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
             const socketGunConfig = await db.collection('socket_gun_config').findOne({ charger_id: uniqueIdentifier });
             const connectorIdTypeField = `connector_${connectorId}_type`;
             const connectorTypeValue = socketGunConfig ? socketGunConfig[connectorIdTypeField] : null;
+            const key = `${uniqueIdentifier}_${connectorId}`;
+
+            const UniqueChargingSessionId = chargingSessionID.get(key); // Use the current session ID
+
+            console.log("Creating new charging session...", UniqueChargingSessionId, "Key", key);
 
             // Create session with start time but no stop time
             const sessionCreated = await createChargingSession(
@@ -115,12 +121,12 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
                 connectorId,
                 new Date().toISOString(), // Current time as start time
                 user,
-                generatedTransactionId, // Use the generated transaction ID
+                UniqueChargingSessionId,
                 connectorTypeValue
             );
 
             if (sessionCreated) {
-                logger.loggerSuccess(`Created new charging session for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}, TransactionID ${generatedTransactionId}`);
+                logger.loggerSuccess(`Created new charging session for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}, TransactionID ${generatedTransactionId}, User ${user}, Session ID ${UniqueChargingSessionId} and Connector Type ${connectorTypeValue}.`);
 
                 // Add session info to metadata
                 response.metadata.session = {
