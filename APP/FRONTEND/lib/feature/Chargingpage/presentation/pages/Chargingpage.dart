@@ -227,7 +227,9 @@ class ChargingPage extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async => false,
       child: Obx(() => LoadingOverlay(
-        isLoading: controller.isLoading.value || controller.isEndingSession.value,
+        isLoading: controller.isLoading.value ||
+            controller.isEndingSession.value ||
+            controller.isWaitingForStatusUpdate.value,
         child: Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
           body: Stack(
@@ -619,7 +621,8 @@ class ChargingPage extends StatelessWidget {
                                               'assets/icons/speedometer.png',
                                             ),
                                         ],
-                                      ),if (controller.startedAt.value != null)
+                                      ),
+                                      if (controller.startedAt.value != null)
                                         Center(
                                           child: Padding(
                                             padding: EdgeInsets.only(top: screenHeight * 0.01),
@@ -636,7 +639,7 @@ class ChargingPage extends StatelessWidget {
                                   ),
                                 ),
                               ],
-                              if (data.chargerStatus == 'Charging' ) ...[
+                              if (data.chargerStatus == 'Charging') ...[
                                 SizedBox(height: screenHeight * 0.02),
                                 Container(
                                   width: double.infinity,
@@ -673,7 +676,7 @@ class ChargingPage extends StatelessWidget {
                                       ),
                                       icon: Icon(Icons.stop, color: Colors.white, size: 30),
                                       width: screenWidth * 0.9 - 20,
-                                      height: 60,
+                                      height: 70, // Increased height to prevent negative constraints
                                       buttonSize: 50,
                                       radius: 12,
                                       buttonColor: Colors.red,
@@ -683,7 +686,7 @@ class ChargingPage extends StatelessWidget {
                                       shimmer: true,
                                       vibrationFlag: true,
                                       boxShadow: BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4),
-                                      disable: isStopButtonDisabled.value, // Disable based on state
+                                      disable: isStopButtonDisabled.value,
                                     ),
                                   ),
                                 ),
