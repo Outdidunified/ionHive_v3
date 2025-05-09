@@ -54,7 +54,6 @@ const handleStatusNotification = async (
         }
 
         const { connectorId, errorCode, status, timestamp, vendorErrorCode } = requestPayload;
-        console.log("---------------------- ", connectorId, errorCode, status, timestamp, vendorErrorCode);
         const key = `${uniqueIdentifier}_${connectorId}`;
 
         // Fetch Connector Type
@@ -193,7 +192,6 @@ const handleStatusNotification = async (
                 const GenerateChargingSessionID = Math.floor(1000000 + Math.random() * 9000000); // 7-digit session ID
                 chargingSessionID.set(key, GenerateChargingSessionID);
                 logger.loggerInfo(`Generated new session ID ${GenerateChargingSessionID} for ${key} in StatusNotification`);
-                console.log(chargingSessionID);
             } else {
                 logger.loggerInfo(`Using existing session ID ${chargingSessionID.get(key)} for ${key} in StatusNotification`);
             }

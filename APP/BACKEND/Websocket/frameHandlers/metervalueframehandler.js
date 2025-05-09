@@ -341,11 +341,10 @@ const calculateLivePrice = async (firstMeter, lastMeter, settings, identifier, c
         const unitsConsumed = parseFloat((lastMeter - firstMeter) / 1000).toFixed(2);
 
         const pricePerUnit = await dbService.getPricePerUnit(identifier, connector);
-        console.log("pricePerUnit:", pricePerUnit, "unitsConsumed:", unitsConsumed, 'for', identifier);
+        logger.loggerInfo(`Calculating live price for ${identifier}, connector ${connector}: Units Consumed: ${unitsConsumed}, Price Per Unit: ${pricePerUnit}`);
         const livePrice = unitsConsumed * pricePerUnit;
 
         logger.loggerInfo(`Live price calculation for ${identifier}, connector ${connector}: ${unitsConsumed} units consumed at ${pricePerUnit} per unit = ${livePrice}`);
-        console.log("settings:", settings);
         // Check if wallet balance is sufficient
         if (settings && settings.wallet_balance && livePrice >= parseFloat(settings.wallet_balance)) {
             logger.loggerInfo(`Autostop triggered for ${identifier}, connector ${connector} - Insufficient wallet balance (${settings.wallet_balance})`);

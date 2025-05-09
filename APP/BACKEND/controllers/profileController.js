@@ -1012,7 +1012,7 @@ const fetchFAQsFromDB = async (category, keywords) => {
         const faqs = await faqsCollection.find(query).toArray();
         return faqs;
     } catch (error) {
-        console.error("Error fetching FAQs from DB:", error);
+        logger.loggerError("Error fetching FAQs from DB:", error);
         throw new Error("Failed to fetch FAQs");
     }
 };
@@ -1077,7 +1077,7 @@ const chatbotResponse = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error in chatbot response:", error.message);
+        logger.loggerError("Error in chatbot response:", error.message);
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",

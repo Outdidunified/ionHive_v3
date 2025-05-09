@@ -466,8 +466,7 @@ const checkAuthorization = async (charger_id, idTag) => {
 
 
 const updateChargerTransaction = async (charger_id, updateFields) => {
-    console.log("updateFields:", updateFields);
-    console.log("charger_id:", charger_id);
+
     try {
         if (!db) {
             db = await connectToDatabase();

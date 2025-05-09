@@ -251,7 +251,6 @@ const startCharger = async (req, res) => {
 // STOP CHARGER
 const stopCharger = async (req, res) => {
     const { charger_id, connector_id } = req.body;
-    console.log(req.body);
 
     try {
         // Validate required fields
@@ -326,7 +325,6 @@ const stopCharger = async (req, res) => {
         const transactionIdField = `transaction_id_for_connector_${connectorIdNum}`;
         const transactionId = chargerDetails[transactionIdField];
 
-        console.log("chargerStatus:", chargerStatus, transactionId);
 
         if (!chargerStatus || !transactionId) {
             logger.loggerWarn(`No active charging session found for Charger ID: ${charger_id}, Connector ID: ${connector_id}`);

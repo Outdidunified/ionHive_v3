@@ -116,7 +116,6 @@ async function updateSessionDetails(sessionID, totalUnit, financeDetails, client
 
         // Now we update the device_session_details with the breakdown of charges and commissions for total units consumed
         if (sessionID) {
-            console.log(`SessionID - ${sessionID}`);
             const updateSessionResult = await DeviceSessionDetailsCollection.updateOne(
                 { session_id: sessionID },
                 {

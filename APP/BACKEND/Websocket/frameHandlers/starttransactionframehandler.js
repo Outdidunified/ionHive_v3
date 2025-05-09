@@ -125,7 +125,7 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
                 logger.loggerInfo(`Using existing session ID ${sessionId} for ${key}`);
             }
 
-            console.log("Creating new charging session...", sessionId, "Key", key);
+            logger.loggerInfo("Creating new charging session...", sessionId, "Key", key);
 
             // Create session with start time but no stop time
             const sessionCreated = await createChargingSession(
