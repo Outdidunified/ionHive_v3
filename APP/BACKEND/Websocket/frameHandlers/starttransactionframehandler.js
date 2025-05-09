@@ -109,11 +109,23 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
             const socketGunConfig = await db.collection('socket_gun_config').findOne({ charger_id: uniqueIdentifier });
             const connectorIdTypeField = `connector_${connectorId}_type`;
             const connectorTypeValue = socketGunConfig ? socketGunConfig[connectorIdTypeField] : null;
+
+            // Generate a unique session ID if not already set
             const key = `${uniqueIdentifier}_${connectorId}`;
+            let sessionId = chargingSessionID ? chargingSessionID.get(key) : null;
 
-            const UniqueChargingSessionId = chargingSessionID.get(key); // Use the current session ID
+            if (!sessionId) {
+                // Generate a new session ID and store it
+                sessionId = Math.floor(1000000 + Math.random() * 9000000); // 7-digit session ID
+                if (chargingSessionID) {
+                    chargingSessionID.set(key, sessionId);
+                    logger.loggerInfo(`Generated new session ID ${sessionId} for ${key}`);
+                }
+            } else {
+                logger.loggerInfo(`Using existing session ID ${sessionId} for ${key}`);
+            }
 
-            console.log("Creating new charging session...", UniqueChargingSessionId, "Key", key);
+            console.log("Creating new charging session...", sessionId, "Key", key);
 
             // Create session with start time but no stop time
             const sessionCreated = await createChargingSession(
@@ -121,17 +133,18 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
                 connectorId,
                 new Date().toISOString(), // Current time as start time
                 user,
-                UniqueChargingSessionId,
+                sessionId,
                 connectorTypeValue
             );
 
             if (sessionCreated) {
-                logger.loggerSuccess(`Created new charging session for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}, TransactionID ${generatedTransactionId}, User ${user}, Session ID ${UniqueChargingSessionId} and Connector Type ${connectorTypeValue}.`);
+                logger.loggerSuccess(`Created new charging session for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}, TransactionID ${generatedTransactionId}, User ${user}, Session ID ${sessionId} and Connector Type ${connectorTypeValue}.`);
 
                 // Add session info to metadata
                 response.metadata.session = {
                     created: true,
                     transactionId: generatedTransactionId,
+                    sessionId: sessionId,
                     user: user,
                     connectorType: connectorTypeValue
                 };
@@ -141,6 +154,7 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
         } catch (sessionError) {
             logger.loggerError(`Error creating charging session: ${sessionError.message}`);
         }
+
 
         const autoStopConfig = await dbService.getAutostop(user);
 

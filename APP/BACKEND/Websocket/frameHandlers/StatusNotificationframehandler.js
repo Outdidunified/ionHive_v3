@@ -54,6 +54,7 @@ const handleStatusNotification = async (
         }
 
         const { connectorId, errorCode, status, timestamp, vendorErrorCode } = requestPayload;
+        console.log("---------------------- ", connectorId, errorCode, status, timestamp, vendorErrorCode);
         const key = `${uniqueIdentifier}_${connectorId}`;
 
         // Fetch Connector Type
@@ -88,6 +89,42 @@ const handleStatusNotification = async (
 
         await dbService.SaveChargerStatus(JSON.stringify(keyValPair), connectorId);
 
+        // Also update error code in device_session_details if it exists
+        try {
+            const db = await dbService.connectToDatabase();
+            const key = `${uniqueIdentifier}_${connectorId}`;
+            const sessionId = chargingSessionID ? chargingSessionID.get(key) : null;
+
+            if (sessionId) {
+                const DeviceSessionDetailsCollection = db.collection('device_session_details');
+                const updateResult = await DeviceSessionDetailsCollection.updateOne(
+                    {
+                        charger_id: uniqueIdentifier,
+                        connector_id: parseInt(connectorId),
+                        session_id: sessionId
+                    },
+                    {
+                        $set: {
+                            error_code: errorCode !== "InternalError" ? errorCode : (vendorErrorCode || "InternalError"),
+                            vendor_error_code: vendorErrorCode || null,
+                            status: status
+                        }
+
+                    }
+                );
+
+                if (updateResult.modifiedCount > 0) {
+                    logger.loggerSuccess(`Updated error code in device_session_details for session ID: ${sessionId}`);
+                } else if (updateResult.matchedCount > 0) {
+                    logger.loggerInfo(`No changes needed for error code in device_session_details for session ID: ${sessionId}`);
+                } else {
+                    logger.loggerWarn(`No matching session found to update error code for session ID: ${sessionId}`);
+                }
+            }
+        } catch (error) {
+            logger.loggerError(`Error updating error code in device_session_details: ${error.message}`);
+        }
+
         let chargerErrorCode = errorCode === "NoError" ? errorCode : vendorErrorCode || errorCode;
 
         // Broadcast status change to specific clients subscribed to this charger and connector
@@ -119,11 +156,11 @@ const handleStatusNotification = async (
             }
             timeoutId = setTimeout(async () => {
                 const result = await dbService.updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
-                if (result) {
-                    // Send force disconnect message using our utility function
-                    sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
-                        "No action attempted. Automatically redirecting to home page.");
-                }
+                // if (result) {
+                //     // Send force disconnect message using our utility function
+                //     sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
+                //         "No action attempted. Automatically redirecting to home page.");
+                // }
 
                 logger.loggerInfo(`ChargerID ${uniqueIdentifier} - End charging session ${result ? "updated" : "not updated"}`);
             }, 50000);
@@ -151,9 +188,15 @@ const handleStatusNotification = async (
             charging_states.set(key, true);
             chargerStartTime.set(key, timestamp);
             startedChargingSet.add(key);
-            GenerateChargingSessionID = generateRandomSessionId();
-            chargingSessionID.set(key, GenerateChargingSessionID);
-            console.log(chargingSessionID.set(key, GenerateChargingSessionID))
+            // Only set a new session ID if one doesn't already exist
+            if (!chargingSessionID.has(key)) {
+                const GenerateChargingSessionID = Math.floor(1000000 + Math.random() * 9000000); // 7-digit session ID
+                chargingSessionID.set(key, GenerateChargingSessionID);
+                logger.loggerInfo(`Generated new session ID ${GenerateChargingSessionID} for ${key} in StatusNotification`);
+                console.log(chargingSessionID);
+            } else {
+                logger.loggerInfo(`Using existing session ID ${chargingSessionID.get(key)} for ${key} in StatusNotification`);
+            }
         }
 
         if (["SuspendedEV", "Faulted", "Unavailable"].includes(status) && charging_states.get(key)) {

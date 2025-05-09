@@ -1,7 +1,6 @@
 const dbService = require("../services/dbService");
 const logger = require("../../utils/logger");
 const { framevalidation } = require("../validation/framevalidation");
-const db_conn = require('../../config/db');
 
 // Validate StopTransaction request
 const validateStopTransaction = (data) => {
@@ -381,7 +380,6 @@ const createChargingSession = async (uniqueIdentifier, connectorId, startTime, u
             connector_id: parseInt(connectorId),
             connector_type: connectorType || 'Unknown',
             session_id: sessionId,
-            email_id: user,
             start_time: startTime,
             stop_time: null, // This will be updated when charging stops
             unit_consummed: 0, // Will be updated when charging stops
@@ -389,6 +387,7 @@ const createChargingSession = async (uniqueIdentifier, connectorId, startTime, u
             unit_price: pricePerUnit,
             error_code: 'NoError',
             location: chargerDetails ? chargerDetails.landmark : 'Unknown',
+            email_id: user,
             created_date: new Date(),
             status: true
         };
@@ -410,7 +409,7 @@ const createChargingSession = async (uniqueIdentifier, connectorId, startTime, u
 };
 
 // Handle charging session data
-const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, stopTime, unit, sessionPrice, user, sessionId, connectorType, errorCode) => {
+const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, stopTime, unit, sessionPrice, user, sessionId, connectorType, errorCode, stopReason, vendorErrorCode) => {
     try {
         const db = await dbService.connectToDatabase();
 
@@ -436,6 +435,12 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
         if (existingSession) {
             // Session exists, update with stop time and final values
             if (existingSession.stop_time === null && existingSession.start_time !== null) {
+
+                // Resolve error fields cleanly
+                const resolvedErrorCode = errorCode || (vendorErrorCode ? 'VendorError' : 'NoError');
+                const resolvedVendorErrorCode = vendorErrorCode || 'NoVendorError';
+                const resolvedStopReason = stopReason || 'UnknownReason';
+
                 // Update the existing session with stop time and final values
                 const updateResult = await db.collection('device_session_details').updateOne(
                     {
@@ -449,7 +454,9 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
                             stop_time: stopTime,
                             unit_consummed: formattedUnit,
                             price: formattedPrice,
-                            error_code: errorCode || 'NoError',
+                            error_code: resolvedErrorCode,
+                            vendor_error_code: resolvedVendorErrorCode,
+                            stop_reason: resolvedStopReason,
                             modified_date: new Date()
                         }
                     }
@@ -494,16 +501,16 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
                 const sessionData = {
                     charger_id: uniqueIdentifier,
                     connector_id: parseInt(connectorId),
+                    connector_type: connectorType || 'Unknown',
+                    session_id: sessionId,
                     start_time: startTime,
                     stop_time: stopTime,
                     unit_consummed: formattedUnit,
                     price: formattedPrice,
                     unit_price: pricePerUnit,
-                    email_id: user,
-                    session_id: sessionId,
-                    connector_type: connectorType || 'Unknown',
                     error_code: errorCode || 'NoError',
                     location: chargerDetails ? chargerDetails.landmark : 'Unknown',
+                    email_id: user,
                     created_date: new Date(),
                     status: true
                 };
@@ -725,6 +732,9 @@ const handleStopTransaction = async (
 
             // Handle charging session data if user is available
             if (user) {
+                // Get stop reason from request payload if available
+                const stopReason = requestPayload.reason || null;
+
                 await handleChargingSession(
                     uniqueIdentifier,
                     connectorId,
@@ -735,7 +745,9 @@ const handleStopTransaction = async (
                     user,
                     chargingSessionID.get(key),
                     connectorTypeValue,
-                    "NoError"
+                    requestPayload.errorCode || "NoError",
+                    stopReason,
+                    requestPayload.vendorErrorCode || "NovendorErrorCode",
                 );
             } else {
                 logger.loggerWarn(`ChargerID ${uniqueIdentifier}: User is ${user}, so can't update the session price and commission.`);
