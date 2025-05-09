@@ -100,7 +100,7 @@ const updateChargerDetails = async (charger_id, updateData) => {
             db = await connectToDatabase();
         }
         const collection = db.collection('charger_details');
-
+        s
         const result = await collection.updateOne(
             { charger_id: charger_id },
             { $set: updateData }

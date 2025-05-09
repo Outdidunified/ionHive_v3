@@ -61,7 +61,7 @@ const handleWebSocketConnection = (
 
         try {
             await dbService.updateChargerIP(uniqueIdentifier, clientIpAddress);
-            await dbService.updateChargerStatus(uniqueIdentifier, clientIpAddress);
+            await dbService.updateChargerStatus(uniqueIdentifier, clientIpAddress, 'Connected to Server');
             logger.loggerSuccess(`WebSocket connection established with Charger ID: ${uniqueIdentifier}`);
         } catch (error) {
             logger.loggerError(`Error updating charger details for ${uniqueIdentifier}: ${error.message}`);
