@@ -11,6 +11,7 @@ import 'package:ionhive/feature/Chargingpage/domain/repositories/Chargingpage_re
 import 'package:ionhive/feature/landing_page.dart';
 import 'package:flutter/material.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
+import 'package:ionhive/feature/session_history/presentation/pages/session_bill.dart';
 
 class ChargingPageController extends GetxController {
   final Chargingpagerepo _repo = Chargingpagerepo();
@@ -20,21 +21,17 @@ class ChargingPageController extends GetxController {
   var isInitialLoading = true.obs;
   var isEndingSession = false.obs;
 
-  // New variable to track if we're waiting for a WebSocket status update
   var isWaitingForStatusUpdate = false.obs;
   Timer? _statusUpdateTimeout;
 
-  // WebSocket related variables
   WebSocketService? _webSocketService;
   var isWebSocketConnected = false.obs;
   var webSocketError = ''.obs;
   var isPageActive = true.obs;
   var isReconnecting = false.obs;
 
-  // Static list to track all open WebSocket connections
   static final List<WebSocketService> _openWebSocketServices = [];
 
-  // Charging metrics
   var voltage = Rx<double?>(null);
   var current = Rx<double?>(null);
   var power = Rx<double?>(null);
@@ -44,7 +41,6 @@ class ChargingPageController extends GetxController {
 
   RxDouble livePrice = 0.0.obs;
 
-  // New variables for "Started At" timestamp and meter values visibility
   var startedAt = Rx<DateTime?>(null);
   var showMeterValues = true.obs;
 
@@ -63,8 +59,25 @@ class ChargingPageController extends GetxController {
   }
 
   @override
+  void onReady() {
+    super.onReady();
+    // Reinitialize the page when it becomes active again (e.g., after navigating back)
+    if (!isPageActive.value) {
+      debugPrint(
+          'ChargingPageController: onReady called - reinitializing page');
+      isPageActive.value = true;
+      Future.delayed(const Duration(seconds: 2), () async {
+        await fetchLastStatusData();
+        isInitialLoading.value = false;
+      });
+      initWebSocket();
+    }
+  }
+
+  @override
   void onClose() {
-    debugPrint('ChargingPageController: onClose called - closing all WebSocket connections');
+    debugPrint(
+        'ChargingPageController: onClose called - closing all WebSocket connections');
     isPageActive(false);
     disconnectWebSocket();
     _cancelStatusUpdateTimeout();
@@ -73,7 +86,8 @@ class ChargingPageController extends GetxController {
 
   @override
   void dispose() {
-    debugPrint('ChargingPageController: dispose called - closing all WebSocket connections');
+    debugPrint(
+        'ChargingPageController: dispose called - closing all WebSocket connections');
     isPageActive(false);
     disconnectWebSocket();
     _cancelStatusUpdateTimeout();
@@ -82,18 +96,16 @@ class ChargingPageController extends GetxController {
 
   void initWebSocket() {
     try {
-      // Always create a new WebSocket connection
       final wsUrl = iOnHiveCore.getChargingWebSocketUrl(chargerId, connectorId);
       debugPrint('Creating new WebSocket connection to: $wsUrl');
 
       _webSocketService = WebSocketService(wsUrl);
       _webSocketService!.connect();
 
-      // Add the new connection to the list of open connections
       _openWebSocketServices.add(_webSocketService!);
-      debugPrint('Total open WebSocket connections: ${_openWebSocketServices.length}');
+      debugPrint(
+          'Total open WebSocket connections: ${_openWebSocketServices.length}');
 
-      // Update connection status
       isWebSocketConnected(_webSocketService!.isConnected);
       if (_webSocketService!.isConnected) {
         isReconnecting(false);
@@ -101,12 +113,10 @@ class ChargingPageController extends GetxController {
         isReconnecting(true);
       }
 
-      // Set up stream listener
       _webSocketService!.stream.listen(
-            (dynamic message) {
+        (dynamic message) {
           debugPrint('WebSocket message received in controller');
           handleWebSocketMessage(message);
-          // Confirm connection is working when we receive messages
           isWebSocketConnected(true);
           isReconnecting(false);
         },
@@ -115,29 +125,26 @@ class ChargingPageController extends GetxController {
           webSocketError.value = error.toString();
           isWebSocketConnected(false);
           isReconnecting(true);
-
-          // Schedule reconnection attempt
           _scheduleReconnection();
         },
         onDone: () {
           debugPrint('WebSocket connection closed in controller');
           isWebSocketConnected(false);
           isReconnecting(true);
-
-          // Schedule reconnection attempt
           _scheduleReconnection();
         },
       );
 
-      // Periodically check if the connection is still active
       Timer.periodic(Duration(seconds: 30), (timer) {
         if (!isPageActive.value) {
           timer.cancel();
           return;
         }
 
-        if (_webSocketService != null && !_webSocketService!.isConnectionActive()) {
-          debugPrint('Periodic check: WebSocket connection is not active, reconnecting...');
+        if (_webSocketService != null &&
+            !_webSocketService!.isConnectionActive()) {
+          debugPrint(
+              'Periodic check: WebSocket connection is not active, reconnecting...');
           isWebSocketConnected(false);
           isReconnecting(true);
           _scheduleReconnection();
@@ -148,8 +155,6 @@ class ChargingPageController extends GetxController {
       webSocketError.value = e.toString();
       isWebSocketConnected(false);
       isReconnecting(true);
-
-      // Schedule reconnection attempt
       _scheduleReconnection();
     }
   }
@@ -167,7 +172,6 @@ class ChargingPageController extends GetxController {
 
   void disconnectWebSocket() {
     debugPrint('Disconnecting all WebSocket connections...');
-    // Close all WebSocket connections in the list
     for (var wsService in _openWebSocketServices) {
       try {
         wsService.disconnect();
@@ -176,9 +180,9 @@ class ChargingPageController extends GetxController {
         debugPrint('Error disconnecting WebSocket: $e');
       }
     }
-    // Clear the list of open connections
     _openWebSocketServices.clear();
-    debugPrint('All WebSocket connections closed. Total open connections: ${_openWebSocketServices.length}');
+    debugPrint(
+        'All WebSocket connections closed. Total open connections: ${_openWebSocketServices.length}');
 
     _webSocketService = null;
     isWebSocketConnected(false);
@@ -190,10 +194,10 @@ class ChargingPageController extends GetxController {
       final Map<String, dynamic> data = jsonDecode(message);
       debugPrint('WebSocket message received: $data');
 
-      // First check if this message is for our charger
       final messageChargerId = data['DeviceID']?.toString();
       if (messageChargerId != null && messageChargerId != chargerId) {
-        debugPrint('Ignoring message for chargerId: $messageChargerId (current chargerId: $chargerId)');
+        debugPrint(
+            'Ignoring message for chargerId: $messageChargerId (current chargerId: $chargerId)');
         return;
       }
 
@@ -208,19 +212,18 @@ class ChargingPageController extends GetxController {
           final messageType = messageArray[2];
           final messageData = messageArray[3] as Map<String, dynamic>;
 
-          // For connector-specific messages, check if it's for our connector
           if (messageData.containsKey('connectorId')) {
             final int msgConnectorId = messageData['connectorId'] is String
                 ? int.tryParse(messageData['connectorId']) ?? 0
                 : messageData['connectorId'] ?? 0;
 
             if (msgConnectorId != connectorId) {
-              debugPrint('Ignoring message for connector: $msgConnectorId (current connector: $connectorId)');
+              debugPrint(
+                  'Ignoring message for connector: $msgConnectorId (current connector: $connectorId)');
               return;
             }
           }
 
-          // Process the message only if it's for our charger and connector
           if (messageType == 'StatusNotification') {
             handleStatusNotification(deviceId, messageData);
           } else if (messageType == 'Heartbeat') {
@@ -235,7 +238,8 @@ class ChargingPageController extends GetxController {
             handleStopTransaction(messageData);
           } else if (messageType == 'ChargerLivePrice') {
             final priceData = messageArray[3];
-            livePrice.value = (priceData['livePrice'] as num?)?.toDouble() ?? 0.0;
+            livePrice.value =
+                (priceData['livePrice'] as num?)?.toDouble() ?? 0.0;
           }
         }
       }
@@ -244,40 +248,57 @@ class ChargingPageController extends GetxController {
     }
   }
 
-  void handleStatusNotification(String deviceId, Map<String, dynamic> messageData) {
+  void handleStatusNotification(
+      String deviceId, Map<String, dynamic> messageData) {
     final int notificationConnectorId = messageData['connectorId'] is String
         ? int.tryParse(messageData['connectorId']) ?? 0
         : messageData['connectorId'] ?? 0;
 
     if (notificationConnectorId == connectorId) {
-      debugPrint('Processing status notification for our connector: $messageData');
+      debugPrint(
+          'Processing status notification for our connector: $messageData');
 
       final currentData = chargingData.value;
       if (currentData != null) {
         final newStatus = mapOcppStatusToChargerStatus(messageData['status']);
+
+        // Parse timestamp from message data
+        final DateTime timestamp = DateTime.parse(messageData['timestamp']);
+
+        // Format timestamp for display
+        final formattedTime =
+            '${timestamp.day.toString().padLeft(2, '0')}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.year} ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}:${timestamp.second.toString().padLeft(2, '0')}';
+
         final updatedData = currentData.copyWith(
           chargerStatus: newStatus,
-          timestamp: DateTime.parse(messageData['timestamp']),
+          timestamp: timestamp,
+          timestampIST: formattedTime,
           errorCode: messageData['errorCode'] ?? currentData.errorCode,
         );
 
         chargingData.value = updatedData;
 
-        // Stop showing loading once we receive a new status
+        // Force UI update
+        update();
+
         if (isWaitingForStatusUpdate.value) {
-          debugPrint('Received status update ($newStatus), stopping loading indicator');
+          debugPrint(
+              'Received status update ($newStatus), stopping loading indicator');
           isWaitingForStatusUpdate.value = false;
           _cancelStatusUpdateTimeout();
         }
 
-        // Handle different status conditions
         if (newStatus == 'Finishing') {
-          debugPrint('Charger is finishing, preparing for bill generation');
+          debugPrint('Charger is finishing, generating bill');
+          generateBillOnFinish();
         } else if (newStatus == 'Faulted') {
           if (energy.value != null && energy.value! > 0) {
-            debugPrint('Charger faulted during active charging, will generate bill');
+            debugPrint(
+                'Charger faulted during active charging (energy: ${energy.value}), generating bill');
+            generateBillOnFinish();
           } else {
-            debugPrint('Charger faulted before charging started, no bill needed');
+            debugPrint(
+                'Charger faulted before charging started (energy: ${energy.value}), no bill needed');
           }
         } else if (newStatus != 'Charging') {
           clearMetrics();
@@ -286,11 +307,91 @@ class ChargingPageController extends GetxController {
     }
   }
 
+  Future<void> generateBillOnFinish() async {
+    try {
+      // Wait for 2 seconds after "Finishing" or "Faulted" status
+      await Future.delayed(const Duration(seconds: 2));
+
+      // Show loading dialog for exactly 2 seconds
+      Get.dialog(
+        const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Generating Charging Bill...'),
+            ],
+          ),
+        ),
+        barrierDismissible: false,
+      );
+
+      isLoading.value = true;
+
+      // Ensure the loading dialog is visible for at least 2 seconds
+      final billGenerationFuture = _repo.generatechargingbill(
+        sessionController.userId.value,
+        sessionController.emailId.value,
+        sessionController.token.value,
+        connectorId,
+        chargerId,
+        connectorType,
+      );
+
+      await Future.wait([
+        billGenerationFuture,
+        Future.delayed(const Duration(seconds: 2)),
+      ]);
+
+      final response = await billGenerationFuture;
+
+      // Close the loading dialog
+      Get.back();
+
+      if (response.error) {
+        throw response.message;
+      }
+
+      if (response.chargingSession == null) {
+        throw 'Charging session data is missing in the response';
+      }
+
+      // Prepare session data for SessionBill
+      Map<String, dynamic> sessionData = response.chargingSession!.toJson();
+      sessionData['user'] = response.user?.username ?? 'Unknown';
+      sessionData['Error'] = sessionData['error_code'];
+
+      // Navigate to SessionBill with right-to-left transition
+      // Using Get.off to prevent going back to charging page
+      Future.delayed(const Duration(seconds: 1), () {
+        isPageActive.value = false;
+        disconnectWebSocket();
+        Get.off(
+          () => SessionBill(sessionData),
+          transition: Transition.rightToLeft,
+          duration: const Duration(milliseconds: 300),
+        );
+      });
+    } catch (e) {
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+      debugPrint('Failed to generate bill: $e');
+      CustomSnackbar.showError(message: 'Failed to generate charging bill: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   void handleMeterValues(Map<String, dynamic> messageData) {
     try {
       final meterValues = messageData['meterValue'] as List?;
       if (meterValues != null && meterValues.isNotEmpty) {
         final sampledValues = meterValues.first['sampledValue'] as List;
+
+        // Update timestamp when receiving meter values
+        updateTimestamp();
 
         for (final value in sampledValues) {
           final val = double.tryParse(value['value']?.toString() ?? '0');
@@ -315,6 +416,9 @@ class ChargingPageController extends GetxController {
               break;
           }
         }
+
+        // Force UI update
+        update();
       }
     } catch (e) {
       debugPrint('Error parsing meter values: $e');
@@ -340,7 +444,8 @@ class ChargingPageController extends GetxController {
     powerFactor.value = null;
   }
 
-  void handleForceDisconnect(String deviceId, Map<String, dynamic> messageData) {
+  void handleForceDisconnect(
+      String deviceId, Map<String, dynamic> messageData) {
     final int notificationConnectorId = messageData['connectorId'] is String
         ? int.tryParse(messageData['connectorId']) ?? 0
         : messageData['connectorId'] ?? 0;
@@ -361,8 +466,12 @@ class ChargingPageController extends GetxController {
       Future.delayed(const Duration(seconds: 4), () {
         isPageActive.value = false;
         disconnectWebSocket();
-        Get.off(() => LandingPage());
-        Get.delete<ChargingPageController>();
+        // Use Get.offAll to clear the navigation stack and prevent going back to charging page
+        Get.offAll(
+          () => LandingPage(),
+          transition: Transition.rightToLeft,
+          duration: const Duration(milliseconds: 300),
+        );
       });
     }
   }
@@ -394,9 +503,17 @@ class ChargingPageController extends GetxController {
   void updateTimestamp() {
     final currentData = chargingData.value;
     if (currentData != null) {
+      final now = DateTime.now();
+      final formattedTime =
+          '${now.day.toString().padLeft(2, '0')}-${now.month.toString().padLeft(2, '0')}-${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+
       chargingData.value = currentData.copyWith(
-        timestamp: DateTime.now(),
+        timestamp: now,
+        timestampIST: formattedTime,
       );
+
+      // Force UI update
+      update();
     }
   }
 
@@ -437,11 +554,13 @@ class ChargingPageController extends GetxController {
 
       final currentStatus = chargingData.value?.chargerStatus;
       final shouldGenerateBill = currentStatus == 'Finishing' ||
-          (currentStatus == 'Faulted' && energy.value != null && energy.value! > 0);
+          (currentStatus == 'Faulted' &&
+              energy.value != null &&
+              energy.value! > 0);
 
-      debugPrint('Ending charging session. Status: $currentStatus, Generate bill: $shouldGenerateBill');
+      debugPrint(
+          'Ending charging session. Status: $currentStatus, Generate bill: $shouldGenerateBill');
 
-      // Close all WebSocket connections
       isPageActive(false);
       disconnectWebSocket();
 
@@ -453,7 +572,12 @@ class ChargingPageController extends GetxController {
         chargerId,
       );
 
-      Get.off(() => LandingPage());
+      // Use Get.offAll to clear the navigation stack and prevent going back to charging page
+      Get.offAll(
+        () => LandingPage(),
+        transition: Transition.rightToLeft,
+        duration: const Duration(milliseconds: 300),
+      );
     } catch (e) {
       CustomSnackbar.showError(message: 'Failed to end charging session: $e');
       rethrow;
@@ -494,7 +618,9 @@ class ChargingPageController extends GetxController {
       );
 
       if (startedAtResponse.error) {
-        CustomSnackbar.showError(message: 'Failed to fetch start time: ${startedAtResponse.message}');
+        CustomSnackbar.showError(
+            message:
+                'Failed to fetch start time: ${startedAtResponse.message}');
       } else {
         try {
           if (startedAtResponse.data != null) {
@@ -565,13 +691,12 @@ class ChargingPageController extends GetxController {
       final userId = sessionController.userId.value;
       final emailId = sessionController.emailId.value;
 
-      debugPrint(
-          'updateUserTimeVal: ${settings['autostop_time']}, '
-              'updateUserUnitVal: ${settings['autostop_unit']}, '
-              'updateUserPriceVal: ${settings['autostop_price']}, '
-              'updateUserTime_isChecked: ${settings['autostop_time_is_checked']}, '
-              'updateUserUnit_isChecked: ${settings['autostop_unit_is_checked']}, '
-              'updateUserPrice_isChecked: ${settings['autostop_price_is_checked']}');
+      debugPrint('updateUserTimeVal: ${settings['autostop_time']}, '
+          'updateUserUnitVal: ${settings['autostop_unit']}, '
+          'updateUserPriceVal: ${settings['autostop_price']}, '
+          'updateUserTime_isChecked: ${settings['autostop_time_is_checked']}, '
+          'updateUserUnit_isChecked: ${settings['autostop_unit_is_checked']}, '
+          'updateUserPrice_isChecked: ${settings['autostop_price_is_checked']}');
 
       await _repo.updateAutoStopSettings(
         user_id: userId,
@@ -582,7 +707,8 @@ class ChargingPageController extends GetxController {
         updateUserPriceVal: settings['autostop_price'] as double?,
         updateUserTime_isChecked: settings['autostop_time_is_checked'] as bool,
         updateUserUnit_isChecked: settings['autostop_unit_is_checked'] as bool,
-        updateUserPrice_isChecked: settings['autostop_price_is_checked'] as bool,
+        updateUserPrice_isChecked:
+            settings['autostop_price_is_checked'] as bool,
       );
 
       await fetchLastStatusData();
@@ -607,7 +733,8 @@ class ChargingPageController extends GetxController {
       if (isWaitingForStatusUpdate.value) {
         debugPrint('Timeout waiting for status update, stopping loading');
         isWaitingForStatusUpdate.value = false;
-        CustomSnackbar.showError(message: 'Timed out waiting for charger status update');
+        CustomSnackbar.showError(
+            message: 'Timed out waiting for charger status update');
       }
     });
   }

@@ -247,4 +247,38 @@ class Chargingpageapicalls {
     }
   }
 
+  Future<Map<String, dynamic>> generatechargingbill(int user_id, String email,
+      String authToken, int connector_id, String charger_id,int connector_type) async {
+    final url = Chargingpageurl.forgeneratingchargingbill;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+          'connector_id': connector_id,
+          'charger_id': charger_id,
+          'connector_type':connector_type
+        }),
+      );
+      final data = jsonDecode(response.body);
+      debugPrint('fetching generate charging bill  body : $data');
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
+
 }

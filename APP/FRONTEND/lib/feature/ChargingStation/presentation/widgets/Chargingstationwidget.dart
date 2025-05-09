@@ -451,7 +451,7 @@ class ChargerCard extends StatelessWidget {
                           Text(
                             price,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.primaryColor,
+                              color: Colors.orange,
                               fontSize: width * 0.028,
                             ),
                           ),
