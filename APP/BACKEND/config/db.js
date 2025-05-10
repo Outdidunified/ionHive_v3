@@ -22,4 +22,35 @@ async function connectToDatabase() {
     return client.db(dbName);
 }
 
-module.exports = { connectToDatabase };
+/**
+ * Close the database connection
+ * @returns {Promise<boolean>} - Whether the connection was closed successfully
+ */
+async function closeConnection() {
+    try {
+        if (client) {
+            await client.close();
+            logger.loggerInfo('Database connection closed successfully');
+            client = null; // Reset the client
+            return true;
+        }
+        return false;
+    } catch (error) {
+        logger.loggerError(`Error closing database connection: ${error.message}`);
+        return false;
+    }
+}
+
+/**
+ * Get the MongoDB client instance
+ * @returns {MongoClient|null} - The MongoDB client or null if not connected
+ */
+function getClient() {
+    return client;
+}
+
+module.exports = {
+    connectToDatabase,
+    closeConnection,
+    getClient
+};

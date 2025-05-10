@@ -34,11 +34,20 @@ class ChargingStationController extends GetxController {
     super.onInit();
     debugPrint('Controller initialized');
     expandedConnectorIndices = {};
+
+    // Initialize charger details as empty to prevent null issues
+    chargerDetails.value = [];
+
+    // Listen for changes to charger details
     ever(chargerDetails, (_) {
       expandedConnectorIndices = {};
       update(['connectors', 'viewMoreButton']);
     });
-    _fetchInitialSavedDevices();
+
+    // Fetch saved devices in a safe way
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchInitialSavedDevices();
+    });
   }
 
   Future<void> _fetchInitialSavedDevices() async {
@@ -51,7 +60,7 @@ class ChargingStationController extends GetxController {
     update();
   }
 
-  void setStation(Map<String, dynamic> stationData) {
+  Future<void> setStation(Map<String, dynamic> stationData) async {
     debugPrint('Setting station: $stationData');
     station = stationData;
     final stationId = station?['station_id'];
@@ -59,23 +68,32 @@ class ChargingStationController extends GetxController {
     if (stationId != null) {
       setInitialSavedState(stationId, isSaved);
     }
-    if (station != null &&
-        station!['station_id'] != null &&
-        station!['location_id'] != null) {
-      final authToken = sessionController.token.value;
-      final userId = sessionController.userId.value;
-      final emailId = sessionController.emailId.value;
-      fetchspecificchargers(
-        userId,
-        emailId,
-        authToken,
-        station!['station_id'],
-        station!['location_id'].toString(),
-      ).then((_) {
+
+    // Ensure we're not in the build phase when making API calls
+    try {
+      if (station != null &&
+          station!['station_id'] != null &&
+          station!['location_id'] != null) {
+        final authToken = sessionController.token.value;
+        final userId = sessionController.userId.value;
+        final emailId = sessionController.emailId.value;
+
+        // Use a slight delay to ensure we're not in the build phase
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        await fetchspecificchargers(
+          userId,
+          emailId,
+          authToken,
+          station!['station_id'],
+          station!['location_id'].toString(),
+        );
+        debugPrint('Charger details retrieved successfully.');
         debugPrint('Charger details fetched: $chargerDetails');
-      }).catchError((e) {
-        debugPrint('Error fetching charger details: $e');
-      });
+      }
+    } catch (e) {
+      debugPrint('Error fetching charger details: $e');
+      // Don't rethrow here to prevent UI crashes
     }
   }
 
@@ -167,10 +185,15 @@ $mapUrl
 
   Future<void> fetchspecificchargers(int userId, String emailId,
       String authToken, int stationId, String locationId) async {
+    // Set loading state
     isLoading.value = true;
     debugPrint(
         'Calling fetchspecificchargers with stationId: $stationId, locationId: $locationId');
+
     try {
+      // Ensure we're not in the build phase
+      await Future.microtask(() {});
+
       final response = await _chargingStationsRepo.FetchspecificChargers(
         userId,
         emailId,
@@ -178,30 +201,47 @@ $mapUrl
         stationId,
         locationId,
       );
-      await Future.delayed(const Duration(seconds: 2));
-      // Initialize selectedConnectorIndex for each charger
-      final updatedChargerDetails = response.specificchargers.map((charger) {
-        if (charger is Map<String, dynamic> &&
-            !charger.containsKey('selectedConnectorIndex')) {
-          charger['selectedConnectorIndex'] = -1;
-        }
-        return charger;
-      }).toList();
-      chargerDetails.value =
-          updatedChargerDetails; // Assign new list to trigger reactivity
-      selectedConnectorIndex.value = -1; // Reset global selection
-      CustomSnackbar.showSuccess(
-        message: response.message,
-      );
+
+      // Reduce the delay to improve user experience
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Process the response safely
+      if (response.specificchargers != null) {
+        // Initialize selectedConnectorIndex for each charger
+        final updatedChargerDetails = response.specificchargers.map((charger) {
+          if (charger is Map<String, dynamic> &&
+              !charger.containsKey('selectedConnectorIndex')) {
+            charger['selectedConnectorIndex'] = -1;
+          }
+          return charger;
+        }).toList();
+
+        // Update the charger details safely
+        await Future.microtask(() {
+          chargerDetails.value = updatedChargerDetails;
+          selectedConnectorIndex.value = -1; // Reset global selection
+        });
+
+        debugPrint(response.message);
+      } else {
+        debugPrint('No charger details returned from API');
+        chargerDetails.value = [];
+      }
     } catch (e) {
-      CustomSnackbar.showError(
-        message: e.toString().contains("Exception:")
-            ? e.toString().split("Exception:")[1].trim()
-            : "Failed to fetch charger details",
-      );
-      rethrow;
+      debugPrint('Error in fetchspecificchargers: $e');
+      // Show error message but don't rethrow to prevent UI crashes
+      await Future.microtask(() {
+        CustomSnackbar.showError(
+          message: e.toString().contains("Exception:")
+              ? e.toString().split("Exception:")[1].trim()
+              : "Failed to fetch charger details",
+        );
+      });
     } finally {
-      isLoading.value = false;
+      // Ensure loading state is updated safely
+      await Future.microtask(() {
+        isLoading.value = false;
+      });
     }
   }
 
@@ -339,4 +379,6 @@ $mapUrl
         ['selectedConnectorIndex']; // Update global state
     update(['connectors']); // Ensure UI updates
   }
+
+
 }

@@ -1,5 +1,7 @@
 const db_conn = require('../config/db');
 const logger = require('../utils/logger');
+const dbService = require('../Websocket/services/dbService');
+
 let db;
 const initializeDB = async () => {
     if (!db) {
@@ -119,7 +121,7 @@ const fetchSavedSearchFilter = async (req, res) => {
         const usersCollection = db.collection('users');
         const chargerDetailsCollection = db.collection('charger_details');
         const chargerStatusCollection = db.collection('charger_status');
-        const financeDetailsCollection = db.collection('finance_details');
+        const financeDetailsCollection = db.collection('financeDetails');
 
         // Find user and retrieve favorite chargers
         const user = await usersCollection.findOne(
@@ -157,17 +159,9 @@ const fetchSavedSearchFilter = async (req, res) => {
                 const financeRecord = await financeDetailsCollection.findOne({ finance_id: charger.finance_id });
 
                 if (financeRecord) {
-                    const totalPercentage = [
-                        financeRecord.app_charges,
-                        financeRecord.other_charges,
-                        financeRecord.parking_charges,
-                        financeRecord.rent_charges,
-                        financeRecord.open_a_eb_charges,
-                        financeRecord.open_other_charges
-                    ].reduce((sum, charge) => sum + parseFloat(charge || 0), 0);
+                    const pricePerUnit = await dbService.getPricePerUnit(chargerId);
 
-                    const pricePerUnit = parseFloat(financeRecord.eb_charges || 0);
-                    unitPrice = (pricePerUnit + (pricePerUnit * totalPercentage / 100)).toFixed(2);
+                    unitPrice = pricePerUnit;
                 }
             }
 
@@ -434,29 +428,9 @@ const fetchActiveChargersOfUser = async (req, res) => {
                 if (financeId) {
                     const financeRecord = await financeDetailsCollection.findOne({ finance_id: financeId });
                     if (financeRecord) {
-                        const EB_fee = parseFloat(financeRecord.eb_charge) + parseFloat(financeRecord.margin);
-
-                        // List of additional charges (excluding GST)
-                        const additionalCharges = [
-                            parseFloat(financeRecord.parking_fee),     // Parking fee
-                            parseFloat(financeRecord.convenience_fee), // Convenience fee
-                            parseFloat(financeRecord.station_fee),     // Station fee
-                            parseFloat(financeRecord.processing_fee),  // Processing fee
-                            parseFloat(financeRecord.service_fee)      // Service fee
-                        ];
-
-                        // Calculate total additional charges (sum of all charges except GST)
-                        const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + (charge || 0), 0);
-
-                        // Calculate the base price (including additional charges per unit)
-                        const TotalEBPrice = (EB_fee + totalAdditionalCharges);
-
-                        // Apply GST on the total amount
-                        const gstPercentage = financeRecord.gst;
-                        const gstAmount = (TotalEBPrice * gstPercentage) / 100;
-
+                        const pricePerUnit = await dbService.getPricePerUnit(chargerId);
                         // Final price after adding GST
-                        unitPrice = TotalEBPrice + gstAmount;
+                        unitPrice = pricePerUnit;
                     }
                 }
 

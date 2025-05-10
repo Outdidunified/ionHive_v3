@@ -1,13 +1,15 @@
 const dbService = require("../services/dbService");
 const logger = require('../../utils/logger');
 const { framevalidation } = require("../validation/framevalidation");
-// const { broadcastMessage } = require("../WebsocketHandler");
+const { sendForceDisconnect } = require("../utils/broadcastUtils");
+const clientConnectionUtils = require("../utils/clientConnectionUtils");
+const timeUtils = require('../../utils/timeUtils');
 
 const validateStatusnotification = (data) => {
     return framevalidation(data, "StatusNotification.json");
 };
 
-function generateRandomTransactionId() {
+function generateRandomSessionId() {
     return Math.floor(1000000 + Math.random() * 9000000); // Generates a random number between 1000000 and 9999999
 }
 
@@ -26,11 +28,12 @@ const handleStatusNotification = async (
     ws,
     ClientWss
 ) => {
-    const formattedDate = new Date().toISOString();
+    const formattedDate = timeUtils.getCurrentIST();
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId, {}];
     let timeoutId;
     let db;
+    let GenerateChargingSessionID;
 
     try {
         db = await dbService.connectToDatabase();
@@ -85,7 +88,66 @@ const handleStatusNotification = async (
 
         await dbService.SaveChargerStatus(JSON.stringify(keyValPair), connectorId);
 
+        // Also update error code in device_session_details if it exists
+        try {
+            const db = await dbService.connectToDatabase();
+            const key = `${uniqueIdentifier}_${connectorId}`;
+            const sessionId = chargingSessionID ? chargingSessionID.get(key) : null;
+
+            if (sessionId) {
+                const DeviceSessionDetailsCollection = db.collection('device_session_details');
+                const updateResult = await DeviceSessionDetailsCollection.updateOne(
+                    {
+                        charger_id: uniqueIdentifier,
+                        connector_id: parseInt(connectorId),
+                        session_id: sessionId
+                    },
+                    {
+                        $set: {
+                            error_code: errorCode !== "InternalError" ? errorCode : (vendorErrorCode || "InternalError"),
+                            vendor_error_code: vendorErrorCode || null,
+                            status: status
+                        }
+
+                    }
+                );
+
+                if (updateResult.modifiedCount > 0) {
+                    logger.loggerSuccess(`Updated error code in device_session_details for session ID: ${sessionId}`);
+                } else if (updateResult.matchedCount > 0) {
+                    logger.loggerInfo(`No changes needed for error code in device_session_details for session ID: ${sessionId}`);
+                } else {
+                    logger.loggerWarn(`No matching session found to update error code for session ID: ${sessionId}`);
+                }
+            }
+        } catch (error) {
+            logger.loggerError(`Error updating error code in device_session_details: ${error.message}`);
+        }
+
         let chargerErrorCode = errorCode === "NoError" ? errorCode : vendorErrorCode || errorCode;
+
+        // Broadcast status change to specific clients subscribed to this charger and connector
+        try {
+            // Create a status update message
+            const statusUpdate = {
+                type: "statusUpdate",
+                status: status,
+                errorCode: chargerErrorCode,
+                timestamp: formattedDate,
+                connectorId: connectorId,
+                info: {
+                    chargerModel: requestPayload.info || null,
+                    vendorId: requestPayload.vendorId || null,
+                    vendorErrorCode: vendorErrorCode || null
+                }
+            };
+
+            // Broadcast to specific clients subscribed to this charger and connector
+            logger.loggerInfo(`Broadcasting status update for charger ${uniqueIdentifier}, connector ${connectorId}: ${status}`);
+            clientConnectionUtils.broadcastToSubscribedClients(uniqueIdentifier, connectorId, statusUpdate, ClientWss, ws);
+        } catch (broadcastError) {
+            logger.loggerError(`Error broadcasting status update: ${broadcastError.message}`);
+        }
 
         if (status === "Available") {
             if (timeoutId) {
@@ -94,15 +156,9 @@ const handleStatusNotification = async (
             timeoutId = setTimeout(async () => {
                 const result = await dbService.updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
                 // if (result) {
-                //     // Custom frame to broadcast when update is successful
-                //     const customFrame = {
-                //         type: "forceDisconnect",
-                //         connectorId: connectorId,
-                //         message: "Session cleared. Please return to home screen."
-                //     };
-
-                //     broadcastMessage(uniqueIdentifier, customFrame, ws, ClientWss);
-                //     logger.loggerInfo(`Broadcasted disconnect message for charger ${uniqueIdentifier}, connector ${connectorId}`);
+                //     // Send force disconnect message using our utility function
+                //     sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
+                //         "No action attempted. Automatically redirecting to home page.");
                 // }
 
                 logger.loggerInfo(`ChargerID ${uniqueIdentifier} - End charging session ${result ? "updated" : "not updated"}`);
@@ -110,6 +166,12 @@ const handleStatusNotification = async (
 
             await dbService.deleteMeterValues(key, meterValuesMap);
             await dbService.NullTagIDInStatus(uniqueIdentifier, connectorId);
+        } else {
+            if (timeoutId !== undefined) {
+                clearTimeout(timeoutId);
+                timeoutId = undefined; // Reset the timeout reference
+            }
+
         }
 
         if (status === "Preparing") {
@@ -125,7 +187,14 @@ const handleStatusNotification = async (
             charging_states.set(key, true);
             chargerStartTime.set(key, timestamp);
             startedChargingSet.add(key);
-            chargingSessionID.set(key, generateRandomTransactionId());
+            // Only set a new session ID if one doesn't already exist
+            if (!chargingSessionID.has(key)) {
+                const GenerateChargingSessionID = Math.floor(1000000 + Math.random() * 9000000); // 7-digit session ID
+                chargingSessionID.set(key, GenerateChargingSessionID);
+                logger.loggerInfo(`Generated new session ID ${GenerateChargingSessionID} for ${key} in StatusNotification`);
+            } else {
+                logger.loggerInfo(`Using existing session ID ${chargingSessionID.get(key)} for ${key} in StatusNotification`);
+            }
         }
 
         if (["SuspendedEV", "Faulted", "Unavailable"].includes(status) && charging_states.get(key)) {

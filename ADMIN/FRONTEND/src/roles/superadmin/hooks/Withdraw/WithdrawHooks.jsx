@@ -42,7 +42,9 @@ const useWithdrawRequests = (userInfo) => {
 
   
 
-const handleStatusChange = async (withdrawalId, newStatus, rejectionReason, userInfo, withdrawalRequests, setWithdrawalRequests, setSelectedStatus) => {
+const handleStatusChange = async (withdrawalId, newStatus, rejectionReason) => {
+    console.log(userInfo); // Check if userInfo has the expected structure
+
     if (!userInfo?.email_id) {
         showErrorAlert('Error', 'Admin email not found.');
         return;

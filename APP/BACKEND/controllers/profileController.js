@@ -3,6 +3,8 @@ const emailer = require('../middlewares/emailer');
 const logger = require('../utils/logger');
 const natural = require("natural"); // Optional NLP support
 const tokenizer = new natural.WordTokenizer();
+const dbService = require('../Websocket/services/dbService');
+
 let db;
 
 const initializeDB = async () => {
@@ -382,7 +384,7 @@ const fetchSavedDevices = async (req, res) => {
         const usersCollection = db.collection('users');
         const chargerDetailsCollection = db.collection('charger_details');
         const chargerStatusCollection = db.collection('charger_status');
-        const financeDetailsCollection = db.collection('finance_details');
+        const financeDetailsCollection = db.collection('financeDetails');
         const socketGunConfigCollection = db.collection('socket_gun_config');
 
         // Find user and retrieve favorite chargers
@@ -448,17 +450,9 @@ const fetchSavedDevices = async (req, res) => {
                 const financeRecord = await financeDetailsCollection.findOne({ finance_id: charger.finance_id });
 
                 if (financeRecord) {
-                    const totalPercentage = [
-                        financeRecord.app_charges,
-                        financeRecord.other_charges,
-                        financeRecord.parking_charges,
-                        financeRecord.rent_charges,
-                        financeRecord.open_a_eb_charges,
-                        financeRecord.open_other_charges
-                    ].reduce((sum, charge) => sum + parseFloat(charge || 0), 0);
-
-                    const pricePerUnit = parseFloat(financeRecord.eb_charges || 0);
-                    unitPrice = (pricePerUnit + (pricePerUnit * totalPercentage / 100)).toFixed(2);
+                    const pricePerUnit = await dbService.getPricePerUnit(chargerId);
+                    // Final price after adding GST
+                    unitPrice = pricePerUnit;
                 }
             }
 
@@ -1018,7 +1012,7 @@ const fetchFAQsFromDB = async (category, keywords) => {
         const faqs = await faqsCollection.find(query).toArray();
         return faqs;
     } catch (error) {
-        console.error("Error fetching FAQs from DB:", error);
+        logger.loggerError("Error fetching FAQs from DB:", error);
         throw new Error("Failed to fetch FAQs");
     }
 };
@@ -1083,7 +1077,7 @@ const chatbotResponse = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error in chatbot response:", error.message);
+        logger.loggerError("Error in chatbot response:", error.message);
         return res.status(500).json({
             error: true,
             message: "Internal Server Error",

@@ -3,6 +3,7 @@ import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/Chargingpage/presentation/pages/Chargingpage.dart';
 import 'package:ionhive/feature/home/presentation/pages/qrscanner/domain/repository/qrrepository.dart';
 import 'package:ionhive/feature/home/presentation/pages/qrscanner/domain/model/qrmodel.dart';
+import 'package:ionhive/feature/landing_page.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -175,7 +176,12 @@ class SearchpageController extends GetxController {
                       color: isDarkTheme ? Colors.white70 : Colors.black38),
                   onPressed: () {
                     clearSearchQuery();
-                    Get.offNamed('/landing', arguments: {'pageIndex': 0});
+
+                    Get.offAll(
+                      () => LandingPage(),
+                      transition: Transition.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    );
                   },
                 ),
               ],
@@ -540,10 +546,10 @@ class SearchpageController extends GetxController {
       if (!response.error) {
         debugPrint("Unit Price: ${response.unitPrice}");
 
-        CustomSnackbar.showSuccess(
-          message: 'Charging started with Connector $connectorId',
-          duration: const Duration(seconds: 3),
-        );
+        // CustomSnackbar.showSuccess(
+        //   message: 'Charging started with Connector $connectorId',
+        //   duration: const Duration(seconds: 3),
+        // );
 
         await Future.delayed(const Duration(seconds: 3));
         Get.back();

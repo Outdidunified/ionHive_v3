@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/feature/home/presentation/pages/search/presentation/controllers/search_controllers.dart';
@@ -26,15 +28,17 @@ class SavedDevicepage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bool isDarkTheme = theme.brightness == Brightness.dark;
-    final SavedDeviceControllers savedController =
-    Get.put(SavedDeviceControllers());
-    final ChargingStationController chargingController =
-    Get.put(ChargingStationController());
-    final SearchpageController searchpageController =
-    Get.find<SearchpageController>();
+    final SavedDeviceControllers savedController = Get.put(SavedDeviceControllers());
+    final ChargingStationController chargingController = Get.put(ChargingStationController());
+    final searchpageController = Get.find<SearchpageController>();
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    // Call fetchSavedDevices every time the page is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      savedController.fetchSavedDevices();
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -90,9 +94,7 @@ class SavedDevicepage extends StatelessWidget {
                             "Couldn't reach server",
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontSize: 12,
-                              color: isDarkTheme
-                                  ? Colors.white70
-                                  : Colors.grey[700],
+                              color: isDarkTheme ? Colors.white70 : Colors.grey[700],
                             ),
                           ),
                         ],
@@ -113,8 +115,7 @@ class SavedDevicepage extends StatelessWidget {
                           return Icon(
                             Icons.devices_other,
                             size: 60,
-                            color:
-                            isDarkTheme ? Colors.white70 : Colors.grey[600],
+                            color: isDarkTheme ? Colors.white70 : Colors.grey[600],
                           );
                         },
                       ),
@@ -133,8 +134,7 @@ class SavedDevicepage extends StatelessWidget {
                         child: Text(
                           'You haven’t saved any devices yet. Start exploring devices and save your favorites to access them quickly!',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color:
-                            isDarkTheme ? Colors.white70 : Colors.grey[600],
+                            color: isDarkTheme ? Colors.white70 : Colors.grey[600],
                             fontSize: 14,
                           ),
                           textAlign: TextAlign.center,
@@ -143,13 +143,12 @@ class SavedDevicepage extends StatelessWidget {
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          Get.to(
+                          Get.offAll(
                                 () => LandingPage(),
                             transition: Transition.rightToLeft,
                             duration: const Duration(milliseconds: 300),
                           );
-                          final LandingPageController landingController =
-                          Get.find<LandingPageController>();
+                          final LandingPageController landingController = Get.find<LandingPageController>();
                           landingController.clearPageIndex();
                         },
                         style: ElevatedButton.styleFrom(
@@ -199,12 +198,36 @@ class SavedDevicepage extends StatelessWidget {
           Obx(() {
             if (savedController.selectedConnector['connectorIndex'] != -1) {
               final chargerId = savedController.selectedConnector['chargerId'];
-              final selectedDevice = savedController.savedDevices.firstWhere(
+
+              // Safely find the selected device
+              final selectedDeviceIndex = savedController.savedDevices.indexWhere(
                       (device) => device['charger_id'].toString() == chargerId);
-              final connectorIndex =
-              savedController.selectedConnector['connectorIndex'];
-              final connector = (selectedDevice['connectors']
-              as List<dynamic>)[connectorIndex];
+
+              // Check if device exists
+              if (selectedDeviceIndex == -1 || savedController.savedDevices.isEmpty) {
+                // Reset the selected connector if the device no longer exists
+                savedController.selectedConnector.value = {
+                  'chargerId': '',
+                  'connectorIndex': -1,
+                };
+                return const SizedBox.shrink();
+              }
+
+              final selectedDevice = savedController.savedDevices[selectedDeviceIndex];
+              final connectorIndex = savedController.selectedConnector['connectorIndex'];
+
+              // Safely access connectors
+              final connectors = selectedDevice['connectors'] as List<dynamic>? ?? [];
+              if (connectorIndex < 0 || connectorIndex >= connectors.length) {
+                // Reset the selected connector if the connector index is invalid
+                savedController.selectedConnector.value = {
+                  'chargerId': '',
+                  'connectorIndex': -1,
+                };
+                return const SizedBox.shrink();
+              }
+
+              final connector = connectors[connectorIndex];
 
               return Positioned(
                 left: 0,
@@ -224,51 +247,40 @@ class SavedDevicepage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: searchpageController.isLoading.value
-                          ? null
-                          : () {
-                        // Make sure you have valid data before calling the controller method
-                        if (selectedDevice != null && connector != null) {
+                    child: Obx(() {
+                      final isLoading = searchpageController.isLoading.value;
+                      return ElevatedButton(
+                        onPressed: isLoading
+                            ? null // Disable the button while loading
+                            : () {
                           searchpageController.handleStartCharging(
                             chargerId: selectedDevice['charger_id'],
                             chargerDetails: selectedDevice,
-                            selectedConnectorId:
-                            connector['connector_id'].toString(),
+                            selectedConnectorId: connector['connector_id'].toString(),
                             connectorDetailsMap: {
-                              'type':
-                              connector['connector_type'].toString(),
+                              'type': connector['connector_type'].toString(),
                               'status': connector['charger_status'] ?? ' - ',
                             },
                           );
-                        } else {
-                          debugPrint("Charger or Connector data is missing");
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: EdgeInsets.symmetric(
-                            vertical: screenHeight * 0.015),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: EdgeInsets.symmetric(vertical: screenHeight * 0.015),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      ),
-                      child: Obx(() => Text(
-                        searchpageController.isLoading.value
-                            ? 'Processing...'
-                            : (savedController.selectedConnector[
-                        'connectorIndex'] ==
-                            -1
-                            ? 'Select Connector'
-                            : 'Charge Now'),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: screenWidth * 0.045,
-                          fontWeight: FontWeight.bold,
+                        child: Text(
+                          isLoading ? 'Processing...' : 'Charge Now',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: screenWidth * 0.045,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )),
-                    ),
+                      );
+                    }),
                   ),
                 ),
               );
@@ -309,9 +321,7 @@ class DeviceCard extends StatelessWidget {
 
     // Get all connectors as a single list
     final List<Map<String, dynamic>> connectors =
-    (device['connectors'] as List<dynamic>? ?? [])
-        .map((connector) => connector as Map<String, dynamic>)
-        .toList();
+    (device['connectors'] as List<dynamic>? ?? []).map((connector) => connector as Map<String, dynamic>).toList();
 
     return Card(
       shape: RoundedRectangleBorder(
@@ -387,39 +397,26 @@ class DeviceCard extends StatelessWidget {
                   onTap: isRemoving.value
                       ? null
                       : () async {
-                    final chargerId =
-                    device['charger_id']?.toString();
+                    final chargerId = device['charger_id']?.toString();
                     if (chargerId != null && chargerId.isNotEmpty) {
                       try {
                         isRemoving.value = true;
-                        debugPrint(
-                            'Attempting to remove charger: $chargerId');
+                        debugPrint('Attempting to remove charger: $chargerId');
                         await controller.Removedevice(
                           userId,
                           emailId,
                           token,
                           chargerId,
                         );
-                        debugPrint(
-                            'Successfully removed charger: $chargerId');
+                        debugPrint('Successfully removed charger: $chargerId');
 
-                        // Find and remove the specific device by chargerId
-                        final deviceIndex =
-                        savedController.savedDevices.indexWhere(
-                                (d) => d['charger_id'] == chargerId);
-                        if (deviceIndex != -1) {
-                          savedController.savedDevices
-                              .removeAt(deviceIndex);
-                          savedController.update();
-                        }
+                        // Use the controller's method to safely remove the device
+                        savedController.removeDevice(chargerId);
                       } catch (e) {
                         debugPrint("Error removing charger: $e");
                         CustomSnackbar.showError(
                           message: e.toString().contains("Exception:")
-                              ? e
-                              .toString()
-                              .split("Exception:")[1]
-                              .trim()
+                              ? e.toString().split("Exception:")[1].trim()
                               : "Failed to remove device",
                         );
                       } finally {
@@ -467,30 +464,23 @@ class DeviceCard extends StatelessWidget {
                       final connectorIndex = entry.key;
                       final connector = entry.value;
                       final chargerId = device['charger_id'].toString();
-                      final isSelected = savedController
-                          .selectedConnector['chargerId'] ==
-                          chargerId &&
-                          savedController.selectedConnector['connectorIndex'] ==
-                              connectorIndex;
+                      final isSelected =
+                          savedController.selectedConnector['chargerId'] == chargerId &&
+                              savedController.selectedConnector['connectorIndex'] == connectorIndex;
                       final isVisible = connectorIndex < 2 ||
-                          (savedController.expandedConnectorIndices[index] ??
-                              false);
+                          (savedController.expandedConnectorIndices[index] ?? false);
                       return isVisible
                           ? Padding(
                         padding: const EdgeInsets.only(bottom: 6.0),
                         child: GestureDetector(
                           onTap: () {
-                            savedController.setSelectedConnector(
-                                chargerId, connectorIndex);
+                            savedController.setSelectedConnector(chargerId, connectorIndex);
                           },
                           child: _buildConnectorCard(
                             context,
                             title: 'Connector ${connectorIndex + 1}',
-                            status:
-                            connector['charger_status'] ?? 'Unknown',
-                            type: connector['connector_type'] == 1
-                                ? 'Socket'
-                                : 'Gun',
+                            status: connector['charger_status'] ?? 'Unknown',
+                            type: connector['connector_type'] == 1 ? 'Socket' : 'Gun',
                             power: device['max_power'] ?? 'N/A',
                             width: width,
                             isSelected: isSelected,
@@ -512,15 +502,13 @@ class DeviceCard extends StatelessWidget {
                     onTap: () {
                       if (!savedController.isToggling) {
                         savedController.isToggling = true;
-                        debugPrint(
-                            'Toggling connector details for index $index (before)');
+                        debugPrint('Toggling connector details for index $index (before)');
                         savedController.toggleConnectorDetails(index);
                         debugPrint(
                             'Toggling connector details for index $index (after), state: ${savedController.expandedConnectorIndices[index]}');
                         Future.delayed(const Duration(milliseconds: 300), () {
                           savedController.isToggling = false;
-                          savedController
-                              .update(['connectors', 'viewMoreButton']);
+                          savedController.update(['connectors', 'viewMoreButton']);
                         });
                       }
                     },
@@ -528,18 +516,14 @@ class DeviceCard extends StatelessWidget {
                       id: 'viewMoreButton',
                       builder: (savedController) {
                         final isExpanded =
-                            savedController.expandedConnectorIndices[index] ??
-                                false;
+                            savedController.expandedConnectorIndices[index] ?? false;
                         return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                isExpanded
-                                    ? 'View less connectors'
-                                    : 'View more connectors',
+                                isExpanded ? 'View less connectors' : 'View more connectors',
                                 style: TextStyle(
                                   color: Colors.blue,
                                   fontSize: width * 0.035,
@@ -548,9 +532,7 @@ class DeviceCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Icon(
-                                isExpanded
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
+                                isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                                 color: Colors.blue,
                                 size: width * 0.04,
                               ),
@@ -697,8 +679,7 @@ class DeviceCard extends StatelessWidget {
                     Text(
                       power,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color:
-                        theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                         fontSize: width * 0.028,
                       ),
                     ),

@@ -63,6 +63,16 @@ const fetchLastStatus = async (req, res) => {
 
         const convertedCapacity = fetchCapacity.max_power / 1000;
 
+
+        const time_val = user.autostop_time;
+        const isTimeChecked = user.autostop_time_is_checked;
+        const unit_val = user.autostop_unit;
+        const isUnitChecked = user.autostop_unit_is_checked;
+        const price_val = user.autostop_price;
+        const isPriceChecked = user.autostop_price_is_checked;
+        const wallet_balance = parseFloat(user.wallet_bal).toFixed(3);
+
+
         if (latestStatus) {
             const responseData = {
                 charger_id: latestStatus.charger_id,
@@ -70,8 +80,28 @@ const fetchLastStatus = async (req, res) => {
                 connector_type: latestStatus.connector_type,
                 charger_status: latestStatus.charger_status,
                 timestamp: latestStatus.timestamp,
+                timestamp_IST: new Date(latestStatus.timestamp).toLocaleString('en-IN', {
+                    timeZone: 'Asia/Kolkata',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true,
+                }),
                 error_code: latestStatus.error_code,
-                ChargerCapacity: convertedCapacity
+                ChargerCapacity: convertedCapacity,
+                user_id: user.user_id,
+                email_id: user.email_id,
+                wallet_balance: wallet_balance,
+                autostop_time: time_val,
+                autostop_time_is_checked: isTimeChecked,
+                autostop_unit: unit_val,
+                autostop_unit_is_checked: isUnitChecked,
+                autostop_price: price_val,
+                autostop_price_is_checked: isPriceChecked,
+
             };
             logger.loggerSuccess(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - Last status fetched successfully`);
             return res.status(200).json({
@@ -232,6 +262,17 @@ const stopCharger = async (req, res) => {
             });
         }
 
+        // Validate connector_id (should be between 1 and 5)
+        const connectorIdNum = Number(connector_id);
+        if (!Number.isInteger(connectorIdNum) || connectorIdNum < 1 || connectorIdNum > 5) {
+            logger.loggerWarn(`Invalid connector ID: ${connector_id} for Charger ID: ${charger_id}`);
+            return res.status(400).json({
+                error: true,
+                message: 'Connector ID must be an integer between 1 and 5.'
+            });
+        }
+
+
         const wsToSendTo = wsConnections.get(charger_id);
 
         if (!wsToSendTo) {
@@ -256,14 +297,36 @@ const stopCharger = async (req, res) => {
             });
         }
 
+
+
+        // Determine the transaction ID field based on the connector_id
+        const chargerdetailsCollection = db.collection('charger_details');
         const chargerStatusCollection = db.collection('charger_status');
+
+        const chargerDetails = await chargerdetailsCollection.findOne({
+            charger_id: charger_id
+        });
+        // Check if charger exists
+        if (!chargerDetails) {
+            logger.loggerWarn(`No charger found for Charger ID: ${charger_id}`);
+            return res.status(404).json({
+                error: true,
+                message: 'No charger found.'
+            });
+        }
+
         const chargerStatus = await chargerStatusCollection.findOne({
             charger_id: charger_id,
             connector_id: Number(connector_id),
             charger_status: 'Charging'
         });
 
-        if (!chargerStatus || !chargerStatus.transaction_id) {
+
+        const transactionIdField = `transaction_id_for_connector_${connectorIdNum}`;
+        const transactionId = chargerDetails[transactionIdField];
+
+
+        if (!chargerStatus || !transactionId) {
             logger.loggerWarn(`No active charging session found for Charger ID: ${charger_id}, Connector ID: ${connector_id}`);
             return res.status(404).json({
                 error: true,
@@ -273,7 +336,7 @@ const stopCharger = async (req, res) => {
 
         // Create remote stop request
         const remoteStopRequest = [2, Key, "RemoteStopTransaction", {
-            "transactionId": chargerStatus.transaction_id
+            "transactionId": transactionId
         }];
 
         // Send the request to the WebSocket

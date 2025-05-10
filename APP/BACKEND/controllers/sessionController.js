@@ -57,9 +57,10 @@ const fetchTotalChargingSessionDetails = async (req, res) => {
             const sessionDuration = (stopTime - startTime) / 1000; // Duration in seconds
             totalChargingTime += sessionDuration;
 
-            if (session.unit_consummed) {
-                totalEnergyConsumed += session.unit_consummed;
+            if (session.unit_consummed && !isNaN(parseFloat(session.unit_consummed))) {
+                totalEnergyConsumed += parseFloat(session.unit_consummed);
             }
+
         });
 
         const totalChargingTimeInHours = (totalChargingTime / 3600).toFixed(2); // Convert to hours

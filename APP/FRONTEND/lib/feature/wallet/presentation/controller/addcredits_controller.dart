@@ -7,7 +7,6 @@ import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 
-
 class AddCreditsController extends GetxController
     with GetSingleTickerProviderStateMixin {
   RxString selectedAmount = '500'.obs;
@@ -84,11 +83,17 @@ class AddCreditsController extends GetxController
       final email = sessionController.emailId.value;
       final authToken = sessionController.token.value;
       final amount = _lastPaymentAmount;
+
+      if (amount != null && amount > 0) {
+        // Update wallet balance immediately in the UI
+        walletController.updateBalanceAfterPayment(amount);
+      } else {
+        // Fallback to fetching from server if amount is invalid
+        walletController.fetchwalletbalance();
+      }
+
       // Navigate immediately
       Get.until((route) => route.isFirst || Get.currentRoute == '/wallet');
-
-      // Update wallet balance in the background
-      walletController.fetchwalletbalance();
 
       // Create payment request
       final paymentRequest = PaymentRequest(
@@ -122,8 +127,11 @@ class AddCreditsController extends GetxController
     } catch (error) {
       debugPrint('Error saving payment details: $error');
       CustomSnackbar.showError(
-        message: 'issue in processing payment. Please try again.',
+        message: 'Issue in processing payment. Please try again.',
       );
+
+      // Ensure wallet balance is updated even if there's an error
+      walletController.fetchwalletbalance();
     } finally {
       isLoading.value = false;
     }
@@ -131,9 +139,29 @@ class AddCreditsController extends GetxController
 
   void _handlePaymentError(PaymentFailureResponse response) {
     isLoading.value = false;
+
+    final errorCode = response.code;
+    final errorMessage = _getFriendlyErrorMessage(errorCode);
+
+    debugPrint('Razorpay Error Code: $errorCode');
+    debugPrint('Razorpay Error Message: ${response.message ?? 'No message'}');
+
     CustomSnackbar.showError(
-      message: 'Payment failed: ${response.message ?? ''}',
+      message: errorMessage,
     );
+  }
+
+  String _getFriendlyErrorMessage(int? code) {
+    switch (code) {
+      case 0:
+        return 'Payment failed: Network error or invalid request.';
+      case 1:
+        return 'Payment failed: Invalid payment credentials.';
+      case 2:
+        return 'Payment cancelled by User.';
+      default:
+        return 'Payment failed. Please try again later.';
+    }
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {

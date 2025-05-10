@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export const useAssociationAdminLogin = (handleLogin) => {
   const [email, setEmail] = useState('');
-  const [passwords, setPassword] = useState('');
+  const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading,setLoading]=useState(false)
@@ -13,14 +13,14 @@ export const useAssociationAdminLogin = (handleLogin) => {
     e.preventDefault();
 
     const passwordRegex = /^\d{4}$/;
-    if (!passwords || !passwordRegex.test(passwords)) {
+    if (!password || !passwordRegex.test(password)) {
       setErrorMessage('Password number must be a 4-digit number.');
       return;
     }
 
     try {
         setLoading(true)
-      const parsedPassword = parseInt(passwords);
+      const parsedPassword = parseInt(password);
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/associationadmin/CheckLoginCredentials`,
         { email, password: parsedPassword }
@@ -47,7 +47,7 @@ export const useAssociationAdminLogin = (handleLogin) => {
 
   return {
     email,
-    passwords,
+    password,
     errorMessage,
     successMessage,
     setEmail,

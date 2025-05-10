@@ -7,51 +7,39 @@ import 'package:ionhive/feature/wallet/presentation/pages/wallet_page.dart';
 import 'package:ionhive/feature/home/presentation/pages/home_page.dart';
 import 'package:ionhive/feature/more/presentation/pages/more_page.dart';
 
-class LandingPage extends StatefulWidget {
-  const LandingPage({super.key});
+class LandingPage extends StatelessWidget {
+  LandingPage({super.key});
 
-  @override
-  State<LandingPage> createState() => _LandingPageState();
-}
-
-class _LandingPageState extends State<LandingPage> {
-  late final LandingPageController controller;
-
-  // Pre-initialize all pages to maintain their state
-  final List<Widget> _pages = [
-    HomePage(),
-    const WalletPage(),
-    const SessionHistoryPage(),
-    MoreePage(),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    controller = Get.find<LandingPageController>();
-  }
+  final LandingPageController controller = Get.find<LandingPageController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        // Use IndexedStack to preserve state of all pages
-        return IndexedStack(
-          index: controller.pageIndex.value,
-          children: _pages,
-        );
+        // Only build the current page — no state is preserved
+        switch (controller.pageIndex.value) {
+          case 0:
+            return const HomePage();
+          case 1:
+            return const WalletPage();
+          case 2:
+            return const SessionHistoryPage();
+          case 3:
+            return MoreePage();
+          default:
+            return const Center(child: Text('Page not found'));
+        }
       }),
-      bottomNavigationBar: Obx(
-        () => Footer(
+      bottomNavigationBar: Obx(() {
+        return Footer(
           onTabChanged: (index) {
-            // Ensure we're not in the middle of a build cycle
             WidgetsBinding.instance.addPostFrameCallback((_) {
               controller.changePage(index);
             });
           },
           currentIndex: controller.pageIndex.value,
-        ),
-      ),
+        );
+      }),
     );
   }
 }

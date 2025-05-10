@@ -4,7 +4,7 @@ import ReusableButton from '../../../utils/ReusableButton';
 const Login = ({ handleLogin }) => {
   const {
     email,
-    passwords,
+    password,
     errorMessage,
     successMessage,
     setEmail,
@@ -43,7 +43,7 @@ const Login = ({ handleLogin }) => {
                     {/* <input type="email" className="form-control form-control-lg" placeholder="Enter your email" value={email} onChange={(e) => {const value = e.target.value; const noSpaces = value.replace(/\s/g, ''); const validChars = noSpaces.replace(/[^a-zA-Z0-9@.]/g, ''); const atCount = (validChars.match(/@/g) || []).length; const sanitizedEmail = atCount <= 1 ? validChars : validChars.replace(/@.*@/, '@'); setEmail(sanitizedEmail); }}required/>   */}
                   </div>
                   <div className="form-group">
-                    <input type="password" className="form-control form-control-lg" placeholder="Enter your password" value={passwords} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue); }} required />
+                    <input type="password" className="form-control form-control-lg" placeholder="Enter your password" value={password} maxLength={4} onChange={(e) => { const value = e.target.value; const sanitizedValue = value.replace(/[^0-9]/g, ''); setPassword(sanitizedValue); }} required />
                   </div>
                   {errorMessage && <p className="text-danger">{errorMessage}</p>}<br />
                   {successMessage && <p className="text-success">{successMessage}</p>}<br />

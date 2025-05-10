@@ -32,41 +32,70 @@ fs.readdirSync(schemaDir).forEach(file => {
     }
 });
 
+// const framevalidation = (data, schemaFilename) => {
+//     try {
+//         // Get schema ID
+//         const schemaId = path.basename(schemaFilename, '.json');
+
+//         if (!schemaCache.has(schemaId)) {
+//             throw new Error(`Schema not found: ${schemaFilename}`);
+//         }
+
+//         // Validate data
+//         const validate = ajv.getSchema(schemaId);
+//         const isValid = validate(data);
+
+//         if (!isValid) {
+//             logger.loggerError(`Validation Failed (${schemaFilename}): ${JSON.stringify(validate.errors, null, 2)}`);
+//             return {
+//                 error: true,
+//                 message: 'Validation failed',
+//                 details: validate.errors
+//             };
+//         }
+
+//         // logger.loggerSuccess(`Validation Successful (${schemaFilename})`);
+//         return {
+//             error: false,
+//             message: 'Validation successful'
+//         };
+//     } catch (error) {
+//         logger.loggerError(`Validation Error: ${error.message}`);
+//         return {
+//             error: true,
+//             message: 'Validation error',
+//             details: error.message
+//         };
+//     }
+// };
+
 const framevalidation = (data, schemaFilename) => {
     try {
-        // Get schema ID
         const schemaId = path.basename(schemaFilename, '.json');
-
         if (!schemaCache.has(schemaId)) {
             throw new Error(`Schema not found: ${schemaFilename}`);
         }
-
-        // Validate data
         const validate = ajv.getSchema(schemaId);
+        // logger.loggerDebug(`Validating data: ${JSON.stringify(data)} against schema: ${schemaId}`);
         const isValid = validate(data);
-
         if (!isValid) {
             logger.loggerError(`Validation Failed (${schemaFilename}): ${JSON.stringify(validate.errors, null, 2)}`);
             return {
-                error: true,
-                message: 'Validation failed',
-                details: validate.errors
+                isValid: false,
+                errors: validate.errors || []
             };
         }
-
         // logger.loggerSuccess(`Validation Successful (${schemaFilename})`);
         return {
-            error: false,
-            message: 'Validation successful'
+            isValid: true,
+            errors: []
         };
     } catch (error) {
         logger.loggerError(`Validation Error: ${error.message}`);
         return {
-            error: true,
-            message: 'Validation error',
-            details: error.message
+            isValid: false,
+            errors: [error.message]
         };
     }
 };
-
 module.exports = { framevalidation };

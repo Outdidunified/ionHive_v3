@@ -2,6 +2,7 @@ const dbService = require("../services/dbService");
 const logger = require("../../utils/logger");
 const { framevalidation } = require("../validation/framevalidation");
 const Chargercontrollers = require("../Chargercontrollers");
+const { createChargingSession } = require("./stoptransactionframehandler");
 
 const validateStartTransaction = (data) => {
     return framevalidation(data, "StartTransaction.json"); // Ensure correct schema is used
@@ -11,11 +12,12 @@ const generateRandomTransactionId = () => {
     return Math.floor(100000 + Math.random() * 900000); // Random 6-digit transaction ID
 };
 
-const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestId, wsConnections) => {
+const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestId, wsConnections, chargingSessionID) => {
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId];
 
     try {
+
         // Validate request payload
         const validationResult = validateStartTransaction(requestPayload);
         if (!validationResult.isValid) {
@@ -99,6 +101,61 @@ const handleStartTransaction = async (uniqueIdentifier, requestPayload, requestI
 
         // AutoStop logic
         const user = await dbService.getUserEmail(uniqueIdentifier, connectorId, idTag);
+
+        // Create a new charging session record with start time
+        try {
+            // Get connector type
+            const db = await dbService.connectToDatabase();
+            const socketGunConfig = await db.collection('socket_gun_config').findOne({ charger_id: uniqueIdentifier });
+            const connectorIdTypeField = `connector_${connectorId}_type`;
+            const connectorTypeValue = socketGunConfig ? socketGunConfig[connectorIdTypeField] : null;
+
+            // Generate a unique session ID if not already set
+            const key = `${uniqueIdentifier}_${connectorId}`;
+            let sessionId = chargingSessionID ? chargingSessionID.get(key) : null;
+
+            if (!sessionId) {
+                // Generate a new session ID and store it
+                sessionId = Math.floor(1000000 + Math.random() * 9000000); // 7-digit session ID
+                if (chargingSessionID) {
+                    chargingSessionID.set(key, sessionId);
+                    logger.loggerInfo(`Generated new session ID ${sessionId} for ${key}`);
+                }
+            } else {
+                logger.loggerInfo(`Using existing session ID ${sessionId} for ${key}`);
+            }
+
+            logger.loggerInfo("Creating new charging session...", sessionId, "Key", key);
+
+            // Create session with start time but no stop time
+            const sessionCreated = await createChargingSession(
+                uniqueIdentifier,
+                connectorId,
+                new Date().toISOString(), // Current time as start time
+                user,
+                sessionId,
+                connectorTypeValue
+            );
+
+            if (sessionCreated) {
+                logger.loggerSuccess(`Created new charging session for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}, TransactionID ${generatedTransactionId}, User ${user}, Session ID ${sessionId} and Connector Type ${connectorTypeValue}.`);
+
+                // Add session info to metadata
+                response.metadata.session = {
+                    created: true,
+                    transactionId: generatedTransactionId,
+                    sessionId: sessionId,
+                    user: user,
+                    connectorType: connectorTypeValue
+                };
+            } else {
+                logger.loggerWarn(`Failed to create charging session for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}`);
+            }
+        } catch (sessionError) {
+            logger.loggerError(`Error creating charging session: ${sessionError.message}`);
+        }
+
+
         const autoStopConfig = await dbService.getAutostop(user);
 
         if (autoStopConfig.isTimeChecked && autoStopConfig.time_value) {

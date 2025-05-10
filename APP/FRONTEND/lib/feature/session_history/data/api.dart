@@ -52,6 +52,9 @@ class Sessionhistoryapicalls {
         body: jsonEncode({'email_id': email, 'user_id': user_id}),
       );
 
+      final data = jsonDecode(response.body);
+      debugPrint('fetching total session :$data');
+
       return _handleResponse(response);
     } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
@@ -77,6 +80,8 @@ class Sessionhistoryapicalls {
         },
         body: jsonEncode({'email_id': email, 'user_id': user_id}),
       );
+      final data = jsonDecode(response.body);
+      debugPrint('fetching total session details :$data');
 
       return _handleResponse(response);
     } on TimeoutException {

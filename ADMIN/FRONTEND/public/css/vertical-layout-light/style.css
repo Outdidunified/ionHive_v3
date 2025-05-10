@@ -28808,7 +28808,7 @@ div.tagsinput span.tag a {
 }
 
 .sidebar .nav:not(.sub-menu) {
-  margin-top: 1.45rem;
+  margin-top: 1.95rem; /* Apply 2.0rem top margin */
   margin-left: 1rem;
   margin-right: 1rem;
 }
@@ -28952,10 +28952,10 @@ div.tagsinput span.tag a {
 /* style for off-canvas menu*/
 @media screen and (max-width: 991px) {
   .sidebar-offcanvas {
-    position: fixed;
     max-height: calc(100vh - 60px);
-    top: 60px;
+    top: 70px;
     bottom: 0;
+    position: fixed;
     overflow: auto;
     right: -235px;
     -webkit-transition: all 0.25s ease-out;

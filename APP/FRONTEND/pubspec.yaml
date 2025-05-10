@@ -47,6 +47,7 @@ dependencies:
   mobile_scanner: ^3.5.2
   qr_flutter: ^4.1.0
   web_socket_channel: ^2.4.0
+  slider_button: 2.1.0
 
 
 

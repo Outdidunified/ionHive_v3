@@ -34,7 +34,7 @@ const handleMeterValues = async (uniqueIdentifier, requestPayload, requestId, ws
         const clientIpAddress = sendTo?.socket?.remoteAddress || "unknown";
 
         // Get meter values for this session using the helper function
-        let meterValues = getMeterValues(key);
+        let meterValues = getMeterValues(key, meterValuesMap);
 
         let autostopSettings;
 
@@ -147,19 +147,62 @@ const processMeterValues = async (firstMeter, lastMeter, settings, identifier, c
 
         // Add broadcast data to response for WebsocketHandler to handle
         if (ClientWss && ws) {
-            // Create a JSON message to broadcast
-            const jsonMessage = JSON.stringify({ DeviceID: identifier, message: sendLivePrice });
+            try {
+                // Import the client connection utilities for targeted broadcasting
+                const clientConnectionUtils = require('../utils/clientConnectionUtils');
 
-            // Broadcast to all clients except the sender
-            ClientWss.clients.forEach(client => {
-                if (client !== ws && client.readyState === 1) { // 1 = WebSocket.OPEN
-                    client.send(jsonMessage, (error) => {
-                        if (error) {
-                            logger.loggerError(`Error sending message: ${error.message}`);
+                // Use the targeted broadcast function to send only to clients subscribed to this charger/connector
+                clientConnectionUtils.broadcastToSubscribedClients(identifier, connector, sendLivePrice, ClientWss, ws);
+
+                logger.loggerInfo(`Broadcasting meter values to clients subscribed to charger ${identifier}, connector ${connector}`);
+
+                logger.loggerInfo(`Successfully broadcasted live price and vehicle analytics for ${identifier}`);
+            } catch (error) {
+                logger.loggerError(`Error broadcasting message: ${error.message}`);
+
+                // Fallback to direct broadcast if the enhanced function fails
+                // Only broadcast to clients that have subscribed to this specific charger and connector
+                const jsonMessage = JSON.stringify({
+                    DeviceID: identifier,
+                    message: sendLivePrice,
+                    timestamp: new Date().toISOString(),
+                    connectorId: connector,
+                    connectionData: {
+                        chargerId: identifier,
+                        connectorId: connector,
+                        isConnected: true,
+                        connectionType: "websocket",
+                        lastActivity: new Date().toISOString()
+                    }
+                });
+
+                // Try to find clients subscribed to this charger/connector
+                logger.loggerInfo(`Fallback: Looking for clients subscribed to charger ${identifier}, connector ${connector}`);
+
+                // Get the client subscription utility
+                const clientConnectionUtils = require('../utils/clientConnectionUtils');
+                const subscribedClientIds = clientConnectionUtils.getSubscribedClients(identifier, connector);
+
+                if (subscribedClientIds.size > 0) {
+                    logger.loggerInfo(`Fallback: Found ${subscribedClientIds.size} subscribed clients`);
+
+                    // Broadcast only to subscribed clients
+                    ClientWss.clients.forEach(client => {
+                        if (client !== ws && client.readyState === 1 && // 1 = WebSocket.OPEN
+                            client.clientId && subscribedClientIds.has(client.clientId)) {
+                            client.send(jsonMessage, (error) => {
+                                if (error) {
+                                    logger.loggerError(`Error sending message to client ${client.clientId}: ${error.message}`);
+                                } else {
+                                    logger.loggerInfo(`Fallback: Successfully sent to client ${client.clientId}`);
+                                }
+                            });
                         }
                     });
+                } else {
+                    logger.loggerInfo(`Fallback: No clients subscribed to charger ${identifier}, connector ${connector}`);
                 }
-            });
+            }
         }
     } catch (error) {
         logger.loggerError(`Error in processMeterValues: ${error.message}`);
@@ -197,7 +240,7 @@ const extractMeterValue = (meterValueArray) => {
 };
 
 // Helper function to get meter values from the map
-const getMeterValues = (key) => {
+const getMeterValues = (key, meterValuesMap) => {
     if (!meterValuesMap.has(key)) {
         meterValuesMap.set(key, {});
     }
@@ -295,12 +338,13 @@ const autostop_price = async (firstMeter, lastMeter, settings, identifier, conne
 const calculateLivePrice = async (firstMeter, lastMeter, settings, identifier, connector, wsConnections) => {
     try {
         // Calculate units consumed and price
-        const unitsConsumed = lastMeter - firstMeter;
+        const unitsConsumed = parseFloat((lastMeter - firstMeter) / 1000).toFixed(2);
+
         const pricePerUnit = await dbService.getPricePerUnit(identifier, connector);
+        logger.loggerInfo(`Calculating live price for ${identifier}, connector ${connector}: Units Consumed: ${unitsConsumed}, Price Per Unit: ${pricePerUnit}`);
         const livePrice = unitsConsumed * pricePerUnit;
 
-        logger.loggerInfo(`Live price calculation for ${identifier}, connector ${connector}: ${unitsConsumed} units at ${pricePerUnit} per unit = ${livePrice}`);
-
+        logger.loggerInfo(`Live price calculation for ${identifier}, connector ${connector}: ${unitsConsumed} units consumed at ${pricePerUnit} per unit = ${livePrice}`);
         // Check if wallet balance is sufficient
         if (settings && settings.wallet_balance && livePrice >= parseFloat(settings.wallet_balance)) {
             logger.loggerInfo(`Autostop triggered for ${identifier}, connector ${connector} - Insufficient wallet balance (${settings.wallet_balance})`);
@@ -333,6 +377,7 @@ const calculateLivePrice = async (firstMeter, lastMeter, settings, identifier, c
 
         // Calculate usage time (in minutes) - assuming this is from the start of the session
         const usageTimeMinutes = Math.round((new Date() - vehicleData.lastChargeTime) / (1000 * 60));
+        const safeEnergyConsumed = Number.isFinite(energyConsumed) ? energyConsumed : 0;
 
         // Return all calculated values
         return {
@@ -341,7 +386,7 @@ const calculateLivePrice = async (firstMeter, lastMeter, settings, identifier, c
             vehicleAnalytics: {
                 batteryPercentage: batteryPercentageFromCharge,
                 rangeAdded: rangeAdded,
-                energyConsumed: parseFloat(energyConsumed.toFixed(2)),
+                energyConsumed: parseFloat(safeEnergyConsumed.toFixed(2)),
                 energyConsumptionRate: energyConsumptionRate,
                 usageTimeMinutes: usageTimeMinutes,
                 estimatedMileage: vehicleData.mileage + rangeAdded,
