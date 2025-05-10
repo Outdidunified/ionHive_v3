@@ -18,29 +18,37 @@ const useManageDevice = (userInfo) => {
     
     // Get Allocated charger data
     const FetchAllocatedCharger = useCallback(async () => {
-        try {
-            setLoading(true)
-            const response = await axiosInstance.post('/associationadmin/FetchAllocatedChargerByClientToAssociation', {
-                 association_id: userInfo.association_id })
-            
+    try {
+        setLoading(true);
+        const response = await axiosInstance.post(
+            '/associationadmin/FetchAllocatedChargerByClientToAssociation',
+            { association_id: userInfo.association_id }
+        );
 
-            if (response.status==200) {
-                const data = response.data
-                // console.log('Response data:', data);
-                setData(data.data);
-                setPosts(data.data);  // Update posts with the fetched data
+        const data = response.data;
 
-            } else {
-                setError('Failed to fetch profile, ' + response.statusText);
-                console.error('Failed to fetch profile:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            setError('Error fetching data. Please try again.');
-        }finally{
-            setLoading(false)
+        if (response.status === 200 && data.status === 'Success') {
+            setData(data.data);
+            setPosts(data.data);
+            setError('');
+        } else {
+            setData([]);
+            setPosts([]);
+            setError(''); // Clear error so "No devices found" shows
         }
-    }, [userInfo.association_id]);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+
+        // Handle API error response properly
+        const apiMessage = error.response?.data?.message;
+        setError(apiMessage || 'Error fetching data. Please try again.');
+        setData([]);
+        setPosts([]);
+    } finally {
+        setLoading(false);
+    }
+}, [userInfo.association_id]);
+
 
     useEffect(() => {
         if (!fetchMangeCalled.current && userInfo &&  userInfo.user_id) {

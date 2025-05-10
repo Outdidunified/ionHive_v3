@@ -1,6 +1,7 @@
 // src/hooks/useSuperAdminLogin.js
 import { useState } from 'react';
 import axios from 'axios';
+import { isValidFourDigitPassword } from '../../../../utils/validation';
 
 export const useSuperAdminLogin = (handleLogin) => {
   const [email, setEmail] = useState('');
@@ -12,8 +13,7 @@ export const useSuperAdminLogin = (handleLogin) => {
   const handleLoginFormSubmit = async (e) => {
     e.preventDefault();
 
-    const passwordRegex = /^\d{4}$/;
-    if (!passwords || !passwordRegex.test(passwords)) {
+     if (!passwords || !isValidFourDigitPassword(passwords)) {
       setErrorMessage('Password number must be a 4-digit number.');
       return;
     }

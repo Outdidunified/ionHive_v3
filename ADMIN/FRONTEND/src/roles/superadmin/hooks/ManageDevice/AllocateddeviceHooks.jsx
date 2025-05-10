@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axiosInstance from '../../../../utils/utils';
-import { showErrorAlert,showSuccessAlert } from '../../../../utils/alert';
+import { showErrorAlert, showSuccessAlert } from '../../../../utils/alert';
 
 const useAllocatedChargers = (userInfo) => {
     const [allocatedChargers, setAllocatedChargers] = useState([]);
@@ -20,7 +20,10 @@ const useAllocatedChargers = (userInfo) => {
 
     const fetchAllocatedChargers = useCallback(() => {
         if (!fetchAllocatedChargerDetailsCalled.current) {
-            axiosInstance.get('/superadmin/FetchAllocatedChargers')
+            axiosInstance({
+                method: 'get',  
+                url: '/superadmin/FetchAllocatedChargers',
+            })
                 .then((response) => {
                     if (response.data.status === "Success") {
                         setAllocatedChargers(response.data.data || []);
@@ -33,20 +36,24 @@ const useAllocatedChargers = (userInfo) => {
                     showErrorAlert("Error", "Something went wrong while fetching chargers");
                 })
                 .finally(() => setLoading(false));
-    
+
             fetchAllocatedChargerDetailsCalled.current = true;
         }
     }, []);
-    
 
     const deactivateCharger = useCallback(async (chargerId, status) => {
         try {
-            const response = await axiosInstance.post('/superadmin/DeActivateOrActivateCharger', {
-                charger_id: chargerId,
-                modified_by: userInfo.email_id,
-                status: !status
+            // Explicitly define POST method in axios configuration
+            const response = await axiosInstance({
+                method: 'post',  // Explicitly specify method as 'POST'
+                url: '/superadmin/DeActivateOrActivateCharger',
+                data: {
+                    charger_id: chargerId,
+                    modified_by: userInfo.email_id,
+                    status: !status
+                }
             });
-    
+
             if (response.status === 200) {
                 setAllocatedChargers(prev =>
                     prev.map(charger =>
@@ -55,10 +62,10 @@ const useAllocatedChargers = (userInfo) => {
                             : charger
                     )
                 );
-    
+
                 const message = status ? "Charger deactivated successfully." : "Charger activated successfully.";
                 showSuccessAlert("Success", message);
-    
+
                 // Optional timeout for side effect/logging
                 setTimeout(() => {
                     console.log('Timer finished after 10 seconds');
@@ -71,7 +78,6 @@ const useAllocatedChargers = (userInfo) => {
             showErrorAlert("Error", "An error occurred while updating charger status.");
         }
     }, [userInfo.email_id]);
-    
 
     useEffect(() => {
         fetchAllocatedChargers();

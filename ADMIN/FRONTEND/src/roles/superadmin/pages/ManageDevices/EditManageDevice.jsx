@@ -36,7 +36,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
         setChargerID,
         setErrorMessageCurrent,
         setMaxPower,
-        setErrorMessagePower,
+        setErrorMessagePower
     } = useEditManageDevice(userInfo);
 
 

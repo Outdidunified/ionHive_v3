@@ -30913,8 +30913,89 @@ div.tagsinput span.tag a {
       margin-bottom: 15px; 
   }
 }
+@media (min-width: 768px) and (max-width: 1024px) {
+  .dashboard-card {
+    display: flex;
+    flex-direction: column;  /* Stack the icon and text vertically */
+    justify-content: flex-start;  /* Align items at the top */
+    align-items: center;  /* Center align content */
+    padding: 1rem;
+    min-height: 140px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    flex-wrap: wrap;
+    width: 100%;  /* Ensure it takes full available width */
+  }
 
+  .dashboard-card .card-icon {
+    width: 30px;  /* Smaller icon size */
+    height: 30px;  /* Smaller icon size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;  /* Adjust icon font size */
+    background-color: #f1f1f1;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 2px;  /* Space between text and icon */
+    box-sizing: border-box;
+   
+  }
 
+  .dashboard-card .fa {
+    font-size: 1rem !important;  /* Adjust icon font size */
+    line-height: 1;
+  }
+
+  .dashboard-card .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;  /* Ensures consistent top alignment */
+    width: 90%;
+    min-height: 80px; /* Allow space for content */
+    text-align: center; /* Ensures content is centered */
+    flex-wrap: wrap; /* Allows the content to wrap if necessary */
+  }
+
+  .dashboard-card .card-title {
+    font-size: 1rem;
+    margin-bottom: 2px;
+    text-align: center;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    display: block;  /* Ensures title wraps correctly */
+  }
+
+  .dashboard-card .card-count {
+    font-size: 1.2rem;
+    word-break: break-word;
+    margin-top: 1px;
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-width: 80%;
+    display: block;  /* Ensures count wraps correctly */
+  }
+
+  /* Ensures icon always comes after count, regardless of text length */
+  .dashboard-card .card-content {
+    flex-direction: column; /* Stack items vertically */
+  }
+
+  /* Prevent text overflow by setting a max width and making sure text wraps */
+  .dashboard-card .card-title,
+  .dashboard-card .card-count {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: normal;
+    max-width: 100%;
+  }
+}
 
 
 

@@ -1,6 +1,7 @@
 // src/hooks/useAssociationAdminLogin.js
 import { useState } from 'react';
 import axios from 'axios';
+import { isValidFourDigitPassword } from '../../../../utils/validation';
 
 export const useAssociationAdminLogin = (handleLogin) => {
   const [email, setEmail] = useState('');
@@ -12,11 +13,10 @@ export const useAssociationAdminLogin = (handleLogin) => {
   const handleLoginFormSubmit = async (e) => {
     e.preventDefault();
 
-    const passwordRegex = /^\d{4}$/;
-    if (!password || !passwordRegex.test(password)) {
-      setErrorMessage('Password number must be a 4-digit number.');
-      return;
-    }
+    if (!password || !isValidFourDigitPassword(password)) {
+            setErrorMessage('Password number must be a 4-digit number.');
+            return;
+          }
 
     try {
         setLoading(true)

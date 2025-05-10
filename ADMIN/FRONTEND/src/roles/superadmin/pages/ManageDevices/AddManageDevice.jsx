@@ -80,7 +80,7 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                                     <InputField
                                                                         placeholder="Charger ID"
                                                                         value={charger_id}
-                                                                        maxLength={20}
+                                                                        maxLength={14} // <-- fix here
                                                                         onChange={(e) => {
                                                                             const value = e.target.value;
                                                                             const sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
@@ -88,6 +88,7 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                                         }}
                                                                         required
                                                                     />
+
                                                                 </div>
                                                             </div>
                                                             <div className="col-md-6">
@@ -305,7 +306,7 @@ const AddManageDevice = ({ userInfo, handleLogout }) => {
                                                         <ReusableButton
                                                             type="submit"
                                                             loading={loading}
-                                     
+
                                                             className="mr-2"
                                                         >
                                                             Add

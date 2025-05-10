@@ -14,9 +14,11 @@ const useManageDevice = (userInfo) => {
     if (!fetchDataCalled.current) {
       axiosInstance.get('/superadmin/FetchCharger')
         .then((res) => {
-          setData(res.data.data);
-          setLoading(false);
-        })
+  setData(res.data.data);      // <-- store full dataset here
+  setPosts(res.data.data);     // <-- also store it for display and filtering
+  setLoading(false);
+})
+
         .catch((err) => {
           console.error('Error fetching data:', err);
           setError('Error fetching data. Please try again.');
