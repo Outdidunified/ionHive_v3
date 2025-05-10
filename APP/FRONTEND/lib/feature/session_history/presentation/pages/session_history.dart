@@ -481,6 +481,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
 
           return GestureDetector(
             onTap: () {
+              // Updated sessionData map to include all fees and modified_date
               final Map<String, dynamic> sessionData = {
                 '_id': session.id,
                 'charger_id': session.chargerId,
@@ -493,6 +494,18 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
                 'connector_type': session.connectorType ?? 1,
                 'email_id': sessionController.emailId.value,
                 'user': sessionController.username.value.split('@')[0],
+                'EB_fee': session.ebFee,
+                'association_commission': session.associationCommission,
+                'client_commission': session.clientCommission,
+                'convenience_fee': session.convenienceFee,
+                'gst_amount': session.gstAmount,
+                'gst_percentage': session.gstPercentage,
+                'parking_fee': session.parkingFee,
+                'processing_fee': session.processingFee,
+                'reseller_commission': session.resellerCommission,
+                'service_fee': session.serviceFee,
+                'station_fee': session.stationFee,
+                'modified_date': session.modifiedDate?.toIso8601String(),
               };
 
               Get.to(

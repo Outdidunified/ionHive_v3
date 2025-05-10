@@ -9,6 +9,7 @@ class SessionBill extends StatelessWidget {
   final Map<String, dynamic> session;
   final VoidCallback? onShare;
   final GlobalKey usageReportKey = GlobalKey();
+  final ValueNotifier<bool> isTariffExpanded = ValueNotifier<bool>(false);
 
   SessionBill(this.session, {super.key, this.onShare});
 
@@ -33,8 +34,12 @@ class SessionBill extends StatelessWidget {
     }
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String? value,
-      {IconData? icon}) {
+  Widget _buildInfoRow(
+      BuildContext context,
+      String label,
+      String? value, {
+        IconData? icon,
+      }) {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context).size;
     return AnimatedContainer(
@@ -111,8 +116,97 @@ class SessionBill extends StatelessWidget {
     );
   }
 
+  Widget _buildTariffBreakdown(BuildContext context) {
+    final theme = Theme.of(context);
+    final mediaQuery = MediaQuery.of(context).size;
+    final fees = [
+      {'label': 'EB Fee', 'value': session['EB_fee'] ?? 0.0},
+      {'label': 'Association Commission', 'value': session['association_commission'] ?? 0.0},
+      {'label': 'Client Commission', 'value': session['client_commission'] ?? 0.0},
+      {'label': 'Convenience Fee', 'value': session['convenience_fee'] ?? 0.0},
+      {'label': 'GST Amount (${session['gst_percentage'] ?? 0}%)', 'value': session['gst_amount'] ?? 0.0},
+      {'label': 'Parking Fee', 'value': session['parking_fee'] ?? 0.0},
+      {'label': 'Processing Fee', 'value': session['processing_fee'] ?? 0.0},
+      {'label': 'Reseller Commission', 'value': session['reseller_commission'] ?? 0.0},
+      {'label': 'Service Fee', 'value': session['service_fee'] ?? 0.0},
+      {'label': 'Station Fee', 'value': session['station_fee'] ?? 0.0},
+    ];
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: mediaQuery.width * 0.04),
+      padding: EdgeInsets.all(mediaQuery.width * 0.03),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: theme.dividerColor),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.1),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tariff Breakdown',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...fees.map((fee) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  fee['label'] as String,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  ),
+                ),
+                Text(
+                  '₹${(fee['value'] as num).toStringAsFixed(2)}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          )),
+          const Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Unit Price',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              Text(
+                '₹${(session['price'] ?? 0.0).toStringAsFixed(2)}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   void scrollToUsageReport(SessionHistoryControllers controller) {
-    // Scroll to usage report
     final BuildContext? context = usageReportKey.currentContext;
     if (context != null) {
       Scrollable.ensureVisible(
@@ -132,11 +226,10 @@ class SessionBill extends StatelessWidget {
         SessionHistoryControllers(),
         tag: 'session_bill_${session['_id']}');
 
-    // ValueNotifier for tap animation
     final tapAnimation = ValueNotifier<double>(1.0);
 
     return AnimatedBuilder(
-      animation: tapAnimation, // Listen only to tapAnimation
+      animation: Listenable.merge([tapAnimation, isTariffExpanded]),
       builder: (context, child) {
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
@@ -188,7 +281,7 @@ class SessionBill extends StatelessWidget {
                             children: [
                               Container(
                                 padding:
-                                    EdgeInsets.all(mediaQuery.width * 0.06),
+                                EdgeInsets.all(mediaQuery.width * 0.06),
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
@@ -226,13 +319,35 @@ class SessionBill extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(height: mediaQuery.height * 0.01),
-                              Text(
-                                '₹${session['price'] ?? 0}',
-                                style: theme.textTheme.displayMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.primary,
+                              GestureDetector(
+                                onTap: () {
+                                  isTariffExpanded.value =
+                                  !isTariffExpanded.value;
+                                },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '₹${session['price'] ?? 0}',
+                                      style:
+                                      theme.textTheme.displayMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      isTariffExpanded.value
+                                          ? Icons.arrow_drop_up
+                                          : Icons.arrow_drop_down,
+                                      color: theme.colorScheme.primary,
+                                      size: 30,
+                                    ),
+                                  ],
                                 ),
                               ),
+                              if (isTariffExpanded.value)
+                                _buildTariffBreakdown(context),
                               SizedBox(height: mediaQuery.height * 0.01),
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 300),
@@ -263,7 +378,7 @@ class SessionBill extends StatelessWidget {
                                     Text(
                                       'Completed',
                                       style:
-                                          theme.textTheme.bodyLarge?.copyWith(
+                                      theme.textTheme.bodyLarge?.copyWith(
                                         color: theme.colorScheme.primary,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -302,11 +417,11 @@ class SessionBill extends StatelessWidget {
                                           children: [
                                             TextSpan(
                                               text:
-                                                  session['user'] ?? 'Unknown',
+                                              session['user'] ?? 'Unknown',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 color:
-                                                    theme.colorScheme.primary,
+                                                theme.colorScheme.primary,
                                               ),
                                             ),
                                           ],
@@ -322,7 +437,6 @@ class SessionBill extends StatelessWidget {
                           Obx(() {
                             return GestureDetector(
                               onTap: () {
-                                // Trigger tap animation
                                 tapAnimation.value = 1.5;
                                 Future.delayed(
                                     const Duration(milliseconds: 300), () {
@@ -332,7 +446,7 @@ class SessionBill extends StatelessWidget {
                               },
                               child: AnimatedOpacity(
                                 opacity:
-                                    controller.isArrowVisible.value ? 1.0 : 0.0,
+                                controller.isArrowVisible.value ? 1.0 : 0.0,
                                 duration: const Duration(milliseconds: 500),
                                 child: AnimatedScale(
                                   scale: tapAnimation.value,
@@ -348,10 +462,9 @@ class SessionBill extends StatelessWidget {
                                       );
                                     },
                                     onEnd: () {
-                                      // Reverse the pulse animation
                                       if (controller.isArrowVisible.value) {
                                         tapAnimation.value = tapAnimation
-                                            .value; // Trigger rebuild
+                                            .value;
                                         tapAnimation.notifyListeners();
                                       }
                                     },
@@ -421,18 +534,18 @@ class SessionBill extends StatelessWidget {
                                   SizedBox(height: mediaQuery.height * 0.01),
                                   Container(
                                     padding:
-                                        EdgeInsets.all(mediaQuery.width * 0.03),
+                                    EdgeInsets.all(mediaQuery.width * 0.03),
                                     decoration: BoxDecoration(
                                       color: theme.colorScheme.surface,
                                       borderRadius: BorderRadius.circular(10),
                                       border:
-                                          Border.all(color: theme.dividerColor),
+                                      Border.all(color: theme.dividerColor),
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      MainAxisAlignment.start,
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Container(
                                           padding: EdgeInsets.all(
@@ -453,7 +566,7 @@ class SessionBill extends StatelessWidget {
                                           fit: FlexFit.loose,
                                           child: Column(
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Text(
@@ -472,19 +585,19 @@ class SessionBill extends StatelessWidget {
                                                     children: [
                                                       TextSpan(
                                                         text:
-                                                            '${session['charger_id']} - ',
+                                                        '${session['charger_id']} - ',
                                                         style: theme
                                                             .textTheme.bodyLarge
                                                             ?.copyWith(
                                                           color: theme.textTheme
                                                               .bodyLarge?.color
                                                               ?.withOpacity(
-                                                                  0.7),
+                                                              0.7),
                                                         ),
                                                       ),
                                                       TextSpan(
                                                         text:
-                                                            '[${session['connector_id'].toString()}] ',
+                                                        '[${session['connector_id'].toString()}] ',
                                                         style: TextStyle(
                                                           color: theme
                                                               .colorScheme
@@ -499,27 +612,27 @@ class SessionBill extends StatelessWidget {
                                                           color: theme.textTheme
                                                               .bodyLarge?.color
                                                               ?.withOpacity(
-                                                                  0.7),
+                                                              0.7),
                                                         ),
                                                       ),
                                                       TextSpan(
                                                         text: _getConnectorTypeName(
                                                             session[
-                                                                'connector_type']),
+                                                            'connector_type']),
                                                         style: theme
                                                             .textTheme.bodyLarge
                                                             ?.copyWith(
                                                           color: theme.textTheme
                                                               .bodyLarge?.color
                                                               ?.withOpacity(
-                                                                  0.7),
+                                                              0.7),
                                                         ),
                                                       ),
                                                     ],
                                                   ),
                                                   maxLines: 2,
                                                   overflow:
-                                                      TextOverflow.ellipsis,
+                                                  TextOverflow.ellipsis,
                                                 ),
                                               ),
                                             ],
@@ -556,22 +669,18 @@ class SessionBill extends StatelessWidget {
                                   _buildInfoRow(
                                     context,
                                     'Reason',
-                                    session['Error'] != null &&
-                                            session['Error'].toString() !=
-                                                'NoError'
-                                        ? session['Error']
-                                        : 'Stopped by User',
+                                    '${session['stop_reason']}',
                                     icon: Icons.info_outline,
                                   ),
                                   SizedBox(height: 10),
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                                    MainAxisAlignment.spaceEvenly,
                                     children: [
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           Get.to(
-                                            () => const ContactUs(),
+                                                () => const ContactUs(),
                                             transition: Transition.rightToLeft,
                                             duration: const Duration(
                                                 milliseconds: 300),
@@ -597,12 +706,12 @@ class SessionBill extends StatelessWidget {
                                           elevation: 0,
                                           padding: EdgeInsets.symmetric(
                                               horizontal:
-                                                  mediaQuery.width * 0.04,
+                                              mediaQuery.width * 0.04,
                                               vertical:
-                                                  mediaQuery.height * 0.01),
+                                              mediaQuery.height * 0.01),
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(8),
+                                            BorderRadius.circular(8),
                                             side: BorderSide(
                                                 color: theme.colorScheme.primary
                                                     .withOpacity(0.3)),
@@ -613,30 +722,30 @@ class SessionBill extends StatelessWidget {
                                         onPressed: controller.isLoading.value
                                             ? null
                                             : () async {
-                                                final sessionId =
-                                                    session['session_id']
-                                                            ?.toString() ??
-                                                        '';
-                                                final chargerId =
-                                                    session['charger_id']
-                                                            ?.toString() ??
-                                                        '';
+                                          final sessionId =
+                                              session['session_id']
+                                                  ?.toString() ??
+                                                  '';
+                                          final chargerId =
+                                              session['charger_id']
+                                                  ?.toString() ??
+                                                  '';
 
-                                                if (sessionId.isEmpty ||
-                                                    chargerId.isEmpty) {
-                                                  CustomSnackbar.showError(
-                                                    message:
-                                                        "Missing session or charger information",
-                                                  );
-                                                  return;
-                                                }
+                                          if (sessionId.isEmpty ||
+                                              chargerId.isEmpty) {
+                                            CustomSnackbar.showError(
+                                              message:
+                                              "Missing session or charger information",
+                                            );
+                                            return;
+                                          }
 
-                                                await controller
-                                                    .downloadInvoice(
-                                                  sessionId: sessionId,
-                                                  chargerId: chargerId,
-                                                );
-                                              },
+                                          await controller
+                                              .downloadInvoice(
+                                            sessionId: sessionId,
+                                            chargerId: chargerId,
+                                          );
+                                        },
                                         icon: Icon(
                                           Icons.download,
                                           color: theme.colorScheme.primary,
@@ -657,12 +766,12 @@ class SessionBill extends StatelessWidget {
                                           elevation: 0,
                                           padding: EdgeInsets.symmetric(
                                               horizontal:
-                                                  mediaQuery.width * 0.04,
+                                              mediaQuery.width * 0.04,
                                               vertical:
-                                                  mediaQuery.height * 0.01),
+                                              mediaQuery.height * 0.01),
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(8),
+                                            BorderRadius.circular(8),
                                             side: BorderSide(
                                                 color: theme.colorScheme.primary
                                                     .withOpacity(0.3)),

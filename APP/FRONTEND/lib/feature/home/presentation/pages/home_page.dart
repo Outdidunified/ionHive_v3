@@ -70,6 +70,11 @@ class HomePage extends StatelessWidget {
                   right: 16,
                   child: _buildRefreshButton(context, controller),
                 ),
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 140,
+                  right: 16,
+                  child: ActiveChargersbutton(context, controller),
+                ),
               ],
             ),
           ),
@@ -414,6 +419,40 @@ class HomePage extends StatelessWidget {
         ),
         onPressed: () {
           controller.refreshData();
+        },
+      ),
+    );
+  }
+
+  Widget ActiveChargersbutton(BuildContext context, HomeController controller)       {
+    final isDarkTheme = controller.isDarkMode.value;
+
+    return Container(
+      height: 50,
+      width: 50,
+      decoration: BoxDecoration(
+        color: isDarkTheme
+            ? Colors.green[800]
+            : const Color.fromARGB(255, 185, 227, 185),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDarkTheme ? 0.3 : 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: Image.asset(
+          'assets/icons/saved_device.png',
+          color: isDarkTheme
+              ? const Color.fromARGB(255, 185, 227, 185)
+              : Colors.green[800],
+          height: 25,
+        ),
+        onPressed: () {
+          controller.fetchactivechargers();
         },
       ),
     );
