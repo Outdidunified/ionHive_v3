@@ -55,7 +55,6 @@ const handleSelectRemove = async (userId) => {
     }
 };
 
-
   // Search assign users name
   const handleSearchInputChange = (e) => {
     const inputValue = e.target.value.toUpperCase();
@@ -64,7 +63,7 @@ const handleSelectRemove = async (userId) => {
       setErrorMessage2(''); // Clear any existing error message
     } else {
       const filteredAssignUsers = originalUsersToUnassign.filter((item) =>
-        item.username?.toUpperCase().includes(inputValue) // Use optional chaining
+        item.email_id?.toUpperCase().includes(inputValue) // Use optional chaining
       );
       setUsersToUnassign(filteredAssignUsers);
 
