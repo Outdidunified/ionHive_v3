@@ -173,30 +173,35 @@ const [connectors, setConnectors] = useState(
 
     // Function to fetch the type name options from the backend and update the connectors
     const updateConnectors = useCallback(async (updatedConnector) => {
-        try {
-            const res = await axiosInstance.post('/superadmin/fetchConnectorTypeName', {
-                connector_type: updatedConnector.connector_type
-            });
+    try {
+        const res = await axiosInstance({
+            method: 'post', // POST method to fetch connector type name
+            url: '/superadmin/fetchConnectorTypeName', // Endpoint to fetch connector type details
+            data: {
+                connector_type: updatedConnector.connector_type,
+            },
+        });
 
-            if (res.data && res.data.status === 'Success') {
-                if (typeof res.data.data === 'string' && res.data.data === 'No details were found') {
-                    setErrorMessage('No details were found');
-                    setConnectors([]); // Clear connectors if no details found
-                } else if (Array.isArray(res.data.data)) {
-                    const newConnectors = [...connectors];
-                    newConnectors[updatedConnector.index].typeOptions = res.data.data.map(option => option.output_type_name);
-                    setConnectors(newConnectors);
-                    setErrorMessage(null); // Clear any previous error message
-                }
-            } else {
-                setErrorMessage('Error fetching data. Please try again.');
+        if (res.data && res.data.status === 'Success') {
+            if (typeof res.data.data === 'string' && res.data.data === 'No details were found') {
+                setErrorMessage('No details were found');
+                setConnectors([]); // Clear connectors if no details found
+            } else if (Array.isArray(res.data.data)) {
+                const newConnectors = [...connectors];
+                newConnectors[updatedConnector.index].typeOptions = res.data.data.map(option => option.output_type_name);
+                setConnectors(newConnectors);
+                setErrorMessage(null); // Clear any previous error message
             }
-        } catch (err) {
-            console.error('Error updating connectors:', err);
-            setErrorMessage('No details were found');
-            setConnectors([]); // Clear connectors if an error occurs
+        } else {
+            setErrorMessage('Error fetching data. Please try again.');
         }
-    }, [connectors]);
+    } catch (err) {
+        console.error('Error updating connectors:', err);
+        setErrorMessage('No details were found');
+        setConnectors([]); // Clear connectors if an error occurs
+    }
+}, [connectors]);
+
 
     
     // Handle connector type change and trigger backend fetch for type names
@@ -236,59 +241,69 @@ const [connectors, setConnectors] = useState(
     }, [connectors, updateConnectors]);
 
    
+const editManageDevice = useCallback(async (e) => {
+    e.preventDefault();
 
-    const editManageDevice = async (e) => {
-        e.preventDefault();
-      
-        const chargerIDRegex = /^[a-zA-Z0-9]{1,14}$/;
-        if (!charger_id) {
-          setErrorMessage("Charger ID can't be empty.");
-          return;
-        }
-        if (!chargerIDRegex.test(charger_id)) {
-          setErrorMessage('Oops! Charger ID must be a maximum of 14 characters.');
-          return;
-        }
-      
-        const vendorRegex = /^[a-zA-Z0-9 ]{1,20}$/;
-        if (!vendor) {
-          setErrorMessage("Vendor name can't be empty.");
-          return;
-        }
-        if (!vendorRegex.test(vendor)) {
-          setErrorMessage('Oops! Vendor name must be 1 to 20 characters and contain alphanumeric and numbers.');
-          return;
-        }
-      
-        try {
-          setLoading(true);
-      
-          const response = await axiosInstance.post('/superadmin/UpdateCharger', {
-            _id,
-            charger_id,
-            charger_model,
-            charger_type,
-            vendor,
-            connectors,
-            max_current: parseInt(max_current, 10),
-            max_power: parseInt(max_power, 10),
-            wifi_module,
-            bluetooth_module,
-            modified_by: userInfo.email_id,
-          });
-      
-          if (response.data?.status === 'Success') {
+    // Validate Charger ID
+    const chargerIDRegex = /^[a-zA-Z0-9]{1,14}$/;
+    if (!charger_id) {
+        setErrorMessage("Charger ID can't be empty.");
+        return;
+    }
+    if (!chargerIDRegex.test(charger_id)) {
+        setErrorMessage('Oops! Charger ID must be a maximum of 14 characters.');
+        return;
+    }
+
+    // Validate Vendor Name
+    const vendorRegex = /^[a-zA-Z0-9 ]{1,20}$/;
+    if (!vendor) {
+        setErrorMessage("Vendor name can't be empty.");
+        return;
+    }
+    if (!vendorRegex.test(vendor)) {
+        setErrorMessage('Oops! Vendor name must be 1 to 20 characters and contain alphanumeric and numbers.');
+        return;
+    }
+
+    try {
+        setLoading(true);
+
+        // Make POST request to update charger details
+        const response = await axiosInstance({
+            method: 'post',
+            url: '/superadmin/UpdateCharger',
+            data: {
+                _id,
+                charger_id,
+                charger_model,
+                charger_type,
+                vendor,
+                connectors,
+                max_current: parseInt(max_current, 10),
+                max_power: parseInt(max_power, 10),
+                wifi_module,
+                bluetooth_module,
+                modified_by: userInfo.email_id,
+            },
+        });
+
+        // Check if the response is successful
+        if (response.data?.status === 'Success') {
             showSuccessAlert('Charger updated successfully');
-            backManageDevice();
-          } else {
-            showErrorAlert(response.data?.message || 'Unknown error');
-          }
-        } catch (error) {
-          showErrorAlert(error.response?.data?.message || 'An error occurred while updating the charger');
-        } finally {
-          setLoading(false);
+            backManageDevice(); // Handle back action
+        } else {
+            setErrorMessage(response.data?.message || 'Unknown error');
         }
-      };
+    } catch (error) {
+        // Handle errors (response or network error)
+        const errorMessage = error.response?.data?.message || 'An error occurred while updating the charger';
+        setErrorMessage(errorMessage);
+    } finally {
+        setLoading(false);
+    }
+}, [charger_id, charger_model, charger_type, vendor, connectors, max_current, max_power, wifi_module, bluetooth_module, userInfo.email_id, _id, backManageDevice]);
+
       
     return {
         backManageDevice,

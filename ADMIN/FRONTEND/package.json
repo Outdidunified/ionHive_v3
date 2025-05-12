@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "start": "vite",         
+    "start": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -21,6 +21,7 @@
     "apexcharts": "^4.5.0",
     "axios": "^1.8.4",
     "chart.js": "^4.4.8",
+    "dayjs": "^1.11.13",
     "http-proxy-middleware": "^3.0.5",
     "jquery": "^3.7.1",
     "qrcode.react": "^4.2.0",

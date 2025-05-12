@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../../../../utils/utils';
-import { showErrorAlert,showWarningAlert,showSuccessAlert } from '../../../../utils/alert';
+import { showErrorAlert, showWarningAlert, showSuccessAlert } from '../../../../utils/alert';
+
 const useAssignReseller = (userInfo, backManageDevice) => {
   const [chargers, setChargers] = useState([]);
   const [resellers, setResellers] = useState([]);
@@ -14,7 +15,10 @@ const useAssignReseller = (userInfo, backManageDevice) => {
   // Fetch Resellers
   useEffect(() => {
     if (!FetchSpecificUserRoleForSelectionCalled.current) {
-      axiosInstance.get('/superadmin/FetchResellersToAssgin')
+      axiosInstance({
+        method: 'get', // GET method to fetch resellers
+        url: '/superadmin/FetchResellersToAssgin', // Endpoint to fetch resellers
+      })
         .then((res) => setResellers(res.data.data))
         .catch((err) => console.error('Error fetching resellers:', err));
 
@@ -25,7 +29,10 @@ const useAssignReseller = (userInfo, backManageDevice) => {
   // Fetch Unallocated Chargers
   useEffect(() => {
     if (!FetchUnAllocatedChargerToAssginCalled.current) {
-      axiosInstance.get('/superadmin/FetchUnAllocatedChargerToAssgin')
+      axiosInstance({
+        method: 'get', // GET method to fetch unallocated chargers
+        url: '/superadmin/FetchUnAllocatedChargerToAssgin', // Endpoint to fetch unallocated chargers
+      })
         .then((res) => setChargers(res.data.data))
         .catch((err) => console.error('Error fetching unallocated chargers:', err));
 
@@ -68,10 +75,14 @@ const useAssignReseller = (userInfo, backManageDevice) => {
     try {
       setLoading(true);
   
-      const response = await axiosInstance.post('/superadmin/AssginChargerToReseller', {
-        reseller_id: parseInt(reseller_id),
-        charger_ids,
-        modified_by: userInfo.email_id,
+      const response = await axiosInstance({
+        method: 'post', // POST method to assign chargers to reseller
+        url: '/superadmin/AssginChargerToReseller', // Endpoint for assigning chargers
+        data: {
+          reseller_id: parseInt(reseller_id),
+          charger_ids,
+          modified_by: userInfo.email_id,
+        },
       });
   
       if (response.status === 200) {
@@ -88,8 +99,6 @@ const useAssignReseller = (userInfo, backManageDevice) => {
       setLoading(false);
     }
   };
-  
-
 
   return {
     chargers,
@@ -102,7 +111,7 @@ const useAssignReseller = (userInfo, backManageDevice) => {
     handleChargerChange,
     handleModelChange,
     handleSubmit,
-    loading
+    loading,
   };
 };
 

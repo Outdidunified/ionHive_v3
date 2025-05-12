@@ -2230,7 +2230,7 @@ const UpdateUserProfile = async (req, res) => {
                 $set: {
                     username,
                     phone_no,
-                    password,
+                    password: parseInt(password),
                     modified_date: new Date(),
                     modified_by: username
                 }

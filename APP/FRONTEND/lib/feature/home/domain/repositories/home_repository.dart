@@ -17,6 +17,17 @@ class HomeRepository {
     }
   }
 
+  Future<Fetchactivechargersresponse> fetchactivechargers(
+      int user_id, String email, String authToken) async {
+    try {
+      final responseJson =
+      await _api.fetchactivechargers(user_id, email, authToken);
+      return Fetchactivechargersresponse.fromJson(responseJson);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
 
 

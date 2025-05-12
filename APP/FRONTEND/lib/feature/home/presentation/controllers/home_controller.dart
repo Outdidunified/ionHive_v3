@@ -766,6 +766,26 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  Future<void> fetchactivechargers() async {
+    final authToken = sessionController.token.value;
+    final userId = sessionController.userId.value;
+    final emailId = sessionController.emailId.value;
+
+    try {
+
+      await _homeRepository.fetchactivechargers(
+        userId,
+        emailId,
+        authToken,
+      );
+    } catch (e) {
+      debugPrint('Error downloading session details: $e');
+      CustomSnackbar.showError(
+          message: "Issue downloading session details. Try again later.");
+    }
+  }
+
+
   void navigateToAllChargers() {
     if (chargers.isEmpty) {
       Get.snackbar(

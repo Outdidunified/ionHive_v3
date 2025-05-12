@@ -68,4 +68,36 @@ class HomeAPICalls {
       throw HttpException(500, '$e');
     }
   }
+
+  Future<Map<String, dynamic>> fetchactivechargers(int user_id, String email,
+      String authToken) async {
+    final url = HomeUrls.fetchactivechargers;
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: jsonEncode({
+          'email_id': email,
+          'user_id': user_id,
+
+        }),
+      );
+      final data = jsonDecode(response.body);
+      debugPrint('fetched active chargers ; $data');
+
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw HttpException(408, 'Request timed out. Please try again.');
+    } on http.ClientException {
+      throw HttpException(503,
+          'Unable to reach the server. \nPlease check your connection or try again later.');
+    } catch (e) {
+      debugPrint("Error: $e");
+      throw HttpException(500, '$e');
+    }
+  }
 }

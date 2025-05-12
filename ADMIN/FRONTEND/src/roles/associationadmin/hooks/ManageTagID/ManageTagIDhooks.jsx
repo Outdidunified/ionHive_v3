@@ -16,37 +16,46 @@ const useManageTagID = (userInfo) => {
     const [initialTagIDExpiryDateD, setInitialTagIDExpiryDate] = useState('');
     const [isloading, setIsLoading] = useState(false)
     const [editloading, setEditLoading] = useState(false)
-    const fetchTagID = useCallback(async () => {
-        try {
-            const res = await axiosInstance.post('/associationadmin/FetchAllTagIDs', {
-                association_id: userInfo.association_id
-            });
+    
+   const fetchTagID = useCallback(async () => {
+    try {
+        setLoading(true); // Always set loading true at start
 
-            if (res.data && res.data.status === 'Success') {
-                if (typeof res.data.data === 'string' && res.data.data === 'No tags found') {
-                    // If the response indicates no tags were found
-                    setError(res.data.data);
-                    setData([]); // Clear the data since no tags were found
-                } else if (Array.isArray(res.data.data)) {
-                    // If the data is an array of tag IDs, set it directly
-                    setData(res.data.data);
-                    setPosts(res.data.data); // Add this line
-                    setError(null);
-                    // Clear any previous errors
-                } else {
-                    setError('Unexpected response format.');
-                }
+        const res = await axiosInstance.post('/associationadmin/FetchAllTagIDs', {
+            association_id: userInfo.association_id
+        });
+
+        const data = res.data;
+
+        if (res.status === 200 && data.status === 'Success') {
+            if (typeof data.data === 'string' && data.data === 'No tags found') {
+                setError('No tags found');
+                setData([]);
+                setPosts([]);
+            } else if (Array.isArray(data.data)) {
+                setData(data.data);
+                setPosts(data.data);
+                setError(null);
             } else {
-                setError('Error fetching data. Please try again.');
+                setError('Unexpected response format.');
             }
-
-            setLoading(false);
-        } catch (err) {
-            console.error('Error fetching data:', err);
-            setError('Error fetching data. Please try again.');
-            setLoading(false);
+        } else {
+            setError(data.message || 'Error fetching data.');
+            setData([]);
+            setPosts([]);
         }
-    }, [userInfo.association_id]);
+    } catch (err) {
+        console.error('Fetch error:', err);
+
+        const errorMessage = err.response?.data?.message || 'Error fetching data. Please try again.';
+        setError(errorMessage); // Display backend message like "No tags found"
+        setData([]);
+        setPosts([]);
+    } finally {
+        setLoading(false); // Always stop loading
+    }
+}, [userInfo.association_id]);
+
 
     useEffect(() => {
         if (!fetchUserRoleCalled.current) {

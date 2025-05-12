@@ -2758,7 +2758,7 @@ const UpdateUserProfile = async (req, res) => {
                 $set: {
                     username,
                     phone_no,
-                    password,
+                    password: parseInt(password),
                     modified_by,
                     modified_date: new Date(),
                     status

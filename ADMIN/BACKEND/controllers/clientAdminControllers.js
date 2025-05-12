@@ -2446,7 +2446,7 @@ async function UpdateUserProfile(req, res) {
                 $set: {
                     username,
                     phone_no,
-                    password,
+                    password: parseInt(password),
                     modified_by: username,
                     modified_date: new Date()
                 }

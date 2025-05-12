@@ -157,107 +157,116 @@ const useAddManageDevice = (userInfo) => {
         updateConnectors({ ...updatedConnectors[index], index });
     };
 
-    const addManageDevice = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-      
-        // Validate charger ID
-        const chargerIDRegex = /^[a-zA-Z0-9]{1,20}$/;
-        if (!charger_id) {
-          setErrorMessage("Charger ID can't be empty.");
-          setLoading(false);
-          return;
-        }
-        if (!chargerIDRegex.test(charger_id)) {
-          setErrorMessage('Oops! Charger ID must be a maximum of 20 characters.');
-          setLoading(false);
-          return;
-        }
-      
-        // Validate vendor
-        const vendorRegex = /^[a-zA-Z0-9 ]{1,20}$/;
-        if (!vendor) {
-          setErrorMessage("Vendor name can't be empty.");
-          setLoading(false);
-          return;
-        }
-        if (!vendorRegex.test(vendor)) {
-          setErrorMessage('Oops! Vendor name must be 1 to 20 characters and contain alphanumeric characters.');
-          setLoading(false);
-          return;
-        }
-      
-const validConnectors = connectors.filter(conn => conn.connector_type && conn.typeOptions.length > 0);
-if (validConnectors.length === 0) {
-  showErrorAlert("No Connectors Found", "Connectors not available");
-  setLoading(false);
-  return;
-}
+  const addManageDevice = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-      
-        try {
-          const max_current = parseInt(maxCurrent);
-          const max_power = parseInt(maxPower);
-      
-          const payload = {
-            charger_id,
-            charger_model,
-            charger_type: selectChargerType,
-            connectors,
-            vendor,
-            max_current,
-            max_power,
-            bluetooth_module,
-            wifi_module,
-            created_by: userInfo.email_id,
-          };
-      
-          const response = await axiosInstance.post('/superadmin/CreateCharger', payload);
-          setLoading(false);
-      
-          if (response.data.status === 'Success') {
-            showSuccessAlert("Charger added successfully");
-      
-            // Reset form fields
-            setChargerID('');
-            setModel('');
-            setSelectedChargerType('');
-            setVendor('');
-            setMaxCurrent('');
-            setMaxPower('');
-            setWiFiModule('');
-            setBluetoothModule('');
-            setConnectors([{ connector_id: 1, connector_type: '', type_name: '', typeOptions: [] }]);
-      
-            backManageDevice();
-          } else {
-            showErrorAlert("Error", `Failed to add charger: ${response.data.message}`);
-          }
-        } catch (error) {
-          setLoading(false);
-          const errorMessage = error?.response?.data?.message || error.message;
-          showErrorAlert("Error", `An error occurred while adding the charger: ${errorMessage}`);
-        }
-      };
-      
+  // Validate charger ID
+  const chargerIDRegex = /^[a-zA-Z0-9]{1,14}$/;
+  if (!charger_id) {
+    setErrorMessage("Charger ID can't be empty.");
+    setLoading(false);
+    return;
+  }
+  if (!chargerIDRegex.test(charger_id)) {
+    setErrorMessage("Oops! Charger ID must be alphanumeric and up to 14 characters.");
+    setLoading(false);
+    return;
+  }
+
+  // Validate vendor
+  const vendorRegex = /^[a-zA-Z0-9 ]{1,20}$/;
+  if (!vendor) {
+    setErrorMessage("Vendor name can't be empty.");
+    setLoading(false);
+    return;
+  }
+  if (!vendorRegex.test(vendor)) {
+    setErrorMessage('Oops! Vendor name must be 1 to 20 characters and contain alphanumeric characters.');
+    setLoading(false);
+    return;
+  }
+
+  // Validate connectors
+  const validConnectors = connectors.filter(conn => conn.connector_type && conn.typeOptions.length > 0);
+  if (validConnectors.length === 0) {
+    showErrorAlert("No Connectors Found", "Connectors not available");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const max_current = parseInt(maxCurrent);
+    const max_power = parseInt(maxPower);
+
+    const payload = {
+      charger_id,
+      charger_model,
+      charger_type: selectChargerType,
+      connectors,
+      vendor,
+      max_current,
+      max_power,
+      bluetooth_module,
+      wifi_module,
+      created_by: userInfo.email_id,
+    };
+
+    // Make the POST request with explicit method
+    const response = await axiosInstance({
+      method: 'post',  // Explicitly define the method here
+      url: '/superadmin/CreateCharger',
+      data: payload,
+    });
+    setLoading(false);
+
+    if (response.data.status === 'Success') {
+      showSuccessAlert("Charger added successfully");
+
+      // Reset form fields
+      setChargerID('');
+      setModel('');
+      setSelectedChargerType('');
+      setVendor('');
+      setMaxCurrent('');
+      setMaxPower('');
+      setWiFiModule('');
+      setBluetoothModule('');
+      setConnectors([{ connector_id: 1, connector_type: '', type_name: '', typeOptions: [] }]);
+
+      backManageDevice();
+    } else {
+      showErrorAlert("Error", `Failed to add charger: ${response.data.message}`);
+    }
+  } catch (error) {
+    setLoading(false);
+    const errorMessage = error?.response?.data?.message || error.message;
+    showErrorAlert("Error", `An error occurred while adding the charger: ${errorMessage}`);
+  }
+};
+
 
     
-    useEffect(() => {
-        if (!fetchDataCalled.current) {
-            const url = '/superadmin/FetchCharger';  // Use the relative path
-    
-            axiosInstance.get(url)
-                .then((res) => {
-                    setData(res.data.data);
-                })
-                .catch((err) => {
-                    console.error('Error fetching data:', err);
-                    setErrorMessage('Error fetching data. Please try again.');
-                });
-    
-            fetchDataCalled.current = true;
-        }
-    }, []);  
+useEffect(() => {
+  if (!fetchDataCalled.current) {
+    const url = '/superadmin/FetchCharger';  // Use the relative path
+
+    // Explicitly define the method as 'get'
+    axiosInstance({
+      method: 'get',  // Explicitly define the method here
+      url: url,
+    })
+      .then((res) => {
+        setData(res.data.data);
+      })
+      .catch((err) => {
+        console.error('Error fetching data:', err);
+        setErrorMessage('Error fetching data. Please try again.');
+      });
+
+    fetchDataCalled.current = true;
+  }
+}, []);
 
 
     return {

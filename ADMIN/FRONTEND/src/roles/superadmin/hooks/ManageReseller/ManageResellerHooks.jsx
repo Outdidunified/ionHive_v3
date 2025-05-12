@@ -16,9 +16,11 @@ const useResellerData = (userInfo) => {
       axiosInstance
         .get(url)
         .then((res) => {
-          setPosts(res.data.data); 
+          setData(res.data.data);      // <-- store full dataset here
+          setPosts(res.data.data);     // <-- also store it for display and filtering
           setLoading(false);
         })
+
         .catch((err) => {
           console.error('Error fetching data:', err);
           setError('Error fetching data. Please try again.');
@@ -27,29 +29,20 @@ const useResellerData = (userInfo) => {
       FetchResellersCalled.current = true;
     }
   }, []);
-  
+
   // Search functionality
   const handleSearchInputChange = (e) => {
-    const inputValue = e.target.value.toUpperCase();
+    const inputValue = e.target.value.toLowerCase();
     if (Array.isArray(data)) {
       const filteredData = data.filter((item) =>
-        item.reseller_name.toUpperCase().includes(inputValue)
+        item.reseller_name.toLowerCase().includes(inputValue)
       );
       setPosts(filteredData);
+      console.log('filtered data', filteredData)
     }
   };
 
-  // Update posts with fetched data
-  useEffect(() => {
-    switch (data) {
-        case 'filteredData':
-            setPosts(filteredData);
-            break;
-        default:
-            setPosts(data);
-            break;
-    }
-}, [data, filteredData]);
+  
 
   return {
     data,

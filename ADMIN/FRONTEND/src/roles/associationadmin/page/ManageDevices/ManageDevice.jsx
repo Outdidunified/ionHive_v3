@@ -146,7 +146,7 @@ const ManageDevice = ({ userInfo, handleLogout }) => {
                 </tr>
             ) : error ? (
                 <tr>
-                    <td colSpan="10" style={{ textAlign: 'center' }}>Error: {error}</td>
+                    <td colSpan="10" style={{ textAlign: 'center' }}>{error}</td>
                 </tr>
             ) : Array.isArray(posts) && posts.length === 0 ? (
                 <tr>
