@@ -5,6 +5,9 @@ const { sendForceDisconnect } = require("../utils/broadcastUtils");
 const clientConnectionUtils = require("../utils/clientConnectionUtils");
 const timeUtils = require('../../utils/timeUtils');
 
+// Map to store timeout IDs for each charger-connector combination
+const timeoutMap = new Map();
+
 const validateStatusnotification = (data) => {
     return framevalidation(data, "StatusNotification.json");
 };
@@ -31,7 +34,6 @@ const handleStatusNotification = async (
     const formattedDate = timeUtils.getCurrentIST();
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId, {}];
-    let timeoutId;
     let db;
     let GenerateChargingSessionID;
 
@@ -150,28 +152,40 @@ const handleStatusNotification = async (
         }
 
         if (status === "Available") {
-            if (timeoutId) {
-                clearTimeout(timeoutId);
+            // Clear any existing timeout for this charger-connector combination
+            if (timeoutMap.has(key)) {
+                clearTimeout(timeoutMap.get(key));
+                logger.loggerInfo(`Cleared existing timeout for ${key}`);
             }
-            timeoutId = setTimeout(async () => {
-                const result = await dbService.updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
-                // if (result) {
-                //     // Send force disconnect message using our utility function
-                //     sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
-                //         "No action attempted. Automatically redirecting to home page.");
-                // }
 
-                logger.loggerInfo(`ChargerID ${uniqueIdentifier} - End charging session ${result ? "updated" : "not updated"}`);
+            // Set a new timeout for this charger-connector combination
+            const newTimeoutId = setTimeout(async () => {
+                const result = await dbService.updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
+                if (result) {
+                    // Send force disconnect message using our utility function
+                    sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
+                        "No action attempted. Automatically redirecting to home page.");
+                }
+
+                logger.loggerInfo(`ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId} - End charging session ${result ? "updated" : "not updated"}`);
+
+                // Remove the timeout from the map once it's executed
+                timeoutMap.delete(key);
             }, 50000);
+
+            // Store the timeout ID in the map
+            timeoutMap.set(key, newTimeoutId);
+            logger.loggerInfo(`Set new timeout for ${key}`);
 
             await dbService.deleteMeterValues(key, meterValuesMap);
             await dbService.NullTagIDInStatus(uniqueIdentifier, connectorId);
         } else {
-            if (timeoutId !== undefined) {
-                clearTimeout(timeoutId);
-                timeoutId = undefined; // Reset the timeout reference
+            // Clear any existing timeout for this charger-connector combination
+            if (timeoutMap.has(key)) {
+                clearTimeout(timeoutMap.get(key));
+                timeoutMap.delete(key);
+                logger.loggerInfo(`Cleared timeout for ${key} due to status: ${status}`);
             }
-
         }
 
         if (status === "Preparing") {
@@ -216,6 +230,16 @@ const handleStatusNotification = async (
         };
     } catch (error) {
         logger.loggerError(`Error handling StatusNotification for ChargerID ${uniqueIdentifier}: ${error.message}`);
+
+        // If we have connector ID information, clean up any timeouts for this charger-connector
+        if (requestPayload && requestPayload.connectorId) {
+            const errorKey = `${uniqueIdentifier}_${requestPayload.connectorId}`;
+            if (timeoutMap.has(errorKey)) {
+                clearTimeout(timeoutMap.get(errorKey));
+                timeoutMap.delete(errorKey);
+                logger.loggerInfo(`Cleared timeout for ${errorKey} due to error`);
+            }
+        }
 
         // Ensure we have a valid OCPP response even in case of error
         response = [3, requestId, {}];
