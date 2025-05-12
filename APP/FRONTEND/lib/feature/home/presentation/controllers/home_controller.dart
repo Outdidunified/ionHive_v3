@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/ChargingStation/presentation/pages/Chargingstation.dart';
+import 'package:ionhive/feature/Chargingpage/presentation/pages/Chargingpage.dart';
 import 'package:ionhive/feature/home/domain/repositories/home_repository.dart';
 import 'package:ionhive/feature/home/presentation/pages/Viewallnearbychargers.dart';
 import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
@@ -25,6 +26,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   Completer<GoogleMapController> mapControllerCompleter = Completer();
   PageController? stationPageController;
   SessionController? _sessionController;
+  final isFetchingActiveChargers = false.obs; // Loading state for fetchactivechargers
 
   Marker? _selectedLocationMarker;
   DateTime? _lastFetchTime;
@@ -766,42 +768,351 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+
   Future<void> fetchactivechargers() async {
     final authToken = sessionController.token.value;
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
 
+    isFetchingActiveChargers.value = true;
+    debugPrint('Fetching active chargers...');
     try {
-
-      await _homeRepository.fetchactivechargers(
+      final response = await _homeRepository.fetchactivechargers(
         userId,
         emailId,
         authToken,
       );
+
+      debugPrint('Fetched active chargers: ${response.toJson()}');
+
+      if (response.success && response.activechargers != null) {
+        if (response.activechargers is List && (response.activechargers as List).isEmpty) {
+          CustomSnackbar.showInfo(
+            message: "No active charging sessions found.",
+          );
+        } else if (response.activechargers is List) {
+          // Show a popup with the list of active chargers
+          final activeChargers = List<Map<String, dynamic>>.from(response.activechargers);
+          _showActiveChargersPopup(activeChargers);
+        } else {
+          debugPrint("Unexpected activechargers format: ${response.activechargers}");
+          CustomSnackbar.showError(
+            message: "Unexpected response format for active chargers.",
+          );
+        }
+      } else {
+        CustomSnackbar.showError(
+          message: response.message ?? "Failed to fetch active chargers.",
+        );
+      }
     } catch (e) {
-      debugPrint('Error downloading session details: $e');
+      debugPrint('Error fetching active chargers: $e');
       CustomSnackbar.showError(
-          message: "Issue downloading session details. Try again later.");
+        message: "Issue fetching active chargers. Try again later.",
+      );
+    } finally {
+      isFetchingActiveChargers.value = false;
+      debugPrint('Finished fetching active chargers');
     }
   }
 
+  void _showActiveChargersPopup(List<Map<String, dynamic>> activeChargers) {
+    final isDark = isDarkMode.value;
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 12,
+              spreadRadius: 2,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header with Gradient
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isDark
+                      ? [Colors.green.shade900, Colors.green.shade700]
+                      : [Colors.green.shade400, Colors.green.shade600],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.bolt,
+                    color: isDark ? Colors.white : Colors.white,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    "Active Charging Sessions",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // List of Active Chargers with Animation
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: activeChargers.length,
+                padding: const EdgeInsets.only(bottom: 16),
+                itemBuilder: (context, index) {
+                  final charger = activeChargers[index];
+                  // Extract connector details from the 'status' field
+                  final connectorDetailsMap = charger['status'] as Map<String, dynamic>?;
+                  print(connectorDetailsMap);
+
+                  Map<String, dynamic> connDetails;
+                  if (connectorDetailsMap != null) {
+                    connDetails = {
+                      'type': connectorDetailsMap['connector_type'] ?? 1,
+                      'power': connectorDetailsMap['power'] ?? 'N/A',
+                      'charger_status': connectorDetailsMap['charger_status'] ?? 'Unknown',
+                      'connector_id': connectorDetailsMap['connector_id']?.toString() ?? 'Unknown',
+                      'connection_status': connectorDetailsMap['connection_status'] ?? 'Unknown',
+                      'last_connection_time': connectorDetailsMap['last_connection_time'] ?? '',
+                    };
+                  } else {
+                    connDetails = {
+                      'type': 1,
+                      'power': 'N/A',
+                      'charger_status': 'Unknown',
+                      'connector_id': 'Unknown',
+                    };
+                  }
+
+                  // Determine connector type label
+                  final connectorTypeLabel = connDetails['type'] == 1 ? 'Socket' : (connDetails['type'] == 2 ? 'Gun' : 'Unknown');
+
+                  // Create charger details map
+                  Map<String, dynamic> chargerData = {
+                    'vendor': charger['vendor'] ?? 'Unknown',
+                    'max_power': charger['max_power'] ?? 'N/A',
+                    'address': charger['address'] ?? 'Unknown Location',
+                    'landmark': charger['landmark'] ?? 'No landmark information',
+                    'lat': charger['lat'] ?? currentPosition.value.latitude.toString(),
+                    'long': charger['long'] ?? currentPosition.value.longitude.toString(),
+                    'charger_id': charger['charger_id']?.toString(),
+                    'status': charger['status'], // Include the full status object
+                  };
+
+                  return AnimatedOpacity(
+                    opacity: 1.0,
+                    duration: Duration(milliseconds: 300 + (index * 100)),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        color: isDark ? Colors.grey.shade800 : Colors.white,
+                        child: InkWell(
+                          onTap: () {
+                            Get.back(); // Close the bottom sheet
+                            // Navigate to ChargingPage with charger details
+                            Get.to(
+                                  () => ChargingPage(
+                                chargerId: charger['charger_id'].toString(),
+                                chargerDetails: chargerData,
+                                connectorId: connDetails['connector_id'],
+                                connectorDetails: connDetails,
+                                unitPrice: double.tryParse(charger['unit_price']?.toString() ?? '0.0') ?? 0.0,
+                              ),
+                              transition: Transition.rightToLeft,
+                              duration: const Duration(milliseconds: 300),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                // Charger Icon
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade100,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.ev_station,
+                                    color: Colors.green.shade700,
+                                    size: 28,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                // Charger Details
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Charger ID: ${charger['charger_id'] ?? 'Unknown'} | Connector ID: ${connDetails['connector_id']}",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        charger['address'] ?? 'Unknown Location',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: connDetails['charger_status'] == 'Charging'
+                                                  ? Colors.green.shade100
+                                                  : Colors.red.shade100,
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: Text(
+                                              connDetails['charger_status'],
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                                color: connDetails['charger_status'] == 'Charging'
+                                                    ? Colors.green.shade700
+                                                    : Colors.red.shade700,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue.shade100,
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: Text(
+                                              connectorTypeLabel,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.blue.shade700,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Trailing Arrow
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                  size: 18,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Custom Close Button (Full Width)
+            Align(
+              alignment: Alignment.center,
+              child: GestureDetector(
+                onTap: () {
+                  Get.back(); // Close the bottom sheet
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isDark
+                          ? [Colors.green.shade900, Colors.green.shade700]
+                          : [Colors.green.shade400, Colors.green.shade600],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Close",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
 
   void navigateToAllChargers() {
     if (chargers.isEmpty) {
-      Get.snackbar(
-        'No Chargers',
-        'No nearby chargers available',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomSnackbar.showInfo(message: 'No Active Charging Found');
     } else {
       Get.to(
-        () => ViewAllNearbyChargers(),
+            () => ViewAllNearbyChargers(),
         transition: Transition.rightToLeft,
         duration: Duration(milliseconds: 300),
       );
     }
   }
-
   Future<void> launchGoogleMapsNavigation(LatLng destination) async {
     debugPrint("lat long : $destination");
     final uri = Uri.parse(

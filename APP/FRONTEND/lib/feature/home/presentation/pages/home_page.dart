@@ -55,7 +55,7 @@ class HomePage extends StatelessWidget {
                   child: _buildSearchField(context, controller),
                 ),
                 Positioned(
-                  top: MediaQuery.of(context).padding.top + 16,
+                  top: MediaQuery.of(context).padding.top + 18,
                   right: 16,
                   child: _buildQrScannerButton(context, controller),
                 ),
@@ -66,12 +66,12 @@ class HomePage extends StatelessWidget {
                   child: _buildStationCardsList(controller, context),
                 ),
                 Positioned(
-                  top: MediaQuery.of(context).padding.top + 80,
-                  right: 16,
+                  bottom: MediaQuery.of(context).padding.top + 165,
+                  left: 16,
                   child: _buildRefreshButton(context, controller),
                 ),
                 Positioned(
-                  top: MediaQuery.of(context).padding.top + 140,
+                  top: MediaQuery.of(context).padding.top + 70,
                   right: 16,
                   child: ActiveChargersbutton(context, controller),
                 ),
@@ -133,25 +133,23 @@ class HomePage extends StatelessWidget {
         Positioned(
           right: 16,
           bottom: MediaQuery.of(context).size.height < 500
-              ? 160
-              : (MediaQuery.of(context).size.height < 600 ? 180 : 200),
+              ? 120
+              : (MediaQuery.of(context).size.height < 600 ? 140 : 200),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                height: 50,
-                width: 50,
-                margin: const EdgeInsets.only(bottom: 8),
+                height: 40,
+                width: 40,
+                margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: isDarkTheme
-                      ? Colors.green[800]
-                      : const Color.fromARGB(255, 185, 227, 185),
+                  color: Colors.green[800],
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(isDarkTheme ? 0.3 : 0.1),
                       blurRadius: 4,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -165,29 +163,25 @@ class HomePage extends StatelessWidget {
                   onPressed: controller.zoomIn,
                   child: Image.asset(
                     'assets/icons/zoom-in.png',
-                    height: 24,
-                    width: 24,
+                    height: 20,
+                    width: 20,
                     fit: BoxFit.contain,
-                    color: isDarkTheme
-                        ? const Color.fromARGB(255, 185, 227, 185)
-                        : Colors.green[800],
+                    color: const Color.fromARGB(255, 185, 227, 185),
                   ),
                 ),
               ),
               Container(
-                height: 50,
-                width: 50,
-                margin: const EdgeInsets.only(bottom: 8),
+                height: 40,
+                width: 40,
+                margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  color: isDarkTheme
-                      ? Colors.green[800]
-                      : const Color.fromARGB(255, 185, 227, 185),
+                  color: Colors.green[800],
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(isDarkTheme ? 0.3 : 0.1),
                       blurRadius: 4,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -201,28 +195,24 @@ class HomePage extends StatelessWidget {
                   onPressed: controller.zoomOut,
                   child: Image.asset(
                     'assets/icons/zoom-out.png',
-                    height: 24,
-                    width: 24,
+                    height: 20,
+                    width: 20,
                     fit: BoxFit.contain,
-                    color: isDarkTheme
-                        ? const Color.fromARGB(255, 185, 227, 185)
-                        : Colors.green[800],
+                    color: const Color.fromARGB(255, 185, 227, 185),
                   ),
                 ),
               ),
               Container(
-                height: 50,
-                width: 50,
+                height: 40,
+                width: 40,
                 decoration: BoxDecoration(
-                  color: isDarkTheme
-                      ? Colors.green[800]
-                      : const Color.fromARGB(255, 185, 227, 185),
+                  color: Colors.green[800],
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(isDarkTheme ? 0.3 : 0.1),
                       blurRadius: 4,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -236,20 +226,16 @@ class HomePage extends StatelessWidget {
                   onPressed: controller.zoomToCurrentLocation,
                   child: Icon(
                     Icons.my_location,
-                    size: 24,
-                    color: isDarkTheme
-                        ? const Color.fromARGB(255, 185, 227, 185)
-                        : Colors.green[800],
+                    size: 20,
+                    color: const Color.fromARGB(255, 185, 227, 185),
                   ),
                 ),
               ),
             ],
           ),
-        ),
-      ],
+        )   ],
     );
   }
-
   Widget _buildSearchField(BuildContext context, HomeController controller) {
     final isDarkTheme = controller.isDarkMode.value;
 
@@ -266,7 +252,7 @@ class HomePage extends StatelessWidget {
               const curve = Curves.easeInOut;
 
               var tween =
-                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
               var offsetAnimation = animation.drive(tween);
 
               return SlideTransition(
@@ -302,15 +288,15 @@ class HomePage extends StatelessWidget {
       },
       child: AbsorbPointer(
         child: Container(
-          height: 48,
+          height: 40,
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(24),
             border: isDarkTheme
                 ? Border.all(
-                    color: Colors.grey.withOpacity(0.3),
-                    width: 0.8,
-                  )
+              color: Colors.grey.withOpacity(0.3),
+              width: 0.8,
+            )
                 : null,
             boxShadow: [
               BoxShadow(
@@ -323,13 +309,13 @@ class HomePage extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Icon(
                 Icons.search,
                 color: Theme.of(context).hintColor,
-                size: 20,
+                size: 16,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(
                 child: TextField(
                   decoration: InputDecoration(
@@ -337,56 +323,50 @@ class HomePage extends StatelessWidget {
                     border: InputBorder.none,
                     hintStyle: TextStyle(
                       color: Theme.of(context).hintColor,
-                      fontSize: 14,
+                      fontSize: 12,
                     ),
                     contentPadding: EdgeInsets.zero,
                     isDense: true,
                   ),
                   style: TextStyle(
                     color: Theme.of(context).textTheme.headlineLarge?.color,
-                    fontSize: 14,
+                    fontSize: 12,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
             ],
           ),
         ),
       ),
     );
   }
-
-  Widget _buildQrScannerButton(
-      BuildContext context, HomeController controller) {
+  Widget _buildQrScannerButton(BuildContext context, HomeController controller) {
     final isDarkTheme = controller.isDarkMode.value;
 
     return Container(
-      height: 50,
-      width: 50,
+      height: 40,
+      width: 40,
       decoration: BoxDecoration(
-        color: isDarkTheme
-            ? Colors.green[800]
-            : const Color.fromARGB(255, 185, 227, 185),
+        color: Colors.green[800],
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(isDarkTheme ? 0.3 : 0.1),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: IconButton(
         icon: Icon(
           Icons.qr_code_scanner,
-          color: isDarkTheme
-              ? const Color.fromARGB(255, 185, 227, 185)
-              : Colors.green[800],
+          size: 20,
+          color: const Color.fromARGB(255, 185, 227, 185),
         ),
         onPressed: () {
           Get.to(() => const QrScannerpage(), transition: Transition.leftToRight);
         },
-
       ),
     );
   }
@@ -395,27 +375,24 @@ class HomePage extends StatelessWidget {
     final isDarkTheme = controller.isDarkMode.value;
 
     return Container(
-      height: 50,
-      width: 50,
+      height: 40,
+      width: 40,
       decoration: BoxDecoration(
-        color: isDarkTheme
-            ? Colors.green[800]
-            : const Color.fromARGB(255, 185, 227, 185),
+        color: Colors.green[800],
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(isDarkTheme ? 0.3 : 0.1),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: IconButton(
         icon: Icon(
           Icons.refresh,
-          color: isDarkTheme
-              ? const Color.fromARGB(255, 185, 227, 185)
-              : Colors.green[800],
+          size: 20,
+          color: const Color.fromARGB(255, 185, 227, 185),
         ),
         onPressed: () {
           controller.refreshData();
@@ -424,16 +401,14 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget ActiveChargersbutton(BuildContext context, HomeController controller)       {
+  Widget ActiveChargersbutton(BuildContext context, HomeController controller) {
     final isDarkTheme = controller.isDarkMode.value;
 
     return Container(
-      height: 50,
-      width: 50,
+      height: 40,
+      width: 40,
       decoration: BoxDecoration(
-        color: isDarkTheme
-            ? Colors.green[800]
-            : const Color.fromARGB(255, 185, 227, 185),
+        color: Colors.green[800],
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -446,10 +421,8 @@ class HomePage extends StatelessWidget {
       child: IconButton(
         icon: Image.asset(
           'assets/icons/saved_device.png',
-          color: isDarkTheme
-              ? const Color.fromARGB(255, 185, 227, 185)
-              : Colors.green[800],
-          height: 25,
+          color: const Color.fromARGB(255, 185, 227, 185),
+          height: 20,
         ),
         onPressed: () {
           controller.fetchactivechargers();
