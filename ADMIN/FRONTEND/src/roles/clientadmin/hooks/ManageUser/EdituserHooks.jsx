@@ -71,7 +71,7 @@ const useEdituser = (userInfo) => {
           };
       
           // Send update request
-          const response = await axiosInstance.post('/clientadmin/UpdateUser', formattedUserData);
+          const response = await axiosInstance({method:'post',url:'/clientadmin/UpdateUser', data:formattedUserData});
       
           if (response.status === 200) {
             showSuccessAlert('User updated successfully');

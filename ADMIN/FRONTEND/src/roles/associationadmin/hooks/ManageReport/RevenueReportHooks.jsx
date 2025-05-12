@@ -25,10 +25,10 @@ const useRevenueReport = ( userInfo) => {
             isFetchingFirst.current = true;
             try {
                 ;
-                const response = await axiosInstance.post(
+                const response = await axiosInstance({method:'post',url:
                     '/associationadmin/FetchSpecificChargerRevenue',
-                    { association_id:associationId }
-                );
+                    data:{ association_id:associationId }
+            });
 
                 setFirstTableData(response.data.revenueData || []);
                 setTotalRevenue(response.data.TotalChargerRevenue || "0.000");
@@ -54,10 +54,10 @@ const useRevenueReport = ( userInfo) => {
             try {
              
     
-                const response = await axiosInstance.post(
+                const response = await axiosInstance({method:'post',url:
                     '/associationadmin/FetchChargerListWithAllCostWithRevenue',
-                    { association_id: associationId }
-                );
+                    data:{ association_id: associationId }
+            });
                 setSecondTableData(response.data.revenueData || []);
             } catch (error) {
                 console.error("Error fetching second table data:", error);

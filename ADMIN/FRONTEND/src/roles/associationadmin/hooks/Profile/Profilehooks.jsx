@@ -32,9 +32,9 @@ const useProfile = (userInfo) => {
     // get profile data
     const fetchProfile = useCallback(async () => {
         try {
-            const response = await axiosInstance.post('/associationadmin/FetchUserProfile', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/FetchUserProfile', data:{
                 user_id: userInfo.user_id 
-            })
+            }})
 
             if (response.status==200) {
                 const data = response.data
@@ -105,12 +105,12 @@ const useProfile = (userInfo) => {
             setLoading(true);
     
             const phoneNos = parseInt(association_phone_no);
-            const response = await axiosInstance.post('/associationadmin/UpdateAssociationProfile', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/UpdateAssociationProfile', data:{
                 association_id: userInfo.association_id,
                 association_address,
                 association_phone_no: phoneNos,
                 modified_by: userInfo.email_id
-            });
+            }});
     
             if (response.status === 200) {
                 showSuccessAlert('Association profile updated successfully');
@@ -168,12 +168,12 @@ const useProfile = (userInfo) => {
     
             const phoneNo = parseInt(phone_no);
             const Password = parseInt(password);
-            const response = await axiosInstance.post('/associationadmin/UpdateUserProfile', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/UpdateUserProfile', data:{
                 user_id: userInfo.user_id,
                 username,
                 phone_no: phoneNo,
                 password: Password
-            });
+            }});
     
             if (response.status === 200) {
                 showSuccessAlert("User profile updated successfully");

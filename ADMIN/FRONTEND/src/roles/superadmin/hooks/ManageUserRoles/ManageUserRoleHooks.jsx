@@ -24,7 +24,7 @@ const useManageUserRole = (userInfo) => {
     const fetchUserRoles = async () => {
         try {
           setLoading(true)
-            const res = await axiosInstance.get('/superadmin/FetchUserRoles');
+            const res = await axiosInstance({method:'get',url:'/superadmin/FetchUserRoles'});
             setData(res.data.data);
             setPosts(res.data.data);
         } catch (err) {
@@ -91,11 +91,11 @@ const useManageUserRole = (userInfo) => {
         setEditLoading(true);
       
         try {
-          const response = await axiosInstance.post('/superadmin/UpdateUserRole', {
+          const response = await axiosInstance({method:'post',url:'/superadmin/UpdateUserRole', data:{
             role_id: dataItem.role_id,
             role_name: roleEditname,
             modified_by: userInfo.email_id,
-          });
+          }});
       
           if (response.data.status === 'Success') {
              showSuccessAlert('Update user role successfully');
@@ -124,11 +124,11 @@ const useManageUserRole = (userInfo) => {
       const changeDeActivate = async (e, role_id) => {
         e.preventDefault();
         try {
-          const response = await axiosInstance.post('/superadmin/DeActivateOrActivateUserRole', {
+          const response = await axiosInstance({method:'post',url:'/superadmin/DeActivateOrActivateUserRole', data:{
             role_id,
             status: false,
             modified_by: userInfo.email_id,
-          });
+          }});
       
           if (response.status === 200) {
             await showSuccessAlert('Deactivated successfully');
@@ -147,11 +147,11 @@ const useManageUserRole = (userInfo) => {
     const changeActivate = async (e, role_id) => {
         e.preventDefault();
         try {
-          const response = await axiosInstance.post('/superadmin/DeActivateOrActivateUserRole', {
+          const response = await axiosInstance({method:'post',url:'/superadmin/DeActivateOrActivateUserRole', data:{
             role_id,
             status: true,
             modified_by: userInfo.email_id,
-          });
+          }});
       
           if (response.status === 200) {
             await showSuccessAlert('Activated successfully');

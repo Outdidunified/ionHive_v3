@@ -11,9 +11,9 @@ import axiosInstance from '../../../../utils/utils';
           try {
             setIsLoading(true); // Start loading
       
-            const response = await axiosInstance.post('/superadmin/FetchAssignedClients', {
+            const response = await axiosInstance({method:'post',url:'/superadmin/FetchAssignedClients',data: {
               reseller_id: dataItem.reseller_id,
-            });
+            }});
       
             if (response.data.status === 'Success') {
               setData(response.data.data);

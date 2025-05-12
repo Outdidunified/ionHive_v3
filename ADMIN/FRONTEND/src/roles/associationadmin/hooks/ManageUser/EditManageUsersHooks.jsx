@@ -81,7 +81,7 @@ const useEditManageUsers = (userInfo) => {
                 modified_by: userInfo.email_id,
             };
     
-            const response = await axiosInstance.post('/associationadmin/UpdateUser', updatedUser);
+            const response = await axiosInstance({method:'post',url:'/associationadmin/UpdateUser', data:updatedUser});
     
             if (response.status === 200) {
                 showSuccessAlert('User updated successfully', 'User details have been updated.');

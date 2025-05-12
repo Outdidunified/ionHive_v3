@@ -41,7 +41,7 @@ const useCreateass = (userInfo) => {
                 created_by: userInfo.email_id
             };
     
-            const response = await axiosInstance.post('/clientadmin/CreateAssociationUser', newAssociation);
+            const response = await axiosInstance({method:'post',url:'/clientadmin/CreateAssociationUser',data: newAssociation});
     
             if (response.status === 200 && response.data.status === 'Success') {
                  showSuccessAlert("User created successfully");

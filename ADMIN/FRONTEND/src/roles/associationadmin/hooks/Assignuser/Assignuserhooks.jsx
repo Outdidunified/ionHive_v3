@@ -16,9 +16,9 @@ const useAssignuser = (userInfo) => {
   // fetch user to unassign data
   const fetchUsersToUnassign = useCallback(async () => {
     try {
-      const response = await axiosInstance.post('/associationadmin/FetchUsersWithSpecificRolesToUnAssign', {
+      const response = await axiosInstance({method:'post',url:'/associationadmin/FetchUsersWithSpecificRolesToUnAssign', data:{
         association_id: userInfo.association_id,
-      });
+      }});
       const users = response.data.data || []; // Use an empty array if data is undefined
       setUsersToUnassign(users);
       setOriginalUsersToUnassign(users); // Store the original list
@@ -41,11 +41,11 @@ const useAssignuser = (userInfo) => {
 
 const handleSelectRemove = async (userId) => {
     try {
-        await axiosInstance.post('/associationadmin/RemoveUserFromAssociation', {
+        await axiosInstance({method:'post',url:'/associationadmin/RemoveUserFromAssociation', data:{
             association_id: userInfo.association_id,
             user_id: parseInt(userId),
             modified_by: userInfo.email_id
-        });
+        }});
 
         showSuccessAlert('Success!', 'User has been removed from the association.');
         fetchUsersToUnassign(); // Refresh the list after removal
@@ -82,11 +82,11 @@ const handleSelectRemove = async (userId) => {
       e.preventDefault();
   
       try {
-          const response = await axiosInstance.post('/associationadmin/AssUserToAssociation', {
+          const response = await axiosInstance({method:'post',url:'/associationadmin/AssUserToAssociation', data:{
               association_id: userInfo.association_id,
               email_id,
               modified_by: userInfo.email_id
-          });
+          }});
   
           fetchUsersToUnassign();
   

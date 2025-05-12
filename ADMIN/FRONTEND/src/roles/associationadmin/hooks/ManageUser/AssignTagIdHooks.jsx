@@ -39,10 +39,10 @@ const useAssignTagID = (userInfo) => {
     // Fetch TagID
     const fetchTagID = useCallback(async () => {
         try {
-            const res = await axiosInstance.post('/associationadmin/FetchTagIdToAssign', {
+            const res = await axiosInstance({method:'post',url:'/associationadmin/FetchTagIdToAssign', data:{
                 association_id: userInfo.association_id,
                 user_id: userInfo.user_id
-            });
+            }});
     
             if (res.data && res.data.status === 'Success') {
                 if (typeof res.data.data === 'string' && res.data.data === 'No tags found') {
@@ -131,11 +131,11 @@ const useAssignTagID = (userInfo) => {
 
 const handleAssignTagID = async (dataItem) => {
     try {
-        const response = await axiosInstance.post('/associationadmin/AssignTagIdToUser', {
+        const response = await axiosInstance({method:'post',url:'/associationadmin/AssignTagIdToUser', data:{
             user_id: newUser.user_id, 
             tag_id: dataItem.tag_id, 
             modified_by: userInfo.email_id
-        });
+        }});
 
         if (response.status === 200) {
             showSuccessAlert("Assign TagID successfully", "TagID assigned to user successfully");

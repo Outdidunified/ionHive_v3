@@ -16,28 +16,31 @@ const useDeviceReport = ( userInfo ) => {
     const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
 
     // Get manage charger data
-    useEffect(() => {
-        if (!fetchDataCalled.current) {
-            const url = '/associationadmin/FetchReportDevice';
+   useEffect(() => {
+    if (!fetchDataCalled.current) {
+        const url = '/associationadmin/FetchReportDevice';
 
-            axiosInstance.post(url, {
+        axiosInstance({
+            method: 'post',
+            url: url,
+            data: {
                 association_id: userInfo?.association_id,
+            }
+        })
+            .then((res) => {
+                setDeviceData(Array.isArray(res.data.data) ? res.data.data : []); // Ensure it's an array
+                setLoadingDevice(false);
             })
-                .then((res) => {
-                    setDeviceData(Array.isArray(res.data.data) ? res.data.data : []); // Ensure it's an array
+            .catch((err) => {
+                console.error("Error fetching data:", err);
+                const errorMessage = err.response?.data?.message || "Failed to Fetch Report Device";
+                setErrorDevice(errorMessage);
+                setLoadingDevice(false);
+            });
 
-                    setLoadingDevice(false);
-                })
-                .catch((err) => {
-                    console.error("Error fetching data:", err);
-                    const errorMessage = err.response?.data?.message || "Failed to Fetch Report Device";
-                    setErrorDevice(errorMessage);
-                    setLoadingDevice(false);
-                });
-
-            fetchDataCalled.current = true;
-        }
-    }, [userInfo]);
+        fetchDataCalled.current = true;
+    }
+}, [userInfo]);
 
 
     // Handle Search Button Click
@@ -79,9 +82,9 @@ const useDeviceReport = ( userInfo ) => {
         setDeviceId('');
       
         try {
-          const response = await axiosInstance.post('/associationadmin/DeviceReport', {
+          const response = await axiosInstance({method:'post',url:'/associationadmin/DeviceReport',data: {
             from_date: fromDate, to_date: toDate, device_id: selectDevice
-          });
+          }});
       
           const responseData = response.data;
       

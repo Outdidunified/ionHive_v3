@@ -19,7 +19,7 @@ const useAssigneddevass = (userInfo) => {
     const fetchChargerDetails = useCallback(async () => {
         try {
             setIsLoading(true); // Start loading
-            const response = await axiosInstance.post('/clientadmin/FetchChargerDetailsWithSession', { association_id });
+            const response = await axiosInstance({method:'post',url:'/clientadmin/FetchChargerDetailsWithSession', data:{ association_id }});
     
             if (response.status === 200) {
                 const responseData = response.data;
@@ -126,11 +126,11 @@ const useAssigneddevass = (userInfo) => {
         try {
             setIsEdit(true); // Start loading
     
-            const response = await axiosInstance.post('/clientadmin/UpdateClientCommission', {
+            const response = await axiosInstance({method:'post',url:'/clientadmin/UpdateClientCommission', data:{
                 chargerID: dataItem.charger_id,
                 client_commission,
                 modified_by: userInfo.email_id
-            });
+            }});
     
             if (response.status === 200) {
                  showSuccessAlert('Client commission updated successfully');

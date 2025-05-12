@@ -19,7 +19,7 @@ const useWithdrawRequests = (userInfo) => {
             isFetching.current = true;
 
             try {
-                const response = await axiosInstance.get('/superadmin/FetchPaymentRequest');
+                const response = await axiosInstance({method:'get',url:'/superadmin/FetchPaymentRequest'});
                 if (response.status === 200 && response.data.data) {
                     setWithdrawalRequests(response.data.data);
                     const initialStatus = {};
@@ -67,13 +67,13 @@ const handleStatusChange = async (withdrawalId, newStatus, rejectionReason) => {
 
     const reason = newStatus === 'Rejected' ? rejectionReason : ''; 
     try {
-        const response = await axiosInstance.post('/superadmin/UpdatePaymentRequestStatus', {
+        const response = await axiosInstance({method:'post',url:'/superadmin/UpdatePaymentRequestStatus', data:{
             user_id: userId,
             _id: withdrawalId, 
             withdrawal_approved_status: newStatus,
             withdrawal_approved_by: userInfo.email_id,
             withdrawal_rejected_message: reason, 
-        });
+        }});
 
         if (response.status === 200) {
             setSelectedStatus(prevState => ({ ...prevState, [withdrawalId]: newStatus }));

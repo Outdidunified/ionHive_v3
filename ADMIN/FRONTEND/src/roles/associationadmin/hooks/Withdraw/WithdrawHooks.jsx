@@ -24,9 +24,9 @@ const useWithdraw = (userInfo) => {
     
         try {
             setIsLoading(true);
-            const response = await axiosInstance.post('/associationadmin/FetchPaymentRequest', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/FetchPaymentRequest', data:{
                 user_id: userInfo.user_id,
-            });
+            }});
     
             if (response.status === 200 && response.data.withdrawalDetails) {
                 const { withdrawalDetails, associationData, user } = response.data;
@@ -57,9 +57,9 @@ const useWithdraw = (userInfo) => {
     useEffect(() => {
         const fetchCommissionAmount = async () => {
             try {
-                const response = await axiosInstance.post('/associationadmin/FetchCommissionAmtassociation', {
+                const response = await axiosInstance({method:'post',url:'/associationadmin/FetchCommissionAmtassociation', data:{
                     user_id: userInfo.user_id,
-                });
+                }});
                 if (response.status === 200) {
                     setCommissionAmount(response.data.data);
                 } else {
@@ -95,9 +95,9 @@ const useWithdraw = (userInfo) => {
     const fetchUserDetails = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.post('/associationadmin/fetchUserBankDetails', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/fetchUserBankDetails', data:{
                
-                 user_id: userInfo.user_id })
+                 user_id: userInfo.user_id }})
     
             if (response.status === 200) {
                 const data = response.data
@@ -218,9 +218,9 @@ const useWithdraw = (userInfo) => {
     
         let walletBalance = 0;
         try {
-            const response = await axiosInstance.post('/associationadmin/FetchCommissionAmtAssociation', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/FetchCommissionAmtAssociation', data:{
                 user_id: userInfo.user_id,
-            });
+            }});
     
             if (response.status === 200) {
                 walletBalance = response.data.data;
@@ -350,7 +350,7 @@ const useWithdraw = (userInfo) => {
         };
     
         try {
-            const response = await axiosInstance.post('/associationadmin/ApplyWithdrawal', withdrawalData);
+            const response = await axiosInstance({method:'post',url:'/associationadmin/ApplyWithdrawal', data:withdrawalData});
     
             if (response.status === 200) {
                 showSuccessAlert(

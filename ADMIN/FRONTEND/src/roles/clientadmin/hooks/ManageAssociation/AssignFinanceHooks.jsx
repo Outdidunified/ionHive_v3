@@ -15,9 +15,9 @@ const useAssignfinance = (userInfo) => {
     // Fetch finance details
     const fetchFinanceId = useCallback(async (finance_id) => {
         try {
-            const response = await axiosInstance.post('/clientadmin/FetchFinanceDetailsForSelection', {
+            const response = await axiosInstance({method:'post',url:'/clientadmin/FetchFinanceDetailsForSelection', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
             if (response.data && Array.isArray(response.data.data)) {
                 const financeIds = response.data.data.map(item => ({
                     finance_id: item.finance_id,
@@ -70,7 +70,7 @@ const useAssignfinance = (userInfo) => {
                 modified_by: userInfo.email_id,
             };
     
-            const response = await axiosInstance.post('/clientadmin/AssignFinanceToCharger', formattedData);
+            const response = await axiosInstance({method:'post',url:'/clientadmin/AssignFinanceToCharger', data:formattedData});
     
             if (response.status === 200) {
                  showSuccessAlert('Finance has been assigned successfully.');

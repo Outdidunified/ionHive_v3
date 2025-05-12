@@ -56,33 +56,33 @@ const useDashboard = (userInfo) => {
         isFetching.current = true;
 
         try {
-            const totalRes = await axiosInstance.post('/associationadmin/FetchTotalCharger', {
+            const totalRes = await axiosInstance({method:'post',url:'/associationadmin/FetchTotalCharger', data:{
                 association_id: userInfo.association_id,
-            });
+            }});
 
-            const onlineRes = await axiosInstance.post('/associationadmin/FetchOnlineCharger', {
+            const onlineRes = await axiosInstance({method:'post',url:'/associationadmin/FetchOnlineCharger',data: {
                 association_id: userInfo.association_id,
-            });
+            }});
 
-            const faultRes = await axiosInstance.post('/associationadmin/FetchFaultsCharger', {
+            const faultRes = await axiosInstance({method:'post',url:'/associationadmin/FetchFaultsCharger',data: {
                 association_id: userInfo.association_id,
-            });
+            }});
 
-            const offlineRes = await axiosInstance.post('/associationadmin/FetchOfflineCharger', {
+            const offlineRes = await axiosInstance({method:'post',url:'/associationadmin/FetchOfflineCharger', data:{
                 association_id: userInfo.association_id,
-            });
+            }});
 
-            const energyRes = await axiosInstance.post('/associationadmin/FetchChargerTotalEnergy', {
+            const energyRes = await axiosInstance({method:'post',url:'/associationadmin/FetchChargerTotalEnergy', data:{
                 association_id: userInfo.association_id,
-            });
+            }});
 
-            const totalsession = await axiosInstance.post('/associationadmin/FetchTotalChargersSession', {
+            const totalsession = await axiosInstance({method:'post',url:'/associationadmin/FetchTotalChargersSession',data: {
                 association_id: userInfo.association_id,
-            });
+            }});
 
-            const res = await axiosInstance.post('/associationadmin/FetchTotalUsers', {
+            const res = await axiosInstance({method:'post',url:'/associationadmin/FetchTotalUsers', data:{
                 association_id: userInfo.association_id,
-            });
+            }});
 
             const appUsersCount = res.data.appUsersCount || 0;
 

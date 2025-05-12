@@ -84,7 +84,7 @@ const [wallet_bal, setWalletBal] = useState(dataItem?.wallet_bal ? String(dataIt
         }
       
         try {
-          const response = await axiosInstance.post('/superadmin/UpdateUser', requestBody);
+          const response = await axiosInstance({method:'post',url:'/superadmin/UpdateUser', data:requestBody});
       
           if (response.data.status === 'Success') {
              showSuccessAlert('User updated successfully');

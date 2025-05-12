@@ -15,59 +15,62 @@ const useRevenueData = (userInfo) => {
 
     const resellerId = userInfo?.reseller_id;
 
-    useEffect(() => {
-        if (!resellerId) return;  // Exit early if resellerId is not available
+ useEffect(() => {
+  if (!resellerId) return; // Exit early if resellerId is not available
 
-        const fetchData = async () => {
-            if (isFetchingFirst.current) return;
-            setFirstTableLoading(true);
-            isFetchingFirst.current = true;
+  const fetchData = async () => {
+    if (isFetchingFirst.current) return;
+    setFirstTableLoading(true);
+    isFetchingFirst.current = true;
 
-            try {
-               
-                const response = await axiosInstance.post(
-                    '/reselleradmin/FetchSpecificChargerRevenue',
-                    { reseller_id: resellerId }
-                );
-                setFirstTableData(response.data.revenueData || []);
-                setTotalRevenue(response.data.TotalChargerRevenue || "0.000");
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            } finally {
-                setFirstTableLoading(false);
-                isFetchingFirst.current = false;
-            }
-        };
+    try {
+      const response = await axiosInstance({
+        method: 'post',
+        url: '/reselleradmin/FetchSpecificChargerRevenue',
+        data: { reseller_id: resellerId },
+      });
 
-        fetchData();
-    }, [resellerId]); 
+      setFirstTableData(response.data.revenueData || []);
+      setTotalRevenue(response.data.TotalChargerRevenue || "0.000");
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setFirstTableLoading(false);
+      isFetchingFirst.current = false;
+    }
+  };
+
+  fetchData();
+}, [resellerId]);
+
 
    
-    useEffect(() => {
-        if (!resellerId) return;  
+   useEffect(() => {
+  if (!resellerId) return;
 
-        const fetchSessionData = async () => {
-            if (isFetchingSecond.current) return;
-            setSecondTableLoading(true);
-            isFetchingSecond.current = true;
-            try {
-                
-                const response = await axiosInstance.post(
-                    '/reselleradmin/FetchChargerListWithAllCostWithRevenue',
-                    { reseller_id: resellerId }
-                );
-                setSecondTableData(response.data.revenueData || []);
-            } catch (error) {
-                console.error("Error fetching session data:", error);
-            } finally {
-            setSecondTableLoading(false);
-                isFetchingSecond.current = false;
+  const fetchSessionData = async () => {
+    if (isFetchingSecond.current) return;
+    setSecondTableLoading(true);
+    isFetchingSecond.current = true;
 
-            }
-        };
+    try {
+      const response = await axiosInstance({
+        method: 'post',
+        url: '/reselleradmin/FetchChargerListWithAllCostWithRevenue',
+        data: { reseller_id: resellerId },
+      });
 
-        fetchSessionData();
-    }, [resellerId]); // Runs only when resellerId changes
+      setSecondTableData(response.data.revenueData || []);
+    } catch (error) {
+      console.error("Error fetching session data:", error);
+    } finally {
+      setSecondTableLoading(false);
+      isFetchingSecond.current = false;
+    }
+  };
+
+  fetchSessionData();
+}, [resellerId]);
 
     const filteredFirstTableData = firstTableData.filter((item) => {
         const searchQuery = firstTableSearchQuery.toLowerCase();

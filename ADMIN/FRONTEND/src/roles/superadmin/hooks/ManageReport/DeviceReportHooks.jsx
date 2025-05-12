@@ -19,27 +19,34 @@ const useDeviceReport = () => {
   const fetchDataCalled = useRef(false);
 
   useEffect(() => {
-    if (!fetchDataCalled.current) {
-      axiosInstance
-        .get("/superadmin/FetchReportDevice")
-        .then((res) => {
-          if (res.data.status === "Success") {
-            setDeviceData(res.data.data);
-            setLoadingDevice(false);
-          } else {
-            throw new Error("Invalid response format");
-          }
-        })
-        .catch((err) => {
-          console.error("Error fetching data:", err);
-          const errorMessage = err.response?.data?.message || "Failed to Fetch Report Device";
-          setErrorDevice(errorMessage);
-          setLoadingDevice(false);
+  if (!fetchDataCalled.current) {
+    const fetchReportDevice = async () => {
+      setLoadingDevice(true);
+      try {
+        const response = await axiosInstance({
+          method: 'get', // Explicitly defining the method
+          url: '/superadmin/FetchReportDevice',
         });
 
-      fetchDataCalled.current = true;
-    }
-  }, []);
+        if (response.data.status === 'Success') {
+          setDeviceData(response.data.data);
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        const errorMessage = err?.response?.data?.message || "Failed to Fetch Report Device";
+        setErrorDevice(errorMessage);
+      } finally {
+        setLoadingDevice(false);
+      }
+    };
+
+    fetchReportDevice();
+    fetchDataCalled.current = true;
+  }
+}, []);
+
 
   const handleSearch = async () => {
     setError(null);
@@ -79,9 +86,9 @@ const useDeviceReport = () => {
     setDeviceId('');
 
     try {
-        const response = await axiosInstance.post('/superadmin/DeviceReport', {
+        const response = await axiosInstance({method:'post',url:'/superadmin/DeviceReport', data:{
             from_date: fromDate, to_date: toDate, device_id: selectDevice
-        });
+        }});
 
         const responseData = response.data;
 

@@ -12,7 +12,7 @@ const useManageDevice = (userInfo) => {
   // Fetch charger data
   useEffect(() => {
     if (!fetchDataCalled.current) {
-      axiosInstance.get('/superadmin/FetchCharger')
+      axiosInstance({method:'get',url:'/superadmin/FetchCharger'})
         .then((res) => {
   setData(res.data.data);      // <-- store full dataset here
   setPosts(res.data.data);     // <-- also store it for display and filtering
@@ -45,26 +45,40 @@ const useManageDevice = (userInfo) => {
   };
 
   // Upload Excel file
-  const uploadFile = async (file) => {
-    const formData = new FormData();
-    formData.append("req.file", file);
-    formData.append("eq.body.created_by", userInfo.email_id);
-  
-    try {
-      const response = await axiosInstance.post('/superadmin/CreateChargerWithExcelFile', formData);
-      const data = response.data;
-  
-      if (data?.status === 'Success') {
-        fetchDataCalled.current = true;
-        showSuccessAlert("File uploaded & Charger added successfully");
-      } else {
-        showErrorAlert("Failed to add charger, " + (data?.message || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      showErrorAlert("Error", "An error occurred while adding the charger: " + (error?.message || error));
+ const uploadFile = async (file) => {
+  setLoading(true); // Optional: if you have a loading indicator
+
+  const formData = new FormData();
+  formData.append("req.file", file);
+  formData.append("eq.body.created_by", userInfo.email_id);
+
+  try {
+    const response = await axiosInstance({
+      method: 'post',
+      url: '/superadmin/CreateChargerWithExcelFile',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    const data = response.data;
+    setLoading(false);
+
+    if (data?.status === 'Success') {
+      fetchDataCalled.current = true;
+      showSuccessAlert("File uploaded & Charger added successfully");
+    } else {
+      showErrorAlert("Error", "Failed to add charger: " + (data?.message || "Unknown error"));
     }
-  };
+  } catch (error) {
+    setLoading(false);
+    const errorMessage = error?.response?.data?.message || error.message;
+    console.error("Upload error:", errorMessage);
+    showErrorAlert("Error", "An error occurred while adding the charger: " + errorMessage);
+  }
+};
+
   
 
   return {

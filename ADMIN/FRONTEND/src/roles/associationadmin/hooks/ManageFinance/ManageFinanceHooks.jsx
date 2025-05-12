@@ -13,9 +13,9 @@ const useManagefinance = (userInfo) => {
     const fetchFinanceDetails = useCallback(async () => {
         try {
             setLoading(true)
-            const response = await axiosInstance.post('/associationadmin/fetchFinance', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/fetchFinance',data: {
                 association_id: userInfo.association_id
-            });
+            }});
           
             if (response.status === 200) {
                 setFinanceDetails(response.data.data || []);

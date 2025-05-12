@@ -14,9 +14,9 @@ const useManageUsers = (userInfo ) => {
     const fetchUsers = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await axiosInstance.post('/reselleradmin/FetchUsers', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/FetchUsers', data:{
                 reseller_id: userInfo.reseller_id,
-            });
+            }});
     
             if (response.status === 200) {
                 const data = response.data.data;

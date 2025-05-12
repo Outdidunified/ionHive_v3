@@ -32,9 +32,9 @@ const useProfile = (userInfo) => {
     // Define fetchClientUserDetails using useCallback to memoize it
     const fetchClientUserDetails = useCallback(async () => {
         try {
-            const response = await axiosInstance.post('/clientadmin/FetchUserProfile', {
+            const response = await axiosInstance({method:'post',url:'/clientadmin/FetchUserProfile', data:{
                 user_id: userInfo.user_id,
-            });
+            }});
 
             if (response.status === 200) {
                 const data = response.data.data;
@@ -122,13 +122,13 @@ const useProfile = (userInfo) => {
           setLoading(true);
           const phoneNos = parseInt(client_phone_no);
       
-          const response = await axiosInstance.post('/clientadmin/UpdateClientProfile', {
+          const response = await axiosInstance({method:'post',url:'/clientadmin/UpdateClientProfile', data:{
             client_id: userInfo.client_id,
             client_name,
             client_address,
             client_phone_no: phoneNos,
             modified_by: userInfo.email_id,
-          });
+          }});
       
           if (response.status === 200) {
             showSuccessAlert('Client profile updated successfully');
@@ -184,12 +184,12 @@ const useProfile = (userInfo) => {
           const phoneNo = parseInt(phone_no);
           const Password = parseInt(password);
       
-          const response = await axiosInstance.post('/clientadmin/UpdateUserProfile', {
+          const response = await axiosInstance({method:'post',url:'/clientadmin/UpdateUserProfile', data:{
             user_id: userInfo.user_id,
             username,
             phone_no: phoneNo,
             password: Password,
-          });
+          }});
       
           if (response.status === 200) {
             showSuccessAlert('User profile updated successfully');

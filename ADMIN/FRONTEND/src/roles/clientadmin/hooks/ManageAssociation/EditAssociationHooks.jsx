@@ -64,7 +64,7 @@ const [loading,setLoading]=useState(false);
                 status: status === 'true',
             };
     
-            const response = await axiosInstance.post('/clientadmin/UpdateAssociationUser', formattedAssData);
+            const response = await axiosInstance({method:'post',url:'/clientadmin/UpdateAssociationUser', data:formattedAssData});
     
             if (response.data.status === 'Success') {
                  showSuccessAlert("Association details updated successfully");

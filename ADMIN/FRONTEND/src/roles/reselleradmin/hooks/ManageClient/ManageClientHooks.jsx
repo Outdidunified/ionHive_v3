@@ -12,9 +12,9 @@ const useManageclient = (userInfo) => {
     const fetchUsers = async () => {
         setLoading(true); 
         try {
-            const response = await axiosInstance.post('/reselleradmin/getAllClients', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/getAllClients', data:{
                 reseller_id: userInfo.reseller_id
-            });
+            }});
             setUsers(response.data.data || []);
         } catch (error) {
             console.error('Error fetching users:', error);

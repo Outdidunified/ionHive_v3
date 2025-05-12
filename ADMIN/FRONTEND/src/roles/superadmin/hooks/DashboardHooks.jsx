@@ -53,14 +53,14 @@ const useDashboard = (userInfo) => {
         isFetching.current = true; // Mark as fetching
 
         try {
-            const totalRes = await axiosInstance.get('/superadmin/FetchTotalCharger');
-            const onlineRes = await axiosInstance.get('/superadmin/FetchOnlineCharger');
-            const faultRes = await axiosInstance.get('/superadmin/FetchFaultsCharger');
-            const offlineRes = await axiosInstance.get('/superadmin/FetchOfflineCharger');
-            const energyRes = await axiosInstance.get('/superadmin/FetchChargerTotalEnergy');
-            const totalsession = await axiosInstance.get('/superadmin/FetchTotalChargersSession');
+            const totalRes = await axiosInstance({method:'get',url:'/superadmin/FetchTotalCharger'});
+            const onlineRes = await axiosInstance({method:'get',url:'/superadmin/FetchOnlineCharger'});
+            const faultRes = await axiosInstance({method:'get',url:'/superadmin/FetchFaultsCharger'});
+            const offlineRes = await axiosInstance({method:'get',url:'/superadmin/FetchOfflineCharger'});
+            const energyRes = await axiosInstance({method:'get',url:'/superadmin/FetchChargerTotalEnergy'});
+            const totalsession = await axiosInstance({method:'get',url:'/superadmin/FetchTotalChargersSession'});
 
-            const res = await axiosInstance.get('/superadmin/FetchTotalUsers');
+            const res = await axiosInstance({method:'get',url:'/superadmin/FetchTotalUsers'});
             const { resellersCount, clientsCount, associationsCount, appUsersCount } = res.data.totalCounts;
 
             setTotalCounts({

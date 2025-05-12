@@ -21,9 +21,9 @@ const useWithdrawal = (userInfo) => {
         isFetching.current = true;
         try {
             setIsLoading(true);
-            const response = await axiosInstance.post('/reselleradmin/FetchPaymentRequest', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/FetchPaymentRequest', data:{
                 user_id: userInfo.user_id,
-            });
+            }});
 
             if (response.status === 200 && response.data.data) {
                 const { withdrawalDetails, resellerData, user } = response.data.data;
@@ -51,9 +51,9 @@ const useWithdrawal = (userInfo) => {
         useEffect(() => {
         const fetchCommissionAmount = async () => {
             try {
-                const response = await axiosInstance.post('/reselleradmin/FetchCommissionAmtReseller', {
+                const response = await axiosInstance({method:'post',url:'/reselleradmin/FetchCommissionAmtReseller', data:{
                     user_id: userInfo.user_id,
-                });
+                }});
                 if (response.status === 200) {
                     setCommissionAmount(response.data.data);
                 } else {
@@ -89,9 +89,9 @@ const useWithdrawal = (userInfo) => {
     const fetchUserDetails = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.post('/reselleradmin/fetchUserBankDetails', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/fetchUserBankDetails',data: {
                 user_id: userInfo.user_id
-            });
+            }});
     
             if (response.status === 200) {
                 const data = response.data;
@@ -136,8 +136,8 @@ const useWithdrawal = (userInfo) => {
     
         setFormData((prevData) => ({
             ...prevData,
-            user_id: userInfo?.data?.user_id || prevData.user_id,
-            created_by: userInfo?.data?.email_id || prevData.created_by,
+            user_id: userInfo?.user_id || prevData.user_id,
+            created_by: userInfo?.email_id || prevData.created_by,
             [name]: uppercasedValue, // Use the uppercase value for both fields
         }));
     
@@ -153,50 +153,54 @@ const useWithdrawal = (userInfo) => {
     };
     
       
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-      
-        if (!hasChanges()) return;
-      
-        const endpoint = isEditing
-          ? "/reselleradmin/updateUserBankDetails"
-          : "/reselleradmin/saveUserBankDetails";
-      
-        const updatedFormData = {
-          ...formData,
-          user_id: userInfo?.user_id || formData.user_id,
-          created_by: userInfo?.email_id || formData.created_by,
-          modified_by: userInfo?.email_id,
-        };
-      
-        try {
-          setIsLoading(true);
-      
-          const response = await axiosInstance.post(endpoint, updatedFormData);
-      
-          if (response.data?.message?.toLowerCase().includes("success")) {
-            const updatedData = { ...formData };
-            setInitialData(updatedData);
-            setIsEditing(true);
-      
-            // Force re-fetch to refresh UI
-            fetchUserDetailsCalled.current = false;
-            fetchUserDetails();
-      
-            showSuccessAlert(
-              "Success",
-              isEditing ? "Details updated successfully!" : "Details saved successfully!"
-            );
-          } else {
-            showErrorAlert("Error", response.data?.message || "Failed to save details.");
-          }
-        } catch (error) {
-          showErrorAlert("Error", error.response?.data?.message || "Something went wrong.");
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      
+    const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!hasChanges()) return;
+
+  const endpoint = isEditing
+    ? "/reselleradmin/updateUserBankDetails"
+    : "/reselleradmin/saveUserBankDetails";
+
+  const updatedFormData = {
+    ...formData,
+    user_id: userInfo?.user_id || formData.user_id,
+    created_by: userInfo?.email_id || formData.created_by,
+    modified_by: userInfo?.email_id,
+  };
+
+  try {
+    setIsLoading(true);
+
+    const response = await axiosInstance({
+      method: 'post',
+      url: endpoint,
+      data: updatedFormData,
+    });
+
+    if (response.data?.message?.toLowerCase().includes("success")) {
+      const updatedData = { ...formData };
+      setInitialData(updatedData);
+      setIsEditing(true);
+
+      // Force re-fetch to refresh UI
+      fetchUserDetailsCalled.current = false;
+      fetchUserDetails();
+
+      showSuccessAlert(
+        "Success",
+        isEditing ? "Details updated successfully!" : "Details saved successfully!"
+      );
+    } else {
+      showErrorAlert("Error", response.data?.message || "Failed to save details.");
+    }
+  } catch (error) {
+    showErrorAlert("Error", error.response?.data?.message || "Something went wrong.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
       
       const handleWithdraw = async () => {
         const { accountHolderName, bankName, accountNumber, ifscNumber } = formData;
@@ -211,9 +215,9 @@ const useWithdrawal = (userInfo) => {
       
         let walletBalance = 0;
         try {
-          const response = await axiosInstance.post('/reselleradmin/FetchCommissionAmtReseller', {
+          const response = await axiosInstance({method:'post',url:'/reselleradmin/FetchCommissionAmtReseller',data: {
             user_id: userInfo.user_id,
-          });
+          }});
       
           if (response.status === 200) {
             walletBalance = response.data.data;
@@ -337,7 +341,7 @@ const useWithdrawal = (userInfo) => {
         };
       
         try {
-          const response = await axiosInstance.post('/reselleradmin/ApplyWithdrawal', withdrawalData);
+          const response = await axiosInstance({method:'post',url:'/reselleradmin/ApplyWithdrawal', data:withdrawalData});
       
           if (response.status === 200) {
             showSuccessAlert(

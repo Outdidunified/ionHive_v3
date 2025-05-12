@@ -32,9 +32,9 @@ const useProfile = (userInfo) => {
     // Define fetchResellerUserDetails using useCallback to memoize it
     const fetchResellerUserDetails = useCallback(async () => {
         try {
-            const response = await axiosInstance.post('/reselleradmin/FetchUserProfile', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/FetchUserProfile', data:{
                 user_id: userInfo.user_id,
-            });
+            }});
 
             if (response.status === 200) {
                 const data = response.data.data;
@@ -103,13 +103,13 @@ const useProfile = (userInfo) => {
         }
     
         try {
-            const response = await axiosInstance.post('/reselleradmin/UpdateResellerProfile', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/UpdateResellerProfile', data:{
                 reseller_id: userInfo.reseller_id,
                 reseller_name,
                 reseller_address,
                 reseller_phone_no,
                 modified_by: userInfo.email_id,
-            });
+            }});
     
             if (response.status === 200) {
                 showSuccessAlert("Reseller profile updated successfully");
@@ -173,12 +173,12 @@ const useProfile = (userInfo) => {
         try {
             const phoneNo = parseInt(phone_no);
             const Password = parseInt(password);
-            const response = await axiosInstance.post('/reselleradmin/UpdateUserProfile', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/UpdateUserProfile', data:{
                 user_id: userInfo.user_id,
                 username,
                 phone_no: phoneNo,
                 password: Password,
-            });
+            }});
     
             if (response.status === 200) {
                 showSuccessAlert("User profile updated successfully");
