@@ -4,17 +4,26 @@ const { framevalidation } = require("../validation/framevalidation");
 const { sendForceDisconnect } = require("../utils/broadcastUtils");
 const clientConnectionUtils = require("../utils/clientConnectionUtils");
 const timeUtils = require('../../utils/timeUtils');
+let db;
 
+const connectToDatabase = async () => {
+    try {
+        if (!db) {
+            db = await db_conn.connectToDatabase();
+            // Don't log here, the message will come from db_conn.connectToDatabase()
+        }
+        return db;
+    } catch (error) {
+        logger.loggerError(`Failed to connect to database: ${error.message}`);
+        throw error;
+    }
+};
 // Map to store timeout IDs for each charger-connector combination
 const timeoutMap = new Map();
 
 const validateStatusnotification = (data) => {
     return framevalidation(data, "StatusNotification.json");
 };
-
-function generateRandomSessionId() {
-    return Math.floor(1000000 + Math.random() * 9000000); // Generates a random number between 1000000 and 9999999
-}
 
 const handleStatusNotification = async (
     uniqueIdentifier,
@@ -57,7 +66,12 @@ const handleStatusNotification = async (
 
         const { connectorId, errorCode, status, timestamp, vendorErrorCode } = requestPayload;
         const key = `${uniqueIdentifier}_${connectorId}`;
-
+        let stopReason;
+        if (errorCode === "NoError") {
+            stopReason = "Stopped by user";
+        } else {
+            stopReason = errorCode !== "InternalError" ? errorCode : (vendorErrorCode || "InternalError");
+        }
         // Fetch Connector Type
         const socketGunConfig = await db.collection("socket_gun_config").findOne({ charger_id: uniqueIdentifier });
 
@@ -83,7 +97,7 @@ const handleStatusNotification = async (
             charger_status: status,
             timestamp: new Date(timestamp),
             client_ip: clientIpAddress || null,
-            error_code: errorCode !== "InternalError" ? errorCode : vendorErrorCode,
+            stop_reason: stopReason,
             created_date: new Date(),
             modified_date: null
         };
@@ -92,7 +106,13 @@ const handleStatusNotification = async (
 
         // Also update error code in device_session_details if it exists
         try {
-            const db = await dbService.connectToDatabase();
+            if (!db) {
+                db = await connectToDatabase();
+                if (!db) {
+                    logger.loggerError('Failed to establish database connection.');
+                    return { status: "Error", message: "Database connection failed" };
+                }
+            }
             const key = `${uniqueIdentifier}_${connectorId}`;
             const sessionId = chargingSessionID ? chargingSessionID.get(key) : null;
 
@@ -106,11 +126,10 @@ const handleStatusNotification = async (
                     },
                     {
                         $set: {
-                            error_code: errorCode !== "InternalError" ? errorCode : (vendorErrorCode || "InternalError"),
-                            vendor_error_code: vendorErrorCode || null,
-                            status: status
-                        }
+                            charger_status: status,
+                            stop_reason: stopReason
 
+                        }
                     }
                 );
 
@@ -126,15 +145,14 @@ const handleStatusNotification = async (
             logger.loggerError(`Error updating error code in device_session_details: ${error.message}`);
         }
 
-        let chargerErrorCode = errorCode === "NoError" ? errorCode : vendorErrorCode || errorCode;
 
         // Broadcast status change to specific clients subscribed to this charger and connector
         try {
             // Create a status update message
             const statusUpdate = {
                 type: "statusUpdate",
-                status: status,
-                errorCode: chargerErrorCode,
+                charger_status: status,
+                errorCode: stopReason,
                 timestamp: formattedDate,
                 connectorId: connectorId,
                 info: {

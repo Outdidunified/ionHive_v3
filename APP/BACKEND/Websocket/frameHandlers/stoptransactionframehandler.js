@@ -384,11 +384,10 @@ const createChargingSession = async (uniqueIdentifier, connectorId, startTime, u
             unit_consummed: 0, // Will be updated when charging stops
             price: 0, // Will be updated when charging stops
             unit_price: pricePerUnit,
-            error_code: 'NoError',
+            // error_code: 'NoError',
             location: chargerDetails ? chargerDetails.landmark : 'Unknown',
             email_id: user,
             created_date: new Date(),
-            status: true
         };
 
         // Insert session data into device_session_details collection
@@ -453,11 +452,7 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
                             stop_time: stopTime,
                             unit_consummed: formattedUnit,
                             price: formattedPrice,
-                            error_code: resolvedErrorCode,
-                            vendor_error_code: resolvedVendorErrorCode,
-                            stop_reason: resolvedStopReason,
                             modified_date: new Date(),
-                            status: false // Set to false since this is a completed session
                         }
                     }
                 );
@@ -513,7 +508,7 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
                     unit_consummed: formattedUnit,
                     price: formattedPrice,
                     unit_price: pricePerUnit,
-                    error_code: resolvedErrorCode,
+                    // error_code: resolvedErrorCode,
                     vendor_error_code: resolvedVendorErrorCode,
                     stop_reason: resolvedStopReason,
                     location: chargerDetails ? chargerDetails.landmark : 'Unknown',
