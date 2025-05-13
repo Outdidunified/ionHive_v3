@@ -46,6 +46,7 @@ class TransactionController extends GetxController {
     hasError.value = false;
     errorMessage.value = '';
     isLoading.value = true;
+    debugPrint("TransactionController: call");
 
     try {
       final response = await _transactionrepository.fetchAllTransactions(
@@ -57,6 +58,7 @@ class TransactionController extends GetxController {
           debugPrint("TransactionController: No transactions found");
           transactions.clear(); // Ensure the list is empty
         } else {
+          print(response.transactions);
           // Map transactions to the required format
           transactions.assignAll(response.transactions.map((t) {
             return {

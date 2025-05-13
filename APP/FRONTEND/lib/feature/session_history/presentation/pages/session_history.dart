@@ -276,7 +276,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildStatBox(context, 'assets/icons/save.png', 'Total Sessions',
-                controller.totalSessions.value, Colors.deepPurple),
+                controller.totalSessions.value, Colors.lightBlue),
             _buildStatBox(context, 'assets/icons/charge.png', 'Total Energy',
                 controller.totalEnergy.value, Colors.green.shade600),
           ],

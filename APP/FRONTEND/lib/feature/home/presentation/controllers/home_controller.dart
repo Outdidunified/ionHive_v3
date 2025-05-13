@@ -974,7 +974,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "Charger ID: ${charger['charger_id'] ?? 'Unknown'} | Connector ID: ${connDetails['connector_id']}",
+                                        "${charger['charger_id'] ?? 'Unknown'} | ${connDetails['connector_id']}",
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,

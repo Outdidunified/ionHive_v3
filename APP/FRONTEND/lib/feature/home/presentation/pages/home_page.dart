@@ -206,7 +206,7 @@ class HomePage extends StatelessWidget {
                 height: 40,
                 width: 40,
                 decoration: BoxDecoration(
-                  color: Colors.green[800],
+                  color: isDarkTheme ? Colors.lightBlue :  Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -227,7 +227,7 @@ class HomePage extends StatelessWidget {
                   child: Icon(
                     Icons.my_location,
                     size: 20,
-                    color: const Color.fromARGB(255, 185, 227, 185),
+                    color: isDarkTheme ? Colors.white :  Colors.lightBlue ,
                   ),
                 ),
               ),
@@ -312,8 +312,8 @@ class HomePage extends StatelessWidget {
               const SizedBox(width: 12),
               Icon(
                 Icons.search,
-                color: Theme.of(context).hintColor,
-                size: 16,
+                color: Theme.of(context).primaryColor,
+                size: 20,
               ),
               const SizedBox(width: 8),
               Expanded(
