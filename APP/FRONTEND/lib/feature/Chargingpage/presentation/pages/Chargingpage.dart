@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -274,7 +273,7 @@ class ChargingPage extends StatelessWidget {
                           Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: screenWidth * 0.04),
-                            child: Container(
+                            child: SizedBox(
                               width: double.infinity,
                               child: Row(
                                 mainAxisAlignment:
@@ -656,7 +655,7 @@ class ChargingPage extends StatelessWidget {
                                         _buildDetailItem(
                                           context,
                                           'Error',
-                                          data.errorCode!,
+                                          data.errorCode,
                                           Icon(Icons.error_outline,
                                               size: 20, color: Colors.red),
                                           isError: true,
@@ -765,7 +764,7 @@ class ChargingPage extends StatelessWidget {
                                     Padding(
                                       padding: EdgeInsets.symmetric(
                                           horizontal: screenWidth * 0.04),
-                                      child: Container(
+                                      child: SizedBox(
                                         width: double.infinity,
                                         child: CustomSlideAction(
                                           label:
@@ -832,7 +831,7 @@ class ChargingPage extends StatelessWidget {
                           Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: screenWidth * 0.04),
-                            child: Container(
+                            child: SizedBox(
                               width: double.infinity,
                               child: Obx(() {
                                 final chargerStatus = controller

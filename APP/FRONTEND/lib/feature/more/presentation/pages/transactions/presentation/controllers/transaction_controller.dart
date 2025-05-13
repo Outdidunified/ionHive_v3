@@ -58,7 +58,6 @@ class TransactionController extends GetxController {
           debugPrint("TransactionController: No transactions found");
           transactions.clear(); // Ensure the list is empty
         } else {
-          print(response.transactions);
           // Map transactions to the required format
           transactions.assignAll(response.transactions.map((t) {
             return {
@@ -350,7 +349,7 @@ class TransactionController extends GetxController {
         // Fetch data
         await Future.wait([fetchTransactionFilter(), fetchAllTransactions()]);
 
-        // Debug print to check data state after fetching
+        // Debug debugPrint to check data state after fetching
         debugPrint("TransactionController: Data refresh completed");
         debugPrint(
             "TransactionController: transactions.length = ${transactions.length}");

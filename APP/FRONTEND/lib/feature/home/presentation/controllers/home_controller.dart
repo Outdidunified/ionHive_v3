@@ -26,7 +26,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   Completer<GoogleMapController> mapControllerCompleter = Completer();
   PageController? stationPageController;
   SessionController? _sessionController;
-  final isFetchingActiveChargers = false.obs; // Loading state for fetchactivechargers
+  final isFetchingActiveChargers =
+      false.obs; // Loading state for fetchactivechargers
 
   Marker? _selectedLocationMarker;
   DateTime? _lastFetchTime;
@@ -768,7 +769,6 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-
   Future<void> fetchactivechargers() async {
     final authToken = sessionController.token.value;
     final userId = sessionController.userId.value;
@@ -786,23 +786,26 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       debugPrint('Fetched active chargers: ${response.toJson()}');
 
       if (response.success && response.activechargers != null) {
-        if (response.activechargers is List && (response.activechargers as List).isEmpty) {
+        if (response.activechargers is List &&
+            (response.activechargers as List).isEmpty) {
           CustomSnackbar.showInfo(
             message: "No active charging sessions found.",
           );
         } else if (response.activechargers is List) {
           // Show a popup with the list of active chargers
-          final activeChargers = List<Map<String, dynamic>>.from(response.activechargers);
+          final activeChargers =
+              List<Map<String, dynamic>>.from(response.activechargers);
           _showActiveChargersPopup(activeChargers);
         } else {
-          debugPrint("Unexpected activechargers format: ${response.activechargers}");
+          debugPrint(
+              "Unexpected activechargers format: ${response.activechargers}");
           CustomSnackbar.showError(
             message: "Unexpected response format for active chargers.",
           );
         }
       } else {
         CustomSnackbar.showError(
-          message: response.message ?? "Failed to fetch active chargers.",
+          message: response.message,
         );
       }
     } catch (e) {
@@ -885,18 +888,23 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                 itemBuilder: (context, index) {
                   final charger = activeChargers[index];
                   // Extract connector details from the 'status' field
-                  final connectorDetailsMap = charger['status'] as Map<String, dynamic>?;
-                  print(connectorDetailsMap);
+                  final connectorDetailsMap =
+                      charger['status'] as Map<String, dynamic>?;
 
                   Map<String, dynamic> connDetails;
                   if (connectorDetailsMap != null) {
                     connDetails = {
                       'type': connectorDetailsMap['connector_type'] ?? 1,
                       'power': connectorDetailsMap['power'] ?? 'N/A',
-                      'charger_status': connectorDetailsMap['charger_status'] ?? 'Unknown',
-                      'connector_id': connectorDetailsMap['connector_id']?.toString() ?? 'Unknown',
-                      'connection_status': connectorDetailsMap['connection_status'] ?? 'Unknown',
-                      'last_connection_time': connectorDetailsMap['last_connection_time'] ?? '',
+                      'charger_status':
+                          connectorDetailsMap['charger_status'] ?? 'Unknown',
+                      'connector_id':
+                          connectorDetailsMap['connector_id']?.toString() ??
+                              'Unknown',
+                      'connection_status':
+                          connectorDetailsMap['connection_status'] ?? 'Unknown',
+                      'last_connection_time':
+                          connectorDetailsMap['last_connection_time'] ?? '',
                     };
                   } else {
                     connDetails = {
@@ -908,25 +916,32 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                   }
 
                   // Determine connector type label
-                  final connectorTypeLabel = connDetails['type'] == 1 ? 'Socket' : (connDetails['type'] == 2 ? 'Gun' : 'Unknown');
+                  final connectorTypeLabel = connDetails['type'] == 1
+                      ? 'Socket'
+                      : (connDetails['type'] == 2 ? 'Gun' : 'Unknown');
 
                   // Create charger details map
                   Map<String, dynamic> chargerData = {
                     'vendor': charger['vendor'] ?? 'Unknown',
                     'max_power': charger['max_power'] ?? 'N/A',
                     'address': charger['address'] ?? 'Unknown Location',
-                    'landmark': charger['landmark'] ?? 'No landmark information',
-                    'lat': charger['lat'] ?? currentPosition.value.latitude.toString(),
-                    'long': charger['long'] ?? currentPosition.value.longitude.toString(),
+                    'landmark':
+                        charger['landmark'] ?? 'No landmark information',
+                    'lat': charger['lat'] ??
+                        currentPosition.value.latitude.toString(),
+                    'long': charger['long'] ??
+                        currentPosition.value.longitude.toString(),
                     'charger_id': charger['charger_id']?.toString(),
-                    'status': charger['status'], // Include the full status object
+                    'status':
+                        charger['status'], // Include the full status object
                   };
 
                   return AnimatedOpacity(
                     opacity: 1.0,
                     duration: Duration(milliseconds: 300 + (index * 100)),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 4.0),
                       child: Card(
                         elevation: 4,
                         shape: RoundedRectangleBorder(
@@ -938,12 +953,15 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                             Get.back(); // Close the bottom sheet
                             // Navigate to ChargingPage with charger details
                             Get.to(
-                                  () => ChargingPage(
+                              () => ChargingPage(
                                 chargerId: charger['charger_id'].toString(),
                                 chargerDetails: chargerData,
                                 connectorId: connDetails['connector_id'],
                                 connectorDetails: connDetails,
-                                unitPrice: double.tryParse(charger['unit_price']?.toString() ?? '0.0') ?? 0.0,
+                                unitPrice: double.tryParse(
+                                        charger['unit_price']?.toString() ??
+                                            '0.0') ??
+                                    0.0,
                               ),
                               transition: Transition.rightToLeft,
                               duration: const Duration(milliseconds: 300),
@@ -971,22 +989,28 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                                 // Charger Details
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         "${charger['charger_id'] ?? 'Unknown'} | ${connDetails['connector_id']}",
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
-                                          color: isDark ? Colors.white : Colors.black87,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black87,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        charger['address'] ?? 'Unknown Location',
+                                        charger['address'] ??
+                                            'Unknown Location',
                                         style: TextStyle(
                                           fontSize: 14,
-                                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                          color: isDark
+                                              ? Colors.grey.shade400
+                                              : Colors.grey.shade600,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -995,19 +1019,25 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                                       Row(
                                         children: [
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
-                                              color: connDetails['charger_status'] == 'Charging'
+                                              color: connDetails[
+                                                          'charger_status'] ==
+                                                      'Charging'
                                                   ? Colors.green.shade100
                                                   : Colors.red.shade100,
-                                              borderRadius: BorderRadius.circular(12),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
                                             child: Text(
                                               connDetails['charger_status'],
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w500,
-                                                color: connDetails['charger_status'] == 'Charging'
+                                                color: connDetails[
+                                                            'charger_status'] ==
+                                                        'Charging'
                                                     ? Colors.green.shade700
                                                     : Colors.red.shade700,
                                               ),
@@ -1015,10 +1045,12 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                                           ),
                                           const SizedBox(width: 8),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
                                               color: Colors.blue.shade100,
-                                              borderRadius: BorderRadius.circular(12),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
                                             child: Text(
                                               connectorTypeLabel,
@@ -1037,7 +1069,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                                 // Trailing Arrow
                                 Icon(
                                   Icons.arrow_forward_ios,
-                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                  color: isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade600,
                                   size: 18,
                                 ),
                               ],
@@ -1060,7 +1094,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
                 },
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -1107,12 +1142,13 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       CustomSnackbar.showInfo(message: 'No Active Charging Found');
     } else {
       Get.to(
-            () => ViewAllNearbyChargers(),
+        () => ViewAllNearbyChargers(),
         transition: Transition.rightToLeft,
         duration: Duration(milliseconds: 300),
       );
     }
   }
+
   Future<void> launchGoogleMapsNavigation(LatLng destination) async {
     debugPrint("lat long : $destination");
     final uri = Uri.parse(

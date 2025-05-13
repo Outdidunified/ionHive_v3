@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// A wrapper for the vibration package to handle compatibility issues
@@ -23,7 +24,7 @@ class VibrationWrapper {
       };
       await _channel.invokeMethod("vibrate", params);
     } catch (e) {
-      print("Vibration error: $e");
+      debugPrint("Vibration error: $e");
       // Fallback to HapticFeedback if vibration fails
       try {
         await HapticFeedback.mediumImpact();
@@ -39,7 +40,7 @@ class VibrationWrapper {
       final bool? result = await _channel.invokeMethod("hasVibrator");
       return result ?? false;
     } catch (e) {
-      print("Vibration check error: $e");
+      debugPrint("Vibration check error: $e");
       return false;
     }
   }
@@ -49,7 +50,7 @@ class VibrationWrapper {
     try {
       await _channel.invokeMethod("cancel");
     } catch (e) {
-      print("Vibration cancel error: $e");
+      debugPrint("Vibration cancel error: $e");
     }
   }
 }

@@ -41,6 +41,6 @@ class iOnHiveCore {
 
   // Helper method to get charging-specific WebSocket URL
   static String getChargingWebSocketUrl(String chargerId, int connectorId) {
-    return '${webSocketUrl}/charging/$chargerId/$connectorId';
+    return '$webSocketUrl/charging/$chargerId/$connectorId';
   }
 }
