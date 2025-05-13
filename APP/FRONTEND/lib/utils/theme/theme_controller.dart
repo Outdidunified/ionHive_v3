@@ -10,7 +10,7 @@ class ThemeController extends GetxController {
   static const String PRIMARY_COLOR_KEY = 'primary_color';
 
   // Observable variables
-  final Rx<ThemeMode> themeMode = ThemeMode.dark.obs;
+  final Rx<ThemeMode> themeMode = ThemeMode.light.obs;
   final Rx<MaterialColor> primaryColor = Colors.green.obs;
 
   // Available theme colors
