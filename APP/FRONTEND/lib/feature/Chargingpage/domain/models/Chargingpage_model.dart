@@ -124,13 +124,13 @@ class ChargerStatusData {
       meterValue: meterValue ?? this.meterValue,
       autostopTime: autostopTime ?? this.autostopTime,
       autostopTimeIsChecked:
-      autostopTimeIsChecked ?? this.autostopTimeIsChecked,
+          autostopTimeIsChecked ?? this.autostopTimeIsChecked,
       autostopUnit: autostopUnit ?? this.autostopUnit,
       autostopUnitIsChecked:
-      autostopUnitIsChecked ?? this.autostopUnitIsChecked,
+          autostopUnitIsChecked ?? this.autostopUnitIsChecked,
       autostopPrice: autostopPrice ?? this.autostopPrice,
       autostopPriceIsChecked:
-      autostopPriceIsChecked ?? this.autostopPriceIsChecked,
+          autostopPriceIsChecked ?? this.autostopPriceIsChecked,
     );
   }
 }
@@ -307,60 +307,60 @@ class ChargingSession {
       id: json['_id']?.toString() ?? '',
       chargerId: json['charger_id']?.toString() ?? '',
       connectorId:
-      num.tryParse(json['connector_id']?.toString() ?? '0')?.toInt() ?? 0,
+          num.tryParse(json['connector_id']?.toString() ?? '0')?.toInt() ?? 0,
       stop_reason: json['stop_reason']?.toString() ?? '',
       startTime: json['start_time']?.toString() ?? '',
       stopTime: json['stop_time']?.toString() ?? '',
       unitConsumed:
-      num.tryParse(json['unit_consummed']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['unit_consummed']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       price: num.tryParse(json['price']?.toString() ?? '0')?.toDouble() ?? 0.0,
       unitPrice:
-      num.tryParse(json['unit_price']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['unit_price']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       emailId: json['email_id']?.toString() ?? '',
       sessionId:
-      num.tryParse(json['session_id']?.toString() ?? '0')?.toInt() ?? 0,
+          num.tryParse(json['session_id']?.toString() ?? '0')?.toInt() ?? 0,
       connectorType:
-      num.tryParse(json['connector_type']?.toString() ?? '0')?.toInt() ?? 0,
+          num.tryParse(json['connector_type']?.toString() ?? '0')?.toInt() ?? 0,
       errorCode: json['error_code']?.toString() ?? 'NoError',
       location: json['location']?.toString() ?? '',
       createdDate: json['created_date']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       ebFee: num.tryParse(json['EB_fee']?.toString() ?? '0')?.toDouble() ?? 0.0,
       client_commission:
-      num.tryParse(json['client_commission']?.toString() ?? '0')
-          ?.toDouble() ??
-          0.0,
+          num.tryParse(json['client_commission']?.toString() ?? '0')
+                  ?.toDouble() ??
+              0.0,
       convenience_fee: num.tryParse(json['convenience_fee']?.toString() ?? '0')
-          ?.toDouble() ??
+              ?.toDouble() ??
           0.0,
       gst_amount:
-      num.tryParse(json['gst_amount']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['gst_amount']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       gst_percentage:
-      num.tryParse(json['gst_percentage']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['gst_percentage']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       parking_fee:
-      num.tryParse(json['parking_fee']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['parking_fee']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       processing_fee:
-      num.tryParse(json['processing_fee']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['processing_fee']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       reseller_commission:
-      num.tryParse(json['reseller_commission']?.toString() ?? '0')
-          ?.toDouble() ??
-          0.0,
+          num.tryParse(json['reseller_commission']?.toString() ?? '0')
+                  ?.toDouble() ??
+              0.0,
       service_fee:
-      num.tryParse(json['service_fee']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['service_fee']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       station_fee:
-      num.tryParse(json['station_fee']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['station_fee']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       association_commission:
-      num.tryParse(json['association_commission']?.toString() ?? '0')
-          ?.toDouble() ??
-          0.0, // Added association_commission parsing
+          num.tryParse(json['association_commission']?.toString() ?? '0')
+                  ?.toDouble() ??
+              0.0, // Added association_commission parsing
     );
   }
 
@@ -392,7 +392,8 @@ class ChargingSession {
       'reseller_commission': reseller_commission,
       'service_fee': service_fee,
       'station_fee': station_fee,
-      'association_commission': association_commission, // Added association_commission
+      'association_commission':
+          association_commission, // Added association_commission
     };
   }
 }
@@ -454,23 +455,23 @@ class User {
       phoneNo: json['phone_no']?.toString() ?? '',
       emailId: json['email_id']?.toString() ?? '',
       walletBal:
-      num.tryParse(json['wallet_bal']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['wallet_bal']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       autostopPrice:
-      num.tryParse(json['autostop_price']?.toString() ?? '0')?.toDouble() ??
-          0.0,
+          num.tryParse(json['autostop_price']?.toString() ?? '0')?.toDouble() ??
+              0.0,
       autostopPriceIsChecked: json['autostop_price_is_checked'] ?? false,
       autostopTime:
-      num.tryParse(json['autostop_time']?.toString() ?? '0')?.toInt() ?? 0,
+          num.tryParse(json['autostop_time']?.toString() ?? '0')?.toInt() ?? 0,
       autostopTimeIsChecked: json['autostop_time_is_checked'] ?? false,
       autostopUnit:
-      num.tryParse(json['autostop_unit']?.toString() ?? '0')?.toInt() ?? 0,
+          num.tryParse(json['autostop_unit']?.toString() ?? '0')?.toInt() ?? 0,
       autostopUnitIsChecked: json['autostop_unit_is_checked'] ?? false,
       tagId: num.tryParse(json['tag_id']?.toString() ?? '0')?.toInt() ?? 0,
       assignedAssociation:
-      num.tryParse(json['assigned_association']?.toString() ?? '0')
-          ?.toInt() ??
-          0,
+          num.tryParse(json['assigned_association']?.toString() ?? '0')
+                  ?.toInt() ??
+              0,
       createdBy: json['created_by']?.toString() ?? '',
       createdDate: json['created_date']?.toString() ?? '',
     );

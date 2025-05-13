@@ -23,7 +23,7 @@ class CustomSlideAction extends StatelessWidget {
     this.textColor,
     this.sliderButtonColor,
     this.sliderButtonIconColor,
-    this.height = 70,
+    this.height = 60,
     this.borderRadius = 12,
     this.icon,
   });

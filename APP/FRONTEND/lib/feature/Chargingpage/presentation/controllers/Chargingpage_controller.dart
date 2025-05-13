@@ -326,6 +326,73 @@ class ChargingPageController extends GetxController {
       debugPrint(
           'Processing status notification for our connector: $messageData');
 
+      // final currentData = chargingData.value;
+      // if (currentData != null) {
+      //   final newStatus = mapOcppStatusToChargerStatus(messageData['status']);
+      //   final DateTime timestamp = DateTime.parse(messageData['timestamp']);
+      //   final formattedTime =
+      //       '${timestamp.day.toString().padLeft(2, '0')}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.year} ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}:${timestamp.second.toString().padLeft(2, '0')}';
+
+      //   final updatedData = currentData.copyWith(
+      //     chargerStatus: newStatus,
+      //     timestamp: timestamp,
+      //     timestampIST: formattedTime,
+      //     errorCode: messageData['errorCode'] ?? currentData.errorCode,
+      //   );
+
+      //   chargingData.value = updatedData;
+
+      //   if (isWaitingForStatusUpdate.value) {
+      //     debugPrint(
+      //         'Received status update ($newStatus), stopping loading indicator');
+      //     isWaitingForStatusUpdate.value = false;
+      //     _cancelStatusUpdateTimeout();
+      //   }
+
+      //   if (newStatus == 'Finishing') {
+      //     debugPrint('Charger is finishing, generating bill');
+      //     generateBillOnFinish();
+      //   } else if (newStatus == 'Faulted') {
+      //     final errorCode = messageData['errorCode'] ?? 'Unknown error';
+
+      //     if (energy.value != null && energy.value! > 0) {
+      //       debugPrint(
+      //           'Charger faulted during active charging (energy: ${energy.value}), generating bill');
+      //       generateBillOnFinish();
+      //     } else if (errorCode != 'NoError') {
+      //       // Only show fault notification if there's a real error
+      //       debugPrint(
+      //           'Charger faulted before charging started (energy: ${energy.value}), pushing notification and navigating');
+      //       // Push notification for early fault
+      //       _pushNotification(
+      //         status: 'Faulted',
+      //         errorCode: errorCode,
+      //       ).then((_) {
+      //         // Navigate after notification is pushed
+      //         Future.delayed(const Duration(seconds: 2), () {
+      //           if (isPageActive.value) {
+      //             isPageActive.value = false;
+      //             disconnectWebSocket();
+      //             Get.offAll(
+      //               () => LandingPage(),
+      //               transition: Transition.rightToLeft,
+      //               duration: const Duration(milliseconds: 300),
+      //             );
+      //           }
+      //         });
+      //       });
+      //     } else {
+      //       // If status is Faulted but errorCode is NoError, treat it as a normal completion
+      //       debugPrint(
+      //           'Status is Faulted but errorCode is NoError, treating as normal completion');
+      //       generateBillOnFinish();
+      //     }
+      //   } else if (newStatus != 'Charging') {
+      //     clearMetrics();
+      //   } else if (newStatus == 'Charging') {
+      //     fetchStartedAt();
+      //   }
+      // }
       final currentData = chargingData.value;
       if (currentData != null) {
         final newStatus = mapOcppStatusToChargerStatus(messageData['status']);
@@ -333,11 +400,22 @@ class ChargingPageController extends GetxController {
         final formattedTime =
             '${timestamp.day.toString().padLeft(2, '0')}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.year} ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}:${timestamp.second.toString().padLeft(2, '0')}';
 
+        // Determine error code, using vendorErrorCode for InternalError
+        final rawErrorCode = messageData['errorCode'] ?? currentData.errorCode;
+        final errorCode = rawErrorCode == 'InternalError' &&
+                messageData.containsKey('vendorErrorCode') &&
+                messageData['vendorErrorCode'] is String &&
+                messageData['vendorErrorCode'].isNotEmpty
+            ? messageData['vendorErrorCode']
+            : rawErrorCode;
+
+        debugPrint('Using errorCode: $errorCode for status: $newStatus');
+
         final updatedData = currentData.copyWith(
           chargerStatus: newStatus,
           timestamp: timestamp,
           timestampIST: formattedTime,
-          errorCode: messageData['errorCode'] ?? currentData.errorCode,
+          errorCode: errorCode,
         );
 
         chargingData.value = updatedData;
@@ -353,8 +431,6 @@ class ChargingPageController extends GetxController {
           debugPrint('Charger is finishing, generating bill');
           generateBillOnFinish();
         } else if (newStatus == 'Faulted') {
-          final errorCode = messageData['errorCode'] ?? 'Unknown error';
-
           if (energy.value != null && energy.value! > 0) {
             debugPrint(
                 'Charger faulted during active charging (energy: ${energy.value}), generating bill');
@@ -363,7 +439,7 @@ class ChargingPageController extends GetxController {
             // Only show fault notification if there's a real error
             debugPrint(
                 'Charger faulted before charging started (energy: ${energy.value}), pushing notification and navigating');
-            // Push notification for early fault
+            // Push notification for early fault with determined errorCode
             _pushNotification(
               status: 'Faulted',
               errorCode: errorCode,
@@ -389,14 +465,51 @@ class ChargingPageController extends GetxController {
           }
         } else if (newStatus != 'Charging') {
           clearMetrics();
+        } else if (newStatus == 'Charging') {
+          fetchStartedAt();
         }
       }
     }
   }
 
+  Future<void> fetchStartedAt() async {
+    final authToken = sessionController.token.value;
+    final userId = sessionController.userId.value;
+    final emailId = sessionController.emailId.value;
+
+    try {
+      final startedAtResponse = await _repo.Startedat(
+        userId,
+        emailId,
+        authToken,
+        connectorId,
+        chargerId,
+        connectorType,
+      );
+
+      if (startedAtResponse.error) {
+        CustomSnackbar.showError(
+            message:
+                'Failed to fetch start time: ${startedAtResponse.message}');
+        return;
+      }
+
+      if (startedAtResponse.data == null) {
+        CustomSnackbar.showError(message: 'Start time data is missing');
+        return;
+      }
+
+      final startedAtValue = DateTime.parse(startedAtResponse.data!);
+      startedAt.value = startedAtValue;
+    } catch (e) {
+      debugPrint('Failed to parse start time: $e');
+      CustomSnackbar.showError(message: 'Failed to parse start time: $e');
+    }
+  }
+
   Future<void> generateBillOnFinish() async {
     try {
-      await Future.delayed(const Duration(seconds: 2));
+      // await Future.delayed(const Duration(seconds: 2));
 
       Get.dialog(
         const AlertDialog(
@@ -447,8 +560,9 @@ class ChargingPageController extends GetxController {
       sessionData['Error'] = sessionData['stop_reason'] ?? 'Unknown';
 
       final errorCode = sessionData['stop_reason']?.toString() ?? '';
-      final energyUsed = (sessionData['energy'] as num?)?.toDouble() ?? 0.0;
-      final totalCost = (sessionData['total_cost'] as num?)?.toDouble() ?? 0.0;
+      final energyUsed =
+          (sessionData['unit_consummed'] as num?)?.toDouble() ?? 0.0;
+      final totalCost = (sessionData['price'] as num?)?.toDouble() ?? 0.0;
       final currentStatus = chargingData.value?.chargerStatus ?? '';
 
       // Push notification based on the status
@@ -705,31 +819,31 @@ class ChargingPageController extends GetxController {
         connectorType,
       );
 
-      final startedAtResponse = await _repo.Startedat(
-        userId,
-        emailId,
-        authToken,
-        connectorId,
-        chargerId,
-        connectorType,
-      );
+      // final startedAtResponse = await _repo.Startedat(
+      //   userId,
+      //   emailId,
+      //   authToken,
+      //   connectorId,
+      //   chargerId,
+      //   connectorType,
+      // );
 
-      if (startedAtResponse.error) {
-        CustomSnackbar.showError(
-            message:
-                'Failed to fetch start time: ${startedAtResponse.message}');
-      } else {
-        try {
-          if (startedAtResponse.data != null) {
-            final startedAtValue = DateTime.parse(startedAtResponse.data!);
-            startedAt.value = startedAtValue;
-          } else {
-            CustomSnackbar.showError(message: 'Start time data is missing');
-          }
-        } catch (e) {
-          CustomSnackbar.showError(message: 'Failed to parse start time: $e');
-        }
-      }
+      // if (startedAtResponse.error) {
+      //   CustomSnackbar.showError(
+      //       message:
+      //           'Failed to fetch start time: ${startedAtResponse.message}');
+      // } else {
+      //   try {
+      //     if (startedAtResponse.data != null) {
+      //       final startedAtValue = DateTime.parse(startedAtResponse.data!);
+      //       startedAt.value = startedAtValue;
+      //     } else {
+      //       CustomSnackbar.showError(message: 'Start time data is missing');
+      //     }
+      //   } catch (e) {
+      //     CustomSnackbar.showError(message: 'Failed to parse start time: $e');
+      //   }
+      // }
 
       showMeterValues.value = true;
       await fetchLastStatusData();

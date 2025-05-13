@@ -463,15 +463,18 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
         itemBuilder: (context, index) {
           final session = controller.sessions[index];
           // Convert and format start date in IST
-          final istStartTime = session.startTime.toUtc().add(Duration(hours: 5, minutes: 30));
+          final istStartTime =
+              session.startTime.toUtc().add(Duration(hours: 5, minutes: 30));
           final startDate = DateFormat('MMM dd, yyyy').format(istStartTime);
           final startTime = DateFormat('hh:mm a').format(istStartTime);
 
 // Convert and format stop time in IST, if available
           String endTime = 'In Progress';
           if (session.stopTime != null) {
-            final istStopTime = session.stopTime!.toUtc().add(Duration(hours: 5, minutes: 30));
-            endTime = DateFormat('hh:mm a').format(istStopTime);}
+            final istStopTime =
+                session.stopTime!.toUtc().add(Duration(hours: 5, minutes: 30));
+            endTime = DateFormat('hh:mm a').format(istStopTime);
+          }
 
           String duration = '';
           if (session.stopTime != null) {
@@ -495,6 +498,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage>
                 'email_id': sessionController.emailId.value,
                 'user': sessionController.username.value.split('@')[0],
                 'EB_fee': session.ebFee,
+                'stop_reason': session.stop_reason,
                 'association_commission': session.associationCommission,
                 'client_commission': session.clientCommission,
                 'convenience_fee': session.convenienceFee,

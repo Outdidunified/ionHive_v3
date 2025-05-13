@@ -762,18 +762,14 @@ class ChargingPage extends StatelessWidget {
                                   ],
                                   if (data.chargerStatus == 'Charging') ...[
                                     SizedBox(height: screenHeight * 0.02),
-                                    Container(
-                                      width: double.infinity,
+                                    Padding(
                                       padding: EdgeInsets.symmetric(
-                                        horizontal: theme.brightness ==
-                                                Brightness.dark
-                                            ? 20
-                                            : 10, // Thicker padding in dark theme
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
+                                          horizontal: screenWidth * 0.04),
+                                      child: Container(
+                                        width: double.infinity,
                                         child: CustomSlideAction(
-                                          label: 'Slide to Stop Charging',
+                                          label:
+                                              '            Slide to Stop Charging',
                                           onSubmit: () async {
                                             if (controller.isLoading.value ||
                                                 controller
@@ -805,18 +801,25 @@ class ChargingPage extends StatelessWidget {
                                                   false;
                                             }
                                           },
+                                          icon: Icon(
+                                            Icons.stop,
+                                            color: theme.brightness ==
+                                                    Brightness.dark
+                                                ? Colors.white
+                                                : Colors
+                                                    .white, // Match theme-based coloring
+                                          ),
+                                          height: 65,
+                                          borderRadius: 20,
                                           backgroundColor: theme.brightness ==
                                                   Brightness.dark
                                               ? theme.colorScheme.surface
-                                              : Colors.grey.shade200,
+                                              : Colors.grey
+                                                  .shade200, // Match Start Charging background
+                                          sliderButtonColor: Colors
+                                              .red, // Distinct color for stop action
                                           textColor:
                                               theme.textTheme.bodyLarge?.color,
-                                          sliderButtonColor: Colors.red,
-                                          sliderButtonIconColor: Colors.white,
-                                          icon: Icon(Icons.stop,
-                                              color: Colors.white, size: 30),
-                                          height: 70,
-                                          borderRadius: 12,
                                         ),
                                       ),
                                     ),
@@ -861,8 +864,8 @@ class ChargingPage extends StatelessWidget {
                                           ? Colors.white
                                           : Colors.green,
                                     ),
-                                    height: 60,
-                                    borderRadius: 12,
+                                    height: 65,
+                                    borderRadius: 20,
                                     backgroundColor:
                                         theme.brightness == Brightness.dark
                                             ? theme.colorScheme.surface
