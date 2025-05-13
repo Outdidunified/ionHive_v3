@@ -8,7 +8,7 @@ import 'package:ionhive/feature/Chargingpage/presentation/controllers/Chargingpa
 import 'package:ionhive/feature/Chargingpage/presentation/controllers/LivePriceController.dart';
 import 'package:ionhive/feature/Chargingpage/presentation/pages/status_helper.dart';
 import 'package:ionhive/feature/more/presentation/pages/help&support/presentation/pages/contact%20us.dart';
-import 'package:slider_button/slider_button.dart';
+import 'package:ionhive/utils/slide_action.dart';
 import 'package:ionhive/utils/widgets/loading/loading_indicator.dart';
 import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
 import 'package:ionhive/feature/landing_page.dart';
@@ -772,12 +772,14 @@ class ChargingPage extends StatelessWidget {
                                       ),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(12),
-                                        child: SliderButton(
-                                          action: () async {
+                                        child: CustomSlideAction(
+                                          label: 'Slide to Stop Charging',
+                                          onSubmit: () async {
                                             if (controller.isLoading.value ||
                                                 controller
-                                                    .isEndingSession.value) {
-                                              return false;
+                                                    .isEndingSession.value ||
+                                                isStopButtonDisabled.value) {
+                                              return;
                                             }
                                             controller.isEndingSession.value =
                                                 true;
@@ -788,55 +790,33 @@ class ChargingPage extends StatelessWidget {
                                                     int.parse(connectorId),
                                                 chargerId: chargerId,
                                               );
-                                              isStopButtonDisabled.value =
-                                                  true; // Disable on success
-                                              return true;
+                                              isStopButtonDisabled.value = true;
                                             } catch (e) {
-                                              // Do not disable on failure
-                                              return false;
+                                              Get.snackbar(
+                                                'Error',
+                                                'Failed to stop charging: ${e.toString()}',
+                                                snackPosition:
+                                                    SnackPosition.BOTTOM,
+                                                backgroundColor: Colors.red,
+                                                colorText: Colors.white,
+                                              );
                                             } finally {
                                               controller.isEndingSession.value =
                                                   false;
                                             }
                                           },
-                                          label: Text(
-                                            'Slide to Stop Charging',
-                                            style: TextStyle(
-                                              color: theme
-                                                  .textTheme.bodyLarge?.color,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          icon: Icon(Icons.stop,
-                                              color: Colors.white, size: 30),
-                                          width: screenWidth * 0.9 -
-                                              (theme.brightness ==
-                                                      Brightness.dark
-                                                  ? 40
-                                                  : 20), // Adjust width based on padding
-                                          height:
-                                              70, // Increased height to prevent negative constraints
-                                          buttonSize: 50,
-                                          radius: 12,
-                                          buttonColor: Colors.red,
                                           backgroundColor: theme.brightness ==
                                                   Brightness.dark
                                               ? theme.colorScheme.surface
                                               : Colors.grey.shade200,
-                                          highlightedColor: theme.brightness ==
-                                                  Brightness.dark
-                                              ? theme.colorScheme.surface
-                                                  .withOpacity(0.7)
-                                              : Colors.white,
-                                          baseColor: Colors.red.shade300,
-                                          shimmer: true,
-                                          vibrationFlag: true,
-                                          boxShadow: BoxShadow(
-                                              color: theme.shadowColor
-                                                  .withOpacity(0.2),
-                                              blurRadius: 4),
-                                          disable: isStopButtonDisabled.value,
+                                          textColor:
+                                              theme.textTheme.bodyLarge?.color,
+                                          sliderButtonColor: Colors.red,
+                                          sliderButtonIconColor: Colors.white,
+                                          icon: Icon(Icons.stop,
+                                              color: Colors.white, size: 30),
+                                          height: 70,
+                                          borderRadius: 12,
                                         ),
                                       ),
                                     ),
@@ -855,11 +835,12 @@ class ChargingPage extends StatelessWidget {
                                 final chargerStatus = controller
                                     .chargingData.value?.chargerStatus;
                                 if (chargerStatus == 'Preparing') {
-                                  return SliderButton(
-                                    action: () async {
+                                  return CustomSlideAction(
+                                    label: 'Slide to Start Charging',
+                                    onSubmit: () async {
                                       if (controller.isLoading.value ||
                                           controller.isEndingSession.value) {
-                                        return false;
+                                        return;
                                       }
                                       try {
                                         controller.isLoading.value = true;
@@ -867,53 +848,30 @@ class ChargingPage extends StatelessWidget {
                                           connectorId: int.parse(connectorId),
                                           chargerId: chargerId,
                                         );
-                                        return true;
                                       } catch (e) {
                                         Get.snackbar('Error',
                                             'Failed to start charging: $e');
-                                        return false;
                                       } finally {
                                         controller.isLoading.value = false;
                                       }
                                     },
-                                    label: Text(
-                                      'Slide to Start Charging',
-                                      style: TextStyle(
-                                        color: theme.textTheme.bodyLarge?.color,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16,
-                                      ),
-                                    ),
                                     icon: Icon(
                                       Icons.bolt,
                                       color: theme.brightness == Brightness.dark
                                           ? Colors.white
                                           : Colors.green,
                                     ),
-                                    width: screenWidth * 0.9,
                                     height: 60,
-                                    buttonSize: 50,
-                                    radius: 12,
-                                    buttonColor:
-                                        theme.brightness == Brightness.dark
-                                            ? Colors.green
-                                            : Colors.black,
+                                    borderRadius: 12,
                                     backgroundColor:
                                         theme.brightness == Brightness.dark
                                             ? theme.colorScheme.surface
                                             : Colors.grey.shade200,
-                                    highlightedColor:
+                                    sliderButtonColor:
                                         theme.brightness == Brightness.dark
-                                            ? theme.colorScheme.surface
-                                                .withOpacity(0.7)
-                                            : Colors.white,
-                                    baseColor: Colors.green.shade300,
-                                    shimmer: true,
-                                    vibrationFlag: true,
-                                    boxShadow: BoxShadow(
-                                        color:
-                                            theme.shadowColor.withOpacity(0.2),
-                                        blurRadius: 4),
+                                            ? Colors.green
+                                            : Colors.black,
+                                    textColor: theme.textTheme.bodyLarge?.color,
                                   );
                                 }
                                 return const SizedBox.shrink();

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:ionhive/core/Networks/websocket_service.dart';
 import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/core/core.dart';
+import 'package:ionhive/core/services/notification_service.dart';
 import 'package:ionhive/feature/Chargingpage/domain/models/Chargingpage_model.dart';
 import 'package:ionhive/feature/Chargingpage/domain/repositories/Chargingpage_repositories.dart';
 import 'package:ionhive/feature/landing_page.dart';
@@ -23,6 +24,7 @@ class ChargingPageController extends GetxController {
 
   var isWaitingForStatusUpdate = false.obs;
   Timer? _statusUpdateTimeout;
+  Timer? _periodicCheckTimer;
 
   WebSocketService? _webSocketService;
   var isWebSocketConnected = false.obs;
@@ -44,6 +46,9 @@ class ChargingPageController extends GetxController {
   var startedAt = Rx<DateTime?>(null);
   var showMeterValues = true.obs;
 
+  // Track if a notification has been sent for this session
+  var hasSentNotification = false.obs;
+
   late final String chargerId;
   late final int connectorId;
   late final int connectorType;
@@ -51,9 +56,12 @@ class ChargingPageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    hasSentNotification.value = false; // Reset notification flag on init
     Future.delayed(const Duration(seconds: 2), () async {
-      await fetchLastStatusData();
-      isInitialLoading.value = false;
+      if (isPageActive.value) {
+        await fetchLastStatusData();
+        isInitialLoading.value = false;
+      }
     });
     initWebSocket();
   }
@@ -61,14 +69,16 @@ class ChargingPageController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    // Reinitialize the page when it becomes active again (e.g., after navigating back)
     if (!isPageActive.value) {
       debugPrint(
           'ChargingPageController: onReady called - reinitializing page');
       isPageActive.value = true;
+      hasSentNotification.value = false; // Reset notification flag on re-init
       Future.delayed(const Duration(seconds: 2), () async {
-        await fetchLastStatusData();
-        isInitialLoading.value = false;
+        if (isPageActive.value) {
+          await fetchLastStatusData();
+          isInitialLoading.value = false;
+        }
       });
       initWebSocket();
     }
@@ -76,9 +86,9 @@ class ChargingPageController extends GetxController {
 
   @override
   void onClose() {
-    debugPrint(
-        'ChargingPageController: onClose called - closing all WebSocket connections');
-    isPageActive(false);
+    debugPrint('ChargingPageController: onClose called - cleaning up');
+    isPageActive.value = false;
+    _cancelPeriodicCheckTimer();
     disconnectWebSocket();
     _cancelStatusUpdateTimeout();
     super.onClose();
@@ -86,9 +96,9 @@ class ChargingPageController extends GetxController {
 
   @override
   void dispose() {
-    debugPrint(
-        'ChargingPageController: dispose called - closing all WebSocket connections');
-    isPageActive(false);
+    debugPrint('ChargingPageController: dispose called - cleaning up');
+    isPageActive.value = false;
+    _cancelPeriodicCheckTimer();
     disconnectWebSocket();
     _cancelStatusUpdateTimeout();
     super.dispose();
@@ -115,27 +125,33 @@ class ChargingPageController extends GetxController {
 
       _webSocketService!.stream.listen(
         (dynamic message) {
-          debugPrint('WebSocket message received in controller');
-          handleWebSocketMessage(message);
-          isWebSocketConnected(true);
-          isReconnecting(false);
+          if (isPageActive.value) {
+            debugPrint('WebSocket message received in controller');
+            handleWebSocketMessage(message);
+            isWebSocketConnected(true);
+            isReconnecting(false);
+          }
         },
         onError: (error) {
           debugPrint('WebSocket error in controller: $error');
           webSocketError.value = error.toString();
           isWebSocketConnected(false);
           isReconnecting(true);
-          _scheduleReconnection();
+          if (isPageActive.value) {
+            _scheduleReconnection();
+          }
         },
         onDone: () {
           debugPrint('WebSocket connection closed in controller');
           isWebSocketConnected(false);
           isReconnecting(true);
-          _scheduleReconnection();
+          if (isPageActive.value) {
+            _scheduleReconnection();
+          }
         },
       );
 
-      Timer.periodic(Duration(seconds: 30), (timer) {
+      _periodicCheckTimer = Timer.periodic(Duration(seconds: 30), (timer) {
         if (!isPageActive.value) {
           timer.cancel();
           return;
@@ -155,7 +171,9 @@ class ChargingPageController extends GetxController {
       webSocketError.value = e.toString();
       isWebSocketConnected(false);
       isReconnecting(true);
-      _scheduleReconnection();
+      if (isPageActive.value) {
+        _scheduleReconnection();
+      }
     }
   }
 
@@ -248,6 +266,56 @@ class ChargingPageController extends GetxController {
     }
   }
 
+  Future<void> _pushNotification({
+    required String status,
+    String? errorCode,
+    double? energy,
+    double? cost,
+  }) async {
+    if (hasSentNotification.value) {
+      debugPrint('Notification already sent for this session, skipping');
+      return;
+    }
+
+    NotificationService? notificationService;
+    try {
+      notificationService = Get.find<NotificationService>();
+      debugPrint('Successfully retrieved NotificationService for notification');
+    } catch (e) {
+      debugPrint('Error finding NotificationService: $e');
+      CustomSnackbar.showError(message: 'Notification service unavailable: $e');
+      return;
+    }
+
+    try {
+      // Only show fault notification if there's a real fault (status is Faulted AND errorCode is not NoError)
+      if (status == 'Faulted' &&
+          (errorCode != null && errorCode != 'NoError')) {
+        debugPrint(
+            'Pushing Charging Faulted notification: errorCode=$errorCode, energy=$energy, cost=$cost');
+        await notificationService.showChargingFaultNotification(
+          errorCode: errorCode,
+          energy: energy != null && energy > 0 ? energy : null,
+          cost: cost != null && cost > 0 ? cost : null,
+        );
+      } else if (status == 'Finishing' ||
+          (status == 'Available' && errorCode == 'Stopped by user')) {
+        // Show completion notification for normal finish or user-stopped sessions
+        debugPrint(
+            'Pushing Charging Complete notification: energy=$energy, cost=$cost');
+        await notificationService.showChargingCompleteNotification(
+          energy: energy ?? 0.0,
+          cost: cost ?? 0.0,
+        );
+      }
+      hasSentNotification.value = true; // Mark notification as sent
+      debugPrint('Notification pushed successfully');
+    } catch (e) {
+      debugPrint('Failed to push notification: $e');
+      CustomSnackbar.showError(message: 'Failed to show notification: $e');
+    }
+  }
+
   void handleStatusNotification(
       String deviceId, Map<String, dynamic> messageData) {
     final int notificationConnectorId = messageData['connectorId'] is String
@@ -261,11 +329,7 @@ class ChargingPageController extends GetxController {
       final currentData = chargingData.value;
       if (currentData != null) {
         final newStatus = mapOcppStatusToChargerStatus(messageData['status']);
-
-        // Parse timestamp from message data
         final DateTime timestamp = DateTime.parse(messageData['timestamp']);
-
-        // Format timestamp for display
         final formattedTime =
             '${timestamp.day.toString().padLeft(2, '0')}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.year} ${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}:${timestamp.second.toString().padLeft(2, '0')}';
 
@@ -278,9 +342,6 @@ class ChargingPageController extends GetxController {
 
         chargingData.value = updatedData;
 
-        // Force UI update
-        update();
-
         if (isWaitingForStatusUpdate.value) {
           debugPrint(
               'Received status update ($newStatus), stopping loading indicator');
@@ -292,13 +353,39 @@ class ChargingPageController extends GetxController {
           debugPrint('Charger is finishing, generating bill');
           generateBillOnFinish();
         } else if (newStatus == 'Faulted') {
+          final errorCode = messageData['errorCode'] ?? 'Unknown error';
+
           if (energy.value != null && energy.value! > 0) {
             debugPrint(
                 'Charger faulted during active charging (energy: ${energy.value}), generating bill');
             generateBillOnFinish();
-          } else {
+          } else if (errorCode != 'NoError') {
+            // Only show fault notification if there's a real error
             debugPrint(
-                'Charger faulted before charging started (energy: ${energy.value}), no bill needed');
+                'Charger faulted before charging started (energy: ${energy.value}), pushing notification and navigating');
+            // Push notification for early fault
+            _pushNotification(
+              status: 'Faulted',
+              errorCode: errorCode,
+            ).then((_) {
+              // Navigate after notification is pushed
+              Future.delayed(const Duration(seconds: 2), () {
+                if (isPageActive.value) {
+                  isPageActive.value = false;
+                  disconnectWebSocket();
+                  Get.offAll(
+                    () => LandingPage(),
+                    transition: Transition.rightToLeft,
+                    duration: const Duration(milliseconds: 300),
+                  );
+                }
+              });
+            });
+          } else {
+            // If status is Faulted but errorCode is NoError, treat it as a normal completion
+            debugPrint(
+                'Status is Faulted but errorCode is NoError, treating as normal completion');
+            generateBillOnFinish();
           }
         } else if (newStatus != 'Charging') {
           clearMetrics();
@@ -309,10 +396,8 @@ class ChargingPageController extends GetxController {
 
   Future<void> generateBillOnFinish() async {
     try {
-      // Wait for 2 seconds after "Finishing" or "Faulted" status
       await Future.delayed(const Duration(seconds: 2));
 
-      // Show loading dialog for exactly 2 seconds
       Get.dialog(
         const AlertDialog(
           content: Column(
@@ -329,7 +414,6 @@ class ChargingPageController extends GetxController {
 
       isLoading.value = true;
 
-      // Ensure the loading dialog is visible for at least 2 seconds
       final billGenerationFuture = _repo.generatechargingbill(
         sessionController.userId.value,
         sessionController.emailId.value,
@@ -346,8 +430,9 @@ class ChargingPageController extends GetxController {
 
       final response = await billGenerationFuture;
 
-      // Close the loading dialog
-      Get.back();
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
 
       if (response.error) {
         throw response.message;
@@ -357,21 +442,34 @@ class ChargingPageController extends GetxController {
         throw 'Charging session data is missing in the response';
       }
 
-      // Prepare session data for SessionBill
       Map<String, dynamic> sessionData = response.chargingSession!.toJson();
       sessionData['user'] = response.user?.username ?? 'Unknown';
-      sessionData['Error'] = sessionData['error_code'];
+      sessionData['Error'] = sessionData['stop_reason'] ?? 'Unknown';
 
-      // Navigate to SessionBill with right-to-left transition
-      // Using Get.off to prevent going back to charging page
+      final errorCode = sessionData['stop_reason']?.toString() ?? '';
+      final energyUsed = (sessionData['energy'] as num?)?.toDouble() ?? 0.0;
+      final totalCost = (sessionData['total_cost'] as num?)?.toDouble() ?? 0.0;
+      final currentStatus = chargingData.value?.chargerStatus ?? '';
+
+      // Push notification based on the status
+      await _pushNotification(
+        status: currentStatus,
+        errorCode: errorCode,
+        energy: energyUsed,
+        cost: totalCost,
+      );
+
+      // Navigate to SessionBill after notification
       Future.delayed(const Duration(seconds: 1), () {
-        isPageActive.value = false;
-        disconnectWebSocket();
-        Get.off(
-          () => SessionBill(sessionData),
-          transition: Transition.rightToLeft,
-          duration: const Duration(milliseconds: 300),
-        );
+        if (isPageActive.value) {
+          isPageActive.value = false;
+          disconnectWebSocket();
+          Get.off(
+            () => SessionBill(sessionData),
+            transition: Transition.rightToLeft,
+            duration: const Duration(milliseconds: 300),
+          );
+        }
       });
     } catch (e) {
       if (Get.isDialogOpen == true) {
@@ -390,7 +488,6 @@ class ChargingPageController extends GetxController {
       if (meterValues != null && meterValues.isNotEmpty) {
         final sampledValues = meterValues.first['sampledValue'] as List;
 
-        // Update timestamp when receiving meter values
         updateTimestamp();
 
         for (final value in sampledValues) {
@@ -417,7 +514,6 @@ class ChargingPageController extends GetxController {
           }
         }
 
-        // Force UI update
         update();
       }
     } catch (e) {
@@ -427,6 +523,8 @@ class ChargingPageController extends GetxController {
 
   void handleStartTransaction(Map<String, dynamic> messageData) {
     debugPrint('Charging session started: $messageData');
+    hasSentNotification.value =
+        false; // Reset notification flag when a new session starts
   }
 
   void handleStopTransaction(Map<String, dynamic> messageData) {
@@ -464,14 +562,15 @@ class ChargingPageController extends GetxController {
       );
 
       Future.delayed(const Duration(seconds: 4), () {
-        isPageActive.value = false;
-        disconnectWebSocket();
-        // Use Get.offAll to clear the navigation stack and prevent going back to charging page
-        Get.offAll(
-          () => LandingPage(),
-          transition: Transition.rightToLeft,
-          duration: const Duration(milliseconds: 300),
-        );
+        if (isPageActive.value) {
+          isPageActive.value = false;
+          disconnectWebSocket();
+          Get.offAll(
+            () => LandingPage(),
+            transition: Transition.rightToLeft,
+            duration: const Duration(milliseconds: 300),
+          );
+        }
       });
     }
   }
@@ -512,7 +611,6 @@ class ChargingPageController extends GetxController {
         timestampIST: formattedTime,
       );
 
-      // Force UI update
       update();
     }
   }
@@ -572,7 +670,6 @@ class ChargingPageController extends GetxController {
         chargerId,
       );
 
-      // Use Get.offAll to clear the navigation stack and prevent going back to charging page
       Get.offAll(
         () => LandingPage(),
         transition: Transition.rightToLeft,
@@ -716,8 +813,10 @@ class ChargingPageController extends GetxController {
       CustomSnackbar.showSuccess(message: 'Auto-stop settings updated');
 
       Future.delayed(const Duration(seconds: 2), () {
-        debugPrint('Closing modal after success snackbar');
-        Get.close(1);
+        if (isPageActive.value) {
+          debugPrint('Closing modal after success snackbar');
+          Get.close(1);
+        }
       });
     } catch (e) {
       CustomSnackbar.showError(message: 'Failed to update settings: $e');
@@ -742,5 +841,10 @@ class ChargingPageController extends GetxController {
   void _cancelStatusUpdateTimeout() {
     _statusUpdateTimeout?.cancel();
     _statusUpdateTimeout = null;
+  }
+
+  void _cancelPeriodicCheckTimer() {
+    _periodicCheckTimer?.cancel();
+    _periodicCheckTimer = null;
   }
 }
