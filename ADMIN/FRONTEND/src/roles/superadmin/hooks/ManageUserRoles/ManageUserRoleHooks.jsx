@@ -34,7 +34,7 @@ const useManageUserRole = (userInfo) => {
           setLoading(false)
         }
     };
-
+  
     useEffect(() => {
         if (!fetchUserRoleCalled.current) {
             fetchUserRoles();

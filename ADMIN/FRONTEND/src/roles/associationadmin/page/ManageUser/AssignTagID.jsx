@@ -83,7 +83,7 @@ const AssignTagID = ({ userInfo, handleLogout }) => {
                                                         </tr>
                                                     ) : error ? (
                                                         <tr>
-                                                            <td colSpan="9" style={{ marginTop: '50px', textAlign: 'center' }}>{error}</td>
+                                                            <td colSpan="9" style={{ marginTop: '50px', textAlign: 'center' }}>No Tag ID found</td>
                                                         </tr>
                                                     ) : (
                                                         Array.isArray(posts) && posts.length > 0 ? (

@@ -205,6 +205,8 @@ const useManageDevice = (userInfo) => {
         ? "/reAssignFinance"
         : "/assignFinance";
 
+    console.log('endpoint',endpoint)
+
     try {
         setIsLoading(true);
 
@@ -244,7 +246,7 @@ const useManageDevice = (userInfo) => {
     }
 };
 
-    
+ 
     
 
     return {
