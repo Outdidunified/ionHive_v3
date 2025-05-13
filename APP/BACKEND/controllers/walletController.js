@@ -127,7 +127,7 @@ const FetchWalletBalance = async (req, res) => {
             error: false,
             message: "Wallet balance and metrics retrieved successfully.",
             data: {
-                wallet_balance: user.wallet_bal || 0,
+                wallet_balance: parseFloat(user.wallet_bal.toFixed(2)) || 0,
                 total_credited: parseFloat(totalCredited.toFixed(2)),
                 total_debited: parseFloat(totalDebited.toFixed(2)),
                 credited_count: creditedCount,
@@ -540,7 +540,7 @@ const getTransactionDetails = async (req, res) => {
 
         // Process Transactions
         const deductedTransactions = chargingSessions
-            .filter(session => session.StopTimestamp !== null)
+            .filter(session => session.stop_time !== null)
             .map(session => ({
                 status: 'Deducted',
                 amount: parseFloat(session.price), // Ensure amount is a double
