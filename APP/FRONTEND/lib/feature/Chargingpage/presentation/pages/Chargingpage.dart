@@ -695,7 +695,7 @@ class ChargingPage extends StatelessWidget {
                                                   context,
                                                   'Energy',
                                                   controller.energy.value!,
-                                                  'kWh',
+                                                  'wh',
                                                   theme.cardTheme.color ??
                                                       const Color(
                                                           0xFFF5F5F5), // Use theme color
