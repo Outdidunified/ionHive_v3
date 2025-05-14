@@ -19,5 +19,13 @@ services:
     networks:
       - appnet
 
+  app-backend:
+    build: ./APP/BACKEND
+    ports:
+      - "3003:3003"
+    restart: always
+    networks:
+      - appnet
+
 networks:
   appnet:
