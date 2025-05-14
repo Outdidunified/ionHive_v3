@@ -186,7 +186,7 @@ const fetchChargingSessionHistoryFilter = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal Server Error', error: error.message });
     }
 };
-// Fetch all charging session details //TODO -  want to fix the filter issue 
+// Fetch all charging session details
 const fetchChargingSessionDetails = async (req, res) => {
     try {
         const { email_id, days } = req.body;
@@ -200,7 +200,6 @@ const fetchChargingSessionDetails = async (req, res) => {
         }
 
         // Connect to database
-
         if (!db) {
             return res.status(500).json({
                 error: true,
@@ -241,11 +240,28 @@ const fetchChargingSessionDetails = async (req, res) => {
             });
         }
 
-        logger.loggerSuccess(`Charge session retrieved successfully for email_id=${req.body?.email_id}`)
+        // Modify the result to combine EB_fee and association_commission into EB_fee
+        const modifiedResult = result.map(session => {
+            // Parse EB_fee and association_commission as floats, default to 0 if not present
+            const ebFee = parseFloat(session.EB_fee || '0');
+            const associationCommission = parseFloat(session.association_commission || '0');
+
+            // Add association_commission to EB_fee and convert back to string with 2 decimal places
+            const combinedEbFee = (ebFee + associationCommission).toFixed(2);
+
+            // Create a new session object with the updated EB_fee and without association_commission
+            const { association_commission, ...rest } = session;
+            return {
+                ...rest,
+                EB_fee: combinedEbFee
+            };
+        });
+
+        logger.loggerSuccess(`Charge session retrieved successfully for email_id=${req.body?.email_id}`);
         return res.status(200).json({
             error: false,
             message: 'Charging session details retrieved successfully.',
-            data: result,
+            data: modifiedResult,
         });
 
     } catch (error) {
@@ -257,6 +273,8 @@ const fetchChargingSessionDetails = async (req, res) => {
         });
     }
 };
+
+module.exports = { fetchChargingSessionDetails };
 
 // DOWNLOAD CHARGING HISTORY 
 // download all user charging session details
