@@ -31,9 +31,9 @@ const useUnallocateddevice = (userInfo) => {
     
         try {
          setLoading(true)
-            const response = await axiosInstance.post('/clientadmin/FetchUnAllocatedCharger', {
+            const response = await axiosInstance({method:'post',url:'/clientadmin/FetchUnAllocatedCharger',data: {
                 client_id: userInfo.client_id,
-            });
+            }});
             setUnallocatedChargers(response.data.data || []);
         } catch (error) {
             console.error('Error fetching unallocated charger details:', error);

@@ -16,9 +16,9 @@ const useProfile = (userInfo) => {
 
     const fetchProfile = useCallback(async () => {
         try {
-            const response = await axiosInstance.post('/superadmin/FetchUserProfile', {
+            const response = await axiosInstance({method:'post',url:'/superadmin/FetchUserProfile', data:{
                 user_id: userInfo.user_id
-            });
+            }});
 
             if (response.status === 200) {
                 const data = response.data;
@@ -79,14 +79,14 @@ const useProfile = (userInfo) => {
         try {
           setLoading(true);
       
-          const response = await axiosInstance.post('/superadmin/UpdateUserProfile', {
+          const response = await axiosInstance({method:'post',url:'/superadmin/UpdateUserProfile', data:{
             user_id: userInfo.user_id,
             username,
             phone_no: parseInt(phone_no),
             password: parseInt(password),
             status: true,
             modified_by: userInfo.email_id
-          });
+          }});
       
           if (response.status === 200) {
              showSuccessAlert("Profile updated successfully");

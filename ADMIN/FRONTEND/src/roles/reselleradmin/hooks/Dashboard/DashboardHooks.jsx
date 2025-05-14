@@ -53,33 +53,33 @@ const useDashboard = ( userInfo ) => {
         isFetching.current = true; // Prevent multiple calls
 
         try {
-            const totalRes = await axiosInstance.post('/reselleradmin/FetchTotalCharger', {
+            const totalRes = await axiosInstance({method:'post',url:'/reselleradmin/FetchTotalCharger',data: {
                 reseller_id: userInfo.reseller_id,
-            });
+            }});
 
-            const onlineRes = await axiosInstance.post('/reselleradmin/FetchOnlineCharger', {
+            const onlineRes = await axiosInstance({method:'post',url:'/reselleradmin/FetchOnlineCharger', data:{
                 reseller_id: userInfo.reseller_id,
-            });
+            }});
 
-            const faultRes = await axiosInstance.post('/reselleradmin/FetchFaultsCharger', {
+            const faultRes = await axiosInstance({method:'post',url:'/reselleradmin/FetchFaultsCharger', data:{
                 reseller_id: userInfo.reseller_id,
-            });
+            }});
 
-            const offlineRes = await axiosInstance.post('/reselleradmin/FetchOfflineCharger', {
+            const offlineRes = await axiosInstance({method:'post',url:'/reselleradmin/FetchOfflineCharger', data:{
                 reseller_id: userInfo.reseller_id,
-            });
+            }});
 
-            const energyRes = await axiosInstance.post('/reselleradmin/FetchChargerTotalEnergy', {
+            const energyRes = await axiosInstance({method:'post',url:'/reselleradmin/FetchChargerTotalEnergy', data:{
                 reseller_id: userInfo.reseller_id,
-            });
+            }});
 
-            const totalsession = await axiosInstance.post('/reselleradmin/FetchTotalChargersSession', {
+            const totalsession = await axiosInstance({method:'post',url:'/reselleradmin/FetchTotalChargersSession', data:{
                 reseller_id: userInfo.reseller_id,
-            });
+            }});
 
-            const res = await axiosInstance.post('/reselleradmin/FetchTotalUsers', {
+            const res = await axiosInstance({method:'post',url:'/reselleradmin/FetchTotalUsers', data:{
                 reseller_id: userInfo.reseller_id,
-            });
+            }});
 
             const { resellersCount, clientsCount, associationsCount, appUsersCount } = res.data.TotalCounts;
 

@@ -20,9 +20,9 @@ const useAssignedDevicesClient = ( userInfo) => {
     const fetchChargerDetails = useCallback(async () => {
         setIsLoading(true); // Start loading
         try {
-            const response = await axiosInstance.post('/reselleradmin/FetchChargerDetailsWithSession', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/FetchChargerDetailsWithSession',data: {
                 client_id
-            });
+            }});
     
             if (response.status === 200) {
                 const responseData = response.data;
@@ -117,11 +117,11 @@ const useAssignedDevicesClient = ( userInfo) => {
         setIsUpdating(true); // Start spinner
       
         try {
-          const response = await axiosInstance.post('/reselleradmin/UpdateResellerCommission', {
+          const response = await axiosInstance({method:'post',url:'/reselleradmin/UpdateResellerCommission', data:{
             chargerID: dataItem.chargerID,
             reseller_commission,
             modified_by: userInfo.email_id
-          });
+          }});
       
           if (response.status === 200) {
              showSuccessAlert("Update reseller commission successfully");

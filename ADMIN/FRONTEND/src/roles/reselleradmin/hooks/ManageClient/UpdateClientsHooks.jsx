@@ -66,7 +66,7 @@ const useUpdateClientForm = (userInfo) => {
             status: status === 'true',
           };
       
-          const response = await axiosInstance.post('/reselleradmin/updateClient/', formattedUserData);
+          const response = await axiosInstance({method:'post',url:'/reselleradmin/updateClient/', data:formattedUserData});
       
           if (response.status === 200) {
              showSuccessAlert("Client updated successfully");

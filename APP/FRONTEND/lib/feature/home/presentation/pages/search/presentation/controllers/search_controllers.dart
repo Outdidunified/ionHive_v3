@@ -598,7 +598,7 @@ class SearchpageController extends GetxController {
           duration: const Duration(seconds: 3),
         );
       }
-      print('Failed to start charging hgfwegfdgh : ${response.message}');
+      debugPrint('Failed to start charging hgfwegfdgh : ${response.message}');
     } catch (e) {
       CustomSnackbar.showError(
         message: 'Failed to start charging: $e',

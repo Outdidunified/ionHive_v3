@@ -21,10 +21,15 @@ export const useClientAdminLogin = (handleLogin) => {
     try {
         setLoading(true)
       const parsedPassword = parseInt(password);
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/clientadmin/CheckLoginCredentials`,
-        { email, password: parsedPassword }
-      );
+      // const response = await axios.post(
+      //   `${import.meta.env.VITE_API_URL}/clientadmin/CheckLoginCredentials`,
+      //   { email, password: parsedPassword }
+      // );
+
+     const baseurl=`${import.meta.env.VITE_API_URL}/clientadmin/CheckLoginCredentials`;
+     const response=await axios({method:'post',url:baseurl,
+      data:{email,password:parsedPassword}
+     })
 
       if (response.status === 200 && response.data.status === 'Success') {
         handleLogin(response.data); // Send full user data

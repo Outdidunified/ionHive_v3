@@ -108,7 +108,7 @@ const ManageUser = ( userInfo ) => {
             payload.reseller_id = resellerID;
           }
       
-          const response = await axiosInstance.post('/superadmin/CreateUser', payload);
+          const response = await axiosInstance({method:'post',url:'/superadmin/CreateUser',data: payload});
       
           if (response.data.status === 'Success') {
              showSuccessAlert('User added successfully');
@@ -150,8 +150,8 @@ const ManageUser = ( userInfo ) => {
     // Get Specific User
     useEffect(() => {
         if (!fetchSpecificUserRoleForSelectionCalled.current) {
-            const url = '/superadmin/FetchSpecificUserRoleForSelection';
-            axiosInstance.get(url)
+            // const url = '/superadmin/FetchSpecificUserRoleForSelection';
+            axiosInstance({method:'get',url:'/superadmin/FetchSpecificUserRoleForSelection'})
                 .then((res) => {
                     setSelectionRoles(res.data.data);
                 })
@@ -165,8 +165,8 @@ const ManageUser = ( userInfo ) => {
     // Get Reseller data
     useEffect(() => {
         if (!FetchResellerForSelectionCalled.current) {
-            const url = '/superadmin/FetchResellerForSelection';
-            axiosInstance.get(url)
+            // const url = '/superadmin/FetchResellerForSelection';
+            axiosInstance({method:'get',url:'/superadmin/FetchResellerForSelection'})
                 .then((res) => {
                     setSelectionReseller(res.data.data);
                 })
@@ -187,8 +187,8 @@ const ManageUser = ( userInfo ) => {
     const fetchUsers = async () => {
         setIsLoading(true); // Show loading before API call
         try {
-            const url = '/superadmin/FetchUsers';
-            const res = await axiosInstance.get(url);
+            // const url = '/superadmin/FetchUsers';
+            const res = await axiosInstance({method:'get',url:'/superadmin/FetchUsers'});
             setData(res.data.data);
             setPosts(res.data.data); // Make sure to update 'posts' which is used in rendering
             setError(null);

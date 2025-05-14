@@ -14,9 +14,9 @@ const useManageUsers = (userInfo) => {
         try {
             setLoading(true)
 
-            const response = await axiosInstance.post('/clientadmin/FetchUsers', {
+            const response = await axiosInstance({method:'post',url:'/clientadmin/FetchUsers', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
 
             if (response.status === 200) {
                 const data = response.data.data;

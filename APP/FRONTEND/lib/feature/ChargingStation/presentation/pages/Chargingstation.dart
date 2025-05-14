@@ -13,7 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 class ChargingStationPage extends StatelessWidget {
   final Map<String, dynamic> station;
   final ChargingStationController controller =
-  Get.put(ChargingStationController());
+      Get.put(ChargingStationController());
   final searchpageController = Get.find<SearchpageController>();
 
   // Controller to manage the Google Map
@@ -50,7 +50,7 @@ class ChargingStationPage extends StatelessWidget {
         'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
     final shareText = 'Check out this charging station at $address: $url';
     final uri =
-    Uri.parse('mailto:?subject=Charging Station Location&body=$shareText');
+        Uri.parse('mailto:?subject=Charging Station Location&body=$shareText');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
@@ -510,55 +510,55 @@ class ChargingStationPage extends StatelessWidget {
                                     final detail = entry.value;
 
                                     if (detail == null ||
-                                        !(detail is Map<String, dynamic>)) {
+                                        detail is! Map<String, dynamic>) {
                                       return const SizedBox.shrink();
                                     }
 
                                     return Column(
                                       children: [
                                         GestureDetector(
-                                          onTap: () =>
-                                              controller.toggleChargerDetails(i),
+                                          onTap: () => controller
+                                              .toggleChargerDetails(i),
                                           child: ChargerCard(
                                             title:
-                                            '${detail['address'] ?? 'Charger'} ${i + 1}',
+                                                '${detail['address'] ?? 'Charger'} ${i + 1}',
                                             power:
-                                            '${detail['max_power'] ?? 'N/A'}W',
+                                                '${detail['max_power'] ?? 'N/A'}W',
                                             price:
-                                            '₹ ${detail['unitPrice']??'-'}/kWh',
+                                                '₹ ${detail['unitPrice'] ?? '-'}/kWh',
                                             lastUsed: '24/04/2025',
                                             sessions: i == 0 ? '1k+' : null,
                                             vendor:
-                                            detail['vendor'] ?? 'Unknown',
+                                                detail['vendor'] ?? 'Unknown',
                                             chargerId:
-                                            detail['charger_id'] ?? 'N/A',
+                                                detail['charger_id'] ?? 'N/A',
                                             chargerType:
-                                            detail['charger_type'] ?? 'N/A',
+                                                detail['charger_type'] ?? 'N/A',
                                             connectors:
-                                            detail['connectors'] != null
-                                                ? (detail['connectors']
-                                            as List<dynamic>)
-                                                .map((connector) {
-                                              return ConnectorInfo(
-                                                name: connector[
-                                                'connector_id']
-                                                    ?.toString() ??
-                                                    'N/A',
-                                                type: connector[
-                                                'connector_type']
-                                                    ?.toString() ??
-                                                    'N/A',
-                                                power:
-                                                '${detail['max_power'] ?? 'N/A'}W',
-                                                status: connector[
-                                                'charger_status'] ??
-                                                    ' - ',
-                                              );
-                                            }).toList()
-                                                : [],
+                                                detail['connectors'] != null
+                                                    ? (detail['connectors']
+                                                            as List<dynamic>)
+                                                        .map((connector) {
+                                                        return ConnectorInfo(
+                                                          name: connector[
+                                                                      'connector_id']
+                                                                  ?.toString() ??
+                                                              'N/A',
+                                                          type: connector[
+                                                                      'connector_type']
+                                                                  ?.toString() ??
+                                                              'N/A',
+                                                          power:
+                                                              '${detail['max_power'] ?? 'N/A'}W',
+                                                          status: connector[
+                                                                  'charger_status'] ??
+                                                              ' - ',
+                                                        );
+                                                      }).toList()
+                                                    : [],
                                             isExpanded: controller
-                                                .expandedChargerIndex
-                                                .value ==
+                                                    .expandedChargerIndex
+                                                    .value ==
                                                 i,
                                             index: i,
                                           ),
@@ -577,14 +577,16 @@ class ChargingStationPage extends StatelessWidget {
                                           'assets/icons/saved_device.png',
                                           width: screenWidth * 0.1,
                                           height: screenWidth * 0.1,
-                                          color:
-                                          theme.iconTheme.color?.withOpacity(0.5),
+                                          color: theme.iconTheme.color
+                                              ?.withOpacity(0.5),
                                         ),
                                         SizedBox(height: screenHeight * 0.02),
                                         Text(
                                           'There are no chargers available in this station',
-                                          style: theme.textTheme.bodyLarge?.copyWith(
-                                            color: theme.textTheme.bodyLarge?.color
+                                          style: theme.textTheme.bodyLarge
+                                              ?.copyWith(
+                                            color: theme
+                                                .textTheme.bodyLarge?.color
                                                 ?.withOpacity(0.6),
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -617,152 +619,160 @@ class ChargingStationPage extends StatelessWidget {
                                 Container(
                                   height: screenHeight * 0.4,
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: theme.dividerColor),
-                                    borderRadius:
-                                    BorderRadius.circular(screenWidth * 0.02),
+                                    border:
+                                        Border.all(color: theme.dividerColor),
+                                    borderRadius: BorderRadius.circular(
+                                        screenWidth * 0.02),
                                   ),
                                   child: ClipRRect(
-                                    borderRadius:
-                                    BorderRadius.circular(screenWidth * 0.02),
+                                    borderRadius: BorderRadius.circular(
+                                        screenWidth * 0.02),
                                     child: areCoordinatesValid
                                         ? GoogleMap(
-                                      initialCameraPosition: CameraPosition(
-                                        target: LatLng(latitude, longitude),
-                                        zoom: 15,
-                                      ),
-                                      markers: {
-                                        Marker(
-                                          markerId:
-                                          const MarkerId('station'),
-                                          position:
-                                          LatLng(latitude, longitude),
-                                          icon: BitmapDescriptor
-                                              .defaultMarkerWithHue(
-                                              BitmapDescriptor.hueRed),
-                                          infoWindow: InfoWindow(
-                                            title: stationAddress,
-                                            snippet: 'Tap for actions',
-                                            onTap: () {
-                                              showModalBottomSheet(
-                                                context: context,
-                                                backgroundColor:
-                                                theme.cardTheme.color,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                  BorderRadius.vertical(
-                                                      top: Radius.circular(
-                                                          screenWidth *
-                                                              0.04)),
-                                                ),
-                                                builder: (context) =>
-                                                    Container(
-                                                      padding: EdgeInsets.all(
-                                                          screenWidth * 0.04),
-                                                      child: Column(
-                                                        mainAxisSize:
-                                                        MainAxisSize.min,
-                                                        children: [
-                                                          ListTile(
-                                                            leading: Icon(
-                                                              Icons.directions,
-                                                              color: theme
-                                                                  .primaryColor,
-                                                            ),
-                                                            title: Text(
-                                                              'Get Directions',
-                                                              style: theme
-                                                                  .textTheme
-                                                                  .bodyLarge
-                                                                  ?.copyWith(
-                                                                fontWeight:
-                                                                FontWeight
-                                                                    .w600,
-                                                                color: theme
-                                                                    .textTheme
-                                                                    .bodyLarge
-                                                                    ?.color,
-                                                              ),
-                                                            ),
-                                                            onTap: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                              _launchDirections(
-                                                                  latitude,
-                                                                  longitude);
-                                                            },
-                                                          ),
-                                                          ListTile(
-                                                            leading: Icon(
-                                                              Icons.share,
-                                                              color: theme
-                                                                  .primaryColor,
-                                                            ),
-                                                            title: Text(
-                                                              'Share Location',
-                                                              style: theme
-                                                                  .textTheme
-                                                                  .bodyLarge
-                                                                  ?.copyWith(
-                                                                fontWeight:
-                                                                FontWeight
-                                                                    .w600,
-                                                                color: theme
-                                                                    .textTheme
-                                                                    .bodyLarge
-                                                                    ?.color,
-                                                              ),
-                                                            ),
-                                                            onTap: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                              _shareLocation(
-                                                                  latitude,
-                                                                  longitude,
-                                                                  stationAddress);
-                                                            },
-                                                          ),
-                                                        ],
+                                            initialCameraPosition:
+                                                CameraPosition(
+                                              target:
+                                                  LatLng(latitude, longitude),
+                                              zoom: 15,
+                                            ),
+                                            markers: {
+                                              Marker(
+                                                markerId:
+                                                    const MarkerId('station'),
+                                                position:
+                                                    LatLng(latitude, longitude),
+                                                icon: BitmapDescriptor
+                                                    .defaultMarkerWithHue(
+                                                        BitmapDescriptor
+                                                            .hueRed),
+                                                infoWindow: InfoWindow(
+                                                  title: stationAddress,
+                                                  snippet: 'Tap for actions',
+                                                  onTap: () {
+                                                    showModalBottomSheet(
+                                                      context: context,
+                                                      backgroundColor:
+                                                          theme.cardTheme.color,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.vertical(
+                                                                top: Radius.circular(
+                                                                    screenWidth *
+                                                                        0.04)),
                                                       ),
-                                                    ),
-                                              );
+                                                      builder: (context) =>
+                                                          Container(
+                                                        padding: EdgeInsets.all(
+                                                            screenWidth * 0.04),
+                                                        child: Column(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            ListTile(
+                                                              leading: Icon(
+                                                                Icons
+                                                                    .directions,
+                                                                color: theme
+                                                                    .primaryColor,
+                                                              ),
+                                                              title: Text(
+                                                                'Get Directions',
+                                                                style: theme
+                                                                    .textTheme
+                                                                    .bodyLarge
+                                                                    ?.copyWith(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  color: theme
+                                                                      .textTheme
+                                                                      .bodyLarge
+                                                                      ?.color,
+                                                                ),
+                                                              ),
+                                                              onTap: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                _launchDirections(
+                                                                    latitude,
+                                                                    longitude);
+                                                              },
+                                                            ),
+                                                            ListTile(
+                                                              leading: Icon(
+                                                                Icons.share,
+                                                                color: theme
+                                                                    .primaryColor,
+                                                              ),
+                                                              title: Text(
+                                                                'Share Location',
+                                                                style: theme
+                                                                    .textTheme
+                                                                    .bodyLarge
+                                                                    ?.copyWith(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  color: theme
+                                                                      .textTheme
+                                                                      .bodyLarge
+                                                                      ?.color,
+                                                                ),
+                                                              ),
+                                                              onTap: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                _shareLocation(
+                                                                    latitude,
+                                                                    longitude,
+                                                                    stationAddress);
+                                                              },
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                                onTap: () {
+                                                  _mapController
+                                                      ?.showMarkerInfoWindow(
+                                                          const MarkerId(
+                                                              'station'));
+                                                },
+                                              ),
                                             },
-                                          ),
-                                          onTap: () {
-                                            _mapController
-                                                ?.showMarkerInfoWindow(
-                                                const MarkerId(
-                                                    'station'));
-                                          },
-                                        ),
-                                      },
-                                      onMapCreated: (GoogleMapController
-                                      mapController) {
-                                        debugPrint('Google Map created');
-                                        _mapController = mapController;
-                                        // Apply map style based on theme
-                                        if (theme.brightness ==
-                                            Brightness.dark) {
-                                          mapController
-                                              .setMapStyle(_darkMapStyle);
-                                        } else {
-                                          mapController
-                                              .setMapStyle(_lightMapStyle);
-                                        }
-                                        mapController.showMarkerInfoWindow(
-                                            const MarkerId('station'));
-                                      },
-                                    )
+                                            onMapCreated: (GoogleMapController
+                                                mapController) {
+                                              debugPrint('Google Map created');
+                                              _mapController = mapController;
+                                              // Apply map style based on theme
+                                              if (theme.brightness ==
+                                                  Brightness.dark) {
+                                                mapController
+                                                    .setMapStyle(_darkMapStyle);
+                                              } else {
+                                                mapController.setMapStyle(
+                                                    _lightMapStyle);
+                                              }
+                                              mapController
+                                                  .showMarkerInfoWindow(
+                                                      const MarkerId(
+                                                          'station'));
+                                            },
+                                          )
                                         : Center(
-                                      child: Text(
-                                        'Invalid coordinates for this station',
-                                        style: theme.textTheme.bodyLarge
-                                            ?.copyWith(
-                                          color: theme.textTheme.bodyLarge
-                                              ?.color
-                                              ?.withOpacity(0.6),
-                                        ),
-                                      ),
-                                    ),
+                                            child: Text(
+                                              'Invalid coordinates for this station',
+                                              style: theme.textTheme.bodyLarge
+                                                  ?.copyWith(
+                                                color: theme
+                                                    .textTheme.bodyLarge?.color
+                                                    ?.withOpacity(0.6),
+                                              ),
+                                            ),
+                                          ),
                                   ),
                                 ),
                                 SizedBox(height: screenHeight * 0.02),
@@ -782,8 +792,8 @@ class ChargingStationPage extends StatelessWidget {
                           child: Text(
                             'Reviews feature coming soon!',
                             style: theme.textTheme.bodyLarge?.copyWith(
-                              color:
-                              theme.textTheme.bodyLarge?.color?.withOpacity(0.6),
+                              color: theme.textTheme.bodyLarge?.color
+                                  ?.withOpacity(0.6),
                             ),
                           ),
                         ),
@@ -874,7 +884,7 @@ class ChargingStationPage extends StatelessWidget {
               final charger = selectedConnector.value;
               final connectorIndex = charger['selectedConnectorIndex'];
               final connector =
-              (charger['connectors'] as List<dynamic>)[connectorIndex];
+                  (charger['connectors'] as List<dynamic>)[connectorIndex];
               return Positioned(
                 left: 0,
                 right: 0,
@@ -899,33 +909,33 @@ class ChargingStationPage extends StatelessWidget {
                         onPressed: isLoading
                             ? null // Disable the button while loading
                             : () {
-                          if (charger != null && connector != null) {
-                            searchpageController.handleStartCharging(
-                              chargerId: charger['charger_id'],
-                              chargerDetails: charger,
-                              selectedConnectorId:
-                              connector['connector_id'].toString(),
-                              connectorDetailsMap: {
-                                'type':
-                                connector['connector_type'].toString(),
-                                'power':
-                                charger['max_power']?.toString() ??
-                                    'N/A',
-                                'status':
-                                connector['charger_status'] ?? ' - ',
+                                if (charger != null && connector != null) {
+                                  searchpageController.handleStartCharging(
+                                    chargerId: charger['charger_id'],
+                                    chargerDetails: charger,
+                                    selectedConnectorId:
+                                        connector['connector_id'].toString(),
+                                    connectorDetailsMap: {
+                                      'type': connector['connector_type']
+                                          .toString(),
+                                      'power':
+                                          charger['max_power']?.toString() ??
+                                              'N/A',
+                                      'status':
+                                          connector['charger_status'] ?? ' - ',
+                                    },
+                                  );
+                                } else {
+                                  debugPrint(
+                                      "Charger or Connector data is missing");
+                                  Get.snackbar(
+                                    'Error',
+                                    'Charger or Connector data is missing',
+                                    backgroundColor: theme.colorScheme.error,
+                                    colorText: theme.colorScheme.onError,
+                                  );
+                                }
                               },
-                            );
-                          } else {
-                            debugPrint(
-                                "Charger or Connector data is missing");
-                            Get.snackbar(
-                              'Error',
-                              'Charger or Connector data is missing',
-                              backgroundColor: theme.colorScheme.error,
-                              colorText: theme.colorScheme.onError,
-                            );
-                          }
-                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,

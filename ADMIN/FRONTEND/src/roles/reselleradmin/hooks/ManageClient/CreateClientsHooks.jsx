@@ -35,14 +35,14 @@ const useCreateClient = (userInfo) => {
       
           const PhoneNumber = parseInt(client_phone_no);
       
-          const response = await axiosInstance.post('/reselleradmin/addNewClient', {
+          const response = await axiosInstance({method:'post',url:'/reselleradmin/addNewClient', data:{
             reseller_id: userInfo.reseller_id,
             client_name,
             client_phone_no: PhoneNumber,
             client_email_id,
             client_address,
             created_by: userInfo.email_id
-          });
+          }});
       
           if (response.status === 200) {
              showSuccessAlert("Client added successfully");

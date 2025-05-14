@@ -46,6 +46,7 @@ class TransactionController extends GetxController {
     hasError.value = false;
     errorMessage.value = '';
     isLoading.value = true;
+    debugPrint("TransactionController: call");
 
     try {
       final response = await _transactionrepository.fetchAllTransactions(
@@ -348,7 +349,7 @@ class TransactionController extends GetxController {
         // Fetch data
         await Future.wait([fetchTransactionFilter(), fetchAllTransactions()]);
 
-        // Debug print to check data state after fetching
+        // Debug debugPrint to check data state after fetching
         debugPrint("TransactionController: Data refresh completed");
         debugPrint(
             "TransactionController: transactions.length = ${transactions.length}");

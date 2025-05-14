@@ -15,58 +15,59 @@ const useRevenueReport = (userInfo) => {
 
     const clientId = userInfo?.client_id;
 
-    useEffect(() => {
-        if (!clientId) return;
-    
-        const fetchData = async () => {
-            if (isFetchingFirst.current) return;
-            setFirstTableLoading(true);
-            isFetchingFirst.current = true;
-    
-            try {
-                const response = await axiosInstance.post(
-                    '/clientadmin/FetchSpecificChargerRevenue',
-                    { client_id: clientId }
-                );
-                setFirstTableData(response.data.revenueData || []);
-                setTotalRevenue(response.data.TotalChargerRevenue || "0.000");
-            } catch (error) {
-                console.error("Error fetching first table data:", error);
-            } finally {
-                setFirstTableLoading(false);
-                isFetchingFirst.current = false;
-            }
-        };
-    
-        fetchData();
-    }, [clientId]);
-    
+  useEffect(() => {
+    if (!clientId) return;
 
-    useEffect(() => {
-        if (!clientId) return;
+    const fetchData = async () => {
+        if (isFetchingFirst.current) return;
+        setFirstTableLoading(true);
+        isFetchingFirst.current = true;
 
-        const fetchSessionData = async () => {
-            if (isFetchingSecond.current) return;
-            setSecondTableLoading(true);
-            isFetchingSecond.current = true;
+        try {
+            const response = await axiosInstance({
+                method: 'post',
+                url: '/clientadmin/FetchSpecificChargerRevenue',
+                data: { client_id: clientId }
+            });
+            setFirstTableData(response.data.revenueData || []);
+            setTotalRevenue(response.data.TotalChargerRevenue || "0.000");
+        } catch (error) {
+            console.error("Error fetching first table data:", error);
+        } finally {
+            setFirstTableLoading(false);
+            isFetchingFirst.current = false;
+        }
+    };
 
-            try {
-              
-                const response = await axiosInstance.post(
-                    '/clientadmin/FetchChargerListWithAllCostWithRevenue',
-                    { client_id: clientId }
-                );
-                setSecondTableData(response.data.revenueData || []);
-            } catch (error) {
-                console.error("Error fetching second table data:", error);
-            } finally {
-                setSecondTableLoading(false);
-                isFetchingSecond.current = false;
-            }
-        };
+    fetchData();
+}, [clientId]);
 
-        fetchSessionData();
-    }, [clientId]);
+useEffect(() => {
+    if (!clientId) return;
+
+    const fetchSessionData = async () => {
+        if (isFetchingSecond.current) return;
+        setSecondTableLoading(true);
+        isFetchingSecond.current = true;
+
+        try {
+            const response = await axiosInstance({
+                method: 'post',
+                url: '/clientadmin/FetchChargerListWithAllCostWithRevenue',
+                data: { client_id: clientId }
+            });
+            setSecondTableData(response.data.revenueData || []);
+        } catch (error) {
+            console.error("Error fetching second table data:", error);
+        } finally {
+            setSecondTableLoading(false);
+            isFetchingSecond.current = false;
+        }
+    };
+
+    fetchSessionData();
+}, [clientId]);
+
 
     const filteredFirstTableData = firstTableData.filter((item) => {
         const searchQuery = firstTableSearchQuery.toLowerCase();

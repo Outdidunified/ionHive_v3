@@ -9,26 +9,32 @@ const useResellerData = (userInfo) => {
 
   const FetchResellersCalled = useRef(false);
 
-  useEffect(() => {
-    if (!FetchResellersCalled.current) {
-      const url = '/superadmin/FetchResellers';
+ useEffect(() => {
+  if (!FetchResellersCalled.current) {
+    const fetchResellers = async () => {
       setLoading(true);
-      axiosInstance
-        .get(url)
-        .then((res) => {
-          setData(res.data.data);      // <-- store full dataset here
-          setPosts(res.data.data);     // <-- also store it for display and filtering
-          setLoading(false);
-        })
-
-        .catch((err) => {
-          console.error('Error fetching data:', err);
-          setError('Error fetching data. Please try again.');
-          setLoading(false);
+      try {
+        const response = await axiosInstance({
+          method: 'get',
+          url: '/superadmin/FetchResellers',
         });
-      FetchResellersCalled.current = true;
-    }
-  }, []);
+
+        setData(response.data.data);   // Store full dataset
+        setPosts(response.data.data);  // Also store for display/filtering
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        const errorMessage = err?.response?.data?.message || 'Error fetching data. Please try again.';
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResellers();
+    FetchResellersCalled.current = true;
+  }
+}, []);
+
 
   // Search functionality
   const handleSearchInputChange = (e) => {

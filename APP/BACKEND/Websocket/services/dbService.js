@@ -293,6 +293,67 @@ const updateCurrentOrActiveUserToNull = async (uniqueIdentifier, connectorId) =>
         return false;
     }
 }
+
+/**
+ * Check if a charger has an active charging session and end it if necessary
+ * @param {string} uniqueIdentifier - The charger ID
+ * @param {number|string} connectorId - The connector ID
+ * @returns {Promise<boolean>} - True if a session was ended, false otherwise
+ */
+const checkAndEndChargingSession = async (uniqueIdentifier, connectorId) => {
+    try {
+        if (!db) {
+            db = await connectToDatabase();
+        }
+
+        // First, check if there's an active session in device_session_details
+        const DeviceSessionDetailsCollection = db.collection('device_session_details');
+
+        // Find active session (where stop_time is null)
+        const activeSession = await DeviceSessionDetailsCollection.findOne({
+            charger_id: uniqueIdentifier,
+            connector_id: parseInt(connectorId),
+            stop_time: null
+        });
+
+        if (activeSession) {
+            logger.loggerInfo(`Found active charging session for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}, SessionID ${activeSession.session_id}`);
+
+            // Update the session with stop time and status
+            const currentTime = new Date().toISOString();
+            const updateResult = await DeviceSessionDetailsCollection.updateOne(
+                { _id: activeSession._id },
+                {
+                    $set: {
+                        stop_time: currentTime,
+                        status: false,
+                        error_code: "ConnectionLost",
+                        stop_reason: "ChargerDisconnected",
+                        modified_date: new Date()
+                    }
+                }
+            );
+
+            if (updateResult.modifiedCount > 0) {
+                logger.loggerSuccess(`Successfully ended charging session for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}`);
+
+                // Also update the current_or_active_user to null
+                await updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
+
+                return true;
+            } else {
+                logger.loggerWarn(`Failed to update charging session for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}`);
+            }
+        } else {
+            logger.loggerInfo(`No active charging session found for ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId}`);
+        }
+
+        return false;
+    } catch (error) {
+        logger.loggerError(`Error checking and ending charging session: ${error.message}`);
+        return false;
+    }
+}
 const deleteMeterValues = async (key, meterValuesMap) => {
     if (meterValuesMap.has(key)) {
         meterValuesMap.delete(key);

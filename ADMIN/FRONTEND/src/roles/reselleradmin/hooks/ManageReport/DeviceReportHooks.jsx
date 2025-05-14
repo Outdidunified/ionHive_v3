@@ -19,25 +19,33 @@ const useDeviceReport = (userInfo) => {
   const today = new Date().toISOString().split('T')[0];
 
   // Fetch device list
-  useEffect(() => {
-    if (!fetchDataCalled.current) {
-      axiosInstance
-        .post('/reselleradmin/FetchReportDevice', {
-          reseller_id: userInfo?.reseller_id,
-        })
-        .then((res) => {
-          setDeviceData(Array.isArray(res.data.data) ? res.data.data : []);
-          setLoadingDevice(false);
-        })
-        .catch((err) => {
-          const errorMessage = err.response?.data?.message || 'Failed to Fetch Report Device';
-          setErrorDevice(errorMessage);
-          setLoadingDevice(false);
+ useEffect(() => {
+  if (!fetchDataCalled.current) {
+    const fetchReportDevice = async () => {
+      setLoadingDevice(true);
+      try {
+        const response = await axiosInstance({
+          method: 'post',
+          url: '/reselleradmin/FetchReportDevice',
+          data: {
+            reseller_id: userInfo?.reseller_id,
+          },
         });
 
-      fetchDataCalled.current = true;
-    }
-  }, [userInfo]);
+        setDeviceData(Array.isArray(response.data.data) ? response.data.data : []);
+      } catch (err) {
+        const errorMessage = err?.response?.data?.message || 'Failed to Fetch Report Device';
+        setErrorDevice(errorMessage);
+        console.error('Error fetching report device:', err);
+      } finally {
+        setLoadingDevice(false);
+      }
+    };
+
+    fetchReportDevice();
+    fetchDataCalled.current = true;
+  }
+}, [userInfo]);
 
   // Handle search
   
@@ -80,9 +88,9 @@ const useDeviceReport = (userInfo) => {
     setDeviceId('');
   
     try {
-      const response = await axiosInstance.post('/reselleradmin/DeviceReport', {
+      const response = await axiosInstance({method:'post',url:'/reselleradmin/DeviceReport', data:{
         from_date: fromDate, to_date: toDate, device_id: selectDevice
-      });
+      }});
   
       const responseData = response.data;
   

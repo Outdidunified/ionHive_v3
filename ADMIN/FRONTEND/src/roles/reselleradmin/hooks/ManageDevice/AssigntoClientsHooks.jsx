@@ -23,9 +23,9 @@ const useAssigntoclients = ( userInfo ) => {
     // fetch clientuser to assgin charger
     const fetchClients = async () => {
         try {
-            const response = await axiosInstance.post('/reselleradmin/FetchClientUserToAssginCharger', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/FetchClientUserToAssginCharger', data:{
                 reseller_id: userInfo.reseller_id
-            });
+            }});
             setClientsList(response.data.data || []);
         } catch (error) {
             console.error('Error fetching clients:', error);
@@ -35,9 +35,9 @@ const useAssigntoclients = ( userInfo ) => {
 
     const fetchUnallocatedChargers = async () => {
         try {
-            const response = await axiosInstance.post('/reselleradmin/FetchUnAllocatedChargerToAssgin', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/FetchUnAllocatedChargerToAssgin',data: {
                 reseller_id: userInfo.reseller_id,
-            });
+            }});
             setUnallocatedChargers(response.data.data || []);
         } catch (error) {
             console.error('Error fetching unallocated charger details:', error);
@@ -138,12 +138,12 @@ const useAssigntoclients = ( userInfo ) => {
         setIsSubmitting(true); // Start loading
       
         try {
-          const response = await axiosInstance.post('/reselleradmin/AssginChargerToClient', {
+          const response = await axiosInstance({method:'post',url:'/reselleradmin/AssginChargerToClient', data:{
             client_id: parseInt(selectedClientId),
             charger_id: selectedChargers,
             reseller_commission: commission,
             modified_by: userInfo.email_id,
-          });
+          }});
       
           if (response.data.status === 'Success') {
              showSuccessAlert('Charger Assigned Successfully');

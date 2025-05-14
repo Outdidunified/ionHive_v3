@@ -11,9 +11,9 @@ const useAssignCharger = (dataItem) => {
         const fetchAssignedClients = async () => {
             setIsLoading(true); // Start loading
             try {
-                const response = await axiosInstance.post('/superadmin/FetchChargerDetailsWithSession', {
+                const response = await axiosInstance({method:'post',url:'/superadmin/FetchChargerDetailsWithSession', data:{
                     reseller_id: dataItem.reseller_id
-                });
+                }});
     
                 if (response.data.success) {
                     setData(response.data.data);

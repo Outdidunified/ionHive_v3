@@ -36,43 +36,54 @@ const useAssignTagID = (userInfo) => {
     }, [location]);
     // Fetch Tagid
 
-    // Fetch TagID
-    const fetchTagID = useCallback(async () => {
-        try {
-            const res = await axiosInstance.post('/associationadmin/FetchTagIdToAssign', {
+  const fetchTagID = useCallback(async () => {
+    try {
+        const res = await axiosInstance({
+            method: 'post',
+            url: '/associationadmin/FetchTagIdToAssign',
+            data: {
                 association_id: userInfo.association_id,
                 user_id: userInfo.user_id
-            });
-    
-            if (res.data && res.data.status === 'Success') {
-                if (typeof res.data.data === 'string' && res.data.data === 'No tags found') {
-                    // If the data contains the message "No tags found"
-                    setError(res.data.data);
-                    setData([]); // Clear the data since no tags were found
-                } else if (Array.isArray(res.data.data)) {
-                    // If the data contains an array of tag IDs, filter based on expiry date
+            }
+        });
+
+        setLoading(false);
+
+        if (res.data) {
+            if (res.data.status === 'Success') {
+                if (Array.isArray(res.data.data)) {
                     const currentDate = new Date();
                     const tagIDdata = res.data.data.filter((item) => {
                         const expiryDate = new Date(item.tag_id_expiry_date);
-                        return expiryDate >= currentDate; // Filter future expiry dates
+                        return expiryDate >= currentDate;
                     });
-    
+
                     setData(tagIDdata);
-                    setError(null); // Clear any previous errors
+                    setError(null);
                 } else {
                     setError('Unexpected response format.');
+                    setData([]);
                 }
+            } else if (
+                res.data.status === 'Failed' &&
+                res.data.message === 'No tags found'
+            ) {
+                setError(null); // Don't show error
+                setData([]);    // Still set empty data
             } else {
                 setError('Error fetching data. Please try again.');
+                setData([]);
             }
-    
-            setLoading(false);
-        } catch (err) {
-            console.error('Error fetching data:', err);
-            setError('Error fetching data. Please try again.');
-            setLoading(false);
+        } else {
+            setError('Unexpected response structure.');
         }
-    }, [userInfo.association_id, userInfo.user_id]);
+    } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Error fetching data. Please try again.');
+        setLoading(false);
+    }
+}, [userInfo.association_id, userInfo.user_id]);
+
     
 
     useEffect(() => {
@@ -131,11 +142,11 @@ const useAssignTagID = (userInfo) => {
 
 const handleAssignTagID = async (dataItem) => {
     try {
-        const response = await axiosInstance.post('/associationadmin/AssignTagIdToUser', {
+        const response = await axiosInstance({method:'post',url:'/associationadmin/AssignTagIdToUser', data:{
             user_id: newUser.user_id, 
             tag_id: dataItem.tag_id, 
             modified_by: userInfo.email_id
-        });
+        }});
 
         if (response.status === 200) {
             showSuccessAlert("Assign TagID successfully", "TagID assigned to user successfully");

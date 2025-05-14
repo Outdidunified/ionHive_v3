@@ -21,7 +21,7 @@ const useCreateUser = (userInfo) => {
     // Fetch user roles
     const fetchUserRoles = async () => {
         try {
-            const response = await axiosInstance.get('/clientadmin/FetchSpecificUserRoleForSelection');
+            const response = await axiosInstance({method:'get',url:'/clientadmin/FetchSpecificUserRoleForSelection',});
             if (response.data.status === 'Success') {
                 setUserRoles(response.data.data);
             } else {
@@ -35,9 +35,9 @@ const useCreateUser = (userInfo) => {
     // Fetch association names
     const fetchAssociationNames = useCallback(async () => {
         try {
-            const response = await axiosInstance.post('/clientadmin/FetchAssociationForSelection', {
+            const response = await axiosInstance({method:'post',url:'/clientadmin/FetchAssociationForSelection', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
 
             if (response.data.status === 'Success') {
                 setAssName(response.data.data);
@@ -102,7 +102,7 @@ const useCreateUser = (userInfo) => {
             reseller_id: userInfo.data.reseller_id
           };
       
-          const response = await axiosInstance.post('/clientadmin/CreateUser', formattedUserData);
+          const response = await axiosInstance({method:'post',url:'/clientadmin/CreateUser', data:formattedUserData});
       
           if (response.status === 200) {
              showSuccessAlert('User created successfully');

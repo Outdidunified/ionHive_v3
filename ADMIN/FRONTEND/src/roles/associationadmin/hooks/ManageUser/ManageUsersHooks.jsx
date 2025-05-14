@@ -20,9 +20,9 @@ const useManageUsers = (userInfo) => {
     const fetchUsers = useCallback(async () => {
         try {
             setLoading(true)
-            const response = await axiosInstance.post('/associationadmin/FetchUsers', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/FetchUsers', data:{
                 association_id: userInfo.association_id,
-            });
+            }});
 
             if (response.status === 200) {
                 const data = response.data.data;

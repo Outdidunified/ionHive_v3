@@ -25,9 +25,9 @@ const useAssignToAssociation = () => {
     const fetchAssignToAssociationData = async (client_id) => {
         setIsLoading(true); // Start loading
         try {
-            const response = await axiosInstance.post('/reselleradmin/FetchAssignedAssociation', {
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/FetchAssignedAssociation', data:{
                 client_id: client_id
-            });
+            }});
     
             if (response.data.status === 'Success' && response.data.data.length > 0) {
                 const fetchedData = response.data.data.map(item => ({

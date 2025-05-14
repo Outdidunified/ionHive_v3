@@ -84,7 +84,7 @@ const useCreateFinance = (userInfo) => {
                 created_by: newFinance.created_by,
             };
 
-            await axiosInstance.post('/associationadmin/createFinance', formattedFinanceData);
+            await axiosInstance({method:'post',url:'/associationadmin/createFinance', data:formattedFinanceData});
 
             showSuccessAlert('Finance created successfully'); // Show success alert using the helper
 

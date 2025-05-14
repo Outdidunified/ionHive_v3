@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { showSuccessAlert, showErrorAlert } from '../../../../utils/alert' // Import alert functions
 import axiosInstance from '../../../../utils/utils';
-import dayjs from 'dayjs';
+// import dayjs from 'dayjs';
 
 
 const useManageTagID = (userInfo) => {
@@ -21,9 +21,9 @@ const useManageTagID = (userInfo) => {
     try {
         setLoading(true); // Always set loading true at start
 
-        const res = await axiosInstance.post('/associationadmin/FetchAllTagIDs', {
+        const res = await axiosInstance({method:'post',url:'/associationadmin/FetchAllTagIDs', data:{
             association_id: userInfo.association_id
-        });
+        }});
 
         const data = res.data;
 
@@ -118,12 +118,12 @@ const useManageTagID = (userInfo) => {
         try {
             setIsLoading(true);
     
-            const response = await axiosInstance.post('/associationadmin/CreateTagID', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/CreateTagID', data:{
                 tag_id: add_tag_id, 
                 tag_id_expiry_date: add_tag_id_expiry_date, 
                 created_by: userInfo.email_id, 
                 association_id: userInfo.association_id
-            });
+            }});
     
             if (response.status === 200) {
                 showSuccessAlert("TagID added successfully");
@@ -210,13 +210,13 @@ const editTagID = async (e) => {
     try {
         setEditLoading(true);
 
-        const response = await axiosInstance.post('/associationadmin/UpdateTagID', {
+        const response = await axiosInstance({method:'post',url:'/associationadmin/UpdateTagID', data:{
             id: dataItem.id, 
             tag_id, 
             tag_id_expiry_date, 
             status: dataItem.status, 
             modified_by: userInfo.email_id
-        });
+        }});
 
         if (response.status === 200) {
             showSuccessAlert("TagID updated successfully");
@@ -243,11 +243,11 @@ const editTagID = async (e) => {
 const changeDeActivate = async (e, id) => {
     e.preventDefault();
     try {
-        const response = await axiosInstance.post('/associationadmin/DeactivateOrActivateTagID', {
+        const response = await axiosInstance({method:'post',url:'/associationadmin/DeactivateOrActivateTagID',data: {
             id, 
             status: false, 
             modified_by: userInfo.email_id
-        });
+        }});
 
         if (response.status === 200) {
             showSuccessAlert("Deactivated successfully", "TagID deactivated successfully");
@@ -265,11 +265,11 @@ const changeDeActivate = async (e, id) => {
 const changeActivate = async (e, id) => {
     e.preventDefault();
     try {
-        const response = await axiosInstance.post('/associationadmin/DeactivateOrActivateTagID', {
+        const response = await axiosInstance({method:'post',url:'/associationadmin/DeactivateOrActivateTagID', data:{
             id, 
             status: true, 
             modified_by: userInfo.email_id
-        });
+        }});
 
         if (response.status === 200) {
             showSuccessAlert("Activated successfully", "TagID activated successfully");

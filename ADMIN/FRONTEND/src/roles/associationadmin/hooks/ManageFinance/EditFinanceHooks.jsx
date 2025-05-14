@@ -142,7 +142,7 @@ const useEditFinance = (userInfo) => {
     
         try {
             setLoading(true);
-            const response = await axiosInstance.post('/associationadmin/updateFinance', formattedFinanceData);
+            const response = await axiosInstance({method:'post',url:'/associationadmin/updateFinance', data:formattedFinanceData});
     
             if (response.data.status === 'Success') {
                 showSuccessAlert('Finance details updated successfully'); // Use success alert helper

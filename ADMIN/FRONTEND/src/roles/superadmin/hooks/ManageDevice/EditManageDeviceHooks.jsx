@@ -175,9 +175,9 @@ const [connectors, setConnectors] = useState(
     // Function to fetch the type name options from the backend and update the connectors
     const updateConnectors = useCallback(async (updatedConnector) => {
         try {
-            const res = await axiosInstance.post('/superadmin/fetchConnectorTypeName', {
+            const res = await axiosInstance({method:'post',url:'/superadmin/fetchConnectorTypeName', data:{
                 connector_type: updatedConnector.connector_type
-            });
+        }});
 
             if (res.data && res.data.status === 'Success') {
                 if (typeof res.data.data === 'string' && res.data.data === 'No details were found') {
@@ -265,7 +265,7 @@ const editManageDevice = async (e) => {
   try {
     setLoading(true);
 
-    const response = await axiosInstance.post('/superadmin/UpdateCharger', {
+    const response = await axiosInstance({method:'post',url:'/superadmin/UpdateCharger',data: {
       _id,
       charger_id,
       charger_model,
@@ -277,7 +277,7 @@ const editManageDevice = async (e) => {
       wifi_module,
       bluetooth_module,
       modified_by: userInfo.email_id,
-    });
+  }});
 
     if (response.data?.status === 'Success') {
       await showSuccessAlert('Charger updated successfully');

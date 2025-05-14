@@ -19,9 +19,9 @@ const useOutputTypeConfig = ( userInfo ) => {
             const association_id = userInfo.association_id;
             console.log("Sending association_id:", association_id);
     
-            const res = await axiosInstance.post('/superadmin/fetchAllOutputType', {
+            const res = await axiosInstance({method:'post',url:'/superadmin/fetchAllOutputType', data:{
                 association_id: association_id
-            });
+            }});
     
             if (res.data && res.data.status === 'Success') {
                 if (typeof res.data.data === 'string' && res.data.data === 'No Output Type found') {
@@ -97,11 +97,11 @@ const useOutputTypeConfig = ( userInfo ) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-          await axiosInstance.post('/superadmin/createOutputType', {
+          await axiosInstance({method:'post',url:'/superadmin/createOutputType', data:{
             output_type: add_OutputType,
             output_type_name: add_OutputTypeConfig,
             created_by: userInfo.email_id
-          });
+          }});
       
            showSuccessAlert("Add Output Type Config successfully");
       
@@ -166,11 +166,11 @@ const useOutputTypeConfig = ( userInfo ) => {
         e.preventDefault();
         setIsUpdating(true);
         try {
-          await axiosInstance.post('/superadmin/updateOutputType', {
+          await axiosInstance({method:'post',url:'/superadmin/updateOutputType', data:{
             id: dataItem.id,
             output_type_name,
             modified_by: userInfo.email_id
-          });
+          }});
       
            showSuccessAlert("Update Output Type Config successfully");
       
@@ -191,11 +191,11 @@ const useOutputTypeConfig = ( userInfo ) => {
       const changeDeActivate = async (e, id) => {
         e.preventDefault();
         try {
-          await axiosInstance.post('/superadmin/DeActivateOutputType', {
+          await axiosInstance({method:'post',url:'/superadmin/DeActivateOutputType',data: {
             id,
             status: false,
             modified_by: userInfo.email_id
-          });
+          }});
       
            showSuccessAlert("Deactivated successfully");
           fetchTagID();
@@ -208,11 +208,11 @@ const useOutputTypeConfig = ( userInfo ) => {
       const changeActivate = async (e, id) => {
         e.preventDefault();
         try {
-          await axiosInstance.post('/superadmin/DeActivateOutputType', {
+          await axiosInstance({method:'post',url:'/superadmin/DeActivateOutputType', data:{
             id,
             status: true,
             modified_by: userInfo.email_id
-          });
+          }});
       
            showSuccessAlert("Activated successfully");
           fetchTagID();

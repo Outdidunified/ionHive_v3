@@ -63,7 +63,7 @@ const useEditManageDevice = (userInfo) => {
         setIsLoading(true); // Start loading
         try {
             const Status = parseInt(selectStatus);
-            const response = await axiosInstance.post('/associationadmin/UpdateDevice', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/UpdateDevice', data:{
                 charger_id: dataItem.charger_id,
                 charger_accessibility: Status,
                 lat: latitude,
@@ -73,7 +73,7 @@ const useEditManageDevice = (userInfo) => {
                 wifi_username: wifiUsername,
                 wifi_password: wifiPassword,
                 modified_by: userInfo.email_id
-            });
+            }});
     
             const data = response.data;
     

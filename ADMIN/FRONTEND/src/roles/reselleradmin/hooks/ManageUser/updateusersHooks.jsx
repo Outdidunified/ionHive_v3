@@ -72,7 +72,7 @@ const useUpdateUser = (userInfo) => {
                 status: status === 'true',
             };
     
-            const response = await axiosInstance.post('/reselleradmin/UpdateUser', formattedUserData);
+            const response = await axiosInstance({method:'post',url:'/reselleradmin/UpdateUser', data:formattedUserData});
     
             if (response.status === 200) {
                 // Handle success

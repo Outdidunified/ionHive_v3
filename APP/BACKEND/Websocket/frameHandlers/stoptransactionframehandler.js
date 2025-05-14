@@ -384,11 +384,10 @@ const createChargingSession = async (uniqueIdentifier, connectorId, startTime, u
             unit_consummed: 0, // Will be updated when charging stops
             price: 0, // Will be updated when charging stops
             unit_price: pricePerUnit,
-            error_code: 'NoError',
+            // error_code: 'NoError',
             location: chargerDetails ? chargerDetails.landmark : 'Unknown',
             email_id: user,
             created_date: new Date(),
-            status: true
         };
 
         // Insert session data into device_session_details collection
@@ -436,7 +435,7 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
             if (existingSession.stop_time === null && existingSession.start_time !== null) {
 
                 // Resolve error fields cleanly
-                const resolvedErrorCode = errorCode || (vendorErrorCode ? 'VendorError' : 'NoError');
+                const resolvedErrorCode = errorCode || 'NoError';
                 const resolvedVendorErrorCode = vendorErrorCode || 'NoVendorError';
                 const resolvedStopReason = stopReason || 'UnknownReason';
 
@@ -453,10 +452,7 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
                             stop_time: stopTime,
                             unit_consummed: formattedUnit,
                             price: formattedPrice,
-                            error_code: resolvedErrorCode,
-                            vendor_error_code: resolvedVendorErrorCode,
-                            stop_reason: resolvedStopReason,
-                            modified_date: new Date()
+                            modified_date: new Date(),
                         }
                     }
                 );
@@ -496,6 +492,11 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
                 const pricePerUnit = await dbService.getPricePerUnit(uniqueIdentifier, connectorId);
 
 
+                // Resolve error fields cleanly
+                const resolvedErrorCode = errorCode || 'NoError';
+                const resolvedVendorErrorCode = vendorErrorCode || 'NoVendorError';
+                const resolvedStopReason = stopReason || 'UnknownReason';
+
                 // Create session data object
                 const sessionData = {
                     charger_id: uniqueIdentifier,
@@ -507,11 +508,14 @@ const handleChargingSession = async (uniqueIdentifier, connectorId, startTime, s
                     unit_consummed: formattedUnit,
                     price: formattedPrice,
                     unit_price: pricePerUnit,
-                    error_code: errorCode || 'NoError',
+                    // error_code: resolvedErrorCode,
+                    vendor_error_code: resolvedVendorErrorCode,
+                    stop_reason: resolvedStopReason,
                     location: chargerDetails ? chargerDetails.landmark : 'Unknown',
                     email_id: user,
                     created_date: new Date(),
-                    status: true
+                    modified_date: new Date(),
+                    status: false // Set to false since this is a completed session
                 };
 
                 // Insert session data into device_session_details collection
@@ -746,7 +750,7 @@ const handleStopTransaction = async (
                     connectorTypeValue,
                     requestPayload.errorCode || "NoError",
                     stopReason,
-                    requestPayload.vendorErrorCode || "NovendorErrorCode",
+                    requestPayload.vendorErrorCode || "NoVendorError",
                 );
             } else {
                 logger.loggerWarn(`ChargerID ${uniqueIdentifier}: User is ${user}, so can't update the session price and commission.`);

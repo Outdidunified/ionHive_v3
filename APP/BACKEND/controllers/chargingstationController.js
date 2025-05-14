@@ -568,7 +568,7 @@ const updateConnectorUser = async (req, res) => {
         }
 
         const walletBalance = userRecord.wallet_bal;
-        const minBal = 100;
+        const minBal = 1;
         if (walletBalance === undefined || isNaN(walletBalance) || walletBalance < minBal) {
             logger.loggerWarn(`Your wallet balance is not enough to charge (minimum ${minBal} Rs required)`);
             return res.status(400).json({ error: true, message: `Your wallet balance is not enough to charge (minimum ${minBal} Rs required)` });

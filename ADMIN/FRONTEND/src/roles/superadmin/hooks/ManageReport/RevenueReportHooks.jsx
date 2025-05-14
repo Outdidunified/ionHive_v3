@@ -10,53 +10,62 @@ const useRevenueReport = () => {
     const isFetching = useRef(false);
 
     const fetchData = useCallback(async () => {
-        if (isFetching.current) return;
-        isFetching.current = true;
-        setLoading(true);
+  if (isFetching.current) return;
+  isFetching.current = true;
+  setLoading(true);
 
-        try {
-            const [firstTableResponse, secondTableResponse] = await Promise.all([
-                axiosInstance.get('/superadmin/FetchSpecificChargerRevenue'),
-                axiosInstance.get('/superadmin/FetchChargerListWithAllCostWithRevenue')
-            ]);
+  try {
+    const [firstTableResponse, secondTableResponse] = await Promise.all([
+      axiosInstance({
+        method: 'get',
+        url: '/superadmin/FetchSpecificChargerRevenue',
+      }),
+      axiosInstance({
+        method: 'get',
+        url: '/superadmin/FetchChargerListWithAllCostWithRevenue',
+      }),
+    ]);
 
-            const processedFirstTableData = firstTableResponse.data.revenueData.map(item => ({
-                chargeId: item.charger_id,
-                reseller: item.reseller_email_id,
-                client: item.client_email_id,
-                association: item.association_email_id,
-                totalRevenue: item.TotalRevenue
-            }));
+    const processedFirstTableData = firstTableResponse.data.revenueData.map(item => ({
+      chargeId: item.charger_id,
+      reseller: item.reseller_email_id,
+      client: item.client_email_id,
+      association: item.association_email_id,
+      totalRevenue: item.TotalRevenue,
+    }));
 
-            const processedSecondTableData = secondTableResponse.data.revenueData.flatMap(item => {
-                if (item?.sessions && Array.isArray(item.sessions)) {
-                    return item.sessions.map(session => ({
-                        chargerId: item.charger_id,
-                        sessionId: session.session_id,
-                        customerName: session.customerName,
-                        startTime: session.start_time,
-                        stopTime: session.stop_time,
-                        duration: session.duration,
-                        location: session.location,
-                        energyConsumed: session.energyConsumed,
-                        price: session.price,
-                        reseller: session.reseller_revenue,
-                        client: session.client_revenue,
-                        association: session.association_revenue,
-                        totalRevenue: session.totalRevenue
-                    }));
-                }
-                return [];
-            });
+    const processedSecondTableData = secondTableResponse.data.revenueData.flatMap(item => {
+      if (item?.sessions && Array.isArray(item.sessions)) {
+        return item.sessions.map(session => ({
+          chargerId: item.charger_id,
+          sessionId: session.session_id,
+          customerName: session.customerName,
+          startTime: session.start_time,
+          stopTime: session.stop_time,
+          duration: session.duration,
+          location: session.location,
+          energyConsumed: session.energyConsumed,
+          price: session.price,
+          reseller: session.reseller_revenue,
+          client: session.client_revenue,
+          association: session.association_revenue,
+          totalRevenue: session.totalRevenue,
+        }));
+      }
+      return [];
+    });
 
-            setFirstTableData(processedFirstTableData);
-            setSecondTableData(processedSecondTableData);
-        } catch (error) {
-            console.error("Error fetching revenue report data:", error);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    setFirstTableData(processedFirstTableData);
+    setSecondTableData(processedSecondTableData);
+  } catch (error) {
+    console.error("Error fetching revenue report data:", error);
+    const errorMessage = error?.response?.data?.message || "Failed to fetch revenue report data";
+    showErrorAlert("Error", errorMessage);
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
 
     useEffect(() => {
         fetchData();

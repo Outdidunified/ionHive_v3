@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/View/NoInternetScreen.dart';
 import 'package:ionhive/core/controllers/session_controller.dart'; // Session Controller
+import 'package:ionhive/core/services/notification_service.dart'; // Notification Service
 import 'package:ionhive/core/splash_screen.dart';
 import 'package:ionhive/feature/Chargingpage/presentation/controllers/LivePriceController.dart';
 import 'package:ionhive/feature/auth/presentation/pages/GettingStarted%20page.dart';
@@ -35,6 +36,23 @@ void main() async {
       statusBarBrightness: Brightness.light,
     ),
   );
+
+  // Initialize notification service first
+  NotificationService notificationService = NotificationService();
+  // Register it early to ensure it's available for other controllers
+  Get.put(notificationService, permanent: true);
+
+  // Delay the initialization to ensure Flutter engine is fully set up
+  // This helps prevent MissingPluginException
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    try {
+      await notificationService.init();
+      await notificationService.requestPermissions();
+      debugPrint('Notification service initialized successfully');
+    } catch (e) {
+      debugPrint('Error initializing notification service: $e');
+    }
+  });
 
   // Initialize theme controller first to ensure theme is applied before other controllers
   final themeController = Get.put(ThemeController());

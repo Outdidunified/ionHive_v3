@@ -64,7 +64,7 @@ const useEditResellerForm = (userInfo) => {
         modified_by: userInfo.email_id,
       };
   
-      const response = await axiosInstance.post('/superadmin/UpdateReseller', updatedReseller);
+      const response = await axiosInstance({method:'post',url:'/superadmin/UpdateReseller',data:updatedReseller});
   
       if (response.status === 200) {
         // Directly handle success alert and navigation here

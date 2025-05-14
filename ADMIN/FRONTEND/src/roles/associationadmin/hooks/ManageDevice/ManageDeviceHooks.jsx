@@ -17,13 +17,15 @@ const useManageDevice = (userInfo) => {
     };
     
     // Get Allocated charger data
-    const FetchAllocatedCharger = useCallback(async () => {
+   const FetchAllocatedCharger = useCallback(async () => {
     try {
         setLoading(true);
-        const response = await axiosInstance.post(
-            '/associationadmin/FetchAllocatedChargerByClientToAssociation',
-            { association_id: userInfo.association_id }
-        );
+
+        const response = await axiosInstance({
+            method: 'post',
+            url: '/associationadmin/FetchAllocatedChargerByClientToAssociation',
+            data: { association_id: userInfo.association_id }
+        });
 
         const data = response.data;
 
@@ -48,7 +50,6 @@ const useManageDevice = (userInfo) => {
         setLoading(false);
     }
 }, [userInfo.association_id]);
-
 
     useEffect(() => {
         if (!fetchMangeCalled.current && userInfo &&  userInfo.user_id) {
@@ -82,9 +83,9 @@ const useManageDevice = (userInfo) => {
     const changeDeActivate = async (e, dataItem) => {
         e.preventDefault();
         try {
-            const response = await axiosInstance.post('/associationadmin/DeActivateOrActivateCharger', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/DeActivateOrActivateCharger', data:{
                 charger_id: dataItem.charger_id, status: false, modified_by: userInfo.email_id
-            });
+            }});
     
             if (response.status === 200) {
                 showSuccessAlert("Deactivated successfully"); // Use success alert helper
@@ -103,9 +104,9 @@ const useManageDevice = (userInfo) => {
     const changeActivate = async (e, dataItem) => {
         e.preventDefault();
         try {
-            const response = await axiosInstance.post('/associationadmin/DeActivateOrActivateCharger', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/DeActivateOrActivateCharger', data:{
                 charger_id: dataItem.charger_id, status: true, modified_by: userInfo.email_id
-            });
+            }});
     
             if (response.status === 200) {
                 showSuccessAlert("Activated successfully"); // Use success alert helper
@@ -130,9 +131,9 @@ const useManageDevice = (userInfo) => {
     // Fetch Finance Details
     const fetchFinanceDetails = useCallback(async () => {
         try {
-            const response = await axiosInstance.post('/associationadmin/fetchFinance_dropdown', {
+            const response = await axiosInstance({method:'post',url:'/associationadmin/fetchFinance_dropdown', data:{
                 association_id: userInfo.association_id
-            });
+            }});
     
             if (response.status === 200) {
                 let fetchedOptions = response.data.data || [];
@@ -192,52 +193,60 @@ const useManageDevice = (userInfo) => {
     
 
     // Handle Form Submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    
-        if (!selectedChargerDitails || !selectedFinanceId) {
-            showErrorAlert("Error", "Please select a unit price");
-            return;
-        }
-    
-        const endpoint = selectedChargerDitails.finance_id !== undefined && selectedChargerDitails.finance_id !== null
-            ? "/reAssignFinance"
-            : "/assignFinance";
-    
-        try {
-            setIsLoading(true);
-            const response = await axiosInstance.post(`/associationadmin${endpoint}`, {
+   const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!selectedChargerDitails || !selectedFinanceId) {
+        showErrorAlert("Error", "Please select a unit price");
+        return;
+    }
+
+    const endpoint = selectedChargerDitails.finance_id !== undefined && selectedChargerDitails.finance_id !== null
+        ? "/reAssignFinance"
+        : "/assignFinance";
+
+    console.log('endpoint',endpoint)
+
+    try {
+        setIsLoading(true);
+
+        const response = await axiosInstance({
+            method: 'post',
+            url: `/associationadmin${endpoint}`,
+            data: {
                 _id: selectedChargerDitails._id,
                 charger_id: selectedChargerDitails.charger_id,
                 finance_id: parseInt(selectedFinanceId),
                 modified_by: userInfo.email_id,
-            });
-    
-            const data = response.data;
-    
-            if (data.status === "Success") {
-                const actionType = selectedChargerDitails.finance_id ? "reassigned" : "assigned";
-                showSuccessAlert("Success", `Finance ${actionType} successfully`);
-                setShowModal(false);
-                setSelectedFinanceId("");
-                setIsEdited(false);
-                FetchAllocatedCharger();
-                fetchFinanceDetails();
-            } else if (data.status === "Failed") {
-                // Server says operation failed, but HTTP was 200
-                showErrorAlert("Error", data.message || "Failed to update finance");
-            } else {
-                // Unknown status
-                showErrorAlert("Error", "Unexpected response from server");
             }
-        } catch (error) {
-            console.error("Error submitting finance:", error);
-            showErrorAlert("Error", "Something went wrong");
-        } finally {
-            setIsLoading(false);
+        });
+
+        const data = response.data;
+
+        if (data.status === "Success") {
+            const actionType = selectedChargerDitails.finance_id ? "reassigned" : "assigned";
+            showSuccessAlert("Success", `Finance ${actionType} successfully`);
+            setShowModal(false);
+            setSelectedFinanceId("");
+            setIsEdited(false);
+            FetchAllocatedCharger();
+            fetchFinanceDetails();
+        } else if (data.status === "Failed") {
+            // Server says operation failed, but HTTP was 200
+            showErrorAlert("Error", data.message || "Failed to update finance");
+        } else {
+            // Unknown status
+            showErrorAlert("Error", "Unexpected response from server");
         }
-    };
-    
+    } catch (error) {
+        console.error("Error submitting finance:", error);
+        showErrorAlert("Error", "Something went wrong");
+    } finally {
+        setIsLoading(false);
+    }
+};
+
+ 
     
 
     return {

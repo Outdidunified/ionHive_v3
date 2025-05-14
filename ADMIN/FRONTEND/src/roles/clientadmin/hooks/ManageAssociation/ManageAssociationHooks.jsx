@@ -21,9 +21,9 @@ const useManageAssociation = (userInfo) => {
     const fetchUsers = async () => {
         try {
             setLoading(true)
-            const response = await axiosInstance.post('/clientadmin/FetchAssociationUser', {
+            const response = await axiosInstance({method:'post',url:'/clientadmin/FetchAssociationUser', data:{
                 client_id: userInfo.client_id
-            });
+            }});
             setAssociations(response.data.data || []);
             console.log(response.data.data);
         } catch (error) {

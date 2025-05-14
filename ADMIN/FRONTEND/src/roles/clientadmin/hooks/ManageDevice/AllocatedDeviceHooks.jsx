@@ -28,11 +28,11 @@ const useAllocateddevice = (userInfo) => {
 
     const deactivateCharger = async (chargerId, status) => {
         try {
-            const response = await axiosInstance.post('/clientadmin/DeActivateOrActivateCharger', {
+            const response = await axiosInstance({method:'post',url:'/clientadmin/DeActivateOrActivateCharger', data:{
                 charger_id: chargerId,
                 modified_by: userInfo.email_id,
                 status: !status // Toggle status
-            });
+            }});
     
             if (response.status === 200) {
                 // Update charger status in state
@@ -66,9 +66,9 @@ const useAllocateddevice = (userInfo) => {
     const fetchAllocatedChargerDetails = useCallback(async () => {
         try {
             setLoading(true)
-            const response = await axiosInstance.post('/clientadmin/FetchAllocatedCharger', {
+            const response = await axiosInstance({method:'post',url:'/clientadmin/FetchAllocatedCharger', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
             console.log(response);
 
             setAllocatedChargers(response.data.data || []);

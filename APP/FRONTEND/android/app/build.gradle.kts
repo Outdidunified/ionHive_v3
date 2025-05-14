@@ -8,11 +8,13 @@ plugins {
 android {
     namespace = "com.outdidev.ev_app"
     compileSdk = flutter.compileSdkVersion
-ndkVersion = "27.0.12077973"
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // Core library desugaring is already enabled
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -21,10 +23,11 @@ ndkVersion = "27.0.12077973"
 
     defaultConfig {
         applicationId = "com.outdidev.ev_app"
-        minSdk = flutter.minSdkVersion
+        minSdk = 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     signingConfigs {
@@ -45,23 +48,23 @@ ndkVersion = "27.0.12077973"
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = false  // Disable minification
-            isShrinkResources = false  // Disable resource shrinking
-            // No proguard files needed
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
 
         debug {
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
-            isShrinkResources = false  // Disable resource shrinking
-            // No proguard files needed
+            isShrinkResources = false
         }
     }
 }
 
 dependencies {
-    // Add the androidx.startup dependency for initializing components
     implementation("androidx.startup:startup-runtime:1.1.1")
+    // Updated to 2.1.4 as required by flutter_local_notifications
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    implementation("androidx.multidex:multidex:2.0.1")
 }
 
 flutter {

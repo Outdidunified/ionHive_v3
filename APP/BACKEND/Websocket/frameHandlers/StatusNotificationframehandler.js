@@ -4,14 +4,26 @@ const { framevalidation } = require("../validation/framevalidation");
 const { sendForceDisconnect } = require("../utils/broadcastUtils");
 const clientConnectionUtils = require("../utils/clientConnectionUtils");
 const timeUtils = require('../../utils/timeUtils');
+let db;
+
+const connectToDatabase = async () => {
+    try {
+        if (!db) {
+            db = await db_conn.connectToDatabase();
+            // Don't log here, the message will come from db_conn.connectToDatabase()
+        }
+        return db;
+    } catch (error) {
+        logger.loggerError(`Failed to connect to database: ${error.message}`);
+        throw error;
+    }
+};
+// Map to store timeout IDs for each charger-connector combination
+const timeoutMap = new Map();
 
 const validateStatusnotification = (data) => {
     return framevalidation(data, "StatusNotification.json");
 };
-
-function generateRandomSessionId() {
-    return Math.floor(1000000 + Math.random() * 9000000); // Generates a random number between 1000000 and 9999999
-}
 
 const handleStatusNotification = async (
     uniqueIdentifier,
@@ -31,7 +43,6 @@ const handleStatusNotification = async (
     const formattedDate = timeUtils.getCurrentIST();
     // Initialize with correct OCPP 1.6 format: [MessageTypeId, UniqueId, Payload]
     let response = [3, requestId, {}];
-    let timeoutId;
     let db;
     let GenerateChargingSessionID;
 
@@ -55,7 +66,12 @@ const handleStatusNotification = async (
 
         const { connectorId, errorCode, status, timestamp, vendorErrorCode } = requestPayload;
         const key = `${uniqueIdentifier}_${connectorId}`;
-
+        let stopReason;
+        if (errorCode === "NoError") {
+            stopReason = "Stopped by user";
+        } else {
+            stopReason = errorCode !== "InternalError" ? errorCode : (vendorErrorCode || "InternalError");
+        }
         // Fetch Connector Type
         const socketGunConfig = await db.collection("socket_gun_config").findOne({ charger_id: uniqueIdentifier });
 
@@ -81,7 +97,7 @@ const handleStatusNotification = async (
             charger_status: status,
             timestamp: new Date(timestamp),
             client_ip: clientIpAddress || null,
-            error_code: errorCode !== "InternalError" ? errorCode : vendorErrorCode,
+            stop_reason: stopReason,
             created_date: new Date(),
             modified_date: null
         };
@@ -90,7 +106,13 @@ const handleStatusNotification = async (
 
         // Also update error code in device_session_details if it exists
         try {
-            const db = await dbService.connectToDatabase();
+            if (!db) {
+                db = await connectToDatabase();
+                if (!db) {
+                    logger.loggerError('Failed to establish database connection.');
+                    return { status: "Error", message: "Database connection failed" };
+                }
+            }
             const key = `${uniqueIdentifier}_${connectorId}`;
             const sessionId = chargingSessionID ? chargingSessionID.get(key) : null;
 
@@ -104,11 +126,10 @@ const handleStatusNotification = async (
                     },
                     {
                         $set: {
-                            error_code: errorCode !== "InternalError" ? errorCode : (vendorErrorCode || "InternalError"),
-                            vendor_error_code: vendorErrorCode || null,
-                            status: status
-                        }
+                            charger_status: status,
+                            stop_reason: stopReason
 
+                        }
                     }
                 );
 
@@ -124,15 +145,14 @@ const handleStatusNotification = async (
             logger.loggerError(`Error updating error code in device_session_details: ${error.message}`);
         }
 
-        let chargerErrorCode = errorCode === "NoError" ? errorCode : vendorErrorCode || errorCode;
 
         // Broadcast status change to specific clients subscribed to this charger and connector
         try {
             // Create a status update message
             const statusUpdate = {
                 type: "statusUpdate",
-                status: status,
-                errorCode: chargerErrorCode,
+                charger_status: status,
+                errorCode: stopReason,
                 timestamp: formattedDate,
                 connectorId: connectorId,
                 info: {
@@ -150,28 +170,40 @@ const handleStatusNotification = async (
         }
 
         if (status === "Available") {
-            if (timeoutId) {
-                clearTimeout(timeoutId);
+            // Clear any existing timeout for this charger-connector combination
+            if (timeoutMap.has(key)) {
+                clearTimeout(timeoutMap.get(key));
+                logger.loggerInfo(`Cleared existing timeout for ${key}`);
             }
-            timeoutId = setTimeout(async () => {
-                const result = await dbService.updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
-                // if (result) {
-                //     // Send force disconnect message using our utility function
-                //     sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
-                //         "No action attempted. Automatically redirecting to home page.");
-                // }
 
-                logger.loggerInfo(`ChargerID ${uniqueIdentifier} - End charging session ${result ? "updated" : "not updated"}`);
+            // Set a new timeout for this charger-connector combination
+            const newTimeoutId = setTimeout(async () => {
+                const result = await dbService.updateCurrentOrActiveUserToNull(uniqueIdentifier, connectorId);
+                if (result) {
+                    // Send force disconnect message using our utility function
+                    sendForceDisconnect(uniqueIdentifier, connectorId, ws, ClientWss,
+                        "No action attempted. Automatically redirecting to home page.");
+                }
+
+                logger.loggerInfo(`ChargerID ${uniqueIdentifier}, ConnectorID ${connectorId} - End charging session ${result ? "updated" : "not updated"}`);
+
+                // Remove the timeout from the map once it's executed
+                timeoutMap.delete(key);
             }, 50000);
+
+            // Store the timeout ID in the map
+            timeoutMap.set(key, newTimeoutId);
+            logger.loggerInfo(`Set new timeout for ${key}`);
 
             await dbService.deleteMeterValues(key, meterValuesMap);
             await dbService.NullTagIDInStatus(uniqueIdentifier, connectorId);
         } else {
-            if (timeoutId !== undefined) {
-                clearTimeout(timeoutId);
-                timeoutId = undefined; // Reset the timeout reference
+            // Clear any existing timeout for this charger-connector combination
+            if (timeoutMap.has(key)) {
+                clearTimeout(timeoutMap.get(key));
+                timeoutMap.delete(key);
+                logger.loggerInfo(`Cleared timeout for ${key} due to status: ${status}`);
             }
-
         }
 
         if (status === "Preparing") {
@@ -216,6 +248,16 @@ const handleStatusNotification = async (
         };
     } catch (error) {
         logger.loggerError(`Error handling StatusNotification for ChargerID ${uniqueIdentifier}: ${error.message}`);
+
+        // If we have connector ID information, clean up any timeouts for this charger-connector
+        if (requestPayload && requestPayload.connectorId) {
+            const errorKey = `${uniqueIdentifier}_${requestPayload.connectorId}`;
+            if (timeoutMap.has(errorKey)) {
+                clearTimeout(timeoutMap.get(errorKey));
+                timeoutMap.delete(errorKey);
+                logger.loggerInfo(`Cleared timeout for ${errorKey} due to error`);
+            }
+        }
 
         // Ensure we have a valid OCPP response even in case of error
         response = [3, requestId, {}];

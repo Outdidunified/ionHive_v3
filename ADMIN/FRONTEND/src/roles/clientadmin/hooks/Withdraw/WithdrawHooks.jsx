@@ -26,9 +26,9 @@ const useWithdraw = (userInfo) => {
   
       try {
           setIsLoading(true);
-          const response = await axiosInstance.post('/clientadmin/FetchPaymentRequest', {
+          const response = await axiosInstance({method:'post',url:'/clientadmin/FetchPaymentRequest', data:{
               user_id: userInfo.user_id,
-          });
+          }});
   
           if (response.status === 200 && response.data.status === 'Success') {
             const { withdrawalDetails, clientData, user } = response.data;
@@ -60,9 +60,9 @@ const useWithdraw = (userInfo) => {
     useEffect(() => {
         const fetchCommissionAmount = async () => {
             try {
-                const response = await axiosInstance.post('/clientadmin/FetchCommissionAmtClient', {
+                const response = await axiosInstance({method:'post',url:'/clientadmin/FetchCommissionAmtClient', data:{
                     user_id: userInfo.user_id,
-                });
+                }});
                 if (response.status === 200) {
                     setCommissionAmount(response.data.data);
                 } else {
@@ -98,8 +98,8 @@ const useWithdraw = (userInfo) => {
     const fetchUserDetails = async () => {
         try {
             setIsLoading(true);
-            const response = await axiosInstance.post('/clientadmin/fetchUserBankDetails', {
-               user_id: userInfo.user_id })
+            const response = await axiosInstance({method:'post',url:'/clientadmin/fetchUserBankDetails', data:{
+               user_id: userInfo.user_id }})
     
             if (response.status === 200) {
                 const data = response.data
@@ -161,48 +161,53 @@ const useWithdraw = (userInfo) => {
         return JSON.stringify(formData) !== JSON.stringify(initialData);
     };
     
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-      
-        if (!hasChanges()) return;
-      
-        try {
-          const endpoint = isEditing
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!hasChanges()) return;
+
+    try {
+        const endpoint = isEditing
             ? '/clientadmin/updateUserBankDetails'
             : '/clientadmin/saveUserBankDetails';
-      
-          setIsLoading(true);
-      
-          const updatedFormData = {
+
+        setIsLoading(true);
+
+        const updatedFormData = {
             ...formData,
             modified_by: userInfo.email_id,
-          };
-      
-          console.log("Sending data:", updatedFormData);
-      
-          const response = await axiosInstance.post(endpoint, updatedFormData);
-      
-          if (response.data?.message?.toLowerCase().includes("success")) {
+        };
+
+        console.log("Sending data:", updatedFormData);
+
+        const response = await axiosInstance({
+            method: 'post',
+            url: endpoint,
+            data: updatedFormData
+        });
+
+        if (response.data?.message?.toLowerCase().includes("success")) {
             setInitialData({ ...formData });
             setIsEditing(true);
-      
+
             // Force re-fetch of user details
             fetchUserDetailsCalled.current = false;
             fetchUserDetails();
-      
+
             showSuccessAlert(
-              'Success',
-              isEditing ? 'Details updated successfully!' : 'Details saved successfully!'
+                'Success',
+                isEditing ? 'Details updated successfully!' : 'Details saved successfully!'
             );
-          } else {
+        } else {
             showErrorAlert('Error', response.data?.message || 'Failed to save details.');
-          }
-        } catch (error) {
-          showErrorAlert('Error', error.response?.data?.message || 'Something went wrong.');
-        } finally {
-          setIsLoading(false);
         }
-      };
+    } catch (error) {
+        showErrorAlert('Error', error.response?.data?.message || 'Something went wrong.');
+    } finally {
+        setIsLoading(false);
+    }
+};
+
       
     
      // Update import path as needed
@@ -220,9 +225,9 @@ const useWithdraw = (userInfo) => {
       
         let walletBalance = 0;
         try {
-          const response = await axiosInstance.post('/clientadmin/FetchCommissionAmtClient', {
+          const response = await axiosInstance({method:'post',url:'/clientadmin/FetchCommissionAmtClient', data:{
             user_id: userInfo.user_id,
-          });
+          }});
       
           if (response.status === 200) {
             walletBalance = response.data.data;
@@ -348,7 +353,7 @@ const useWithdraw = (userInfo) => {
         };
       
         try {
-          const response = await axiosInstance.post('/clientadmin/ApplyWithdrawal', withdrawalData);
+          const response = await axiosInstance({method:'post',url:'/clientadmin/ApplyWithdrawal', data:withdrawalData});
       
           if (response.status === 200) {
             showSuccessAlert(

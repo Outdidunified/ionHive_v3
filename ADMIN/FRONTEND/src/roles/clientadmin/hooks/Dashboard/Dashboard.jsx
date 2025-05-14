@@ -55,33 +55,33 @@ const useDashboard = (userInfo) => {
         isFetching.current = true;
 
         try {
-            const totalRes = await axiosInstance.post('/clientadmin/FetchTotalCharger', {
+            const totalRes = await axiosInstance({method:'post',url:'/clientadmin/FetchTotalCharger',data: {
                 client_id: userInfo.client_id,
-            });
+            }});
 
-            const onlineRes = await axiosInstance.post('/clientadmin/FetchOnlineCharger', {
+            const onlineRes = await axiosInstance({method:'post',url:'/clientadmin/FetchOnlineCharger', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
 
-            const faultRes = await axiosInstance.post('/clientadmin/FetchFaultsCharger', {
+            const faultRes = await axiosInstance({method:'post',url:'/clientadmin/FetchFaultsCharger', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
 
-            const offlineRes = await axiosInstance.post('/clientadmin/FetchOfflineCharger', {
+            const offlineRes = await axiosInstance({method:'post',url:'/clientadmin/FetchOfflineCharger', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
 
-            const energyRes = await axiosInstance.post('/clientadmin/FetchChargerTotalEnergy', {
+            const energyRes = await axiosInstance({method:'post',url:'/clientadmin/FetchChargerTotalEnergy', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
 
-            const totalsession = await axiosInstance.post('/clientadmin/FetchTotalChargersSession', {
+            const totalsession = await axiosInstance({method:'post',url:'/clientadmin/FetchTotalChargersSession', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
 
-            const res = await axiosInstance.post('/clientadmin/FetchTotalUsers', {
+            const res = await axiosInstance({method:'post',url:'/clientadmin/FetchTotalUsers', data:{
                 client_id: userInfo.client_id,
-            });
+            }});
 
             const {associationsCount, appUsersCount } = res.data.totalCounts;
 

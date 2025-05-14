@@ -42,7 +42,7 @@ const useAddManageReseller = (userInfo) => {
         created_by: userInfo.email_id
       };
   
-      const response = await axiosInstance.post('/superadmin/CreateReseller', payload);
+      const response = await axiosInstance({method:'post',url:'/superadmin/CreateReseller', data:payload});
   
       // Ensure response structure matches what you expect
       if (response.data && response.data.status === 'Success') {
