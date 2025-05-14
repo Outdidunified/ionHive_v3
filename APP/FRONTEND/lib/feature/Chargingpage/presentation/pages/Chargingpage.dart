@@ -738,23 +738,21 @@ class ChargingPage extends StatelessWidget {
                                                 ),
                                             ],
                                           ),
-                                          if (controller.startedAt.value !=
-                                              null)
+                                          if (controller.startedAt.value != null)
                                             Center(
                                               child: Padding(
-                                                padding: EdgeInsets.only(
-                                                    top: screenHeight * 0.01),
+                                                padding: EdgeInsets.only(top: screenHeight * 0.01),
                                                 child: Text(
-                                                  'Started At: ${DateFormat('dd-mm-yyyy HH:mm:ss a').format(controller.startedAt.value!)}',
-                                                  style: theme
-                                                      .textTheme.bodySmall
-                                                      ?.copyWith(
+                                                  'Started At: ${DateFormat('dd-MM-yyyy hh:mm:ss a').format(controller.startedAt.value!.toLocal())}',
+                                                  style: theme.textTheme.bodySmall?.copyWith(
                                                     color: theme.hintColor,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
                                               ),
                                             ),
+
+
                                         ],
                                       ),
                                     ),

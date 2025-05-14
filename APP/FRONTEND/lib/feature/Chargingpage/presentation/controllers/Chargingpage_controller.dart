@@ -488,7 +488,7 @@ class ChargingPageController extends GetxController {
       if (startedAtResponse.error) {
         CustomSnackbar.showError(
             message:
-                'Failed to fetch start time: ${startedAtResponse.message}');
+                'Issue occurred: ${startedAtResponse.message}');
         return;
       }
 
@@ -500,8 +500,8 @@ class ChargingPageController extends GetxController {
       final startedAtValue = DateTime.parse(startedAtResponse.data!);
       startedAt.value = startedAtValue;
     } catch (e) {
-      debugPrint('Failed to parse start time: $e');
-      CustomSnackbar.showError(message: 'Failed to parse start time: $e');
+      debugPrint('Issue occurred catch : $e');
+      CustomSnackbar.showError(message: 'Issue occurred: $e');
     }
   }
 
@@ -588,7 +588,7 @@ class ChargingPageController extends GetxController {
         Get.back();
       }
       debugPrint('Failed to generate bill: $e');
-      CustomSnackbar.showError(message: 'Failed to generate charging bill: $e');
+      CustomSnackbar.showError(message: 'Issue occured: $e');
     } finally {
       isLoading.value = false;
     }
@@ -788,7 +788,7 @@ class ChargingPageController extends GetxController {
         duration: const Duration(milliseconds: 300),
       );
     } catch (e) {
-      CustomSnackbar.showError(message: 'Failed to end charging session: $e');
+      CustomSnackbar.showError(message: 'Issue occured: $e');
       rethrow;
     } finally {
       isEndingSession(false);
@@ -849,7 +849,7 @@ class ChargingPageController extends GetxController {
       isWaitingForStatusUpdate.value = true;
       _startStatusUpdateTimeout();
     } catch (e) {
-      CustomSnackbar.showError(message: 'Failed to start charging session: $e');
+      CustomSnackbar.showError(message: 'Issue occured: $e');
       isWaitingForStatusUpdate.value = false;
       _cancelStatusUpdateTimeout();
       rethrow;
@@ -884,7 +884,7 @@ class ChargingPageController extends GetxController {
       isWaitingForStatusUpdate.value = true;
       _startStatusUpdateTimeout();
     } catch (e) {
-      CustomSnackbar.showError(message: 'Failed to stop charging session: $e');
+      CustomSnackbar.showError(message: 'Issue occured: $e');
       isWaitingForStatusUpdate.value = false;
       _cancelStatusUpdateTimeout();
       rethrow;
@@ -931,7 +931,7 @@ class ChargingPageController extends GetxController {
         }
       });
     } catch (e) {
-      CustomSnackbar.showError(message: 'Failed to update settings: $e');
+      CustomSnackbar.showError(message: 'Issue occured: $e');
       rethrow;
     } finally {
       isLoading(false);
