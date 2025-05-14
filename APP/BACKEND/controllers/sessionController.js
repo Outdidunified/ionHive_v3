@@ -274,8 +274,6 @@ const fetchChargingSessionDetails = async (req, res) => {
     }
 };
 
-module.exports = { fetchChargingSessionDetails };
-
 // DOWNLOAD CHARGING HISTORY 
 // download all user charging session details
 const DownloadChargingSessionDetails = async (req, res) => {
