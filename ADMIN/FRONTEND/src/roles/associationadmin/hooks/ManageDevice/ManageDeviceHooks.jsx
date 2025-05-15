@@ -129,36 +129,45 @@ const useManageDevice = (userInfo) => {
     const [isEdited, setIsEdited] = useState(false);
     
     // Fetch Finance Details
-    const fetchFinanceDetails = useCallback(async () => {
-        try {
-            const response = await axiosInstance({method:'post',url:'/associationadmin/fetchFinance_dropdown', data:{
+  const fetchFinanceDetails = useCallback(async () => {
+    try {
+        const response = await axiosInstance({
+            method: 'post',
+            url: '/associationadmin/fetchFinance_dropdown',
+            data: {
                 association_id: userInfo.association_id
-            }});
-    
-            if (response.status === 200) {
-                let fetchedOptions = response.data.data || [];
-    
-                if (selectedChargerDitails && selectedChargerDitails.finance_id) {
-                    const selectedId = selectedChargerDitails.finance_id;
-                    fetchedOptions = [
-                        ...fetchedOptions.filter(item => item.finance_id === selectedId),
-                        ...fetchedOptions.filter(item => item.finance_id !== selectedId)
-                    ];
-                    setSelectedFinanceId(selectedId.toString()); // Pre-fill selected
-                }
-    
-                setFinanceOptions(fetchedOptions);
-            } else {
-                console.error("Error fetching finance:", response.data);
-                setFinanceOptions([]);
             }
-        } catch (error) {
-            console.error("Error fetching finance:", error);
+        });
+
+        if (response.status === 200) {
+            let fetchedOptions = response.data.data || [];
+
+            if (selectedChargerDitails && selectedChargerDitails.finance_id) {
+                const selectedId = selectedChargerDitails.finance_id;
+                fetchedOptions = [
+                    ...fetchedOptions.filter(item => item.finance_id === selectedId),
+                    ...fetchedOptions.filter(item => item.finance_id !== selectedId)
+                ];
+                setSelectedFinanceId(selectedId.toString());
+                setIsEdited(false); // not edited yet
+            } else if (fetchedOptions.length === 1) {
+                // Only one option and it's a new assignment
+                setSelectedFinanceId(fetchedOptions[0].finance_id.toString());
+                setIsEdited(true); // Mark as ready to assign
+            }
+
+            setFinanceOptions(fetchedOptions);
+        } else {
+            console.error("Error fetching finance:", response.data);
             setFinanceOptions([]);
         }
-    }, [userInfo.association_id, selectedChargerDitails]);
-    
-    
+    } catch (error) {
+        console.error("Error fetching finance:", error);
+        setFinanceOptions([]);
+    }
+}, [userInfo.association_id, selectedChargerDitails]);
+
+
     useEffect(() => {
         if (showModal) {
             fetchFinanceDetails();
@@ -172,16 +181,28 @@ const useManageDevice = (userInfo) => {
         setShowModal(true);
     };
     
-    // Handle Finance Selection
-    const handleFinanceChange = (e) => {
-        const selectedValue = e.target.value;
-        setSelectedFinanceId(selectedValue);
-    
-        // Compare with the original finance_id (as string, for consistent comparison)
-        const originalFinanceId = selectedChargerDitails?.finance_id?.toString() || "";
-        setIsEdited(selectedValue !== originalFinanceId);
-    };
-    
+   useEffect(() => {
+  if (financeOptions.length === 1 && !selectedFinanceId) {
+    // Automatically select the only option if it's available
+    setSelectedFinanceId(financeOptions[0].finance_id.toString());
+    setIsEdited(true); // Ready for assignment
+  }
+}, [financeOptions, selectedFinanceId]);
+
+const handleFinanceChange = (e) => {
+  const selectedValue = e.target.value;
+  console.log("Selected Value from dropdown:", selectedValue);
+  
+  setSelectedFinanceId(selectedValue);
+  
+  const originalFinanceId = selectedChargerDitails?.finance_id?.toString() || "";
+  const isEdited = selectedValue !== originalFinanceId;
+
+  console.log("Original:", originalFinanceId, "New:", selectedValue, "Edited:", isEdited);
+  setIsEdited(isEdited);
+};
+
+
     
     // Close Modal and Reset States
     const closeModal = () => {
@@ -204,8 +225,6 @@ const useManageDevice = (userInfo) => {
     const endpoint = selectedChargerDitails.finance_id !== undefined && selectedChargerDitails.finance_id !== null
         ? "/reAssignFinance"
         : "/assignFinance";
-
-    console.log('endpoint',endpoint)
 
     try {
         setIsLoading(true);
@@ -246,7 +265,7 @@ const useManageDevice = (userInfo) => {
     }
 };
 
- 
+    
     
 
     return {

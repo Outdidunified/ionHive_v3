@@ -52,21 +52,22 @@ const useAssigneddevass = (userInfo) => {
     }, [association_id]);
 
     // search
-    const handleSearch = (e) => {
-        const query = e.target.value.toLowerCase();
-        setSearchQuery(query);
+  const handleSearch = (e) => {
+    const inputValue = e.target.value; // Preserve user's input
+    const query = inputValue.toLowerCase(); // Only for filtering
 
-        if (query.trim() === '') {
-            // If search query is empty, show all original data
-            setFilteredData(originalData);
-        } else {
-            // Filter data based on search query
-            const filtered = originalData.filter(item =>
-                item.charger_id.toLowerCase().includes(query)
-            );
-            setFilteredData(filtered);
-        }
-    };
+    setSearchQuery(inputValue); // Display original casing in input
+
+    if (query.trim() === '') {
+        setFilteredData(originalData);
+    } else {
+        const filtered = originalData.filter(item =>
+            item.charger_id.toLowerCase().includes(query)
+        );
+        setFilteredData(filtered);
+    }
+};
+
 
     // back page
     const goBack = () => {

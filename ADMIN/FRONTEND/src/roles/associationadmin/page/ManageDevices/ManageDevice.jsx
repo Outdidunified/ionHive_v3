@@ -90,18 +90,25 @@ const ManageDevice = ({ userInfo, handleLogout }) => {
                                                                     <div className="col-md-6">
                                                                         <div className="form-group">
                                                                             <label className="col-form-label">Unit Price</label>
-                                                                            <select className="form-control" value={selectedFinanceId} onChange={handleFinanceChange} required>
-                                                                                <option value="" disabled>Select Unit Price</option>
-                                                                                {financeOptions.length === 0 ? (
-                                                                                    <option disabled>No data found</option>
-                                                                                ) : (
-                                                                                    financeOptions.map((financeItem, index) => (
-                                                                                        <option key={index} value={financeItem.finance_id}>
-                                                                                            {`₹${financeItem.totalprice}`}
-                                                                                        </option>
-                                                                                    ))
-                                                                                )}
-                                                                            </select>
+                                                                           <select
+  className="form-control"
+  value={selectedFinanceId}
+  onChange={handleFinanceChange}
+  required
+  disabled={financeOptions.length === 0} // Disable dropdown only if no data exists
+>
+  <option value="" disabled>Select Unit Price</option>
+  {financeOptions.length === 0 ? (
+    <option disabled>No data found</option>
+  ) : (
+    financeOptions.map((financeItem, index) => (
+      <option key={index} value={financeItem.finance_id}>
+        {`₹${financeItem.totalprice}`}
+      </option>
+    ))
+  )}
+</select>
+
                                                                         </div>
                                                                     </div>
                                                                 </div>
