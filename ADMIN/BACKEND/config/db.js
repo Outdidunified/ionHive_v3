@@ -1,7 +1,8 @@
 const { MongoClient } = require('mongodb');
 
 const url = 'mongodb+srv://outdid:outdid@cluster0.t16a63a.mongodb.net/';
-const dbName = 'EV_PHASE_2_UAT'; //For Testing
+// const dbName = 'EV_PHASE_2_UAT'; //For DEV
+const dbName = 'EV_V3_UAT'; //For UAT
 
 let client;
 let db;
