@@ -2540,8 +2540,8 @@ async function UpdateAssociationProfile(req, res) {
     const { association_id, modified_by, association_phone_no, association_address } = req.body;
 
     // Validate required fields
-    if (!association_id || !modified_by || !association_phone_no || !association_address) {
-        return res.status(400).json({ status: 'Failed', message: 'Association ID, Modified By, Phone Number, and Association Address are required' });
+    if (!association_id || !modified_by || !association_phone_no ) {
+        return res.status(400).json({ status: 'Failed', message: 'Association ID, Modified By, Phone Number, are required' });
     }
 
     try {

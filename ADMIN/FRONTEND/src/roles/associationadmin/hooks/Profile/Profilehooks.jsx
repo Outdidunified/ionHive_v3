@@ -113,12 +113,21 @@ const useProfile = (userInfo) => {
             }});
     
             if (response.status === 200) {
-                showSuccessAlert('Association profile updated successfully');
-                fetchProfile();
-            } else {
-                const responseData = response.data;
-                showErrorAlert('Error', 'Failed to update association profile, ' + responseData.message);
-            }
+    showSuccessAlert('Association profile updated successfully');
+
+    // Update initial state manually instead of re-fetching everything
+    setInitialAssociationData(prev => ({
+        ...prev,
+        association_phone_no: phoneNos,
+        association_address
+    }));
+
+    // Avoid fetchProfile(); causes full UI refresh
+} else {
+    const responseData = response.data;
+    showErrorAlert('Error', 'Failed to update association profile, ' + responseData.message);
+}
+
         } catch (error) {
             showErrorAlert('Error', 'An error occurred while updating the association profile');
         } finally {
@@ -176,12 +185,21 @@ const useProfile = (userInfo) => {
             }});
     
             if (response.status === 200) {
-                showSuccessAlert("User profile updated successfully");
-                fetchProfile();
-            } else {
-                const responseData = response.data;
-                showErrorAlert("Error", "Failed to update user profile, " + responseData.message);
-            }
+    showSuccessAlert("User profile updated successfully");
+
+    // Optimistically update the state without re-fetching
+    setInitialUserData(prev => ({
+        ...prev,
+        phone_no: phoneNo,
+        password: Password,
+        username
+    }));
+
+    // No need to call fetchProfile(); it causes UI flicker
+} else {
+    const responseData = response.data;
+    showErrorAlert("Error", "Failed to update user profile, " + responseData.message);
+}
         } catch (error) {
             showErrorAlert("Error", "An error occurred while updating the user profile");
         } finally {

@@ -2,7 +2,8 @@ const { MongoClient } = require('mongodb');
 const logger = require('../utils/logger');
 
 const url = process.env.MONGODB_URI || 'mongodb+srv://outdid:outdid@cluster0.t16a63a.mongodb.net/';
-const dbName = process.env.MONGODB_DB_NAME || 'EV_PHASE_III'; //For Co-production
+// const dbName = process.env.MONGODB_DB_NAME || 'EV_PHASE_III'; // DEV
+const dbName = process.env.MONGODB_DB_NAME || 'EV_V3_UAT'; // UAT
 
 let client;
 
