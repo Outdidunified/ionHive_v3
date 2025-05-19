@@ -26,9 +26,17 @@ class AddVehicleApicalls {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
+    debugPrint('Response status: ${response.statusCode}');
+    debugPrint('Response body: ${response.body}');
+
     final responseBody = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
+    // For vehicle registration, 402 is a valid response with an error message
+    // that should be shown to the user, not treated as an exception
+    if (response.statusCode == 200 ||
+        (response.statusCode == 402 &&
+            responseBody.containsKey('error') &&
+            responseBody.containsKey('message'))) {
       return responseBody;
     }
 
@@ -85,6 +93,8 @@ class AddVehicleApicalls {
           'vehicle_id': vehicleId,
         }),
       );
+      final data = jsonDecode(response.body);
+      debugPrint('save vehicle response: $data');
 
       return _handleResponse(response);
     } on TimeoutException {

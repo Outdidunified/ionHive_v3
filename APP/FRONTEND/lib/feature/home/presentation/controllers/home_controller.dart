@@ -72,6 +72,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
     // Immediately check location permission and fetch data
     _checkLocationPermissionAndFetch();
+    getCurrentLocation();
 
     mapControllerCompleter.future.then((controller) {
       mapController = controller;
@@ -626,8 +627,14 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
 
-    if (authToken.isEmpty || userId <= 0 || emailId.isEmpty) {
-      debugPrint("Missing session data, skipping fetch");
+    // Check if we're in guest mode
+    if (sessionController.isGuestMode.value) {
+      debugPrint("Guest mode detected, using guest credentials for API call");
+      // Continue with the API call using guest credentials
+    }
+    // If not in guest mode and missing credentials, skip the fetch
+    else if (authToken.isEmpty || userId <= 0 || emailId.isEmpty) {
+      debugPrint("Missing session data and not in guest mode, skipping fetch");
       return;
     }
 

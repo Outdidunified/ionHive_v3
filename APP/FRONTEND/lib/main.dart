@@ -62,7 +62,7 @@ void main() async {
   Get.put(LandingPageController(),
       permanent: true); // Make it permanent to avoid recreation
   Get.put(HomeController());
-  Get.put(SessionController()); // Ensure it is available globally
+  Get.put(SessionController(), permanent: true); // Singleton for the entire app
   Get.put(ConnectivityController());
   Get.put(VehicleController());
   Get.put(SearchpageController());

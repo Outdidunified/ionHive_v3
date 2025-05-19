@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/auth/presentation/controllers/auth_controller.dart'; // Auth controller
 import 'package:ionhive/feature/landing_page.dart' show LandingPage;
 import 'package:ionhive/utils/widgets/button/custom_button.dart'; // Custom button
@@ -13,7 +14,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     controller.validationError.value =
-    null; // Reset validation error when the page is rebuilt
+        null; // Reset validation error when the page is rebuilt
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -112,12 +113,12 @@ class LoginPage extends StatelessWidget {
                                           value ?? false; // Update the RxBool
                                     },
                                     activeColor:
-                                    Colors.green, // Color when checked
+                                        Colors.green, // Color when checked
                                     checkColor:
-                                    Colors.black, // Color of the checkmark
+                                        Colors.black, // Color of the checkmark
                                     side: BorderSide(
                                       color:
-                                      Colors.grey.shade600, // Border color
+                                          Colors.grey.shade600, // Border color
                                       width: 1, // Border width
                                     ),
                                   ),
@@ -132,20 +133,24 @@ class LoginPage extends StatelessWidget {
                                     color: Colors.grey.shade600,
                                   ),
                                   children: [
-                                    const TextSpan(text: "By continuing, I accept the "),
+                                    const TextSpan(
+                                        text: "By continuing, I accept the "),
                                     WidgetSpan(
                                       child: GestureDetector(
                                         onTap: () async {
-                                          final url = Uri.parse("https://ionhive.in/terms-and-service");
+                                          final url = Uri.parse(
+                                              "https://ionhive.in/terms-and-service");
                                           if (await canLaunchUrl(url)) {
-                                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                                            await launchUrl(url,
+                                                mode: LaunchMode
+                                                    .externalApplication);
                                           }
                                         },
                                         child: Text(
                                           "Terms & Conditions",
-                                          style: theme.textTheme.bodySmall?.copyWith(
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
                                             color: theme.primaryColor,
-
                                           ),
                                         ),
                                       ),
@@ -154,16 +159,19 @@ class LoginPage extends StatelessWidget {
                                     WidgetSpan(
                                       child: GestureDetector(
                                         onTap: () async {
-                                          final url = Uri.parse("https://ionhive.in/privacy-policy");
+                                          final url = Uri.parse(
+                                              "https://ionhive.in/privacy-policy");
                                           if (await canLaunchUrl(url)) {
-                                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                                            await launchUrl(url,
+                                                mode: LaunchMode
+                                                    .externalApplication);
                                           }
                                         },
                                         child: Text(
                                           "Privacy Policy",
-                                          style: theme.textTheme.bodySmall?.copyWith(
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
                                             color: theme.primaryColor,
-
                                           ),
                                         ),
                                       ),
@@ -172,30 +180,44 @@ class LoginPage extends StatelessWidget {
                                 ),
                               ),
                             )
-
                           ],
                         ),
                         const SizedBox(height: 24),
                         Center(
                           child: InkWell(
-                            onTap: () {
-                              Get.to(LandingPage(),
-                                transition: Transition.rightToLeft, // Right-to-left animation
-                                duration: Duration(milliseconds: 300), // Optional: customize speed
+                            onTap: () async {
+                              // Enable guest mode
+                              final sessionController =
+                                  Get.find<SessionController>();
+                              await sessionController.enableGuestMode();
+
+                              // Navigate to landing page
+                              Get.to(
+                                LandingPage(),
+                                transition: Transition
+                                    .rightToLeft, // Right-to-left animation
+                                duration: Duration(
+                                    milliseconds:
+                                        300), // Optional: customize speed
                               );
                             },
                             borderRadius: BorderRadius.circular(10),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 14),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [Colors.grey.shade200, Colors.grey.shade200],
+                                  colors: [
+                                    Colors.grey.shade200,
+                                    Colors.grey.shade200
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color: Theme.of(context).brightness == Brightness.dark
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
                                       ? Colors.white54
                                       : Colors.black26,
                                   width: 0.2,
@@ -230,10 +252,6 @@ class LoginPage extends StatelessWidget {
                             ),
                           ),
                         ),
-
-
-
-
                       ],
                     ),
                   ),

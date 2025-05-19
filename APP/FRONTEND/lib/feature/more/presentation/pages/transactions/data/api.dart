@@ -26,9 +26,17 @@ class Transactionapicalls {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
+    debugPrint('Response status: ${response.statusCode}');
+    debugPrint('Response body: ${response.body}');
+
     final responseBody = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
+    // For vehicle registration, 402 is a valid response with an error message
+    // that should be shown to the user, not treated as an exception
+    if (response.statusCode == 200 ||
+        (response.statusCode == 402 &&
+            responseBody.containsKey('error') &&
+            responseBody.containsKey('message'))) {
       return responseBody;
     }
 
@@ -55,6 +63,8 @@ class Transactionapicalls {
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
       });
+      final data = jsonDecode(response.body);
+      debugPrint('fetchalltransactions : $data');
       return _handleResponse(response);
     } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');

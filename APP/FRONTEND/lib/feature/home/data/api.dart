@@ -56,6 +56,8 @@ class HomeAPICalls {
           'latitude': latitude
         }),
       );
+      final data = jsonDecode(response.body);
+      debugPrint('fetchnearbychargers : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
