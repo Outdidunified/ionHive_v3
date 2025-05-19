@@ -19,14 +19,17 @@ class ScannerAreaClipper extends CustomClipper<Path> {
 
     path.addRect(Rect.fromLTWH(0, 0, screenSize.width, screenSize.height));
 
-    final scannerRect = Rect.fromLTWH(
-      centerX - scanAreaSize / 2,
-      topPosition,
-      scanAreaSize,
-      scanAreaSize,
+    final scannerRRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        centerX - scanAreaSize / 2,
+        topPosition,
+        scanAreaSize,
+        scanAreaSize,
+      ),
+      const Radius.circular(16), // 👈 Rounded corner for scan area
     );
 
-    path.addRect(scannerRect);
+    path.addRRect(scannerRRect);
     path.fillType = PathFillType.evenOdd;
 
     return path;
@@ -239,32 +242,40 @@ class QrScannerpage extends StatelessWidget {
   }
 
   Widget _buildPermissionView(QrScannerController controller, ThemeData theme) {
+    // Show the permission view and automatically show the snackbar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.requestCameraPermission();
+    });
+
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.camera_alt,
-              color: theme.colorScheme.onBackground, size: 64),
-          const SizedBox(height: 16),
-          Text(
-            'Camera permission required',
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: theme.colorScheme.onBackground),
-            semanticsLabel: 'Camera permission required to scan QR codes',
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.camera_alt,
+                color: theme.colorScheme.onBackground, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'Camera Access Required',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onBackground,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              semanticsLabel: 'Camera permission required to scan QR codes',
             ),
-            onPressed: () => controller.checkCameraPermission(),
-            child: Text(
-              'Grant Permission',
-              semanticsLabel: 'Grant camera permission',
+            const SizedBox(height: 12),
+            Text(
+              'To scan QR codes, this app needs access to your camera. Please enable camera permission in your device settings.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onBackground,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+
+          ],
+        ),
       ),
     );
   }
@@ -363,10 +374,7 @@ class _AnimatedScanAreaState extends State<_AnimatedScanArea>
                     ),
                   ),
                 ),
-                _buildGlowCorner(Alignment.topLeft, widget.borderColor),
-                _buildGlowCorner(Alignment.topRight, widget.borderColor),
-                _buildGlowCorner(Alignment.bottomLeft, widget.borderColor),
-                _buildGlowCorner(Alignment.bottomRight, widget.borderColor),
+
               ],
             ),
           ),
@@ -375,36 +383,5 @@ class _AnimatedScanAreaState extends State<_AnimatedScanArea>
     );
   }
 
-  Widget _buildGlowCorner(Alignment alignment, Color color) {
-    return Align(
-      alignment: alignment,
-      child: Container(
-        width: 25,
-        height: 25,
-        decoration: BoxDecoration(
-          border: Border(
-            top: alignment.y < 0
-                ? BorderSide(color: color, width: 3)
-                : BorderSide.none,
-            bottom: alignment.y > 0
-                ? BorderSide(color: color, width: 3)
-                : BorderSide.none,
-            left: alignment.x < 0
-                ? BorderSide(color: color, width: 3)
-                : BorderSide.none,
-            right: alignment.x > 0
-                ? BorderSide(color: color, width: 3)
-                : BorderSide.none,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.5),
-              blurRadius: 10,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 }

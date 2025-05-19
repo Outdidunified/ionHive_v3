@@ -82,131 +82,55 @@ class AddCreditsPage extends StatelessWidget {
   }
 
   Widget _buildAmountInputField(String amount, bool isDarkMode) {
-    return Builder(builder: (context) {
-      final theme = Theme.of(context);
-
-      return Container(
-        decoration: BoxDecoration(
-          color: isDarkMode
-              ? theme.colorScheme.surface
-              : theme.colorScheme.primary.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDarkMode
-                ? theme.dividerColor
-                : theme.colorScheme.primary.withOpacity(0.2),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isDarkMode
-                  ? Colors.black.withOpacity(0.2)
-                  : theme.colorScheme.primary.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    return TextField(
+      controller: addCreditsController.amountController,
+      keyboardType: TextInputType.number,
+      onChanged: addCreditsController.onAmountChanged,
+      style: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: isDarkMode ? Colors.white : Colors.black,
+      ),
+      cursorColor: isDarkMode ? Colors.white : Colors.black,
+      decoration: InputDecoration(
+        prefixText: '₹',
+        prefixStyle: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: isDarkMode ? Colors.white : Colors.black,
         ),
-        child: TextField(
-          readOnly: false,
-          controller: addCreditsController.amountController,
-          keyboardType: TextInputType.number,
-          onChanged: addCreditsController.onAmountChanged,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.displaySmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: isDarkMode ? Colors.white : Colors.black,
-          ),
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            prefixIcon: Icon(
-              Icons.currency_rupee,
-              color: theme.colorScheme.primary,
-              size: 24,
-            ),
-            hintText: "Enter amount",
-            hintStyle: theme.textTheme.titleMedium?.copyWith(
-              color: isDarkMode ? Colors.white54 : Colors.black38,
-            ),
-          ),
+        hintText: "Enter amount",
+        filled: true,
+        fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-      );
-    });
+      ),
+    );
   }
 
   Widget _buildQuickAmountSelection(ThemeData theme) {
-    final amounts = ['100', '200', '500', '1000', '2000'];
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final List<String> amounts = ['100', '200', '500', '1000'];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Quick Select",
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: isDarkMode ? Colors.white70 : Colors.black54,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Obx(() {
-          final selected = addCreditsController.selectedAmount.value;
-          return Wrap(
-            spacing: 24,
-            runSpacing: 24,
-            children: amounts.map((amount) {
-              final isSelected = selected == amount;
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => addCreditsController.updateAmount(amount),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? theme.colorScheme.primary
-                          : (isDarkMode
-                              ? theme.colorScheme.surface
-                              : Colors.white),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : theme.dividerColor,
-                        width: 1.5,
-                      ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color:
-                                    theme.colorScheme.primary.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Text(
-                      '₹$amount',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: isSelected
-                            ? theme.colorScheme.onPrimary
-                            : (isDarkMode ? Colors.white : Colors.black),
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+    return Wrap(
+      spacing: 12,
+      children: amounts.map((amount) {
+        return Obx(() {
+          final isSelected = addCreditsController.selectedAmount.value == amount;
+          return ChoiceChip(
+            label: Text('₹$amount'),
+            selected: isSelected,
+            onSelected: (_) => addCreditsController.updateAmount(amount),
+            selectedColor: theme.primaryColor,
+            backgroundColor: Colors.grey[300],
+            labelStyle: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontWeight: FontWeight.w500,
+            ),
           );
-        }),
-      ],
+        });
+      }).toList(),
     );
   }
 

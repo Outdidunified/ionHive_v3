@@ -137,7 +137,7 @@ class SearchpageController extends GetxController {
         return false;
       }
     } catch (e) {
-      CustomSnackbar.showError(message: 'Failed to fetch charger: $e');
+      CustomSnackbar.showError(message: 'Error: $e');
       return false;
     } finally {
       isLoading.value = false;

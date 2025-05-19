@@ -70,12 +70,12 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       }
     });
 
+    // Immediately check location permission and fetch data
+    _checkLocationPermissionAndFetch();
+
     mapControllerCompleter.future.then((controller) {
       mapController = controller;
       applyMapStyle();
-      if (!isLocationFetched.value) {
-        _checkLocationPermissionAndFetch();
-      }
     });
   }
 
@@ -1139,7 +1139,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   void navigateToAllChargers() {
     if (chargers.isEmpty) {
-      CustomSnackbar.showInfo(message: 'No Active Charging Found');
+      CustomSnackbar.showInfo(message: ' No Charging stations available');
     } else {
       Get.to(
         () => ViewAllNearbyChargers(),

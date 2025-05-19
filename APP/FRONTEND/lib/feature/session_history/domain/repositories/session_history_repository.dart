@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ionhive/feature/session_history/data/api.dart';
 import 'package:ionhive/feature/session_history/domain/models/session_history_model.dart';
 import 'package:path_provider/path_provider.dart';
@@ -30,28 +32,30 @@ class Fetchtotalsessioncountrep {
     }
   }
 
-  Future<void> downloadChargingSessionDetails(
+  Future<String?> downloadChargingSessionDetails(
       String? emailId, double totalUnitConsumed, String authToken) async {
     try {
       final http.Response response = await _api.downloadChargingSessionDetails(
           emailId, totalUnitConsumed, authToken);
 
       if (response.statusCode == 200 &&
-          response.headers['content-type']?.contains('application/pdf') ==
-              true) {
+          response.headers['content-type']?.contains('application/pdf') == true) {
         final directory = await getApplicationDocumentsDirectory();
         final filePath = '${directory.path}/ChargingSessions_$emailId.pdf';
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
         await OpenFile.open(filePath);
+        return null; // success, no error message
       } else {
-        throw Exception(
-            'Failed to download file: ${response.statusCode} - ${response.body}');
+        // Return backend message if available
+        final responseBody = jsonDecode(response.body);
+        return responseBody['message'] ?? 'Failed to download session details.';
       }
     } catch (e) {
-      throw Exception('Error downloading file: $e');
+      return 'Error downloading file: $e';
     }
   }
+
 
   Future<void> downloadinvoice(String? emailId, int session_id,
       String authToken, String charger_id) async {

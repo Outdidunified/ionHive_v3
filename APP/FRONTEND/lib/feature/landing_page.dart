@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionhive/core/components/footer.dart';
+import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/landing_page_controller.dart';
 import 'package:ionhive/feature/session_history/presentation/pages/session_history.dart';
 import 'package:ionhive/feature/wallet/presentation/pages/wallet_page.dart';
 import 'package:ionhive/feature/home/presentation/pages/home_page.dart';
 import 'package:ionhive/feature/more/presentation/pages/more_page.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart';
 
 class LandingPage extends StatelessWidget {
   LandingPage({super.key});
 
   final LandingPageController controller = Get.find<LandingPageController>();
+  final sessionController = Get.find<SessionController>();
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +38,24 @@ class LandingPage extends StatelessWidget {
         return Footer(
           onTabChanged: (index) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              controller.changePage(index);
+              if (!sessionController.isLoggedIn.value) {
+                CustomSnackbar.showPermissionRequest(
+                  message: 'You are not logged in to access. Please login .',
+                  onOpenSettings: () {
+                    Get.toNamed('/login');
+                  },
+                  duration: const Duration(seconds: 4),
+                );
+
+              } else {
+                controller.changePage(index); // Navigate only if logged in
+              }
             });
           },
           currentIndex: controller.pageIndex.value,
         );
       }),
+
     );
   }
 }

@@ -26,17 +26,21 @@ class AuthAPICalls {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
-    final responseBody = jsonDecode(response.body);
+    Map<String, dynamic> responseBody;
 
-    if (response.statusCode == 200) {
-      return responseBody;
+    try {
+      responseBody = jsonDecode(response.body);
+    } catch (e) {
+      throw HttpException(
+        response.statusCode,
+        _getDefaultErrorMessage(response.statusCode),
+      );
     }
 
-    throw HttpException(
-      response.statusCode,
-      responseBody['message'] ?? _getDefaultErrorMessage(response.statusCode),
-    );
+    // Always return the JSON response, whether success or error
+    return responseBody;
   }
+
 
   Future<Map<String, dynamic>> GetOTP(String email) async {
     final url = AuthUrl.GetOTP;
@@ -85,6 +89,8 @@ class AuthAPICalls {
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException(408, 'Request timed out. Please try again.');
       });
+      final data = jsonDecode(response.body);
+      debugPrint("authenticating otp : $data");
 
       return _handleResponse(response);
     } on TimeoutException {

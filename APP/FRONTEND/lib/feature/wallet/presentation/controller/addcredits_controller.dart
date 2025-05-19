@@ -68,14 +68,14 @@ class AddCreditsController extends GetxController
   String get formattedAmount => '₹${selectedAmount.value}';
 
   void onAmountChanged(String value) {
-    // Only allow digits
-    final cleanValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+    final cleanValue = value.replaceAll(RegExp(r'[^0-9.]'), ''); // allow decimal
     if (cleanValue.isNotEmpty) {
       selectedAmount.value = cleanValue;
     } else {
       selectedAmount.value = '0';
     }
   }
+
 
   void _handlePaymentSuccess(PaymentSuccessResponse paymentSuccess) async {
     try {

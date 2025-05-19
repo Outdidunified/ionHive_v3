@@ -188,17 +188,25 @@ class SessionHistoryControllers extends GetxController {
 
     try {
       final totalEnergy = _calculateTotalEnergy();
-      await _fetchtotalsessioncountrep.downloadChargingSessionDetails(
+
+      final message = await _fetchtotalsessioncountrep.downloadChargingSessionDetails(
         emailId,
         totalEnergy,
         authToken,
       );
+
+      if (message == null) {
+        CustomSnackbar.showSuccess(message: "Session details downloaded successfully");
+      } else {
+        CustomSnackbar.showWarning(message: message);
+      }
     } catch (e) {
       debugPrint('Error downloading session details: $e');
-      CustomSnackbar.showError(
-          message: "Issue downloading session details. Try again later.");
+      CustomSnackbar.showError(message: "Error: $e");
     }
   }
+
+
 
   Future<void> downloadInvoice(
       {required String sessionId, required String chargerId}) async {

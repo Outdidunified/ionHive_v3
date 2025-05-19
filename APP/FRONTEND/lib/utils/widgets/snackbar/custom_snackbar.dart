@@ -188,9 +188,10 @@ class CustomSnackbar {
   }
 
   /// Shows a permission request snackbar with a settings button
+  /// Shows an authentication request snackbar with a login button
   static void showPermissionRequest({
     required String message,
-    required VoidCallback onOpenSettings,
+    required VoidCallback onOpenSettings, // Acts as 'onLogin' now
     Duration duration = const Duration(seconds: 5),
   }) {
     final isDarkMode = Get.isDarkMode;
@@ -207,7 +208,7 @@ class CustomSnackbar {
                   color: Colors.purple.shade600,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Icon(Icons.location_off, color: Colors.white, size: 18),
+                child: Icon(Icons.login, color: Colors.white, size: 18),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -230,20 +231,18 @@ class CustomSnackbar {
             child: TextButton(
               onPressed: () {
                 Get.closeCurrentSnackbar();
-                onOpenSettings();
+                onOpenSettings(); // Reused for login navigation
               },
               style: TextButton.styleFrom(
-                backgroundColor: isDarkMode
-                    ? Colors.purple.shade800
-                    : Colors.purple.shade100,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                backgroundColor:
+                isDarkMode ? Colors.purple.shade800 : Colors.purple.shade100,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: Text(
-                'Open Settings',
+                'Login',
                 style: TextStyle(
                   color: isDarkMode ? Colors.white : Colors.purple.shade800,
                   fontWeight: FontWeight.w600,
@@ -267,4 +266,5 @@ class CustomSnackbar {
       isDismissible: true,
     );
   }
+
 }

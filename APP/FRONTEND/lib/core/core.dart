@@ -2,14 +2,14 @@ import 'package:flutter/foundation.dart';
 
 class iOnHiveCore {
   // Define base URLs for each environment
-  static const String prodBaseUrl = 'http://192.168.1.42:3003';
-  static const String devBaseUrl = 'http://192.168.1.42:3003';
-  static const String testingBaseUrl = 'http://172.235.29.67:3003';
+  static const String prodBaseUrl = 'http://192.168.1.3:3003';
+  static const String devBaseUrl = 'http://192.168.1.3:3003';
+  static const String testingBaseUrl = 'http://192.168.1.3:3003';
 
-  // Define WebSocket URLs for each environment172.235.29.67
-  static const String prodWsUrl = 'ws://192.168.1.42:7004';
-  static const String devWsUrl = 'ws://192.168.1.42:7004';
-  static const String testingWsUrl = 'ws://172.235.29.67:7004';
+  // Define WebSocket URLs for each environment
+  static const String prodWsUrl = 'ws://192.168.1.3:7004';
+  static const String devWsUrl = 'ws://192.168.1.3:7004';
+  static const String testingWsUrl = 'ws://192.168.1.3:7004';
 
   // Dynamically select URLs based on the environment
   static final String baseUrl = _getBaseUrl();
