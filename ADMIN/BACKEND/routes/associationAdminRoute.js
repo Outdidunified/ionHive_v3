@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Controller = require('../controllers/associationAdminControllers');
 const verifyToken = require('../middlewares/authMiddleware');
+const { verbose } = require('winston');
 
 // 1.Login
 // Route to check login credentials
@@ -142,4 +143,22 @@ router.post('/UpdateUserProfile', verifyToken, Controller.UpdateUserProfile);
 // Route to UpdateAssociationProfile
 router.post('/UpdateAssociationProfile', verifyToken, Controller.UpdateAssociationProfile);
 
+//11.Stations
+//Route to Add Station
+router.post('/Addstation',verifyToken,Controller.addChargingStation)
+
+//Route To update Station
+router.post('/UpdateStation',verifyToken,Controller.updateChargingStation)
+
+//Route to Get station for Particular Association
+
+router.post('/GetAssociationStation',verifyToken,Controller.getStationsByAssociation)
+
+//Route to assign station to charger
+
+router.post('/assignstationtocharger',verifyToken,Controller.assignChargerToStation);
+
+router.post('/removechargerfromstation', verifyToken, Controller.removeChargerFromStation);
+
+//Route to reassign the station to charger
 module.exports = router;

@@ -16,7 +16,9 @@ import Header from '../../roles/associationadmin/components/Header';
 import Assignuser from '../../roles/associationadmin/page/Assignuser/Assignuser';
 import DeviceReport from '../../roles/associationadmin/page/ManageReport/DeviceReport';
 import RevenueReport from '../../roles/associationadmin/page/ManageReport/RevenueReport';
-
+import ManageStation from '../../roles/associationadmin/page/ManageStation/ManageStation';
+import EditStation from '../../roles/associationadmin/page/ManageStation/EditStation';
+import ViewStation from '../../roles/associationadmin/page/ManageStation/ViewStation';
 // managefinance
 import Managefinance from '../../roles/associationadmin/page/ManageFinance/Managefinance';
 import ViewFinance from '../../roles/associationadmin/page/ManageFinance/ViewFinance';
@@ -68,6 +70,29 @@ const AssociationAdminApp = () => {
               <Navigate to="/associationadmin" />
           )}
         />
+         <Route
+          path="ManageStation"
+          element={loggedIn ? (
+            <ManageStation userInfo={userInfo} handleLogout={handleLogout} />
+          ) : (
+            <Navigate to="/associationadmin" />
+          )}
+        />
+         <Route
+          path="EditStation"
+          element={loggedIn ? (
+            <EditStation userInfo={userInfo} handleLogout={handleLogout} />
+          ) : (
+            <Navigate to="/associationadmin" />
+          )}
+        />
+        <Route
+          path="ViewStation"
+          element={loggedIn ? (
+            <ViewStation userInfo={userInfo} handleLogout={handleLogout} />
+          ) : (
+            <Navigate to="/associationadmin" />
+          )}/>
         <Route
           path="/ManageDevice"
           element={loggedIn ? (

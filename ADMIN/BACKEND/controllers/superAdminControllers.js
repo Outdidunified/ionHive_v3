@@ -2782,11 +2782,222 @@ const UpdateUserProfile = async (req, res) => {
     }
 };
 
+
+//Vehicle_Model
+
+//Add vehicle
+
+const CreateVehicleModel = async (req, res) => {
+  const {
+    model,
+    type,
+    vehicle_company,
+    battery_size_kwh,
+    charger_type,
+    created_by  // new field
+  } = req.body;
+
+  if (!req.file) {
+    return res.status(400).json({ status: 'Failed', message: 'Vehicle image is required' });
+  }
+
+  const vehicle_image = req.file.filename;
+
+  try {
+    if (
+      !model || !type || !vehicle_company ||
+      !battery_size_kwh || !charger_type || !vehicle_image || !created_by
+    ) {
+      return res.status(400).json({
+        status: 'Failed',
+        message: 'All fields are required including created_by'
+      });
+    }
+
+    const db = await database.connectToDatabase();
+    const vehicleCollection = db.collection("vehicle_models");
+
+    // Generate next vehicle_id
+    const lastVehicle = await vehicleCollection.find().sort({ vehicle_id: -1 }).limit(1).toArray();
+    const vehicle_id = lastVehicle.length > 0 ? lastVehicle[0].vehicle_id + 1 : 1;
+
+    const existing = await vehicleCollection.findOne({ vehicle_id });
+    if (existing) {
+      return res.status(400).json({ status: 'Failed', message: 'Vehicle ID already exists' });
+    }
+
+    await vehicleCollection.insertOne({
+      vehicle_id,
+      model,
+      type,
+      vehicle_company,
+      battery_size_kwh,
+      charger_type,
+      vehicle_image,
+      status: true,
+      created_date: new Date(),
+      created_by,         // save creator
+      modified_date: null,
+      modified_by: null,  // initially null
+    });
+
+    return res.status(201).json({ status: 'Success', message: 'Vehicle model created successfully' });
+  } catch (error) {
+    console.error('Error in CreateVehicleModel controller:', error);
+    return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
+  }
+};
+
+
+
+
+//Show all Vehicles
+
+const GetAllVehicleModels = async (req, res) => {
+    try {
+        const db = await database.connectToDatabase();
+        const vehicleCollection = db.collection("vehicle_models");
+
+        const vehicles = await vehicleCollection.find({}).toArray();
+
+        return res.status(200).json({ status: 'Success', data: vehicles });
+    } catch (error) {
+        console.error('Error in GetAllVehicleModels controller:', error);
+        return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
+    }
+};
+
+
+//update the vehicles
+const UpdateVehicleModel = async (req, res) => {
+  const {
+    vehicle_id,
+    model,
+    type,
+    vehicle_company,
+    battery_size_kwh,
+    charger_type,
+    modified_by
+  } = req.body;
+
+  const vehicle_image = req.file ? req.file.filename : null;
+
+  try {
+    // Validate all required fields
+    if (
+      !vehicle_id || !model || !type || !vehicle_company ||
+      !battery_size_kwh || !charger_type || !modified_by
+    ) {
+      return res.status(400).json({
+        status: 'Failed',
+        message: 'All fields except image are required including modified_by'
+      });
+    }
+
+    // Convert vehicle_id to number
+    const numericVehicleId = Number(vehicle_id);
+    if (isNaN(numericVehicleId)) {
+      return res.status(400).json({
+        status: 'Failed',
+        message: 'Vehicle ID must be a valid number'
+      });
+    }
+
+    const db = await database.connectToDatabase();
+    const vehicleCollection = db.collection("vehicle_models");
+
+    // Find existing vehicle by numeric ID
+    const existing = await vehicleCollection.findOne({ vehicle_id: numericVehicleId });
+    if (!existing) {
+      return res.status(404).json({ status: 'Failed', message: 'Vehicle Id not found' });
+    }
+
+    const updateData = {
+      model,
+      type,
+      vehicle_company,
+      battery_size_kwh,
+      charger_type,
+      modified_date: new Date(),
+      modified_by,
+    };
+
+    if (vehicle_image) {
+      updateData.vehicle_image = vehicle_image;
+    }
+
+    const updateResult = await vehicleCollection.updateOne(
+      { vehicle_id: numericVehicleId },
+      { $set: updateData }
+    );
+
+    if (updateResult.matchedCount === 0) {
+      return res.status(500).json({ status: 'Failed', message: 'Failed to update vehicle model' });
+    }
+
+    return res.status(200).json({
+      status: 'Success',
+      message: 'Vehicle model updated successfully',
+      data: {
+        vehicle_id: numericVehicleId,
+        ...updateData
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in UpdateVehicleModel controller:', error);
+    return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
+  }
+};
+
+
+
+
+const UpdateVehicleModelStatus = async (req, res) => {
+  const { vehicle_id, status, modified_by } = req.body;
+
+  try {
+    if (!vehicle_id || typeof status !== 'boolean' || !modified_by) {
+      return res.status(400).json({
+        status: 'Failed',
+        message: 'Vehicle ID, status (boolean) and modified_by are required'
+      });
+    }
+
+    const db = await database.connectToDatabase();
+    const vehicleCollection = db.collection("vehicle_models");
+
+    // Use string vehicle_id directly (no parseInt)
+    const result = await vehicleCollection.updateOne(
+      { vehicle_id: vehicle_id },
+      { $set: { status, modified_date: new Date(), modified_by } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({
+        status: 'Failed',
+        message: 'Vehicle model not found'
+      });
+    }
+
+    return res.status(200).json({
+      status: 'Success',
+      message: `Vehicle model has been ${status ? 'activated' : 'deactivated'} successfully`
+    });
+  } catch (error) {
+    console.error('Error in UpdateVehicleModelStatus controller:', error);
+    return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
+  }
+};
+
+
+
+
 module.exports = {
     authenticate, FetchTotalUsers, FetchTotalCharger, FetchOnlineCharger, FetchOfflineCharger, FetchFaultsCharger, FetchChargerTotalEnergy,
     FetchTotalChargersSession, FetchAllocatedChargers, FetchCharger, CreateCharger, UpdateCharger, FetchUnAllocatedChargerToAssgin, fetchConnectorTypeName, DeActivateOrActivateCharger,
     FetchResellersToAssgin, AssginChargerToReseller, FetchResellers, FetchAssignedClients, FetchChargerDetailsWithSession, CreateReseller, UpdateReseller,
     FetchUsers, FetchSpecificUserRoleForSelection, FetchResellerForSelection, CreateUser, UpdateUser, FetchUserRoles, CreateUserRole, UpdateUserRole, DeActivateOrActivateUserRole,
     fetchAllOutputType, updateOutputType, DeActivateOutputType, createOutputType, FetchPaymentRequest, UpdatePaymentRequestStatus, FetchPaymentNotification, MarkNotificationRead,
-    FetchSpecificChargerRevenue, FetchChargerListWithAllCostWithRevenue, FetchReportDevice, DeviceReport, FetchUserProfile, UpdateUserProfile,
+    FetchSpecificChargerRevenue, FetchChargerListWithAllCostWithRevenue, FetchReportDevice, DeviceReport, FetchUserProfile, UpdateUserProfile,CreateVehicleModel,GetAllVehicleModels,UpdateVehicleModel,UpdateVehicleModelStatus
 };

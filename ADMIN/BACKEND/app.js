@@ -1,6 +1,7 @@
 // Load environment variables from .env file
 const dotenv = require('dotenv');
 dotenv.config();
+const path = require('path');
 
 // Core Modules and Dependencies
 const express = require('express');
@@ -31,7 +32,8 @@ app.use(cors({
 }));
 
 // Middleware: Parse incoming JSON
-app.use(express.json());
+app.use(express.json({ type: 'application/json' }));
+
 
 // Middleware: Rate Limiting to prevent DoS attacks
 const limiter = rateLimit({
@@ -41,6 +43,7 @@ const limiter = rateLimit({
 });
 // Uncomment to enable rate limiting
 // app.use(limiter);
+app.use('/uploads', cors(), express.static(path.join(__dirname, 'uploads')));
 
 // Logger Middleware for Incoming Requests
 app.use((req, res, next) => {
@@ -66,7 +69,7 @@ app.use((err, req, res, next) => {
 const httpServer = http.createServer(app);
 
 // Set Port
-const HTTP_PORT = process.env.HTTP_PORT || 6778;
+const HTTP_PORT = process.env.HTTP_PORT;
 
 // Start Server
 httpServer.listen(HTTP_PORT, () => {
