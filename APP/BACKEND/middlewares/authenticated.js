@@ -8,7 +8,7 @@ const isAuthenticated = (req, res, next) => {
   const token = req.headers['authorization'];
 
 
-  if (!token) return res.status(401).json({ message: 'Not authenticated, JWTtoken is missing !' });
+  if (!token) return res.status(403).json({ message: 'Not authenticated, JWTtoken is missing !' });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -17,10 +17,10 @@ const isAuthenticated = (req, res, next) => {
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
       logger.loggerSuccess(`Token expiry: ${err.message}, IP: ${req.ip}, token: ${token}`);
-      return res.status(401).json({ error: true, message: 'Token expired!' });
+      return res.status(403).json({ error: true, message: 'Token expired!' });
     }
     logger.loggerError(`Invalid token: ${err.message}, IP: ${req.ip}, token: ${token}`);
-    return res.status(401).json({ error: true, message: 'Invalid token!' });
+    return res.status(403).json({ error: true, message: 'Invalid token!' });
   }
 };
 

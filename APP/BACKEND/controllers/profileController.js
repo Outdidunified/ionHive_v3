@@ -736,7 +736,7 @@ const SaveVehiclesOfUser = async (req, res) => {
         // If vehicle number exists and belongs to another user, return error
         if (vehicleNumberExists && vehicleNumberExists.user_id !== Number(user_id)) {
             logger.loggerWarn(`Vehicle number ${vehicle_number} already exists for another user.`);
-            return res.status(409).json({
+            return res.status(402).json({
                 error: true,
                 message: 'Vehicle number already exists. Please use a different vehicle number.',
             });
@@ -750,7 +750,7 @@ const SaveVehiclesOfUser = async (req, res) => {
         // If the same vehicle number already exists for this user, return error
         if (sameVehicleNumberIndex !== -1) {
             logger.loggerWarn(`Vehicle number ${vehicle_number} already exists for user ${user_id}.`);
-            return res.status(409).json({
+            return res.status(402).json({
                 error: true,
                 message: 'This vehicle number is already registered in your account.',
             });

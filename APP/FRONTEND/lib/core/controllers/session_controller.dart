@@ -24,7 +24,9 @@ class SessionController extends GetxController {
     isGuestMode.value = prefs.getBool('isGuestMode') ?? false;
     userId.value = prefs.getInt('userId') ?? 0;
     username.value = prefs.getString('username') ?? '';
-    emailId.value = prefs.getString('emailId') ?? '';
+    emailId.value = prefs.getString('emailId')?.trim().isNotEmpty == true
+        ? prefs.getString('emailId')!
+        : 'guest@ionhive.app';
     token.value = prefs.getString('token') ?? '';
 
     // If guest mode was active, restore guest values

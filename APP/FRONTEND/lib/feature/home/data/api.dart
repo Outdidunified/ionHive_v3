@@ -38,26 +38,40 @@ class HomeAPICalls {
     );
   }
 
-  Future<Map<String, dynamic>> fetchnearbystations(int user_id, String email,
-      String authToken, double latitude, double longitude) async {
-    final url = HomeUrls.fetchnearbystations;
+  Future<Map<String, dynamic>> fetchnearbystations(
+    int user_id,
+    String email,
+    String authToken,
+    double latitude,
+    double longitude,
+  ) async {
+    final bool isGuest =
+        user_id == 0 && email.toLowerCase() == 'guest@ionhive.app';
+    final url = isGuest
+        ? HomeUrls.fetchnearbystationsForGuest
+        : HomeUrls.fetchnearbystations;
 
     try {
       final response = await http.post(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': authToken,
+          if (!isGuest) 'Authorization': authToken, // Only add for non-guests
         },
-        body: jsonEncode({
-          'email_id': email,
-          'user_id': user_id,
-          'longitude': longitude,
-          'latitude': latitude
-        }),
+        body: jsonEncode(
+          isGuest
+              ? {
+                  'latitude': latitude,
+                  'longitude': longitude,
+                }
+              : {
+                  'email_id': email,
+                  'user_id': user_id,
+                  'latitude': latitude,
+                  'longitude': longitude,
+                },
+        ),
       );
-      final data = jsonDecode(response.body);
-      debugPrint('fetchnearbychargers : $data');
 
       return _handleResponse(response);
     } on TimeoutException {
@@ -71,8 +85,8 @@ class HomeAPICalls {
     }
   }
 
-  Future<Map<String, dynamic>> fetchactivechargers(int user_id, String email,
-      String authToken) async {
+  Future<Map<String, dynamic>> fetchactivechargers(
+      int user_id, String email, String authToken) async {
     final url = HomeUrls.fetchactivechargers;
 
     try {
@@ -85,7 +99,6 @@ class HomeAPICalls {
         body: jsonEncode({
           'email_id': email,
           'user_id': user_id,
-
         }),
       );
       final data = jsonDecode(response.body);

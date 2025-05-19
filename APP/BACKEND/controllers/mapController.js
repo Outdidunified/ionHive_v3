@@ -97,7 +97,7 @@ const SaveSearchFilter = async (req, res) => {
         });
     }
 };
-// Fetch Saved Filter //TODO - on hold until doing Stations it cant be  done
+// Fetch Saved Filter
 const fetchSavedSearchFilter = async (req, res) => {
     try {
         const { user_id, email_id } = req.body;
@@ -190,15 +190,15 @@ const fetchSavedSearchFilter = async (req, res) => {
 
 // STATIONS
 // Function to find nearby stations
-// Function to find nearby stations
 const getNearbyStations = async (req, res) => {
     try {
         const { latitude, longitude, user_id, email_id } = req.body;
 
-        if (!latitude || !longitude || !user_id || !email_id) {
+        // Only require latitude and longitude
+        if (!latitude || !longitude) {
             return res.status(400).json({
                 error: true,
-                message: "Latitude, Longitude, User ID, and Email are required",
+                message: "Latitude and Longitude are required",
             });
         }
 
@@ -213,21 +213,35 @@ const getNearbyStations = async (req, res) => {
         const lat = parseFloat(latitude);
         const lon = parseFloat(longitude);
         const stationsCollection = db.collection("charging_stations");
-        const usersCollection = db.collection("users");
 
-        // Step 1: Fetch the user's saved stations (favStations)
-        const user = await usersCollection.findOne({ user_id: user_id, email_id: email_id });
-        if (!user) {
-            return res.status(404).json({
-                error: true,
-                message: "User not found",
-            });
+        // Initialize variables for user data
+        let savedStationIds = [];
+        let userAuthenticated = false;
+
+        // Only check user data if both user_id and email_id are provided
+        if (user_id && email_id) {
+            try {
+                const usersCollection = db.collection("users");
+                const user = await usersCollection.findOne({ user_id: user_id, email_id: email_id });
+
+                if (user) {
+                    userAuthenticated = true;
+                    const favStations = user.favStations || [];
+                    savedStationIds = favStations
+                        .filter(station => station.status === true) // Only include stations with status: true
+                        .map(station => station.station_id);
+
+                    logger.loggerInfo(`User found: ${user_id}, ${email_id}. Found ${savedStationIds.length} saved stations.`);
+                } else {
+                    logger.loggerWarn(`User not found: ${user_id}, ${email_id}. Continuing without user data.`);
+                }
+            } catch (userError) {
+                logger.loggerError(`Error fetching user data: ${userError.message}`);
+                // Continue without user data
+            }
+        } else {
+            logger.loggerInfo('No user credentials provided. Continuing without user data.');
         }
-
-        const favStations = user.favStations || [];
-        const savedStationIds = favStations
-            .filter(station => station.status === true) // Only include stations with status: true
-            .map(station => station.station_id);
 
         // Constants for distance calculation
         const EARTH_RADIUS_KM = 6371; // Radius of Earth in KM
@@ -331,7 +345,8 @@ const getNearbyStations = async (req, res) => {
 
         // Step 3: Add saved_station field to each nearby station
         const updatedStations = nearbyStations.map(station => {
-            const isSaved = savedStationIds.includes(station.station_id);
+            // Only mark stations as saved if user is authenticated
+            const isSaved = userAuthenticated ? savedStationIds.includes(station.station_id) : false;
             return {
                 ...station,
                 saved_station: isSaved // Add saved_station key with true/false
@@ -343,7 +358,7 @@ const getNearbyStations = async (req, res) => {
         return res.status(200).json({
             error: false,
             message: "Nearby charging stations retrieved successfully",
-            stations: updatedStations
+            stations: updatedStations,
         });
 
     } catch (error) {

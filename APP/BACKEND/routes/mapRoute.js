@@ -18,6 +18,7 @@ router.post('/fetchActiveChargersOfUser', authUser.isAuthenticated, Controller.f
 
 // MANAGE STATION'S BASED ON CURRENT LOCATION OF THE USER 
 router.post('/fetchNearbyStations', authUser.isAuthenticated, Controller.getNearbyStations);// fetch station
+router.post('/fetchNearbyStationsForGuestUser', Controller.getNearbyStations);// fetch station
 
 // Export the router
 module.exports = router;
