@@ -218,11 +218,23 @@ const getNearbyStations = async (req, res) => {
         let savedStationIds = [];
         let userAuthenticated = false;
 
-        // Only check user data if both user_id and email_id are provided
-        if (user_id && email_id) {
-            try {
+        // Check for user data
+        try {
+            // Determine if we have enough user information to look up
+            const hasUserId = user_id && (Number.isInteger(Number(user_id)) || typeof user_id === 'number');
+            const hasEmailId = email_id && typeof email_id === 'string';
+
+            // If we have at least one identifier, try to find the user
+            if ((hasUserId || hasEmailId) && db) {
                 const usersCollection = db.collection("users");
-                const user = await usersCollection.findOne({ user_id: user_id, email_id: email_id });
+                let query = {};
+
+                // Build query based on available data
+                if (hasUserId) query.user_id = parseInt(user_id);
+                if (hasEmailId) query.email_id = email_id;
+
+                logger.loggerInfo(`Looking up user with query: ${JSON.stringify(query)}`);
+                const user = await usersCollection.findOne(query);
 
                 if (user) {
                     userAuthenticated = true;
@@ -231,16 +243,26 @@ const getNearbyStations = async (req, res) => {
                         .filter(station => station.status === true) // Only include stations with status: true
                         .map(station => station.station_id);
 
-                    logger.loggerInfo(`User found: ${user_id}, ${email_id}. Found ${savedStationIds.length} saved stations.`);
+                    logger.loggerInfo(`User found: ID=${user.user_id}, Email=${user.email_id}. Found ${savedStationIds.length} saved stations.`);
+
+                    // Check if user status is false
+                    if (user.status === false) {
+                        logger.loggerWarn(`User account is inactive: UserID: ${user.user_id}, Email ID: ${user.email_id}`);
+                        return res.status(403).json({
+                            error: true,
+                            message: 'Your account has been deactivated!',
+                            invalidateToken: true
+                        });
+                    }
                 } else {
-                    logger.loggerWarn(`User not found: ${user_id}, ${email_id}. Continuing without user data.`);
+                    logger.loggerWarn(`User not found with provided credentials. Continuing without user data.`);
                 }
-            } catch (userError) {
-                logger.loggerError(`Error fetching user data: ${userError.message}`);
-                // Continue without user data
+            } else {
+                logger.loggerInfo('No valid user credentials provided. Continuing in guest mode.');
             }
-        } else {
-            logger.loggerInfo('No user credentials provided. Continuing without user data.');
+        } catch (userError) {
+            logger.loggerError(`Error fetching user data: ${userError.message}`);
+            // Continue without user data
         }
 
         // Constants for distance calculation
@@ -255,8 +277,27 @@ const getNearbyStations = async (req, res) => {
         const nearbyStations = await stationsCollection.aggregate([
             {
                 $addFields: {
-                    latRad: { $multiply: ["$latitude", DEG_TO_RAD] },
-                    lonRad: { $multiply: ["$longitude", DEG_TO_RAD] },
+                    // Convert latitude and longitude to numbers if they are strings
+                    lat_num: {
+                        $convert: {
+                            input: "$latitude",
+                            to: "double",
+                            onError: 0.0
+                        }
+                    },
+                    lon_num: {
+                        $convert: {
+                            input: "$longitude",
+                            to: "double",
+                            onError: 0.0
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    latRad: { $multiply: ["$lat_num", DEG_TO_RAD] },
+                    lonRad: { $multiply: ["$lon_num", DEG_TO_RAD] },
                 }
             },
             {
@@ -316,8 +357,8 @@ const getNearbyStations = async (req, res) => {
                     network: 1,
                     availability: 1,
                     accessibility: 1,
-                    latitude: 1,
-                    longitude: 1,
+                    latitude: "$lat_num", // Use the converted numeric value
+                    longitude: "$lon_num", // Use the converted numeric value
                     charger_type: 1,
                     distance: 1,
                     charger_details: {
