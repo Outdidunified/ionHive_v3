@@ -206,29 +206,16 @@ class LoginPage extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 24, vertical: 14),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.grey.shade200,
-                                    Colors.grey.shade200
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
+
+                              borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                   color: Theme.of(context).brightness ==
                                           Brightness.dark
                                       ? Colors.white54
                                       : Colors.black26,
-                                  width: 0.2,
+                                  width: 0.1,
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.4),
-                                    blurRadius: 8,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
+
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
