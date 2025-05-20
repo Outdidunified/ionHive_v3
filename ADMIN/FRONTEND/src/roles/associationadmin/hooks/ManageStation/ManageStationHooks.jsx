@@ -17,7 +17,10 @@ const useManageStation = (userInfo) => {
     charger_type: '',
     chargers: [],
   });
-  const [removeModalOpen, setRemoveModalOpen] = useState(false);
+
+const [previouslySelectedChargerId, setPreviouslySelectedChargerId] = useState('');
+const [isChargersLoading, setIsChargersLoading] = useState(false);
+const [removeModalOpen, setRemoveModalOpen] = useState(false);
 const [removeStationId, setRemoveStationId] = useState(null);
 const [removeChargerId, setRemoveChargerId] = useState(null);
 
@@ -143,24 +146,24 @@ const closeRemoveModal = () => {
   };
 
   // Fetch all stations for this association
- const fetchStations = async () => {
-  setIsLoading(true);
-  try {
-    const response = await axiosInstance.post('/associationadmin/GetAssociationStation', {
-      association_id: userInfo.association_id,
-    });
+  const fetchStations = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.post('/associationadmin/GetAssociationStation', {
+        association_id: userInfo.association_id,
+      });
 
-    const data = response.data?.data || [];
-    setStations(data);
-    setFilteredStations(data);
-    setAllocatedChargers(data); // ✅ Add this line
-  } catch (err) {
-    console.error("Error fetching stations:", err);
-    setError('Failed to fetch stations');
-  } finally {
-    setIsLoading(false);
-  }
-};
+      const data = response.data?.data || [];
+      setStations(data);
+      setFilteredStations(data);
+      setAllocatedChargers(data); 
+    } catch (err) {
+      console.error("Error fetching stations:", err);
+      setError('Failed to fetch stations');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
   const handleSearchInputChange = (e) => {
@@ -172,20 +175,24 @@ const closeRemoveModal = () => {
   };
 
   const fetchAllocatedChargersList = useCallback(async () => {
-    try {
-      const response = await axiosInstance.post('/associationadmin/FetchAllocatedChargerByClientToAssociation', {
-        association_id: userInfo.association_id,
-      });
-      if (response.data.status === 'Success') {
-        setAllocatedChargers(response.data.data || []);
-      } else {
-        setAllocatedChargers([]);
-      }
-    } catch (err) {
+  try {
+    setIsChargersLoading(true);
+    const response = await axiosInstance.post('/associationadmin/FetchAllocatedChargerByClientToAssociation', {
+      association_id: userInfo.association_id,
+    });
+    if (response.data.status === 'Success') {
+      setAllocatedChargers(response.data.data || []);
+    } else {
       setAllocatedChargers([]);
-      console.error('Error fetching allocated chargers:', err);
     }
-  }, [userInfo.association_id]);
+  } catch (err) {
+    setAllocatedChargers([]);
+    console.error('Error fetching allocated chargers:', err);
+  } finally {
+    setIsChargersLoading(false);
+  }
+}, [userInfo.association_id]);
+
 
   useEffect(() => {
     if (assignModalOpen) {
@@ -330,7 +337,7 @@ const closeRemoveModal = () => {
     setSelectedChargerId,
     selectedChargers,
     setSelectedChargers,openRemoveModal,closeRemoveModal,removeModalOpen,removeStationId,removeChargerFromStation,setRemoveChargerId,
-  removeChargerId, 
+  removeChargerId, isChargersLoading
   };
 };
 

@@ -2836,9 +2836,9 @@ const CreateVehicleModel = async (req, res) => {
       vehicle_image,
       status: true,
       created_date: new Date(),
-      created_by,         // save creator
+      created_by,         
       modified_date: null,
-      modified_by: null,  // initially null
+      modified_by: null,  
     });
 
     return res.status(201).json({ status: 'Success', message: 'Vehicle model created successfully' });
@@ -2847,8 +2847,6 @@ const CreateVehicleModel = async (req, res) => {
     return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
   }
 };
-
-
 
 
 //Show all Vehicles
@@ -2866,7 +2864,6 @@ const GetAllVehicleModels = async (req, res) => {
         return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
     }
 };
-
 
 //update the vehicles
 const UpdateVehicleModel = async (req, res) => {
@@ -2951,8 +2948,6 @@ const UpdateVehicleModel = async (req, res) => {
 };
 
 
-
-
 const UpdateVehicleModelStatus = async (req, res) => {
   const { vehicle_id, status, modified_by } = req.body;
 
@@ -2989,9 +2984,6 @@ const UpdateVehicleModelStatus = async (req, res) => {
     return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
   }
 };
-
-
-
 
 module.exports = {
     authenticate, FetchTotalUsers, FetchTotalCharger, FetchOnlineCharger, FetchOfflineCharger, FetchFaultsCharger, FetchChargerTotalEnergy,

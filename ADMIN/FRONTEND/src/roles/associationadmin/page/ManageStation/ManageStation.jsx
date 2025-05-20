@@ -10,15 +10,13 @@ const ManageStation = ({ userInfo, handleLogout }) => {
     const navigate = useNavigate();
 
     const {
-       stationData,previousChargerId,selectedChargers, setSelectedChargers,removeStationId,removeChargerFromStation,
-    setStationData,assignModalOpen,
-    handleInputChange,openReassignModal,
-    stations,selectedStation,closeAssignModal,reassignChargerToStation,openRemoveModal,closeRemoveModal,removeModalOpen,removeChargerId,
+       stationData,removeStationId,removeChargerFromStation,assignModalOpen,isChargersLoading,
+    handleInputChange,isAlertVisible,modalErrorMessage,
+    selectedStation,closeAssignModal,openRemoveModal,closeRemoveModal,removeModalOpen,removeChargerId,
     filteredStations,
     isLoading,allocatedChargers,assignLoading,setRemoveChargerId,
-    loading,isReassign,
+    loading,
     error,
-    showAddForm,
     modalAddStyle,
     theadsticky,
     theadfixed,
@@ -26,21 +24,9 @@ const ManageStation = ({ userInfo, handleLogout }) => {
     handleAddStationToggle,
     closeAddModal,
     addStation,
-    handleSearchInputChange,handleRemoveCharger,
-    
-    handleChargerInputChange,setSelectedChargerId,
-    fetchStations,
-    handleAssignSubmit,
-    // Chargers data and selection
-    chargers,
+    handleSearchInputChange,setSelectedChargerId,
     selectedChargerId,
     openAssignModal,
-
-    // Station selection for assignment
-    selectedStationId,
-    setSelectedStationId,
-
-    // Assignment function
     assignChargerToStation,
     } = useManageStation(userInfo);
 
@@ -193,7 +179,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
               type="text"
               className="form-control"
               name="availability"
-              placeholder="Enter Availability (e.g. 9AM - 9PM)"
+              placeholder="Enter Availability"
               value={stationData.availability}
               onChange={handleInputChange}
             />
@@ -497,15 +483,22 @@ const ManageStation = ({ userInfo, handleLogout }) => {
           border: '1px solid #ccc',
           marginBottom: '20px',
         }}
+        disabled={isChargersLoading}
       >
-        <option value="">-- Select Charger ID --</option>
-        {allocatedChargers
-          ?.find((station) => station.station_id === removeStationId)
-          ?.chargers?.map((chargerId) => (
-            <option key={chargerId} value={chargerId}>
-              {chargerId}
-            </option>
-          ))}
+        {isChargersLoading ? (
+          <option>Loading chargers...</option>
+        ) : (
+          <>
+            <option value="">-- Select Charger ID --</option>
+            {allocatedChargers
+              ?.find((station) => station.station_id === removeStationId)
+              ?.chargers?.map((chargerId) => (
+                <option key={chargerId} value={chargerId}>
+                  {chargerId}
+                </option>
+              ))}
+          </>
+        )}
       </select>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
@@ -541,6 +534,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
             cursor: 'pointer',
             minWidth: '90px',
           }}
+          disabled={isChargersLoading}
         >
           Confirm
         </button>
@@ -557,7 +551,8 @@ const ManageStation = ({ userInfo, handleLogout }) => {
     className="modal"
     style={{
       display: 'block',
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      backgroundColor: isAlertVisible ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.5)',
+      pointerEvents: isAlertVisible ? 'none' : 'auto',
       position: 'fixed',
       top: 0,
       left: 0,
@@ -581,9 +576,27 @@ const ManageStation = ({ userInfo, handleLogout }) => {
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <h5 className="text-center mb-3" style={{ fontWeight: '600' }}>Assign Station to Charger</h5>
+      <h5 className="text-center mb-3" style={{ fontWeight: '600' }}>
+        Assign Station to Charger
+      </h5>
 
-      {/* Station Info Grid */}
+      {/* Error message inside modal */}
+      {modalErrorMessage && (
+        <div
+          style={{
+            color: 'red',
+            background: '#ffe5e5',
+            padding: '8px 12px',
+            borderRadius: '6px',
+            border: '1px solid #ffcccc',
+            marginBottom: '16px',
+          }}
+        >
+          {modalErrorMessage}
+        </div>
+      )}
+
+      {/* Station Info */}
       <div
         style={{
           display: 'grid',
@@ -602,7 +615,6 @@ const ManageStation = ({ userInfo, handleLogout }) => {
           { label: 'Latitude', value: selectedStation.latitude },
           { label: 'Longitude', value: selectedStation.longitude },
           { label: 'Charger Type', value: selectedStation.charger_type },
-          { label: 'Status', value: selectedStation.status },
           { label: 'Created At', value: new Date(selectedStation.created_at).toLocaleString() },
           { label: 'Modified At', value: new Date(selectedStation.modified_at).toLocaleString() },
           { label: 'Modified By', value: selectedStation.modified_by },
@@ -632,18 +644,22 @@ const ManageStation = ({ userInfo, handleLogout }) => {
             className="form-control"
             value={selectedChargerId}
             onChange={(e) => setSelectedChargerId(e.target.value)}
+            disabled={isChargersLoading}
             required
           >
-            <option value="">-- Select Charger ID --</option>
-
-            {allocatedChargers.length > 0 ? (
-              allocatedChargers
-                .filter(charger => !charger.station_id) // only unassigned chargers
-                .map(charger => (
-                  <option key={charger.charger_id} value={charger.charger_id}>
-                    {charger.charger_id} 
-                  </option>
-                ))
+            {isChargersLoading ? (
+              <option>Loading chargers...</option>
+            ) : allocatedChargers.length > 0 ? (
+              <>
+                <option value="">-- Select Charger ID --</option>
+                {allocatedChargers
+                  .filter((charger) => !charger.station_id)
+                  .map((charger) => (
+                    <option key={charger.charger_id} value={charger.charger_id}>
+                      {charger.charger_id}
+                    </option>
+                  ))}
+              </>
             ) : (
               <option disabled>No chargers available</option>
             )}
@@ -674,6 +690,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
     </div>
   </div>
 )}
+
 
 
 

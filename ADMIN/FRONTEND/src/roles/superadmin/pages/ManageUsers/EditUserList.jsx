@@ -19,7 +19,7 @@ const EditUserList = ({ userInfo, handleLogout }) => {
         phone_no,
         wallet_bal,
         errorMessage,
-        selectStatus, dataItem, setPassword, loading
+        selectStatus, dataItem, setPassword, loading,setWalletBal,setErrorMessage
     } = useEditUser(userInfo)
 
     const backManageDevice = () => {

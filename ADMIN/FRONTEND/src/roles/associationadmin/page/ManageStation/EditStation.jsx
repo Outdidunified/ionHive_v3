@@ -15,7 +15,6 @@ const EditStation = ({ userInfo, handleLogout }) => {
     latitude, setLatitude,
     longitude, setLongitude,
     chargerType, setChargerType,
-    chargers, setChargers,
     status, setStatus,
     loading,
     isModified,
