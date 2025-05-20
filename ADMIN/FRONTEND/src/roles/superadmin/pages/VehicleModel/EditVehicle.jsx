@@ -141,21 +141,79 @@ const EditVehicle= ({ userInfo, handleLogout }) => {
                           </div>
                         </div>
 
-                        <div className="col-md-6">
-                          <div className="form-group row">
-                            <label className="col-sm-12 col-form-label labelInput">Vehicle Image URL</label>
-                            <div className="col-sm-12">
-                              <input
-  type="file"
-  accept="image/*"
-  className="form-control"
-  onChange={handleImageChange}
-  required={!vehicleImage}
-/>
+                 <div className="col-md-6">
+  <div className="form-group row">
+    <label className="col-sm-12 col-form-label labelInput">Vehicle Image</label>
+    <div className="col-sm-12" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      
+      {/* Hidden real file input */}
+      <input
+        id="vehicleImageInput"
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+        style={{ display: 'none' }}
+      />
 
-                            </div>
-                          </div>
-                        </div>
+      {/* Custom button to trigger file input */}
+      <button
+        type="button"
+        className="btn btn-outline-secondary"
+        onClick={() => document.getElementById('vehicleImageInput').click()}
+        style={{ flexShrink: 0 }}
+      >
+        Choose File
+      </button>
+
+      {/* Custom text to show filename or previous image name */}
+      <div
+        style={{
+          flexGrow: 1,
+          border: '1px solid #ced4da',
+          borderRadius: '4px',
+          padding: '6px 12px',
+          height: '38px',
+          lineHeight: '24px',
+          color: '#6c757d',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          userSelect: 'none',
+          backgroundColor: '#e9ecef',
+        }}
+      >
+        {vehicleImage
+          ? vehicleImage instanceof File
+            ? vehicleImage.name
+            : vehicleImage // string filename (previous image)
+          : 'No file chosen'}
+      </div>
+
+      {/* Image preview */}
+      {vehicleImage && typeof vehicleImage === 'string' && (
+        <img
+          src={`/uploads/${vehicleImage}`}
+          alt="Vehicle"
+          style={{ width: '50px', height: '50px', borderRadius: '5px', objectFit: 'cover', border: '1px solid #ccc' }}
+          onError={(e) => { e.target.onerror = null; e.target.src = '/path/to/placeholder.png'; }}
+          title={vehicleImage}
+        />
+      )}
+
+      {vehicleImage && vehicleImage instanceof File && (
+        <img
+          src={URL.createObjectURL(vehicleImage)}
+          alt="Selected Vehicle"
+          style={{ width: '50px', height: '50px', borderRadius: '5px', objectFit: 'cover', border: '1px solid #ccc' }}
+          title={vehicleImage.name}
+        />
+      )}
+    </div>
+  </div>
+</div>
+
+
+
                       </div>
 
                      

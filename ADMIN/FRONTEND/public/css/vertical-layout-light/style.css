@@ -149,6 +149,20 @@
   transform: translate(-50%, -50%);
 }
 
+.modalContStyle {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 95%; /* Adjust the width as needed */
+  max-width: 500px; /* Maximum width for larger screens */
+  border-radius: 5px;
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .divStyleOccpant {
   background: #f1efef; 
   color:#070707BD;

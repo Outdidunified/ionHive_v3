@@ -98,11 +98,33 @@ const handleEditVehicle = () => {
                         <span>{vehicle.modified_date ? formatTimestamp(vehicle.modified_date) : '-'}</span>
                       </div>
                     </div>
-                   <div className="row viewDataCss" style={{ marginTop: '10px' }}>
+                 <div className="row viewDataCss" style={{ marginTop: '10px' }}>
+  {/* Vehicle Image */}
+  <div className="col-md-4">
+    <strong>Vehicle Image:</strong><br />
+    {vehicle.vehicle_image ? (
+      <img
+  src={`/uploads/${vehicle.vehicle_image}`}
+  style={{
+    width: '100px',
+    height: 'auto',
+    objectFit: 'contain',
+    borderRadius: '15px' // ensures image is not rounded
+  }}
+  onError={(e) => { e.target.onerror = null; e.target.src = '/path/to/placeholder.png'; }} // optional fallback
+/>
+    ) : (
+      <span>No Image Available</span>
+    )}
+  </div>
+
+  {/* Created By */}
   <div className="col-md-4">
     <strong>Created By:</strong>{' '}
     <span>{vehicle.created_by ? vehicle.created_by : '-'}</span>
   </div>
+
+  {/* Modified By */}
   <div className="col-md-4">
     <strong>Modified By:</strong>{' '}
     <span>{vehicle.modified_by ? vehicle.modified_by : '-'}</span>

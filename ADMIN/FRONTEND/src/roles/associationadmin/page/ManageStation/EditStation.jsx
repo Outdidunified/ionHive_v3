@@ -16,7 +16,7 @@ const EditStation = ({ userInfo, handleLogout }) => {
     longitude, setLongitude,
     chargerType, setChargerType,
     status, setStatus,
-    loading,
+    loading,handleLocationIdChange,
     isModified,
     updateStation,
     goBackToManageStations,
@@ -66,12 +66,12 @@ const EditStation = ({ userInfo, handleLogout }) => {
   <div className="form-group row">
     <label className="col-sm-12 col-form-label labelInput">Location ID</label>
     <div className="col-sm-12">
-      <InputField
-        value={locationId}
-        onChange={(e) => setLocationId(e.target.value)}
-        maxLength={100}
-        required
-      />
+    <InputField
+  value={locationId}
+  onChange={handleLocationIdChange}
+  maxLength={50}
+  required
+/>
     </div>
   </div>
 </div>
@@ -83,7 +83,7 @@ const EditStation = ({ userInfo, handleLogout }) => {
                               <InputField
                                 value={stationAddress}
                                 onChange={(e) => setStationAddress(e.target.value)}
-                                maxLength={150}
+                                maxLength={100}
                                 required
                               />
                             </div>
@@ -108,10 +108,17 @@ const EditStation = ({ userInfo, handleLogout }) => {
                             <label className="col-sm-12 col-form-label labelInput">Latitude</label>
                             <div className="col-sm-12">
                               <InputField
-                                value={latitude}
-                                onChange={(e) => setLatitude(e.target.value)}
-                                required
-                              />
+  type="text"
+  value={latitude}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^-?\d*\.?\d*$/.test(value)) {
+      setLatitude(value);
+    }
+  }}
+  required
+/>
+
                             </div>
                           </div>
                         </div>
@@ -121,10 +128,17 @@ const EditStation = ({ userInfo, handleLogout }) => {
                             <label className="col-sm-12 col-form-label labelInput">Longitude</label>
                             <div className="col-sm-12">
                               <InputField
-                                value={longitude}
-                                onChange={(e) => setLongitude(e.target.value)}
-                                required
-                              />
+  type="text"
+  value={longitude}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (/^-?\d*\.?\d*$/.test(value)) {
+      setLongitude(value);
+    }
+  }}
+  required
+/>
+                         
                             </div>
                           </div>
                         </div>
@@ -136,7 +150,9 @@ const EditStation = ({ userInfo, handleLogout }) => {
                               <InputField
                                 value={chargerType}
                                 onChange={(e) => setChargerType(e.target.value)}
+                                 maxLength={20}
                                 required
+                                
                               />
                             </div>
                           </div>
@@ -149,6 +165,8 @@ const EditStation = ({ userInfo, handleLogout }) => {
                               <InputField
                                 value={network}
                                 onChange={(e) => setNetwork(e.target.value)}
+                                maxLength={50}
+
                               />
                             </div>
                           </div>
@@ -161,22 +179,31 @@ const EditStation = ({ userInfo, handleLogout }) => {
                               <InputField
                                 value={availability}
                                 onChange={(e) => setAvailability(e.target.value)}
+                                 maxLength={50}
+
                               />
                             </div>
                           </div>
                         </div>
 
-                        <div className="col-md-6">
-                          <div className="form-group row">
-                            <label className="col-sm-12 col-form-label labelInput">Accessibility</label>
-                            <div className="col-sm-12">
-                              <InputField
-                                value={accessibility}
-                                onChange={(e) => setAccessibility(e.target.value)}
-                              />
-                            </div>
-                          </div>
-                        </div>
+                       <div className="col-md-6">
+  <div className="form-group row">
+    <label className="col-sm-12 col-form-label labelInput">Accessibility</label>
+    <div className="col-sm-12">
+      <select
+        className="form-control"
+        value={accessibility}
+        onChange={(e) => setAccessibility(e.target.value)}
+      >
+        <option value="">Select Accessibility</option>
+        <option value="Public">Public</option>
+        <option value="Private">Private</option>
+        <option value="Captive">Captive</option>
+      </select>
+    </div>
+  </div>
+</div>
+
 
                         <div className="col-md-6">
                           <div className="form-group row">

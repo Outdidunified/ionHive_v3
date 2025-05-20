@@ -35,6 +35,7 @@ const [removeChargerId, setRemoveChargerId] = useState(null);
   const [selectedStation, setSelectedStation] = useState(null);
   const [allocatedChargers, setAllocatedChargers] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
+  
 
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +45,7 @@ const [removeChargerId, setRemoveChargerId] = useState(null);
   const modalAddStyle = {
     display: showAddForm ? 'block' : 'none',
   };
-
+  
   // Table styling
   const [theadsticky, setTheadsticky] = useState('sticky');
   const [theadfixed, setTheadfixed] = useState('fixed');
@@ -69,6 +70,7 @@ const closeRemoveModal = () => {
   setRemoveChargerId(null);
   setRemoveModalOpen(false);
 };
+
 
   const closeAddModal = () => {
     setStationData({
@@ -213,6 +215,8 @@ const closeRemoveModal = () => {
     setAssignModalOpen(false);
     setSelectedStation(null);
     setSelectedChargerId('');
+    setModalErrorMessage(''); // clear error on close
+
   };
 
   // Assign charger to station
@@ -305,6 +309,44 @@ const closeRemoveModal = () => {
     removeChargerFromStation(station_id, charger_id); // Your remove logic here
   }
 };
+const handlelocation = (e) => {
+  const { name, value } = e.target;
+
+  let filteredValue = value;
+
+  if (name === 'location_id') {
+    // Remove all characters except letters and numbers
+    filteredValue = value.replace(/[^a-zA-Z0-9]/g, '');
+  }
+
+  setStationData(prev => ({
+    ...prev,
+    [name]: filteredValue,
+  }));
+};
+
+const handlelatlongvalidation = (e) => {
+  const { name, value } = e.target;
+
+  // Allow valid signed decimal numbers like -90.123 or 45.67
+  const regex = /^-?\d*\.?\d*$/;
+
+  if (name === "latitude" || name === "longitude") {
+    if (value === '' || regex.test(value)) {
+      setStationData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  } else {
+    setStationData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+};
+
+
 
   return {
     stationData,
@@ -312,7 +354,7 @@ const closeRemoveModal = () => {
     setStationData,
     handleInputChange,
     stations,
-    filteredStations,
+    filteredStations,handlelatlongvalidation,
     isLoading,
     loading,
     error,
@@ -323,7 +365,7 @@ const closeRemoveModal = () => {
     theadBackgroundColor,
     handleAddStationToggle,
     closeAddModal,handleRemoveCharger,
-    addStation,
+    addStation,handlelocation,
     handleSearchInputChange,
     handleChargerInputChange,
     assignModalOpen,

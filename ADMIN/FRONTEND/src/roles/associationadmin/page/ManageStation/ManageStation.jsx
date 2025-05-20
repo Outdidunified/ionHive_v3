@@ -11,11 +11,11 @@ const ManageStation = ({ userInfo, handleLogout }) => {
 
     const {
        stationData,removeStationId,removeChargerFromStation,assignModalOpen,isChargersLoading,
-    handleInputChange,isAlertVisible,modalErrorMessage,
+    handleInputChange,isAlertVisible,modalErrorMessage,handlelocation,
     selectedStation,closeAssignModal,openRemoveModal,closeRemoveModal,removeModalOpen,removeChargerId,
     filteredStations,
     isLoading,allocatedChargers,assignLoading,setRemoveChargerId,
-    loading,
+    loading,handlelatlongvalidation,
     error,
     modalAddStyle,
     theadsticky,
@@ -25,7 +25,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
     closeAddModal,
     addStation,
     handleSearchInputChange,setSelectedChargerId,
-    selectedChargerId,
+    selectedChargerId,Assignmodalstyle,
     openAssignModal,
     assignChargerToStation,
     } = useManageStation(userInfo);
@@ -56,14 +56,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
                                         </button>
             <div className="modalStyle" style={modalAddStyle}>
   <div
-    className="modalContentStyle"
-    style={{
-      maxHeight: '680px',
-      backgroundColor: '#fff',
-      borderRadius: '10px',
-      padding: '20px',
-      // Removed overflowY to prevent scroll
-    }}
+    className="modalContStyle"
   >
     <span
       onClick={closeAddModal}
@@ -101,7 +94,8 @@ const ManageStation = ({ userInfo, handleLogout }) => {
               className="form-control"
               placeholder="Enter Location ID"
               value={stationData.location_id}
-              onChange={handleInputChange}
+              onChange={handlelocation}
+              maxLength={50}
             />
           </div>
 
@@ -122,6 +116,8 @@ const ManageStation = ({ userInfo, handleLogout }) => {
               placeholder="Enter Station Address"
               value={stationData.station_address}
               onChange={handleInputChange}
+              maxLength={100}
+
             />
           </div>
 
@@ -142,6 +138,8 @@ const ManageStation = ({ userInfo, handleLogout }) => {
               placeholder="Enter Landmark"
               value={stationData.landmark}
               onChange={handleInputChange}
+              maxLength={100}
+
             />
           </div>
 
@@ -162,6 +160,8 @@ const ManageStation = ({ userInfo, handleLogout }) => {
               placeholder="Enter Network"
               value={stationData.network}
               onChange={handleInputChange}
+              maxLength={50}
+
             />
           </div>
 
@@ -181,7 +181,9 @@ const ManageStation = ({ userInfo, handleLogout }) => {
               name="availability"
               placeholder="Enter Availability"
               value={stationData.availability}
-              onChange={handleInputChange}
+              onChange={handleInputChange}              
+              maxLength={50}
+
             />
           </div>
 
@@ -200,54 +202,56 @@ const ManageStation = ({ userInfo, handleLogout }) => {
               className="form-control"
               value={stationData.accessibility}
               onChange={handleInputChange}
+              maxLength={50}
+
             >
               <option value="">Select Accessibility</option>
               <option value="Public">Public</option>
               <option value="Private">Private</option>
+              <option value="Captivate ">Captivate</option>
             </select>
           </div>
 
           {/* Latitude */}
-          <div className="input-group mb-3">
-            <div className="input-group-prepend">
-              <span
-                className="input-group-text"
-                style={{ width: '120px', color: '#444', fontWeight: 500 }}
-              >
-                Latitude
-              </span>
-            </div>
-            <input
-              type="number"
-              name="latitude"
-              className="form-control"
-              placeholder="Enter Latitude"
-              value={stationData.latitude}
-              onChange={handleInputChange}
-              step="any"
-            />
-          </div>
+         {/* Latitude */}
+<div className="input-group mb-3">
+  <div className="input-group-prepend">
+    <span
+      className="input-group-text"
+      style={{ width: '120px', color: '#444', fontWeight: 500 }}
+    >
+      Latitude
+    </span>
+  </div>
+  <input
+    type="text"
+    name="latitude"
+    className="form-control"
+    placeholder="Enter Latitude"
+    value={stationData.latitude}
+    onChange={handlelatlongvalidation}
+  />
+</div>
 
-          {/* Longitude */}
-          <div className="input-group mb-3">
-            <div className="input-group-prepend">
-              <span
-                className="input-group-text"
-                style={{ width: '120px', color: '#444', fontWeight: 500 }}
-              >
-                Longitude
-              </span>
-            </div>
-            <input
-              type="number"
-              name="longitude"
-              className="form-control"
-              placeholder="Enter Longitude"
-              value={stationData.longitude}
-              onChange={handleInputChange}
-              step="any"
-            />
-          </div>
+{/* Longitude */}
+<div className="input-group mb-3">
+  <div className="input-group-prepend">
+    <span
+      className="input-group-text"
+      style={{ width: '120px', color: '#444', fontWeight: 500 }}
+    >
+      Longitude
+    </span>
+  </div>
+  <input
+    type="text"
+    name="longitude"
+    className="form-control"
+    placeholder="Enter Longitude"
+    value={stationData.longitude}
+    onChange={handlelatlongvalidation}
+  />
+</div>
 
           {/* Charger Type */}
           <div className="input-group mb-3">
@@ -266,6 +270,8 @@ const ManageStation = ({ userInfo, handleLogout }) => {
               placeholder="Enter Charger Type"
               value={stationData.charger_type}
               onChange={handleInputChange}
+              maxLength={20}
+
             />
           </div>
         </div>
@@ -281,10 +287,6 @@ const ManageStation = ({ userInfo, handleLogout }) => {
     </form>
   </div>
 </div>
-
-
-
-
 
                                     </div>
                                 </div>
@@ -545,34 +547,60 @@ const ManageStation = ({ userInfo, handleLogout }) => {
 
 
 
-
 {assignModalOpen && selectedStation && (
   <div
     className="modal"
     style={{
       display: 'block',
       backgroundColor: isAlertVisible ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.5)',
-      pointerEvents: isAlertVisible ? 'none' : 'auto',
+      pointerEvents: 'auto',
       position: 'fixed',
       top: 0,
       left: 0,
       height: '100vh',
       width: '100vw',
-      zIndex: 9999,
     }}
     onClick={closeAssignModal}
   >
+    {modalErrorMessage && (
+      <div
+        style={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#ffe5e5',
+          color: 'red',
+          padding: '12px 20px',
+          borderRadius: '6px',
+          border: '1px solid #ffcccc',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+          fontWeight: '600',
+          zIndex: 10000,
+          width: '90%',
+          maxWidth: '480px',
+          textAlign: 'center',
+          pointerEvents: 'auto',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {modalErrorMessage}
+      </div>
+    )}
+
     <div
       className="modal-content"
       style={{
-        backgroundColor: '#fff',
-        padding: '24px',
-        maxWidth: '700px',
-        margin: '80px auto',
+        backgroundColor: isAlertVisible ? '#fef6f6' : '#fff',
+        padding: '14px',
+        maxWidth: '520px',
+        margin: '100px auto',
         position: 'relative',
         borderRadius: '10px',
         boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
         fontSize: '13px',
+        filter: isAlertVisible ? 'blur(1px)' : 'none',
+        pointerEvents: isAlertVisible ? 'none' : 'auto',
       }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -580,29 +608,13 @@ const ManageStation = ({ userInfo, handleLogout }) => {
         Assign Station to Charger
       </h5>
 
-      {/* Error message inside modal */}
-      {modalErrorMessage && (
-        <div
-          style={{
-            color: 'red',
-            background: '#ffe5e5',
-            padding: '8px 12px',
-            borderRadius: '6px',
-            border: '1px solid #ffcccc',
-            marginBottom: '16px',
-          }}
-        >
-          {modalErrorMessage}
-        </div>
-      )}
-
-      {/* Station Info */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
           gap: '14px',
           marginBottom: '24px',
+          filter: isAlertVisible ? 'blur(1px)' : 'none',
         }}
       >
         {[
@@ -615,9 +627,6 @@ const ManageStation = ({ userInfo, handleLogout }) => {
           { label: 'Latitude', value: selectedStation.latitude },
           { label: 'Longitude', value: selectedStation.longitude },
           { label: 'Charger Type', value: selectedStation.charger_type },
-          { label: 'Created At', value: new Date(selectedStation.created_at).toLocaleString() },
-          { label: 'Modified At', value: new Date(selectedStation.modified_at).toLocaleString() },
-          { label: 'Modified By', value: selectedStation.modified_by },
         ].map((item, idx) => (
           <div
             key={idx}
@@ -633,8 +642,10 @@ const ManageStation = ({ userInfo, handleLogout }) => {
         ))}
       </div>
 
-      {/* Form */}
-      <form onSubmit={assignChargerToStation}>
+      <form
+        onSubmit={assignChargerToStation}
+        style={{ filter: isAlertVisible ? 'blur(1px)' : 'none' }}
+      >
         <div className="form-group mb-3">
           <label htmlFor="chargerIdSelect" className="mb-1" style={{ fontWeight: '500' }}>
             Select Charger ID
@@ -644,7 +655,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
             className="form-control"
             value={selectedChargerId}
             onChange={(e) => setSelectedChargerId(e.target.value)}
-            disabled={isChargersLoading}
+            disabled={isChargersLoading || isAlertVisible}
             required
           >
             {isChargersLoading ? (
@@ -672,7 +683,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
             type="button"
             className="btn btn-outline-secondary"
             onClick={closeAssignModal}
-            disabled={assignLoading}
+            disabled={assignLoading || isAlertVisible}
             style={{ minWidth: '90px' }}
           >
             Cancel
@@ -681,7 +692,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
           <button
             type="submit"
             className="btn btn-success"
-            disabled={assignLoading || !selectedChargerId}
+            disabled={assignLoading || !selectedChargerId || isAlertVisible}
           >
             {assignLoading ? 'Assigning...' : 'Assign'}
           </button>
@@ -691,14 +702,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
   </div>
 )}
 
-
-
-
 </div> 
-
-
-
-
                                 </div>
                             </div>
                         </div>
