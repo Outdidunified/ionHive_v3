@@ -11,9 +11,9 @@ const ManageStation = ({ userInfo, handleLogout }) => {
 
     const {
        stationData,removeStationId,removeChargerFromStation,assignModalOpen,isChargersLoading,
-    handleInputChange,isAlertVisible,modalErrorMessage,handlelocation,
+    handleInputChange,isAlertVisible,modalErrorMessage,handlelocation,previouslySelectedChargerId,
     selectedStation,closeAssignModal,openRemoveModal,closeRemoveModal,removeModalOpen,removeChargerId,
-    filteredStations,
+    filteredStations,setModalErrorMessage,
     isLoading,allocatedChargers,assignLoading,setRemoveChargerId,
     loading,handlelatlongvalidation,
     error,
@@ -650,31 +650,41 @@ const ManageStation = ({ userInfo, handleLogout }) => {
           <label htmlFor="chargerIdSelect" className="mb-1" style={{ fontWeight: '500' }}>
             Select Charger ID
           </label>
-          <select
-            id="chargerIdSelect"
-            className="form-control"
-            value={selectedChargerId}
-            onChange={(e) => setSelectedChargerId(e.target.value)}
-            disabled={isChargersLoading || isAlertVisible}
-            required
-          >
-            {isChargersLoading ? (
-              <option>Loading chargers...</option>
-            ) : allocatedChargers.length > 0 ? (
-              <>
-                <option value="">-- Select Charger ID --</option>
-                {allocatedChargers
-                  .filter((charger) => !charger.station_id)
-                  .map((charger) => (
-                    <option key={charger.charger_id} value={charger.charger_id}>
-                      {charger.charger_id}
-                    </option>
-                  ))}
-              </>
-            ) : (
-              <option disabled>No chargers available</option>
-            )}
-          </select>
+<select
+  id="chargerIdSelect"
+  className="form-control"
+  value={selectedChargerId}
+  onChange={(e) => setSelectedChargerId(e.target.value)}
+  disabled={isChargersLoading || isAlertVisible}
+  required
+>
+  {isChargersLoading ? (
+    <option>Loading chargers...</option>
+  ) : (
+    <>
+      <option value="">-- Select Charger ID --</option>
+
+      {previouslySelectedChargerId && (
+        <option value={previouslySelectedChargerId} disabled>
+          {previouslySelectedChargerId} (Previously Assigned)
+        </option>
+      )}
+
+      {allocatedChargers
+        .filter(charger => !charger.station_id && charger.charger_id !== previouslySelectedChargerId)
+        .map(charger => (
+          <option key={charger.charger_id} value={charger.charger_id}>
+            {charger.charger_id}
+          </option>
+        ))}
+    </>
+  )}
+</select>
+
+
+
+
+
         </div>
 
         {/* Buttons */}
@@ -690,12 +700,18 @@ const ManageStation = ({ userInfo, handleLogout }) => {
           </button>
 
           <button
-            type="submit"
-            className="btn btn-success"
-            disabled={assignLoading || !selectedChargerId || isAlertVisible}
-          >
-            {assignLoading ? 'Assigning...' : 'Assign'}
-          </button>
+  type="submit"
+  className="btn btn-success"
+  disabled={
+    assignLoading ||
+    !selectedChargerId ||
+    selectedChargerId === previouslySelectedChargerId || // disable if selecting the same
+    isAlertVisible
+  }
+>
+  {assignLoading ? 'Assigning...' : 'Assign'}
+</button>
+
         </div>
       </form>
     </div>

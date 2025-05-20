@@ -35,7 +35,6 @@ const [removeChargerId, setRemoveChargerId] = useState(null);
   const [selectedStation, setSelectedStation] = useState(null);
   const [allocatedChargers, setAllocatedChargers] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
-  
 
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +44,7 @@ const [removeChargerId, setRemoveChargerId] = useState(null);
   const modalAddStyle = {
     display: showAddForm ? 'block' : 'none',
   };
-  
+
   // Table styling
   const [theadsticky, setTheadsticky] = useState('sticky');
   const [theadfixed, setTheadfixed] = useState('fixed');
@@ -70,7 +69,6 @@ const closeRemoveModal = () => {
   setRemoveChargerId(null);
   setRemoveModalOpen(false);
 };
-
 
   const closeAddModal = () => {
     setStationData({
@@ -149,23 +147,33 @@ const closeRemoveModal = () => {
 
   // Fetch all stations for this association
   const fetchStations = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axiosInstance.post('/associationadmin/GetAssociationStation', {
-        association_id: userInfo.association_id,
-      });
+  setIsLoading(true);
+  try {
+    const response = await axiosInstance.post('/associationadmin/GetAssociationStation', {
+      association_id: userInfo.association_id,
+    });
 
-      const data = response.data?.data || [];
-      setStations(data);
-      setFilteredStations(data);
-      setAllocatedChargers(data); 
-    } catch (err) {
-      console.error("Error fetching stations:", err);
-      setError('Failed to fetch stations');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const data = response.data?.data || [];
+    setStations(data);
+    setFilteredStations(data);
+
+    // Create a flat array of chargers with charger_id and assigned station_id
+    const chargersList = data.flatMap(station =>
+      station.chargers.map(chargerId => ({
+        charger_id: chargerId,
+        station_id: station.station_id,
+      }))
+    );
+
+    setAllocatedChargers(chargersList);
+  } catch (err) {
+    console.error("Error fetching stations:", err);
+    setError('Failed to fetch stations');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
 
   const handleSearchInputChange = (e) => {
@@ -202,21 +210,22 @@ const closeRemoveModal = () => {
     }
   }, [assignModalOpen, fetchAllocatedChargersList]);
 
-  // Open Assign Modal
   const openAssignModal = (station) => {
-    setSelectedStation(station);
-    setSelectedStationId(station.station_id);
-    setSelectedChargerId('');
-    setAssignModalOpen(true);
-  };
+  console.log("Station chargers:", station.chargers);
+  setSelectedStation(station);
+  setSelectedStationId(station.station_id);
+  setSelectedChargerId('');
+  setPreviouslySelectedChargerId(station.chargers?.slice(-1)[0] || '');
+  setAssignModalOpen(true);
+};
+
+
 
   // Close assign modal
   const closeAssignModal = () => {
     setAssignModalOpen(false);
     setSelectedStation(null);
     setSelectedChargerId('');
-    setModalErrorMessage(''); // clear error on close
-
   };
 
   // Assign charger to station
@@ -284,9 +293,8 @@ const closeRemoveModal = () => {
 
     if (response.data.status === 'Success') {
       showSuccessAlert('Success', 'Charger removed from station successfully.');
-      // Refresh station and allocated chargers lists
-      await fetchStations();
-      await fetchAllocatedChargersList();
+       fetchStations();
+       fetchAllocatedChargersList();
     } else {
       showErrorAlert('Error', response.data.message || 'Failed to remove charger from station.');
     }
@@ -309,44 +317,6 @@ const closeRemoveModal = () => {
     removeChargerFromStation(station_id, charger_id); // Your remove logic here
   }
 };
-const handlelocation = (e) => {
-  const { name, value } = e.target;
-
-  let filteredValue = value;
-
-  if (name === 'location_id') {
-    // Remove all characters except letters and numbers
-    filteredValue = value.replace(/[^a-zA-Z0-9]/g, '');
-  }
-
-  setStationData(prev => ({
-    ...prev,
-    [name]: filteredValue,
-  }));
-};
-
-const handlelatlongvalidation = (e) => {
-  const { name, value } = e.target;
-
-  // Allow valid signed decimal numbers like -90.123 or 45.67
-  const regex = /^-?\d*\.?\d*$/;
-
-  if (name === "latitude" || name === "longitude") {
-    if (value === '' || regex.test(value)) {
-      setStationData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  } else {
-    setStationData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-};
-
-
 
   return {
     stationData,
@@ -354,7 +324,7 @@ const handlelatlongvalidation = (e) => {
     setStationData,
     handleInputChange,
     stations,
-    filteredStations,handlelatlongvalidation,
+    filteredStations,
     isLoading,
     loading,
     error,
@@ -365,7 +335,7 @@ const handlelatlongvalidation = (e) => {
     theadBackgroundColor,
     handleAddStationToggle,
     closeAddModal,handleRemoveCharger,
-    addStation,handlelocation,
+    addStation,
     handleSearchInputChange,
     handleChargerInputChange,
     assignModalOpen,
