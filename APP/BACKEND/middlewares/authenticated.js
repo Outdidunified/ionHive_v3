@@ -30,12 +30,11 @@ const isAuthenticated = async (req, res, next) => {
       const usersCollection = db.collection("users");
       const user = await usersCollection.findOne({
         user_id: user_id,
-        email_id: email_id
       });
 
       // If user not found or status is false, invalidate the token
       if (!user) {
-        logger.loggerWarn(`User not found in database: ${decoded.user_id}, ${decoded.email_id}`);
+        logger.loggerWarn(`User not found in database: ${user_id}, ${user.email_id}`);
         return res.status(403).json({
           error: true,
           message: 'User not found in the system!',
@@ -45,7 +44,7 @@ const isAuthenticated = async (req, res, next) => {
 
       // Check if user status is false
       if (user.status === false) {
-        logger.loggerWarn(`User account is inactive: UserID: ${user_id}, Email ID: ${email_id}`);
+        logger.loggerWarn(`User account is inactive: UserID: ${user_id}, Email ID: ${user.email_id}`);
         return res.status(403).json({
           error: true,
           message: 'Your account has been deactivated!',
