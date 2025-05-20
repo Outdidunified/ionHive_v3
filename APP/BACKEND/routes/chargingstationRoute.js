@@ -11,6 +11,7 @@ router.post('/RemoveStation', authUser.isAuthenticated, Controller.RemoveStation
 
 // MANAGE CHARGER IN STATION 
 router.post('/fetchSpecificStationsChragerDetailsWithConnector', authUser.isAuthenticated, Controller.getSpecificStationsChargerDetailsWithConnector);// fetch the spefic stations charger details with connector
+router.post('/fetchSpecificStationsChragerDetailsWithConnectorGuest', Controller.getSpecificStationsChargerDetailsWithConnector);// fetch the spefic stations charger details with connector
 
 // MANAGE CHARGING SESSION FOR USER
 router.post('/updateConnectorUser', authUser.isAuthenticated, Controller.updateConnectorUser); // Route to update connector user
