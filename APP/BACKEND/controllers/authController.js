@@ -107,19 +107,22 @@ const authOTP = async (req, res) => {
 async function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000);
 }
-
 async function saveUserdetails(email_id, name) {
     try {
-
         const usersCollection = db.collection('users');
+        const userRolesCollection = db.collection('user_roles');
 
-        if (!email_id) return { error: true, message: 'Email ID is missing. Please try again later !' };
+        if (!email_id) return { error: true, message: 'Email ID is missing. Please try again later!' };
 
         const existingUser = await usersCollection.findOne({ email_id: email_id });
 
         if (existingUser && existingUser.status === true) {
-            logger.loggerWarn(`${email_id} - Already Registered! and now logged in successfully `);
-            return { error: false, message: 'Logged In successfully', data: { email_id, user_id: existingUser.user_id, username: existingUser.username } };
+            logger.loggerWarn(`${email_id} - Already Registered! and now logged in successfully`);
+            return {
+                error: false,
+                message: 'Logged In successfully',
+                data: { email_id, user_id: existingUser.user_id, username: existingUser.username }
+            };
         } else if (existingUser && existingUser.status === false) {
             const updateResult = await usersCollection.updateOne(
                 { user_id: existingUser.user_id },
@@ -133,19 +136,34 @@ async function saveUserdetails(email_id, name) {
             );
 
             if (updateResult.matchedCount === 0) {
-                logger.loggerWarn(`${email_id} - Failed to Register, Please try again later !`);
-                return { error: true, message: 'Failed to Register, Please try again later !' };
+                logger.loggerWarn(`${email_id} - Failed to Register, Please try again later!`);
+                return { error: true, message: 'Failed to Register, Please try again later!' };
             }
 
-            logger.loggerSuccess(`${email_id} - Registered successfully !`);
-            return { error: false, message: `Registered successfully !`, data: { email_id, user_id: existingUser.user_id } };
+            logger.loggerSuccess(`${email_id} - Registered successfully!`);
+            return {
+                error: false,
+                message: `Registered successfully!`,
+                data: { email_id, user_id: existingUser.user_id }
+            };
         } else {
-            // Use aggregation to fetch the highest user_id
+            // 🚫 Check if role_id 5 is active in user_role collection
+            const roleStatus = await userRolesCollection.findOne({ role_id: 5 });
+            if (!roleStatus || roleStatus.status === false) {
+                logger.loggerWarn(`${email_id} - Registration blocked. Role ID 5 is disabled.`);
+                return {
+                    error: true,
+                    message: 'Registration is temporarily disabled. Please try again later.'
+                };
+            }
+
+            // ✅ Proceed to register new user
             const lastUser = await usersCollection.find().sort({ user_id: -1 }).limit(1).toArray();
-            let newUserId = 1; // Default user_id if no users exist
+            let newUserId = 1;
             if (lastUser.length > 0) {
                 newUserId = lastUser[0].user_id + 1;
             }
+
             const insertResult = await usersCollection.insertOne({
                 role_id: 5,
                 reseller_id: null,
@@ -155,7 +173,7 @@ async function saveUserdetails(email_id, name) {
                 username: name || null,
                 phone_no: null,
                 email_id: email_id,
-                wallet_bal: 0.00,
+                wallet_bal: 0.0,
                 autostop_price: null,
                 autostop_price_is_checked: null,
                 autostop_time: null,
@@ -172,19 +190,23 @@ async function saveUserdetails(email_id, name) {
             });
 
             if (insertResult.acknowledged) {
-                logger.loggerSuccess(`${email_id} - Registered successfully !`);
-                return { error: false, message: `Registered successfully !`, data: { email_id, user_id: newUserId, username: name } };
+                logger.loggerSuccess(`${email_id} - Registered successfully!`);
+                return {
+                    error: false,
+                    message: `Registered successfully!`,
+                    data: { email_id, user_id: newUserId, username: name }
+                };
             } else {
-                logger.loggerSuccess(`${email_id} - Failed to Register, Please try again later !`);
-                return { error: true, message: `Failed to Register, Please try again later !` };
+                logger.loggerWarn(`${email_id} - Failed to Register, Please try again later!`);
+                return { error: true, message: `Failed to Register, Please try again later!` };
             }
         }
-
     } catch (error) {
         logger.loggerError(`saveUserdetails - ${error.message} for ${email_id}`);
         return { error: true, message: error.message };
     }
 }
+
 
 const googleSignIN = async (req, res) => {
     const { idToken } = req.body;
