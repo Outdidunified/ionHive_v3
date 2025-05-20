@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ionhive/core/controllers/session_controller.dart' show SessionController;
 import 'package:ionhive/feature/ChargingStation/presentation/controllers/Chargingstation_controllers.dart';
 import 'package:ionhive/feature/ChargingStation/presentation/widgets/Chargingstationwidget.dart';
 import 'package:ionhive/feature/home/presentation/pages/search/presentation/controllers/search_controllers.dart';
@@ -419,6 +420,8 @@ class ChargingStationPage extends StatelessWidget {
     final screenHeight = mediaQuery.size.height;
     final theme = Theme.of(context);
     debugPrint('station: $station');
+    final sessionController = Get.find<SessionController>();
+
 
     // Safely access controller.station, assuming it's an Rx object
     final controllerStation = controller.station is Rx
@@ -907,35 +910,36 @@ class ChargingStationPage extends StatelessWidget {
                       final isLoading = searchpageController.isLoading.value;
                       return ElevatedButton(
                         onPressed: isLoading
-                            ? null // Disable the button while loading
+                            ? null
                             : () {
-                                if (charger != null && connector != null) {
-                                  searchpageController.handleStartCharging(
-                                    chargerId: charger['charger_id'],
-                                    chargerDetails: charger,
-                                    selectedConnectorId:
-                                        connector['connector_id'].toString(),
-                                    connectorDetailsMap: {
-                                      'type': connector['connector_type']
-                                          .toString(),
-                                      'power':
-                                          charger['max_power']?.toString() ??
-                                              'N/A',
-                                      'status':
-                                          connector['charger_status'] ?? ' - ',
-                                    },
-                                  );
-                                } else {
-                                  debugPrint(
-                                      "Charger or Connector data is missing");
-                                  Get.snackbar(
-                                    'Error',
-                                    'Charger or Connector data is missing',
-                                    backgroundColor: theme.colorScheme.error,
-                                    colorText: theme.colorScheme.onError,
-                                  );
-                                }
-                              },
+                          controller.handleProtectedNavigation(
+                            isLoggedIn: sessionController.isLoggedIn,
+                            onAllowed: () {
+                              if (charger != null && connector != null) {
+                                searchpageController.handleStartCharging(
+                                  chargerId: charger['charger_id'],
+                                  chargerDetails: charger,
+                                  selectedConnectorId:
+                                  connector['connector_id'].toString(),
+                                  connectorDetailsMap: {
+                                    'type': connector['connector_type'].toString(),
+                                    'power': charger['max_power']?.toString() ?? 'N/A',
+                                    'status': connector['charger_status'] ?? ' - ',
+                                  },
+                                );
+                              } else {
+                                debugPrint("Charger or Connector data is missing");
+                                Get.snackbar(
+                                  'Error',
+                                  'Charger or Connector data is missing',
+                                  backgroundColor: theme.colorScheme.error,
+                                  colorText: theme.colorScheme.onError,
+                                );
+                              }
+                            },
+                          );
+                        },
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,

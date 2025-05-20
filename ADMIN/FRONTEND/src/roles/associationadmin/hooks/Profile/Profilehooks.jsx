@@ -87,53 +87,61 @@ const useProfile = (userInfo) => {
     }, [errorMessageAss]);
 
 
-    const addAssProfileUpdate = async (e) => {
-        e.preventDefault();
-    
-        // Validate phone number
-        const phoneRegex = /^\d{10}$/;
-        if (!association_phone_no) {
-            setErrorMessageAss("Phone can't be empty.");
-            return;
-        }
-        if (!phoneRegex.test(association_phone_no)) {
-            setErrorMessageAss('Oops! Phone must be a 10-digit number.');
-            return;
-        }
-    
-        try {
-            setLoading(true);
-    
-            const phoneNos = parseInt(association_phone_no);
-            const response = await axiosInstance({method:'post',url:'/associationadmin/UpdateAssociationProfile', data:{
+   const addAssProfileUpdate = async (e) => {
+    e.preventDefault();
+
+    const phoneRegex = /^\d{10}$/;
+
+    // Validate phone
+    if (!association_phone_no) {
+        setErrorMessageAss("Phone can't be empty.");
+        return;
+    }
+    if (!phoneRegex.test(association_phone_no)) {
+        setErrorMessageAss('Oops! Phone must be a 10-digit number.');
+        return;
+    }
+
+    // ✅ Validate address
+    if (!association_address || association_address.trim() === "") {
+        setErrorMessageAss("Address can't be empty.");
+        return;
+    }
+
+    try {
+        setLoading(true);
+
+        const phoneNos = parseInt(association_phone_no);
+        const response = await axiosInstance({
+            method: 'post',
+            url: '/associationadmin/UpdateAssociationProfile',
+            data: {
                 association_id: userInfo.association_id,
                 association_address,
                 association_phone_no: phoneNos,
                 modified_by: userInfo.email_id
-            }});
-    
-            if (response.status === 200) {
-    showSuccessAlert('Association profile updated successfully');
+            }
+        });
 
-    // Update initial state manually instead of re-fetching everything
-    setInitialAssociationData(prev => ({
-        ...prev,
-        association_phone_no: phoneNos,
-        association_address
-    }));
-
-    // Avoid fetchProfile(); causes full UI refresh
-} else {
-    const responseData = response.data;
-    showErrorAlert('Error', 'Failed to update association profile, ' + responseData.message);
-}
-
-        } catch (error) {
-            showErrorAlert('Error', 'An error occurred while updating the association profile');
-        } finally {
-            setLoading(false);
+        if (response.status === 200) {
+            showSuccessAlert('Association profile updated successfully');
+            setInitialAssociationData(prev => ({
+                ...prev,
+                association_phone_no: phoneNos,
+                association_address
+            }));
+        } else {
+            const responseData = response.data;
+            showErrorAlert('Error', 'Failed to update association profile, ' + responseData.message);
         }
-    };
+
+    } catch (error) {
+        showErrorAlert('Error', 'An error occurred while updating the association profile');
+    } finally {
+        setLoading(false);
+    }
+};
+
     
 
    // User profile update

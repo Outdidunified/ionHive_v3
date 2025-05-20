@@ -70,12 +70,13 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       }
     });
 
+    // Immediately check location permission and fetch data
+    _checkLocationPermissionAndFetch();
+    getCurrentLocation();
+
     mapControllerCompleter.future.then((controller) {
       mapController = controller;
       applyMapStyle();
-      if (!isLocationFetched.value) {
-        _checkLocationPermissionAndFetch();
-      }
     });
   }
 
@@ -615,6 +616,24 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  void handleProtectedNavigation({
+    required RxBool isLoggedIn,
+    required VoidCallback onAllowed,
+  }) {
+    if (!isLoggedIn.value) {
+      CustomSnackbar.showPermissionRequest(
+        message: 'You are not logged in to access. Please login.',
+        onOpenSettings: () {
+          Get.toNamed('/login');
+        },
+        duration: const Duration(seconds: 4),
+      );
+    } else {
+      onAllowed();
+    }
+  }
+
+
   Future<void> fetchNearbyChargers(
       {double? latitude, double? longitude}) async {
     if (!Get.isRegistered<SessionController>()) {
@@ -626,10 +645,18 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
 
-    if (authToken.isEmpty || userId <= 0 || emailId.isEmpty) {
-      debugPrint("Missing session data, skipping fetch");
-      return;
-    }
+    debugPrint('token:$authToken ,userId:$userId,emailId:$emailId');
+
+    // Check if we're in guest mode
+    // if (sessionController.isGuestMode.value) {
+    //   debugPrint("Guest mode detected, using guest credentials for API call");
+    //   // Continue with the API call using guest credentials
+    // }
+    // // If not in guest mode and missing credentials, skip the fetch
+    // else if (authToken.isEmpty || userId <= 0 || emailId.isEmpty) {
+    //   debugPrint("Missing session data and not in guest mode, skipping fetch");
+    //   return;
+    // }
 
     final fetchLat = latitude ?? currentPosition.value.latitude;
     final fetchLng = longitude ?? currentPosition.value.longitude;
@@ -1139,7 +1166,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   void navigateToAllChargers() {
     if (chargers.isEmpty) {
-      CustomSnackbar.showInfo(message: 'No Active Charging Found');
+      CustomSnackbar.showInfo(message: ' No Charging stations available');
     } else {
       Get.to(
         () => ViewAllNearbyChargers(),

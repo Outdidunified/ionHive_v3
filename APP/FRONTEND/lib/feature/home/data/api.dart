@@ -2,10 +2,16 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:ionhive/core/controllers/session_controller.dart' show SessionController;
 import 'package:ionhive/feature/home/data/urls.dart';
 import 'package:ionhive/utils/exception/exception.dart';
+import 'package:get/get.dart';
+import 'package:flutter/material.dart';
+
 
 class HomeAPICalls {
+  bool _tokenDialogShown = false;
+
   String _getDefaultErrorMessage(int statusCode) {
     switch (statusCode) {
       case 400:
@@ -26,35 +32,100 @@ class HomeAPICalls {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
-    final responseBody = jsonDecode(response.body);
+    try {
+      final responseBody = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
-      return responseBody;
+      // ✅ Handle token invalidation (e.g. account deactivated)
+      if (responseBody is Map<String, dynamic> &&
+          responseBody['invalidateToken'] == true) {
+        _handleTokenExpired(responseBody['message'] ?? 'Your session is no longer valid. Please log in again.');
+        throw HttpException(
+          response.statusCode,
+          responseBody['message'] ?? _getDefaultErrorMessage(response.statusCode),
+        );
+      }
+
+      if (response.statusCode == 200) {
+        return responseBody;
+      }
+
+      // ✅ Handle token expired based on status code and message
+      if (response.statusCode == 403 &&
+          (responseBody['message']?.toString().toLowerCase().contains('token expired') ?? false)) {
+        _handleTokenExpired(responseBody['message'] ?? 'Your session has expired. Please log in again.');
+      }
+
+      // 🚨 Throw for all other errors
+      throw HttpException(
+        response.statusCode,
+        responseBody['message'] ?? _getDefaultErrorMessage(response.statusCode),
+      );
+    } catch (e) {
+      throw HttpException(
+        response.statusCode,
+        _getDefaultErrorMessage(response.statusCode),
+      );
     }
-
-    throw HttpException(
-      response.statusCode,
-      responseBody['message'] ?? _getDefaultErrorMessage(response.statusCode),
-    );
   }
 
-  Future<Map<String, dynamic>> fetchnearbystations(int user_id, String email,
-      String authToken, double latitude, double longitude) async {
-    final url = HomeUrls.fetchnearbystations;
+  void _handleTokenExpired(String message) {
+    if (_tokenDialogShown) return;
+    _tokenDialogShown = true;
+
+    Get.defaultDialog(
+      title: 'Session Expired',
+      barrierDismissible: false,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error_outline, color: Colors.red, size: 48),
+          const SizedBox(height: 10),
+          Text(message),
+        ],
+      ),
+    );
+
+    Future.delayed(Duration(seconds: 3), () {
+      final sessionController = Get.find<SessionController>();
+      sessionController.clearSession();
+      _tokenDialogShown = false;
+      Get.offAllNamed('/login');
+    });
+  }
+
+  Future<Map<String, dynamic>> fetchnearbystations(
+    int user_id,
+    String email,
+    String authToken,
+    double latitude,
+    double longitude,
+  ) async {
+    final bool isGuest =
+        user_id == 0 && email.toLowerCase() == '';
+    final url = isGuest
+        ? HomeUrls.fetchnearbystationsForGuest
+        : HomeUrls.fetchnearbystations;
 
     try {
       final response = await http.post(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': authToken,
+          if (!isGuest) 'Authorization': authToken, // Only add for non-guests
         },
-        body: jsonEncode({
-          'email_id': email,
-          'user_id': user_id,
-          'longitude': longitude,
-          'latitude': latitude
-        }),
+        body: jsonEncode(
+          isGuest
+              ? {
+                  'latitude': latitude,
+                  'longitude': longitude,
+                }
+              : {
+                  'email_id': email,
+                  'user_id': user_id,
+                  'latitude': latitude,
+                  'longitude': longitude,
+                },
+        ),
       );
 
       return _handleResponse(response);
@@ -69,8 +140,8 @@ class HomeAPICalls {
     }
   }
 
-  Future<Map<String, dynamic>> fetchactivechargers(int user_id, String email,
-      String authToken) async {
+  Future<Map<String, dynamic>> fetchactivechargers(
+      int user_id, String email, String authToken) async {
     final url = HomeUrls.fetchactivechargers;
 
     try {
@@ -83,7 +154,6 @@ class HomeAPICalls {
         body: jsonEncode({
           'email_id': email,
           'user_id': user_id,
-
         }),
       );
       final data = jsonDecode(response.body);

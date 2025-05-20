@@ -337,19 +337,25 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
     try {
         const { user_id, email_id, station_id, location_id } = req.body;
 
-        // Validate input
-        if (!user_id || !email_id || !station_id || !location_id) {
+        // Only station_id and location_id are mandatory
+        if (!station_id || !location_id) {
             return res.status(400).json({
                 error: true,
-                message: 'Missing required fields: user_id, email_id, station_id, and location_id are required.',
+                message: 'Missing required fields: station_id and location_id are required.',
             });
         }
 
-        if (!Number.isInteger(Number(user_id)) || typeof email_id !== 'string' ||
-            !Number.isInteger(Number(station_id)) || typeof location_id !== 'string') {
+        if ((user_id && !Number.isInteger(Number(user_id))) || (email_id && typeof email_id !== 'string')) {
             return res.status(400).json({
                 error: true,
-                message: 'Invalid input: user_id and station_id must be integers, email_id must be a string, and location_id must be a string.',
+                message: 'Invalid input: if provided, user_id must be an integer and email_id must be a string.',
+            });
+        }
+
+        if (!Number.isInteger(Number(station_id)) || typeof location_id !== 'string') {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: station_id must be an integer and location_id must be a string.',
             });
         }
 
@@ -380,7 +386,6 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
             });
         }
 
-        // Fetch charger details
         const chargerDetails = await chargersCollection.find(
             { charger_id: { $in: station.chargers } }
         ).project({
@@ -403,25 +408,23 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
             landmark: 1
         }).toArray();
 
-        // Fetch socket & gun configurations dynamically
         const chargerIds = chargerDetails.map(charger => charger.charger_id);
+
         const socketGunConfigs = await socketGunConfigCollection.find(
             { charger_id: { $in: chargerIds } }
         ).toArray();
 
-        // Fetch charger statuses
         const chargerStatuses = await chargerStatusCollection.find(
             { charger_id: { $in: chargerIds } },
             { projection: { _id: 0, charger_id: 1, connector_id: 1, charger_status: 1 } }
         ).toArray();
 
-        // Process charger configurations dynamically, including pricePerUnit
         const chargersWithConfig = await Promise.all(chargerDetails.map(async charger => {
             const config = socketGunConfigs.find(cfg => cfg.charger_id === charger.charger_id) || {};
 
             const connectors = Object.keys(config)
                 .filter(key => /^connector_\d+_type$/.test(key))
-                .map((key, index) => {
+                .map((key) => {
                     const connectorIndex = key.match(/\d+/)[0];
 
                     const matchingStatus = chargerStatuses.find(
@@ -444,7 +447,6 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
 
                 if (financeRecord) {
                     const EB_fee = parseFloat(financeRecord.eb_charge) + parseFloat(financeRecord.margin);
-
                     const additionalCharges = [
                         parseFloat(financeRecord.parking_fee),
                         parseFloat(financeRecord.convenience_fee),
@@ -452,11 +454,8 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
                         parseFloat(financeRecord.processing_fee),
                         parseFloat(financeRecord.service_fee)
                     ];
-
                     const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + (charge || 0), 0);
-
                     const totalEBPrice = EB_fee + totalAdditionalCharges;
-
                     const gstPercentage = financeRecord.gst;
                     const gstAmount = (totalEBPrice * gstPercentage) / 100;
 
@@ -473,7 +472,7 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
                         GST_Percentage: gstPercentage
                     };
 
-                    // Replace "NaN" values in priceDetails with "0.00"
+                    // Clean NaN values
                     Object.keys(priceDetails).forEach(key => {
                         if (priceDetails[key] === "NaN") {
                             priceDetails[key] = "0.00";
@@ -484,13 +483,11 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
 
             return {
                 ...charger,
-                unitPrice: unitPrice ? unitPrice.toFixed(2) : "0.00", // Ensure unitPrice is never null or undefined
+                unitPrice: unitPrice ? unitPrice.toFixed(2) : "0.00",
                 priceDetails,
                 connectors
             };
         }));
-
-
 
         logger.loggerSuccess(`Successfully retrieved charger details for station_id: ${station_id}`);
         return res.status(200).json({
@@ -508,6 +505,7 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
         });
     }
 };
+
 
 // MANAGE CHARGING SESSION FOR USER
 // Update Connector User

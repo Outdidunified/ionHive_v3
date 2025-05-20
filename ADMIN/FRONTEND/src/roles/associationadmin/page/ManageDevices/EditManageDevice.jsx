@@ -64,7 +64,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
             {/* Charger Accessibility */}
             <div className="col-md-4">
                 <div className="form-group">
-                    <label className="labelInput">Charger Accessibility</label>
+                    {/* <label className="labelInput">Charger Accessibility</label>
                     <select
                         className="form-control"
                         value={selectStatus}
@@ -73,12 +73,12 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                     >
                         <option value="1">Public</option>
                         <option value="2">Private</option>
-                    </select>
+                    </select> */}
                 </div>
             </div>
 
             {/* Set Location */}
-            <div className="col-md-4">
+            {/* <div className="col-md-4">
                 <div className="form-group">
                     <label className="labelInput">Location</label>
                     <button
@@ -94,7 +94,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                         📍 Update Location
                     </button>
                 </div>
-            </div>
+            </div> */}
         </div>
 
         {/* Second Row: WiFi Username & Password */}
@@ -131,170 +131,7 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
        <ReusableButton type="submit"
        loading={isLoading} disabled={!isModified}>Update</ReusableButton>
 </form>
-{isLocationModalOpen && (
-    <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-        <div className="modal-dialog">
-            <div className="modal-content">
-                <div className="modal-header">
-                    <h5 className="modal-title">Update Location</h5>
-                    <button
-                        type="button"
-                        className="close"
-                        onClick={() => setIsLocationModalOpen(false)}
-                    >
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div className="modal-body">
-                    {/* Centered Latitude and Longitude Inputs */}
-                    <div className="d-flex justify-content-center">
-                        <div style={{ width: '45%', marginRight: '10px' }}>
-                            <label>Latitude</label>
-                            <InputField
-                                value={tempLat}
-                                onChange={(e) => {
-                                    setTempLat(e.target.value.replace(/[^0-9.-]/g, ''));
-                                    setTempAddress(''); // Reset landmark on coordinate change
-                                }}
-                            />
-                        </div>
-                        <div style={{ width: '45%' }}>
-                            <label>Longitude</label>
-                            <InputField
-                                value={tempLong}
-                                onChange={(e) => {
-                                    setTempLong(e.target.value.replace(/[^0-9.-]/g, ''));
-                                    setTempAddress(''); // Reset landmark on coordinate change
-                                }}
-                            />
-                        </div>
-                    </div>
-
-                    
-
-                    {/* Get Address Button - Show only when both lat & long are entered */}
-                    {tempLat && tempLong && !tempAddress && (
-                        <div className="d-flex justify-content-center my-3">
-                            <button
-                                className="btn btn-outline-primary"
-                                onClick={async () => {
-                                    if (tempLat && tempLong) {
-                                        try {
-                                            console.log('Fetching address for coordinates:', tempLat, tempLong);
-                                
-                                            const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${tempLat},${tempLong}&key=AIzaSyDdBinCjuyocru7Lgi6YT3FZ1P6_xi0tco`;
-                                            console.log('Request URL:', url);
-                                
-                                            const response = await fetch(url);
-                                            const data = await response.json(); // ✅ First fetch the response body
-                                
-                                            console.log('Geocoding API Response:', data); // ✅ Then log it
-                                
-                                            if (data.status === "OK" && data.results.length > 0) {
-                                                const address = data.results[0].formatted_address;
-                                                setTempAddress(address);
-                                            } else {
-                                                Swal.fire({
-                                                    title: "Address not found",
-                                                    text: "Couldn't fetch address for the given coordinates.",
-                                                    icon: "error"
-                                                });
-                                            }
-                                        } catch (error) {
-                                            console.error('Fetch Error:', error); // ✅ log the actual error
-                                            Swal.fire({
-                                                title: "Error",
-                                                text: "An error occurred while fetching the address.",
-                                                icon: "error"
-                                            });
-                                        }
-                                    } else {
-                                        Swal.fire({
-                                            title: "Coordinates Missing",
-                                            text: "Please enter both latitude and longitude.",
-                                            icon: "warning"
-                                        });
-                                    }
-                                }}
-                                
-                                
-                            >
-                                Get Address
-                            </button>
-                        </div>
-                    )}
-
-{tempAddress && (
-    <div className="d-flex justify-content-center pt-2">
-        <div style={{ width: '80%' }}>
-            <label>Address</label>
-            <textarea
-                className="form-control"
-                style={{ height: '80px', resize: 'none' }}
-                value={tempAddress}
-                readOnly
-            />
-        </div>
-    </div>
-)}
-<div className="d-flex justify-content-center pt-2">
-    <div style={{ width: '80%' }}>
-        <label>Landmark</label>
-        <InputField
-            value={tempLandmark}
-            onChange={(e) => setTempLandmark(e.target.value)}
-        />
-    </div>
-</div>
-
-
-
-                </div>
-
-                <div className="modal-footer">
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={() => {
-                            let missingFields = [];
-                            if (!tempLat) missingFields.push("Latitude");
-                            if (!tempLong) missingFields.push("Longitude");
-                            if (!tempAddress) missingFields.push("Address");
-                            if (!tempLandmark) missingFields.push("Landmark");
-                        
-                            if (missingFields.length > 0) {
-                                Swal.fire({
-                                    title: "Missing Fields",
-                                    html: `Please fill the following field(s) before saving:<br/><medium>${missingFields.join(", ")}</medium>`,
-                                    icon: "warning"
-                                });
-                                return;
-                            }
-                        
-                            setLatitude(tempLat);
-                            setLongitude(tempLong);
-                            setAddress(tempAddress);
-                            setLandmark(tempLandmark); // ✅ Save landmark
-                            setIsLocationModalOpen(false);
-                        }}
-                        
-                        
-                        disabled={!isLocationModified}
-                    >
-                        Save
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => setIsLocationModalOpen(false)}
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-)}
+{/*  */}
 
 
 

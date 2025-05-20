@@ -16,6 +16,9 @@ import AssignCharger from '../../roles/superadmin/pages/ManageResellers/AssignCh
 import SessignHistory from '../../roles/superadmin/pages/ManageResellers/SessignHistory';
 import ManageUserRole from '../../roles/superadmin/pages/ManageUserRoles/ManageUserRole';
 import ManageUsers from '../../roles/superadmin/pages/ManageUsers/ManageUsers';
+import ManageVehicle from '../../roles/superadmin/pages/VehicleModel/ManageVehicle';
+import ViewVehicle from '../../roles/superadmin/pages/VehicleModel/ViewVehicle';
+import EditVehicle from '../../roles/superadmin/pages/VehicleModel/EditVehicle';
 import ViewUserList from '../../roles/superadmin/pages/ManageUsers/ViewUserList';
 import EditUserList from '../../roles/superadmin/pages/ManageUsers/EditUserList';
 import OutputTypeConfig from '../../roles/superadmin/pages/OutputTypeConfig/OutputTypeConfig';
@@ -217,6 +220,32 @@ const SuperAdminApp = () => {
             <Navigate to="/superadmin" />
           )}
         />
+
+       <Route
+          path="ManageVehicle"
+          element={loggedIn ? (
+            <ManageVehicle userInfo={userInfo} handleLogout={handleLogout} />
+          ) : (
+            <Navigate to="/superadmin" />
+          )}
+        />
+         <Route
+          path="EditVehicle"
+          element={loggedIn ? (
+            <EditVehicle userInfo={userInfo} handleLogout={handleLogout} />
+          ) : (
+            <Navigate to="/superadmin" />
+          )}
+        />
+        <Route
+          path="ViewVehicle"
+          element={loggedIn ? (
+            <ViewVehicle userInfo={userInfo} handleLogout={handleLogout} />
+          ) : (
+            <Navigate to="/superadmin" />
+          )}
+        />
+       
         <Route
           path="OutputTypeConfig"
           element={loggedIn ? (

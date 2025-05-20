@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/home/presentation/pages/search/presentation/pages/search_page.dart';
 import 'package:ionhive/feature/home/presentation/widgets/station_card.dart';
 import 'package:ionhive/utils/widgets/loading/loading_overlay.dart';
 import 'package:ionhive/utils/debug/build_guard.dart';
+import 'package:ionhive/utils/widgets/snackbar/custom_snackbar.dart'
+    show CustomSnackbar;
 import '../controllers/home_controller.dart';
 import 'qrscanner/presentation/pages/qr_scannerpage.dart';
 
@@ -206,7 +209,7 @@ class HomePage extends StatelessWidget {
                 height: 40,
                 width: 40,
                 decoration: BoxDecoration(
-                  color: isDarkTheme ? Colors.lightBlue :  Colors.white,
+                  color: isDarkTheme ? Colors.lightBlue : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -227,20 +230,35 @@ class HomePage extends StatelessWidget {
                   child: Icon(
                     Icons.my_location,
                     size: 20,
-                    color: isDarkTheme ? Colors.white :  Colors.lightBlue ,
+                    color: isDarkTheme ? Colors.white : Colors.lightBlue,
                   ),
                 ),
               ),
             ],
           ),
-        )   ],
+        )
+      ],
     );
   }
+
   Widget _buildSearchField(BuildContext context, HomeController controller) {
     final isDarkTheme = controller.isDarkMode.value;
+    final sessionController = Get.find<SessionController>();
 
     return GestureDetector(
       onTap: () async {
+        // Check if user is logged in
+        if (!sessionController.isLoggedIn.value) {
+          CustomSnackbar.showPermissionRequest(
+            message: 'You are not logged in to access. Please login .',
+            onOpenSettings: () {
+              Get.toNamed('/login');
+            },
+            duration: const Duration(seconds: 4),
+          );
+          return; // Important: Return early to prevent navigation
+        }
+
         final result = await Navigator.of(context).push(
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
@@ -252,7 +270,7 @@ class HomePage extends StatelessWidget {
               const curve = Curves.easeInOut;
 
               var tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
               var offsetAnimation = animation.drive(tween);
 
               return SlideTransition(
@@ -294,9 +312,9 @@ class HomePage extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             border: isDarkTheme
                 ? Border.all(
-              color: Colors.grey.withOpacity(0.3),
-              width: 0.8,
-            )
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 0.8,
+                  )
                 : null,
             boxShadow: [
               BoxShadow(
@@ -341,8 +359,11 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-  Widget _buildQrScannerButton(BuildContext context, HomeController controller) {
+
+  Widget _buildQrScannerButton(
+      BuildContext context, HomeController controller) {
     final isDarkTheme = controller.isDarkMode.value;
+    final sessionController = Get.find<SessionController>();
 
     return Container(
       height: 40,
@@ -365,7 +386,23 @@ class HomePage extends StatelessWidget {
           color: const Color.fromARGB(255, 185, 227, 185),
         ),
         onPressed: () {
-          Get.to(() => const QrScannerpage(), transition: Transition.leftToRight);
+          // Check if user is logged in
+          if (!sessionController.isLoggedIn.value) {
+            CustomSnackbar.showPermissionRequest(
+              message: 'You are not logged in to access. Please login .',
+              onOpenSettings: () {
+                Get.toNamed('/login');
+              },
+              duration: const Duration(seconds: 4),
+            );
+
+          } else {
+            Get.to(() => const QrScannerpage(),
+                transition: Transition.leftToRight);
+          }
+
+
+
         },
       ),
     );
@@ -403,6 +440,7 @@ class HomePage extends StatelessWidget {
 
   Widget ActiveChargersbutton(BuildContext context, HomeController controller) {
     final isDarkTheme = controller.isDarkMode.value;
+    final sessionController = Get.find<SessionController>();
 
     return Container(
       height: 40,
@@ -425,7 +463,17 @@ class HomePage extends StatelessWidget {
           height: 20,
         ),
         onPressed: () {
-          controller.fetchactivechargers();
+          if (!sessionController.isLoggedIn.value) {
+            CustomSnackbar.showPermissionRequest(
+              message: 'You are not logged in to access. Please login.',
+              onOpenSettings: () {
+                Get.toNamed('/login');
+              },
+              duration: const Duration(seconds: 4),
+            );
+          } else {
+            controller.fetchactivechargers();
+          }
         },
       ),
     );

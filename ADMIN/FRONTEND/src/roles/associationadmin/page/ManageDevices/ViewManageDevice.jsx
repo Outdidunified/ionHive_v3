@@ -60,7 +60,8 @@ const ViewManageDevice = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         <div className="col-md-4">
                                                             <div className="form-group row">
-                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Charger Type: <span style={{fontWeight: 'normal'}}>{deviceData.charger_type ?  deviceData.charger_type : '-'}</span></div>
+                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Charger Type: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.charger_type ? deviceData.station_details.charger_type : '-'}
+</span></div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -123,12 +124,12 @@ const ViewManageDevice = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         <div className="col-md-4">
                                                             <div className="form-group row">
-                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Latitude: <span style={{fontWeight: 'normal'}}>{deviceData.lat ? deviceData.lat : '-'}</span></div>
+                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Latitude: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.latitude ? deviceData.station_details?.latitude : '-'}</span></div>
                                                             </div>
                                                         </div>
                                                         <div className="col-md-4">
                                                             <div className="form-group row">
-                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Longitude: <span style={{fontWeight: 'normal'}}>{deviceData.long ? deviceData.long : '-'}</span></div>
+                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Longitude: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.longitude ? deviceData.station_details?.longitude  : '-'}</span></div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -140,7 +141,8 @@ const ViewManageDevice = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         <div className="col-md-4">
                                                             <div className="form-group row">
-                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Charger Accessibility: <span style={{ fontWeight: 'normal' }}>{deviceData.charger_accessibility === 1 ? 'Public' : deviceData.charger_accessibility === 2 ? 'Private' : '-'}</span></div> 
+                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Charger Accessibility: <span style={{ fontWeight: 'normal' }}>    {deviceData.station_details?.accessibility || '-'}
+</span></div> 
                                                             </div>
                                                         </div>
                                                         <div className="col-md-4">
@@ -186,7 +188,7 @@ const ViewManageDevice = ({ userInfo, handleLogout }) => {
                                                     <div className="row col-12 col-xl-12 viewDataCss">
                                                         <div className="col-md-4">
                                                             <div className="form-group row">
-                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Land Mark: <span style={{fontWeight: 'normal'}}>{deviceData.landmark ? deviceData.landmark : '-'}</span></div>
+                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Land Mark: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.landmark ? deviceData.station_details?.landmark : '-'}</span></div>
                                                             </div>
                                                         </div>
                                                         <div className="col-md-4">
@@ -210,13 +212,48 @@ const ViewManageDevice = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                         <div className="col-md-4">
                                                             <div className="form-group row">
-                                                            <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Address: <span style={{fontWeight: 'normal'}}>{deviceData.address ? deviceData.address : '-'}</span></div>
+                                                            <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Station Address: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.station_address ? deviceData.station_details?.station_address : '-'}</span></div>
                                                             </div>
                                                         
+                                                        
+                                                    </div>
+                                                    <div className="col-md-4">
+                                                            <div className="form-group row">
+                                                            <div className="col-sm-12" style={{ fontWeight: 'bold' }}>location Id: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.location_id ? deviceData.station_details?.location_id : '-'}</span></div>
+                                                            </div>
+                                                        
+                                                        
                                                     </div>
                                                         
                                                         
                                                     </div>
+
+                                                       <div className="row col-12 col-xl-12 viewDataCss">
+                                                        <div className="col-md-4">
+                                                            <div className="form-group row">
+                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>station Id: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.station_id ? deviceData.station_details?.station_id : '-'}</span></div>
+                                                            </div>
+                                                            
+                                                        </div>
+                                                        <div className="col-md-4">
+                                                            <div className="form-group row">
+                                                            <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Network: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.network ? deviceData.station_details?.network : '-'}</span></div>
+                                                            </div>
+                                                        
+                                                        
+                                                    </div>
+                                                    {/* <div className="col-md-4">
+                                                            <div className="form-group row">
+                                                            <div className="col-sm-12" style={{ fontWeight: 'bold' }}>location Id: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.location_id ? deviceData.station_details?.location_id : '-'}</span></div>
+                                                            </div>
+                                                        
+                                                        
+                                                    </div> */}
+                                                        
+                                                        
+                                                    </div>
+
+                                                    
 
                                                     
                                                     {/* Connector Details */}
@@ -236,11 +273,13 @@ const ViewManageDevice = ({ userInfo, handleLogout }) => {
                                                         </div>
                                                     ) : (
                                                         <div className="row col-12 col-xl-12 viewDataCss">
+                                                            
                                                             <div className="col-md-4">
                                                                 <div className="form-group row">
                                                                     <div className="col-sm-12"><span style={{ fontWeight: 'bold' }}>Connector:</span> No Connector Details Available</div>
                                                                 </div>
                                                             </div>
+                                                            
                                                         </div>
                                                     )}
                                                 </div>

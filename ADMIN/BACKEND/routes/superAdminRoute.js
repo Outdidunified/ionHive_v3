@@ -4,6 +4,8 @@ const Controller = require('../controllers/superAdminControllers');
 const verifyToken = require('../middlewares/authMiddleware');
 const flatted = require('flatted');
 const { ObjectId } = require('mongodb');
+const multer=require('../middlewares/upload');
+const upload = require('../middlewares/upload');
 
 // 1.Login
 // Route to check login credentials
@@ -152,4 +154,18 @@ router.post('/FetchUserProfile', verifyToken, Controller.FetchUserProfile);
 // Route to update user profile
 router.post('/UpdateUserProfile', verifyToken, Controller.UpdateUserProfile);
 
+
+//10. Vehicle Models
+//Route to Add Vehicle Model
+router.post('/AddVehicle',upload.single('vehicle_image'),verifyToken,Controller.CreateVehicleModel);
+
+//Route to Fetchvehiclemodel
+router.get('/GetVehiclemodels',verifyToken,Controller.GetAllVehicleModels);
+
+//Route to UpdateVehicleModel
+router.post('/UpdateVehicle',upload.single('vehicle_image'),verifyToken,Controller.UpdateVehicleModel);
+
+//Route to Active/DeactiveModel
+
+router.post('/ActiveorDeactive',verifyToken,Controller.UpdateVehicleModelStatus);
 module.exports = router;

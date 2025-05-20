@@ -142,7 +142,7 @@ class _OtpInputPageState extends State<OtpInputPage> {
               child: Obx(() {
                 // Dynamically set text color based on timer state
                 Color textColor = countdownTime.value > 0
-                    ? Colors.red // Active timer (dynamic color)
+                    ? Colors.indigo // Active timer (dynamic color)
                     : Colors.green; // Ready to resend
 
                 return Text(

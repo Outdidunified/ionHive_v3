@@ -13,6 +13,12 @@ const Sidebar = () => {
                         <span className="menu-title">Dashboard</span>
                     </Link>
                 </li>
+                <li className={location.pathname === '/associationadmin/ManageStation' || location.pathname === '/associationadmin/ViewStation' || location.pathname === '/associationadmin/EditStation' ? 'nav-item active' : 'nav-item'} key="ManageStation">
+                    <Link className="nav-link" to={{ pathname: "/associationadmin/ManageStation" }}>
+                        <i className="icon-head menu-icon mdi mdi-cellphone-link"></i>
+                        <span className="menu-title">Manage Station</span>
+                    </Link>
+                </li>
                 <li className={location.pathname === '/associationadmin/ManageDevice' || location.pathname === '/associationadmin/ViewManageDevice' || location.pathname === '/associationadmin/EditManageDevice' ? 'nav-item active' : 'nav-item'} key="ManageDevice">
                     <Link className="nav-link" to={{ pathname: "/associationadmin/ManageDevice" }}>
                         <i className="icon-head menu-icon mdi mdi-cellphone-link"></i>

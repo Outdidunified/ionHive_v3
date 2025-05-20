@@ -24,7 +24,7 @@ class AuthController extends GetxController {
   Rx<String?> validationError = Rx<String?>(null);
 
   final RxBool isLoading = false.obs;
-  final RxBool isChecked = true.obs;
+  final RxBool isChecked = false.obs;
 
   String? validateEmail() {
     final email = emailController.text;
@@ -135,37 +135,29 @@ class AuthController extends GetxController {
     final email = emailController.text;
     final otpText = otpController.text;
 
-    // Validate email input
+    // Validate email
     validationError.value = validateEmail();
-    if (validationError.value != null) {
-      return;
-    }
+    if (validationError.value != null) return;
 
-    // Convert OTP to integer
     int? otp;
     try {
       otp = int.parse(otpText);
-    } catch (e) {
-      otpValidationError.value =
-          'Invalid OTP format. Please enter numbers only.';
+    } catch (_) {
+      otpValidationError.value = 'Invalid OTP format. Please enter numbers only.';
       return;
     }
 
     isLoading.value = true;
     try {
-      // Call API to authenticate OTP
-      final authenticateResponse =
-          await _authRepository.authenticateOTP(email, otp);
+      final authenticateResponse = await _authRepository.authenticateOTP(email, otp);
 
       if (!authenticateResponse.error) {
-        // Extract data from the response
+        // Success flow
         final token = authenticateResponse.token;
         final userId = authenticateResponse.data?['user_id'];
         final emailId = authenticateResponse.data?['email_id'];
         final username = authenticateResponse.data?['username'];
-        debugPrint("Session $username || $emailId || $username ");
 
-        // Save session details
         final sessionController = Get.find<SessionController>();
         await sessionController.saveSession(
           userId: userId,
@@ -174,24 +166,28 @@ class AuthController extends GetxController {
           token: token!,
         );
 
-        // Clear OTP input
         otpController.clear();
 
         Get.offAll(
-          () => LandingPage(),
+              () => LandingPage(),
           transition: Transition.rightToLeft,
           duration: const Duration(milliseconds: 300),
         );
       } else {
-        otpValidationError.value = authenticateResponse.message;
+        // Show the exact backend message (like "Invalid OTP" or server error)
+        CustomSnackbar.showError(message: authenticateResponse.message ?? "Unknown error");
+        // otpValidationError.value = authenticateResponse.message ?? "Unknown error";
       }
     } catch (e) {
-      otpValidationError.value = e.toString(); // Show actual error message
-      debugPrint("Error: $e");
+      // Unexpected errors, network issues, etc.
+      CustomSnackbar.showError(message: "An error occurred. Please try again later.");
+      // otpValidationError.value = "An error occurred. Please try again later.";
+      debugPrint("Unexpected error: $e");
     } finally {
       isLoading.value = false;
     }
   }
+
 
   // SignIN with the Google Authenticator //NOTE - want to check
   Future<void> handleGoogleSignIn() async {

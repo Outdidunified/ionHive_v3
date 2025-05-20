@@ -473,23 +473,29 @@ class ChargerCard extends StatelessWidget {
                   builder: (controller) {
                     final isSaved = controller.isChargerSaved(chargerId);
                     return GestureDetector(
-                      onTap: () async {
+                      onTap: () {
                         final sessionController = Get.find<SessionController>();
-                        if (isSaved) {
-                          await controller.Removedevice(
-                            sessionController.userId.value,
-                            sessionController.emailId.value,
-                            sessionController.token.value,
-                            chargerId,
-                          );
-                        } else {
-                          await controller.Savedevice(
-                            sessionController.userId.value,
-                            sessionController.emailId.value,
-                            sessionController.token.value,
-                            chargerId,
-                          );
-                        }
+
+                        controller.handleProtectedNavigation(
+                          isLoggedIn: sessionController.isLoggedIn,
+                          onAllowed: () async {
+                            if (isSaved) {
+                              await controller.Removedevice(
+                                sessionController.userId.value,
+                                sessionController.emailId.value,
+                                sessionController.token.value,
+                                chargerId,
+                              );
+                            } else {
+                              await controller.Savedevice(
+                                sessionController.userId.value,
+                                sessionController.emailId.value,
+                                sessionController.token.value,
+                                chargerId,
+                              );
+                            }
+                          },
+                        );
                       },
                       child: Icon(
                         isSaved ? Icons.favorite : Icons.favorite_border,
@@ -498,7 +504,8 @@ class ChargerCard extends StatelessWidget {
                       ),
                     );
                   },
-                ),
+                )
+
               ],
             ),
             const SizedBox(height: 8),

@@ -470,6 +470,7 @@ async function FetchAllocatedChargerByClientToAssociation(req, res) {
         const devicesCollection = db.collection("charger_details");
         const configCollection = db.collection("socket_gun_config");
         const financeCollection = db.collection("financeDetails");
+        const stationCollection = db.collection("charging_stations");
 
         // Fetch chargers assigned to the specified association_id
         const chargers = await devicesCollection.find({ assigned_association_id: association_id }).toArray();
@@ -481,7 +482,7 @@ async function FetchAllocatedChargerByClientToAssociation(req, res) {
         // Fetch finance records based on association_id
         const financeData = await financeCollection.find({ association_id }).toArray();
 
-        // Convert financeData into a map for quick lookup by finance_id
+        // Create a map of finance_id to total price
         const financeMap = {};
         if (financeData.length) {
             financeData.forEach(financeRecord => {
@@ -510,10 +511,12 @@ async function FetchAllocatedChargerByClientToAssociation(req, res) {
         for (let charger of chargers) {
             const chargerID = charger.charger_id;
             const financeID = charger.finance_id;
+            const assignedStationID = charger.assigned_station_id;
 
             // Get the correct total price based on finance_id
             const total_price = financeMap[financeID];
 
+            // Fetch connector configuration
             const config = await configCollection.findOne({ charger_id: chargerID });
 
             let connectorDetails = [];
@@ -522,8 +525,8 @@ async function FetchAllocatedChargerByClientToAssociation(req, res) {
                 while (config[`connector_${connectorIndex}_type`] !== undefined) {
                     let connectorTypeValue =
                         config[`connector_${connectorIndex}_type`] === 1 ? "Socket" :
-                            config[`connector_${connectorIndex}_type`] === 2 ? "Gun" :
-                                config[`connector_${connectorIndex}_type`];
+                        config[`connector_${connectorIndex}_type`] === 2 ? "Gun" :
+                        config[`connector_${connectorIndex}_type`];
 
                     connectorDetails.push({
                         connector_type: connectorTypeValue,
@@ -534,20 +537,24 @@ async function FetchAllocatedChargerByClientToAssociation(req, res) {
                 }
             }
 
+            // Fetch station details
+            let stationDetails = null;
+            if (assignedStationID) {
+                stationDetails = await stationCollection.findOne({ station_id: assignedStationID });
+            }
+
+            // Combine all data
             let chargerData = {
                 ...charger,
-                connector_details: connectorDetails.length > 0 ? connectorDetails : null
+                connector_details: connectorDetails.length > 0 ? connectorDetails : null,
+                unit_price: total_price !== undefined ? total_price : null,
+                station_details: stationDetails || null
             };
-
-            // Only add unit_price if finance data exists
-            if (total_price !== undefined) {
-                chargerData.unit_price = total_price;
-            }
 
             results.push(chargerData);
         }
 
-        return res.status(200).json({ status: 'Success', data: results }); // Returning charger details array
+        return res.status(200).json({ status: 'Success', data: results });
 
     } catch (error) {
         console.error(`Error fetching chargers: ${error.message}`);
@@ -654,6 +661,302 @@ async function DeActivateOrActivateCharger(req, res) {
         return res.status(error.statusCode || 500).json({ status: 'Failed', message: error.message || 'Internal Server Error' });
     }
 }
+
+
+//Manage Station
+
+// POST /addChargingStation
+async function addChargingStation(req, res) {
+  try {
+    const {
+      association_id,
+      location_id,            
+      station_address,
+      landmark,
+      network,
+      availability,
+      accessibility,
+      latitude,
+      longitude,
+      charger_type,
+      chargers,
+      created_by
+    } = req.body;
+
+    if (
+      !association_id ||
+      !location_id ||         
+      !station_address ||
+      !landmark ||
+      !network ||
+      !availability ||
+      !accessibility ||
+      !created_by ||
+      latitude === undefined ||
+      longitude === undefined ||
+      !charger_type
+    ) {
+      return res.status(400).json({
+        status: 'Failed',
+        message: 'All fields are required'
+      });
+    }
+
+    const db = await database.connectToDatabase();
+    const stationCollection = db.collection("charging_stations");
+
+    // Generate next station_id
+    const lastStation = await stationCollection.find().sort({ station_id: -1 }).limit(1).toArray();
+    const station_id = lastStation.length > 0 ? lastStation[0].station_id + 1 : 1;
+
+    // Optional check for concurrency
+    const existing = await stationCollection.findOne({ station_id });
+    if (existing) {
+      return res.status(400).json({
+        status: 'Failed',
+        message: 'Station ID already exists'
+      });
+    }
+
+    await stationCollection.insertOne({
+      station_id,
+      association_id,
+      location_id,            // save location_id here
+      station_address,
+      landmark,
+      network,
+      availability,
+      accessibility,
+      latitude,
+      longitude,
+      charger_type,
+      chargers,
+      status: true,
+      created_by,
+      created_at: new Date(),
+      modified_by: null,
+      modified_at: null,
+    });
+
+    return res.status(201).json({
+      status: 'Success',
+      message: 'Charging station added'
+    });
+
+  } catch (err) {
+    console.error('Error in addChargingStation controller:', err);
+    return res.status(500).json({
+      status: 'Failed',
+      message: 'Internal server error'
+    });
+  }
+}
+
+
+
+
+// PUT /updateChargingStation
+async function updateChargingStation(req, res) {
+  try {
+    const { station_id, modified_by, location_id, chargers, ...updates } = req.body;
+
+    if (!station_id) {
+      return res.status(400).json({ status: 'Failed', message: 'station_id is required' });
+    }
+
+    if (!modified_by) {
+      return res.status(400).json({ status: 'Failed', message: 'modified_by is required' });
+    }
+
+    if (!location_id) {
+      return res.status(400).json({ status: 'Failed', message: 'location_id is required' });
+    }
+
+    const db = await database.connectToDatabase();
+    const stationCollection = db.collection("charging_stations");
+
+    updates.modified_at = new Date();
+    updates.modified_by = modified_by;
+    updates.location_id = location_id;  // update location_id
+
+    const result = await stationCollection.updateOne(
+      { station_id },
+      { $set: updates }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ status: 'Failed', message: 'Station not found' });
+    }
+
+    return res.status(200).json({ status: 'Success', message: 'Station updated' });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: 'Failed', message: 'Internal server error' });
+  }
+}
+
+
+
+
+// POST /getStationsByAssociation
+async function getStationsByAssociation(req, res) {
+    try {
+        const { association_id } = req.body;
+
+        if (!association_id) {
+            return res.status(400).json({ status: 'Failed', message: 'association_id is required' });
+        }
+
+        const db = await database.connectToDatabase();
+        const stationCollection = db.collection("charging_stations");
+
+        const stations = await stationCollection.find({ association_id }).toArray();
+
+        return res.status(200).json({ status: 'Success', data: stations });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ status: 'Failed', message: 'Internal server error' });
+    }
+}
+
+//assign stations to charger 
+
+async function assignChargerToStation(req, res) {
+  try {
+    const { charger_id, station_id, association_id, modified_by } = req.body;
+
+    if (!charger_id || !station_id || !association_id || !modified_by) {
+      return res.status(400).json({
+        status: 'Failed',
+        message: 'charger_id, station_id, association_id, and modified_by are required',
+      });
+    }
+
+    const db = await database.connectToDatabase();
+    const stationCollection = db.collection("charging_stations");
+    const chargerCollection = db.collection("charger_details");
+
+    // Fetch charger
+    const charger = await chargerCollection.findOne({ charger_id });
+    if (!charger) {
+      return res.status(404).json({ status: 'Failed', message: 'Charger not found' });
+    }
+
+    // Fetch station
+    const station = await stationCollection.findOne({ station_id, association_id });
+    if (!station) {
+      return res.status(404).json({ status: 'Failed', message: 'Station not found for this association' });
+    }
+
+    // Check if charger or station is inactive
+    if (charger.status === false) {
+      return res.status(403).json({ status: 'Failed', message: 'Cannot assign. Charger is inactive.' });
+    }
+    if (station.status === false) {
+      return res.status(403).json({ status: 'Failed', message: 'Cannot assign. Station is inactive.' });
+    }
+
+    // Check if charger is already assigned
+    if (charger.assigned_station_id) {
+      const existingStation = await stationCollection.findOne({ station_id: charger.assigned_station_id });
+      if (existingStation) {
+        if (charger.assigned_station_id === station_id) {
+          return res.status(200).json({
+            status: 'AlreadyAssigned',
+            message: 'Charger is already assigned to this station',
+          });
+        } else {
+          return res.status(409).json({
+            status: 'AlreadyAssigned',
+            message: 'Charger is already assigned to another station',
+          });
+        }
+      } else {
+        // The station referenced in assigned_station_id does not exist; proceed with assignment
+        await chargerCollection.updateOne(
+          { charger_id },
+          { $unset: { assigned_station_id: "" } }
+        );
+      }
+    }
+
+    // Assign charger to station
+    await stationCollection.updateOne(
+      { station_id, association_id },
+      {
+        $addToSet: { chargers: charger_id },
+        $set: { modified_by, modified_at: new Date() },
+      }
+    );
+
+    // Update charger assignment
+    await chargerCollection.updateOne(
+      { charger_id },
+      {
+        $set: {
+          assigned_station_id: station_id,
+          modified_by,
+          modified_at: new Date(),
+        },
+      }
+    );
+
+    return res.status(200).json({
+      status: 'Success',
+      message: 'Charger successfully assigned to station',
+    });
+  } catch (err) {
+    console.error("Error assigning charger:", err);
+    return res.status(500).json({ status: 'Failed', message: 'Internal server error' });
+  }
+}
+
+
+async function removeChargerFromStation(req, res) {
+  try {
+    const { station_id, charger_id, association_id, modified_by } = req.body;
+
+    if (!station_id || !charger_id || !association_id || !modified_by) {
+      return res.status(400).json({ status: 'Failed', message: 'Missing required fields' });
+    }
+
+    const db = await database.connectToDatabase();
+    const stationCollection = db.collection("charging_stations");
+    const chargerCollection = db.collection("charger_details");
+
+    // Check if station exists
+    const station = await stationCollection.findOne({ station_id, association_id });
+    if (!station) {
+      return res.status(404).json({ status: 'Failed', message: 'Station not found for this association' });
+    }
+
+    // Remove charger_id from the station's chargers array
+    await stationCollection.updateOne(
+      { station_id, association_id },
+      { 
+        $pull: { chargers: charger_id },
+        $set: { modified_by, modified_at: new Date() }
+      }
+    );
+
+    // Clear assigned_station_id from the charger
+    await chargerCollection.updateOne(
+      { charger_id },
+      {
+        $unset: { assigned_station_id: "" },
+        $set: { modified_by, modified_at: new Date() }
+      }
+    );
+
+    return res.status(200).json({ status: 'Success', message: 'Charger removed from station' });
+  } catch (err) {
+    console.error("Error removing charger:", err);
+    return res.status(500).json({ status: 'Failed', message: 'Internal server error' });
+  }
+}
+
 
 // Function to assignFinance details
 // Controller assignFinance function
@@ -2540,8 +2843,8 @@ async function UpdateAssociationProfile(req, res) {
     const { association_id, modified_by, association_phone_no, association_address } = req.body;
 
     // Validate required fields
-    if (!association_id || !modified_by || !association_phone_no ) {
-        return res.status(400).json({ status: 'Failed', message: 'Association ID, Modified By, Phone Number, are required' });
+    if (!association_id || !modified_by || !association_phone_no || !association_address  ) {
+        return res.status(400).json({ status: 'Failed', message: 'Association ID, Modified By, Phone Number, Address are required' });
     }
 
     try {
@@ -2584,5 +2887,5 @@ module.exports = {
     FetchUsersWithSpecificRolesToUnAssign, AddUserToAssociation, AssignTagIdToUser, FetchTagIdToAssign, RemoveUserFromAssociation, createFinance, fetchFinance, updateFinance,
     FetchReportDevice, DeviceReport, FetchSpecificChargerRevenue, FetchChargerListWithAllCostWithRevenue,
     FetchCommissionAmtAssociation, saveUserBankDetails, fetchUserBankDetails, updateUserBankDetails, ApplyWithdrawal, FetchPaymentRequest, FetchPaymentNotification, MarkNotificationRead,
-    FetchUserProfile, UpdateUserProfile, UpdateAssociationProfile,
+    FetchUserProfile, UpdateUserProfile, UpdateAssociationProfile,addChargingStation,getStationsByAssociation,updateChargingStation,assignChargerToStation,removeChargerFromStation
 };

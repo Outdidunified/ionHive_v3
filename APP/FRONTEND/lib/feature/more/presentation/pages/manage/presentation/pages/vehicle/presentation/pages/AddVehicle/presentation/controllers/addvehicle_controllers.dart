@@ -126,8 +126,18 @@ class AddvehicleControllers extends GetxController {
         vehicleId: selectedVehicleModel.value!.vehicleId,
       );
 
+// Proper debug printing of values
+      debugPrint("AddVehicle: API call initiated.");
+      debugPrint("Sending data ->");
+      debugPrint("User ID: ${sessionController.userId.value}");
+      debugPrint("Email: ${sessionController.emailId.value}");
+      debugPrint("Auth Token: ${sessionController.token.value}");
+      debugPrint("Vehicle Number: ${vehicleNumber.value}");
+      debugPrint("Vehicle ID: ${selectedVehicleModel.value?.vehicleId}");
+
+
       if (!response.error) {
-        // Create the new vehicle object with all necessary details
+        // Success flow (your existing code)
         final newVehicle = {
           'vehicle_number': vehicleNumber.value,
           'details': {
@@ -136,30 +146,22 @@ class AddvehicleControllers extends GetxController {
             'image_base64': selectedVehicleModel.value!.vehicleImage,
             'battery_size_kwh': selectedVehicleModel.value!.batterySizeKwh,
             'charger_type': selectedVehicleModel.value!.chargerType,
-            'range':
-                selectedVehicleModel.value!.type, // Using type as range for now
+            'range': selectedVehicleModel.value!.type,
           }
         };
 
-        // Add the new vehicle to the vehicles list
         vehicles.add(newVehicle);
-
-        // Reset the form
         vehicleNumberController.clear();
         vehicleNumber.value = '';
         selectedModel.value = '';
         selectedVehicleModel.value = null;
 
-        // Close the bottom sheet
         Get.back();
 
-        // Show success message
         CustomSnackbar.showSuccess(message: 'Vehicle added successfully');
 
-        // Refresh the vehicle models list
         fetchAllVehicleModel();
 
-        // Automatically navigate back to the vehicle page after a short delay
         Future.delayed(const Duration(seconds: 2), () {
           if (Get.isRegistered<VehicleController>()) {
             final vehicleController = Get.find<VehicleController>();
@@ -167,11 +169,25 @@ class AddvehicleControllers extends GetxController {
           }
         });
       } else {
-        CustomSnackbar.showError(message: response.message);
+        // Show backend error message here
+        CustomSnackbar.showError(
+            message: response.message ?? 'Unknown error from server');
       }
     } catch (e) {
-      CustomSnackbar.showError(
-          message: 'Failed to submit vehicle: ${e.toString()}');
+      // Extract the error message from the exception
+      String errorMessage = e.toString();
+
+      // Check if the error message contains the specific text about vehicle already registered
+      if (errorMessage.contains("already registered")) {
+        // Show the specific error from the backend
+        CustomSnackbar.showError(message: errorMessage);
+      } else {
+        // Show a generic error message for other types of errors
+        CustomSnackbar.showError(
+            message: 'Failed to submit vehicle: $errorMessage');
+      }
+
+      debugPrint("Vehicle submission error: $e");
     } finally {
       isLoading(false);
     }

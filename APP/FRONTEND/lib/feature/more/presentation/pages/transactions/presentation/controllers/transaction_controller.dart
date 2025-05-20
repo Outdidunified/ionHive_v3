@@ -46,7 +46,7 @@ class TransactionController extends GetxController {
     hasError.value = false;
     errorMessage.value = '';
     isLoading.value = true;
-    debugPrint("TransactionController: call");
+
 
     try {
       final response = await _transactionrepository.fetchAllTransactions(

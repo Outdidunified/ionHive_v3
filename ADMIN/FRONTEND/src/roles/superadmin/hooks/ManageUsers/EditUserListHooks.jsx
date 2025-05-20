@@ -125,7 +125,7 @@ const [wallet_bal, setWalletBal] = useState(dataItem?.wallet_bal ? String(dataIt
         wallet_bal,
         errorMessage,
         loading,
-        selectStatus,initialValues,dataItem,setPassword,setPhoneNo
+        selectStatus,initialValues,dataItem,setPassword,setPhoneNo,setWalletBal,setErrorMessage
     }
 };
     export default useEditUser;

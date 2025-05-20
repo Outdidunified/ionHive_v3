@@ -5,6 +5,7 @@ import 'package:ionhive/core/controllers/session_controller.dart'; // Session Co
 import 'package:ionhive/core/services/notification_service.dart'; // Notification Service
 import 'package:ionhive/core/splash_screen.dart';
 import 'package:ionhive/feature/Chargingpage/presentation/controllers/LivePriceController.dart';
+import 'package:ionhive/feature/auth/presentation/controllers/auth_controller.dart';
 import 'package:ionhive/feature/auth/presentation/pages/GettingStarted%20page.dart';
 import 'package:ionhive/feature/auth/presentation/pages/login_page.dart'; // Login Page
 import 'package:ionhive/feature/home/presentation/controllers/home_controller.dart';
@@ -62,7 +63,8 @@ void main() async {
   Get.put(LandingPageController(),
       permanent: true); // Make it permanent to avoid recreation
   Get.put(HomeController());
-  Get.put(SessionController()); // Ensure it is available globally
+  Get.put(AuthController());
+  Get.put(SessionController(), permanent: true); // Singleton for the entire app
   Get.put(ConnectivityController());
   Get.put(VehicleController());
   Get.put(SearchpageController());

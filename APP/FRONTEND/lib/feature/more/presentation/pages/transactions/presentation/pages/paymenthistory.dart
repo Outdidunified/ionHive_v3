@@ -259,7 +259,7 @@ class PaymentHistoryPage extends StatelessWidget {
           Column(
             children: [
               _buildRadioButton("none", 0),
-              _buildRadioButton("Yesterday", 1),
+              _buildRadioButton("Last 24 hours", 1),
               _buildRadioButton("Last 15 days", 15),
               _buildRadioButton("Last 30 days", 30),
             ],

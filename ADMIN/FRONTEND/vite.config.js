@@ -5,13 +5,17 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    port: 3000, 
-    strictPort: true, 
+    port: 3000,
+    strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://admin-backend:3001',
+        target: 'http://192.168.1.15:3001',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ''),
+      },
+      '/uploads': {
+        target: 'http://192.168.1.15:3001',
+        changeOrigin: true,
       },
     },
   },

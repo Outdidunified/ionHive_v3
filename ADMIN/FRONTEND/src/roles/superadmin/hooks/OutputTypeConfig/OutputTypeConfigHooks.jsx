@@ -13,38 +13,49 @@ const useOutputTypeConfig = ( userInfo ) => {
     const [isloading,setIsLoading]=useState(false)
 
 
-    const fetchTagID = useCallback(async () => {
-        setLoading(true); 
-        try {
-            const association_id = userInfo.association_id;
-            console.log("Sending association_id:", association_id);
-    
-            const res = await axiosInstance({method:'post',url:'/superadmin/fetchAllOutputType', data:{
+const fetchTagID = useCallback(async () => {
+    setLoading(true); 
+    try {
+        const association_id = userInfo.association_id;
+        console.log("Sending association_id:", association_id);
+
+        const res = await axiosInstance({
+            method: 'post',
+            url: '/superadmin/fetchAllOutputType',
+            data: {
                 association_id: association_id
-            }});
-    
-            if (res.data && res.data.status === 'Success') {
-                if (typeof res.data.data === 'string' && res.data.data === 'No Output Type found') {
-                    setError(res.data.data);
-                    setData([]);
-                } else if (Array.isArray(res.data.data)) {
-                    setData(res.data.data);
-                    setPosts(res.data.data); // Sync posts with fetched data
-                    setError(null);
-                } else {
-                    setError('Unexpected response format.');
-                }
-            } else {
-                setError('Error fetching data. Please try again.');
             }
-        } catch (err) {
-            console.error('Error fetching data:', err);
+        });
+
+        if (res.data?.message === "No output type details found") {
+            setError(res.data.message);
+            setData([]);
+            setPosts([]);
+        } 
+        else if (res.data && res.data.status === 'Success') {
+            if (typeof res.data.data === 'string' && res.data.data === 'No Output Type found') {
+                setError(res.data.data);
+                setData([]);
+                setPosts([]);
+            } else if (Array.isArray(res.data.data)) {
+                setData(res.data.data);
+                setPosts(res.data.data);
+                setError(null);
+            } else {
+                setError('Unexpected response format.');
+            }
+        } 
+        else {
             setError('Error fetching data. Please try again.');
-        } finally {
-            setLoading(false); 
         }
-    }, [userInfo.association_id]);
-    
+    } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Error fetching data. Please try again.');
+    } finally {
+        setLoading(false); 
+    }
+}, [userInfo.association_id]);
+
 
     useEffect(() => {
         if (!fetchUserRoleCalled.current) {

@@ -38,15 +38,20 @@ class HeaderController extends GetxController {
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
 
-    // Basic validation - only username is required
+    // Basic validation - username is required
     if (newUsername.isEmpty) {
       CustomSnackbar.showError(message: "Username cannot be empty");
       return;
     }
 
-    // Convert phone number safely if provided, otherwise set to null
+    // Phone number validation (only if entered)
     int? newPhoneNumber;
     if (phoneNumberText.isNotEmpty) {
+      if (!RegExp(r'^\d{10}$').hasMatch(phoneNumberText)) {
+        CustomSnackbar.showError(message: "Phone number must be 10 digits");
+        return;
+      }
+
       try {
         newPhoneNumber = int.parse(phoneNumberText);
       } catch (e) {
@@ -83,6 +88,7 @@ class HeaderController extends GetxController {
       isLoading.value = false;
     }
   }
+
 
   Future<void> fetchprofile() async {
     final authToken = sessionController.token.value;
