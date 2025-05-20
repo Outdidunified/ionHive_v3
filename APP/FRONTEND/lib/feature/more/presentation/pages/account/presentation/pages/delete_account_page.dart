@@ -121,7 +121,7 @@ class DeleteAccountPage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: Row(
+                            child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 const SizedBox(width: 20),
