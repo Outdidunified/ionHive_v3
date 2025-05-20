@@ -2,7 +2,7 @@ name: ionhive
 description: "Ion Hive - Your ultimate companion for finding, charging, and managing EV stations effortlessly."
 publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ">=3.6.0 <3.8.0"  # Already updated to support Dart 3.7.2

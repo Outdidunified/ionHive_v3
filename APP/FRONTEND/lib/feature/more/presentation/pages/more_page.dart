@@ -27,8 +27,9 @@ class MoreePage extends StatelessWidget {
   // Fetch app version dynamically
   Future<String> _getAppVersion() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    return packageInfo.version;
+    return '${packageInfo.version}';
   }
+
 
   void handleLogout() {
     // The controller is already registered in main.dart as permanent
@@ -400,18 +401,18 @@ class MoreePage extends StatelessWidget {
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return LoadingIndicator(
-                          size: context.rWidth(
-                              isLargeScreen ? 40 : (isSmallScreen ? 20 : 30)));
+                        size: context.rWidth(isLargeScreen ? 40 : (isSmallScreen ? 20 : 30)),
+                      );
                     }
-                    if (snapshot.hasData) {
-                      return _buildFooter(snapshot.data!, context,
-                          isSmallScreen, isLargeScreen);
-                    } else {
-                      return _buildFooter('Unknown Version', context,
-                          isSmallScreen, isLargeScreen);
-                    }
+                    return _buildFooter(
+                      snapshot.data ?? 'Unknown Version',
+                      context,
+                      isSmallScreen,
+                      isLargeScreen,
+                    );
                   },
                 ),
+
               ],
             ),
           ),
