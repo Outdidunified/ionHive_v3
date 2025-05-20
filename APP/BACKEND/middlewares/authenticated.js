@@ -12,14 +12,13 @@ initializeDB(); // Initialize the DB connection once
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-
-// Middleware to check if the user is authenticated
 const isAuthenticated = async (req, res, next) => {
   const token = req.headers['authorization'];
   const { user_id, email_id } = req.body;
 
-
-  if (!token) return res.status(403).json({ message: 'Not authenticated, JWTtoken is missing !' });
+  if (!token) {
+    return res.status(403).json({ message: 'Not authenticated, JWT token is missing!' });
+  }
 
   try {
     // Verify the token
@@ -28,13 +27,20 @@ const isAuthenticated = async (req, res, next) => {
     // Check if user exists and is active in the database
     if (db) {
       const usersCollection = db.collection("users");
-      const user = await usersCollection.findOne({
-        user_id: user_id,
-      });
 
-      // If user not found or status is false, invalidate the token
+      // Build the query dynamically
+      const query = {};
+      if (user_id) query.user_id = user_id;
+      if (email_id) query.email_id = email_id;
+
+      if (Object.keys(query).length === 0) {
+        return res.status(400).json({ message: 'Missing user_id or email_id in request body.' });
+      }
+
+      const user = await usersCollection.findOne(query);
+
       if (!user) {
-        logger.loggerWarn(`User not found in database: ${user_id}, ${user.email_id}`);
+        logger.loggerWarn(`User not found in database: user_id=${user_id}, email_id=${email_id}`);
         return res.status(403).json({
           error: true,
           message: 'User not found in the system!',
@@ -42,9 +48,8 @@ const isAuthenticated = async (req, res, next) => {
         });
       }
 
-      // Check if user status is false
       if (user.status === false) {
-        logger.loggerWarn(`User account is inactive: UserID: ${user_id}, Email ID: ${user.email_id}`);
+        logger.loggerWarn(`User account is inactive: user_id=${user.user_id}, email_id=${user.email_id}`);
         return res.status(403).json({
           error: true,
           message: 'Your account has been deactivated!',
@@ -53,18 +58,19 @@ const isAuthenticated = async (req, res, next) => {
       }
     }
 
-    // If all checks pass, attach decoded token data to request
+    // All checks passed
     req.user = decoded;
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
-      logger.loggerSuccess(`Token expiry: ${err.message}, IP: ${req.ip}, token: ${token}`);
+      logger.loggerSuccess(`Token expired: ${err.message}, IP: ${req.ip}, token: ${token}`);
       return res.status(403).json({
         error: true,
         message: 'Token expired!',
         invalidateToken: true
       });
     }
+
     logger.loggerError(`Invalid token: ${err.message}, IP: ${req.ip}, token: ${token}`);
     return res.status(403).json({
       error: true,
@@ -73,4 +79,5 @@ const isAuthenticated = async (req, res, next) => {
     });
   }
 };
+
 module.exports = { isAuthenticated };
