@@ -9,7 +9,6 @@ class SessionController extends GetxController {
   var username = ''.obs;
   var token = ''.obs;
   var emailId = ''.obs;
-  var isGuestMode = false.obs;
 
   @override
   void onInit() {
@@ -21,21 +20,10 @@ class SessionController extends GetxController {
   Future<void> loadSession() async {
     final prefs = await SharedPreferences.getInstance();
     isLoggedIn.value = prefs.getBool('isLoggedIn') ?? false;
-    isGuestMode.value = prefs.getBool('isGuestMode') ?? false;
     userId.value = prefs.getInt('userId') ?? 0;
     username.value = prefs.getString('username') ?? '';
-    emailId.value = prefs.getString('emailId')?.trim().isNotEmpty == true
-        ? prefs.getString('emailId')!
-        : 'guest@ionhive.app';
+    emailId.value = prefs.getString('emailId') ?? '';
     token.value = prefs.getString('token') ?? '';
-
-    // If guest mode was active, restore guest values
-    if (isGuestMode.value) {
-      userId.value = -1;
-      username.value = 'Guest';
-      token.value = 'guest_token';
-      emailId.value = 'guest@ionhive.app';
-    }
   }
 
   // Save session to shared preferences
@@ -61,27 +49,12 @@ class SessionController extends GetxController {
     this.token.value = token;
   }
 
-  // Enable guest mode
-  Future<void> enableGuestMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isGuestMode', true);
-
-    // Set guest mode values
-    isGuestMode.value = true;
-    isLoggedIn.value = false;
-    userId.value = -1; // Use -1 to indicate guest user
-    username.value = 'Guest';
-    token.value = 'guest_token';
-    emailId.value = 'guest@ionhive.app';
-  }
-
   // Clear session data
   Future<void> clearSession() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
 
     isLoggedIn.value = false;
-    isGuestMode.value = false;
     userId.value = 0;
     username.value = '';
     token.value = '';

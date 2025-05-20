@@ -106,16 +106,27 @@ class CharginStationapicalls {
 
   Future<Map<String, dynamic>> fetchspecificchargers(int user_id, String email,
       String authToken, int station_id, String location_id) async {
-    final url = Chargingstationurl.fetchspecificchargers;
+    final bool isGuest =
+        user_id == 0 && email.toLowerCase() == '';
+    final url = isGuest
+        ? Chargingstationurl.guestfetchspecificchargers
+        : Chargingstationurl.fetchspecificchargers;
+
 
     try {
       final response = await http.post(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': authToken,
+          if (!isGuest) 'Authorization': authToken, // Only add for non-guests
         },
-        body: jsonEncode({
+        body: jsonEncode(
+            isGuest
+                ? {
+              'station_id': station_id,
+              'location_id': location_id
+            }
+            :{
           'email_id': email,
           'user_id': user_id,
           'station_id': station_id,

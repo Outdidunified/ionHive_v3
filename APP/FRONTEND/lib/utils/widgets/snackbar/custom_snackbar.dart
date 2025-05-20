@@ -194,6 +194,11 @@ class CustomSnackbar {
     required VoidCallback onOpenSettings, // Acts as 'onLogin' now
     Duration duration = const Duration(seconds: 5),
   }) {
+    // Close any existing snackbars first
+    if (Get.isSnackbarOpen) {
+      Get.closeCurrentSnackbar();
+    }
+
     final isDarkMode = Get.isDarkMode;
     Get.rawSnackbar(
       messageText: Column(
@@ -234,9 +239,11 @@ class CustomSnackbar {
                 onOpenSettings(); // Reused for login navigation
               },
               style: TextButton.styleFrom(
-                backgroundColor:
-                isDarkMode ? Colors.purple.shade800 : Colors.purple.shade100,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                backgroundColor: isDarkMode
+                    ? Colors.purple.shade800
+                    : Colors.purple.shade100,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -266,5 +273,4 @@ class CustomSnackbar {
       isDismissible: true,
     );
   }
-
 }

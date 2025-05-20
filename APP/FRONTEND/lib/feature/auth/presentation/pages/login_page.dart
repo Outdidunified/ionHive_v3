@@ -187,9 +187,9 @@ class LoginPage extends StatelessWidget {
                           child: InkWell(
                             onTap: () async {
                               // Enable guest mode
-                              final sessionController =
-                                  Get.find<SessionController>();
-                              await sessionController.enableGuestMode();
+                              // final sessionController =
+                              //     Get.find<SessionController>();
+                              // await sessionController.enableGuestMode();
 
                               // Navigate to landing page
                               Get.to(

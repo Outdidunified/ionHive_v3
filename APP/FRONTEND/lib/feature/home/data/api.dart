@@ -46,7 +46,7 @@ class HomeAPICalls {
     double longitude,
   ) async {
     final bool isGuest =
-        user_id == 0 && email.toLowerCase() == 'guest@ionhive.app';
+        user_id == 0 && email.toLowerCase() == '';
     final url = isGuest
         ? HomeUrls.fetchnearbystationsForGuest
         : HomeUrls.fetchnearbystations;

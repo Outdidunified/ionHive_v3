@@ -616,6 +616,24 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  void handleProtectedNavigation({
+    required RxBool isLoggedIn,
+    required VoidCallback onAllowed,
+  }) {
+    if (!isLoggedIn.value) {
+      CustomSnackbar.showPermissionRequest(
+        message: 'You are not logged in to access. Please login.',
+        onOpenSettings: () {
+          Get.toNamed('/login');
+        },
+        duration: const Duration(seconds: 4),
+      );
+    } else {
+      onAllowed();
+    }
+  }
+
+
   Future<void> fetchNearbyChargers(
       {double? latitude, double? longitude}) async {
     if (!Get.isRegistered<SessionController>()) {
@@ -627,16 +645,18 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     final userId = sessionController.userId.value;
     final emailId = sessionController.emailId.value;
 
+    debugPrint('token:$authToken ,userId:$userId,emailId:$emailId');
+
     // Check if we're in guest mode
-    if (sessionController.isGuestMode.value) {
-      debugPrint("Guest mode detected, using guest credentials for API call");
-      // Continue with the API call using guest credentials
-    }
-    // If not in guest mode and missing credentials, skip the fetch
-    else if (authToken.isEmpty || userId <= 0 || emailId.isEmpty) {
-      debugPrint("Missing session data and not in guest mode, skipping fetch");
-      return;
-    }
+    // if (sessionController.isGuestMode.value) {
+    //   debugPrint("Guest mode detected, using guest credentials for API call");
+    //   // Continue with the API call using guest credentials
+    // }
+    // // If not in guest mode and missing credentials, skip the fetch
+    // else if (authToken.isEmpty || userId <= 0 || emailId.isEmpty) {
+    //   debugPrint("Missing session data and not in guest mode, skipping fetch");
+    //   return;
+    // }
 
     final fetchLat = latitude ?? currentPosition.value.latitude;
     final fetchLng = longitude ?? currentPosition.value.longitude;

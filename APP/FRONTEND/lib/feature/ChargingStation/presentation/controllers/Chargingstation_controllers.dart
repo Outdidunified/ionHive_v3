@@ -257,13 +257,19 @@ $mapUrl
       builder: (context) => PopupMenuOverlay(
         position: position,
         onHidePopup: hidePopup,
-        onToggleSave: () async {
-          hidePopup();
-          if (!isStationSaved(stationId)) {
-            await saveStation(userId, emailId, authToken, stationId);
-          } else {
-            await removeStation(userId, emailId, authToken, stationId);
-          }
+        onToggleSave: () {
+          handleProtectedNavigation(
+            isLoggedIn: sessionController.isLoggedIn,
+            onAllowed: () async {
+              hidePopup();
+
+              if (!isStationSaved(stationId)) {
+                await saveStation(userId, emailId, authToken, stationId);
+              } else {
+                await removeStation(userId, emailId, authToken, stationId);
+              }
+            },
+          );
         },
         onShare: () {
           hidePopup();
@@ -275,6 +281,24 @@ $mapUrl
     Overlay.of(context).insert(_popupMenu!);
     _isPopupShown = true;
   }
+
+  void handleProtectedNavigation({
+    required RxBool isLoggedIn,
+    required VoidCallback onAllowed,
+  }) {
+    if (!isLoggedIn.value) {
+      CustomSnackbar.showPermissionRequest(
+        message: 'You are not logged in to perform this action. Please login.',
+        onOpenSettings: () {
+          Get.toNamed('/login');
+        },
+        duration: const Duration(seconds: 4),
+      );
+    } else {
+      onAllowed();
+    }
+  }
+
 
   void toggleChargerDetails(int index) {
     expandedChargerIndex.value =
