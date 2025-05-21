@@ -147,23 +147,33 @@ const closeRemoveModal = () => {
 
   // Fetch all stations for this association
   const fetchStations = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axiosInstance.post('/associationadmin/GetAssociationStation', {
-        association_id: userInfo.association_id,
-      });
+  setIsLoading(true);
+  try {
+    const response = await axiosInstance.post('/associationadmin/GetAssociationStation', {
+      association_id: userInfo.association_id,
+    });
 
-      const data = response.data?.data || [];
-      setStations(data);
-      setFilteredStations(data);
-      setAllocatedChargers(data); 
-    } catch (err) {
-      console.error("Error fetching stations:", err);
-      setError('Failed to fetch stations');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const data = response.data?.data || [];
+    setStations(data);
+    setFilteredStations(data);
+
+    // Create a flat array of chargers with charger_id and assigned station_id
+    const chargersList = data.flatMap(station =>
+      station.chargers.map(chargerId => ({
+        charger_id: chargerId,
+        station_id: station.station_id,
+      }))
+    );
+
+    setAllocatedChargers(chargersList);
+  } catch (err) {
+    console.error("Error fetching stations:", err);
+    setError('Failed to fetch stations');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
 
   const handleSearchInputChange = (e) => {
@@ -200,13 +210,16 @@ const closeRemoveModal = () => {
     }
   }, [assignModalOpen, fetchAllocatedChargersList]);
 
-  // Open Assign Modal
   const openAssignModal = (station) => {
-    setSelectedStation(station);
-    setSelectedStationId(station.station_id);
-    setSelectedChargerId('');
-    setAssignModalOpen(true);
-  };
+  console.log("Station chargers:", station.chargers);
+  setSelectedStation(station);
+  setSelectedStationId(station.station_id);
+  setSelectedChargerId('');
+  setPreviouslySelectedChargerId(station.chargers?.slice(-1)[0] || '');
+  setAssignModalOpen(true);
+};
+
+
 
   // Close assign modal
   const closeAssignModal = () => {
@@ -280,9 +293,8 @@ const closeRemoveModal = () => {
 
     if (response.data.status === 'Success') {
       showSuccessAlert('Success', 'Charger removed from station successfully.');
-      // Refresh station and allocated chargers lists
-      await fetchStations();
-      await fetchAllocatedChargersList();
+       fetchStations();
+       fetchAllocatedChargersList();
     } else {
       showErrorAlert('Error', response.data.message || 'Failed to remove charger from station.');
     }

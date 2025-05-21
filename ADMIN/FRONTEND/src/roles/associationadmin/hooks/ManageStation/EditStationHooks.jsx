@@ -50,6 +50,11 @@ const [status, setStatus] = useState(
 );
 
 
+const handleLocationIdChange = (e) => {
+  const filteredValue = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+  setLocationId(filteredValue);
+};
+
 
   const goBackToManageStations = () => {
     navigate('/associationadmin/ManageStation');
@@ -113,7 +118,7 @@ const [status, setStatus] = useState(
     status, setStatus,
     isModified,
       locationId, setLocationId, // <-- added here
-
+handleLocationIdChange,
     updateStation,
     goBackToManageStations,
   };

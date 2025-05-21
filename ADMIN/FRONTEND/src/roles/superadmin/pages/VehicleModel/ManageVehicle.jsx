@@ -111,6 +111,7 @@ const ManageVehicle = ({ userInfo, handleLogout }) => {
                 name={name}
                 value={vehicleData[name]}
                 onChange={handleInputChange}
+                maxLength={50}
                 required
               />
             </div>

@@ -242,20 +242,8 @@ const ViewManageDevice = ({ userInfo, handleLogout }) => {
                                                         
                                                         
                                                     </div>
-                                                    {/* <div className="col-md-4">
-                                                            <div className="form-group row">
-                                                            <div className="col-sm-12" style={{ fontWeight: 'bold' }}>location Id: <span style={{fontWeight: 'normal'}}>{deviceData.station_details?.location_id ? deviceData.station_details?.location_id : '-'}</span></div>
-                                                            </div>
                                                         
-                                                        
-                                                    </div> */}
-                                                        
-                                                        
-                                                    </div>
-
-                                                    
-
-                                                    
+                                                    </div>  
                                                     {/* Connector Details */}
                                                     {deviceData.connector_details && deviceData.connector_details.length > 0 ? (
                                                         <div className="row col-12 col-xl-12 viewDataCss">
