@@ -663,8 +663,18 @@ const savevehicleModel = async (req, res) => {
 // fetching vehicle models and its details
 const getAllvehicleModels = async (req, res) => {
     try {
+        const { user_id, email_id } = req.body;
 
-
+        // Validate input
+        if (
+            !user_id || !email_id ||
+            !Number.isInteger(Number(user_id)) || typeof email_id !== 'string' || email_id.trim() === ''
+        ) {
+            return res.status(400).json({
+                error: true,
+                message: 'Invalid input: user_id  must be integers, email_id must be string',
+            });
+        }
         if (!db) {
             return res.status(500).json({
                 error: true,
