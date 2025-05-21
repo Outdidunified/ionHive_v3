@@ -184,6 +184,21 @@ const closeRemoveModal = () => {
     setFilteredStations(filtered);
   };
 
+//   const handlelatlongvalidation = (e) => {
+//   const { name, value } = e.target;
+
+//   // Regex: optional "-" at the beginning, digits, optional one "."
+//   const isValidNumber = /^-?\d*\.?\d*$/.test(value);
+
+//   if (isValidNumber) {
+//     setStationData((prevData) => ({
+//       ...prevData,
+//       [name]: value,
+//     }));
+//   }
+// };
+
+
   const fetchAllocatedChargersList = useCallback(async () => {
   try {
     setIsChargersLoading(true);
@@ -349,7 +364,7 @@ const closeRemoveModal = () => {
     setSelectedChargerId,
     selectedChargers,
     setSelectedChargers,openRemoveModal,closeRemoveModal,removeModalOpen,removeStationId,removeChargerFromStation,setRemoveChargerId,
-  removeChargerId, isChargersLoading
+  removeChargerId, isChargersLoading,setStationData
   };
 };
 

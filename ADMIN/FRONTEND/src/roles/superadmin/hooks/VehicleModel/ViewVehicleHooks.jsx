@@ -43,7 +43,6 @@ const useViewVehicle = () => {
   modified_date: vehicleData.modified_date || '',
   created_by:vehicleData.created_by||'',
   modified_by:vehicleData.modified_by|| '',
-  vehicle_image:vehicleData.vehicle_image || '',
 });
 
 
