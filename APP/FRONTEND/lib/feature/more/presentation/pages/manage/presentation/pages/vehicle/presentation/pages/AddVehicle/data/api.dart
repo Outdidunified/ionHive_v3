@@ -108,16 +108,21 @@ class AddVehicleApicalls {
   }
 
 
-  Future<Map<String, dynamic>> fetchvehiclemodel(String authToken) async {
+  Future<Map<String, dynamic>> fetchvehiclemodel(String authToken,String emailid,int userid) async {
     final url = AddVehicleurl.fetchvehiclemodel;
 
     try {
-      final response = await http.get(
+      final response = await http.post(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': authToken,
         },
+        body: jsonEncode({
+          'user_id': userid,
+          'email_id': emailid,
+
+        }),
       );
 
       return _handleResponse(response);

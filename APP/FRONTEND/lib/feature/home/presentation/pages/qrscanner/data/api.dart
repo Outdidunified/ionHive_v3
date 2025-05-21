@@ -19,9 +19,9 @@ class QRScannerapicalls {
       case 401:
         return 'Invalid credentials. Please try again.';
       case 403:
-        return 'You do not have permission to access this resource.';
+        return 'You do not have permission to access .';
       case 404:
-        return 'The requested resource was not found.';
+        return 'No data found .';
       case 500:
         return 'An error occurred on the server. Please try again later.';
       case 503:
@@ -32,41 +32,37 @@ class QRScannerapicalls {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
-    try {
-      final responseBody = jsonDecode(response.body);
+    final responseBody = jsonDecode(response.body);
 
-      // ✅ Handle token invalidation (e.g. account deactivated)
-      if (responseBody is Map<String, dynamic> &&
-          responseBody['invalidateToken'] == true) {
-        _handleTokenExpired(responseBody['message'] ?? 'Your session is no longer valid. Please log in again.');
-        throw HttpException(
-          response.statusCode,
-          responseBody['message'] ?? _getDefaultErrorMessage(response.statusCode),
-        );
-      }
-
-      if (response.statusCode == 200) {
-        return responseBody;
-      }
-
-      // ✅ Handle token expired based on status code and message
-      if (response.statusCode == 403 &&
-          (responseBody['message']?.toString().toLowerCase().contains('token expired') ?? false)) {
-        _handleTokenExpired(responseBody['message'] ?? 'Your session has expired. Please log in again.');
-      }
-
-      // 🚨 Throw for all other errors
+    // Handle token invalidation
+    if (responseBody is Map<String, dynamic> &&
+        responseBody['invalidateToken'] == true) {
+      _handleTokenExpired(
+          responseBody['message'] ?? 'Your session is no longer valid. Please log in again.');
       throw HttpException(
         response.statusCode,
         responseBody['message'] ?? _getDefaultErrorMessage(response.statusCode),
       );
-    } catch (e) {
-      throw HttpException(
-        response.statusCode,
-        _getDefaultErrorMessage(response.statusCode),
-      );
     }
+
+    if (response.statusCode == 200) {
+      return responseBody;
+    }
+
+    // Handle token expired
+    if (response.statusCode == 403 &&
+        (responseBody['message']?.toString().toLowerCase().contains('token expired') ?? false)) {
+      _handleTokenExpired(
+          responseBody['message'] ?? 'Your session has expired. Please log in again.');
+    }
+
+    // Throw with backend-provided message if available
+    throw HttpException(
+      response.statusCode,
+      responseBody['message'] ?? _getDefaultErrorMessage(response.statusCode),
+    );
   }
+
 
   void _handleTokenExpired(String message) {
     if (_tokenDialogShown) return;
