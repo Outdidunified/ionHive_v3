@@ -10,7 +10,7 @@ const fs = require("fs");
 const multer = require("multer");
 
 // Ensure the uploads directory exists
-const uploadDir = path.join(__dirname, "../public/uploads/vehicle_images");
+const uploadDir = path.join(__dirname, "../../../public/uploads/vehicle_images");
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -63,7 +63,7 @@ router.post('/RemoveDevice', authUser.isAuthenticated, Controller.RemoveDevice);
 // VEHICLE 
 //  - vehicle model details with images
 router.post("/addvehicleModel", authUser.isAuthenticated, upload.single("vehicle_image"), Controller.savevehicleModel); // Adding vehicle model and details
-router.get("/getAllvehicleModels", authUser.isAuthenticated, Controller.getAllvehicleModels); // fetching all vehicle models and details
+router.post("/getAllvehicleModels", authUser.isAuthenticated, Controller.getAllvehicleModels); // fetching all vehicle models and details
 //  - Vehicle of the paticular user
 router.post('/SaveVehiclesOfUser', authUser.isAuthenticated, Controller.SaveVehiclesOfUser); // add vehchle { model vehicle , Vechle number }
 router.post('/RemoveVehiclesOfUser', authUser.isAuthenticated, Controller.RemoveVehicleOfUser); // add vehchle { model vehicle , Vechle number }
