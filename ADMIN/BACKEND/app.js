@@ -43,7 +43,9 @@ const limiter = rateLimit({
 });
 // Uncomment to enable rate limiting
 // app.use(limiter);
-app.use('/uploads', cors(), express.static(path.join(__dirname, 'uploads')));
+// app.use('/uploads', cors(), express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', cors(),express.static(path.join(__dirname, '../../public/uploads/vehicle_images')));
+
 
 // Logger Middleware for Incoming Requests
 app.use((req, res, next) => {
