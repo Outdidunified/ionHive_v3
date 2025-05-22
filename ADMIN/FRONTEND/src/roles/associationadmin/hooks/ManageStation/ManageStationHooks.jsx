@@ -364,7 +364,7 @@ const closeRemoveModal = () => {
     setSelectedChargerId,
     selectedChargers,
     setSelectedChargers,openRemoveModal,closeRemoveModal,removeModalOpen,removeStationId,removeChargerFromStation,setRemoveChargerId,
-  removeChargerId, isChargersLoading,setStationData
+  removeChargerId, isChargersLoading
   };
 };
 
