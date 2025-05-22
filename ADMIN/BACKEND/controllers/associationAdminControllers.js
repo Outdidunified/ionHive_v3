@@ -727,8 +727,8 @@ async function addChargingStation(req, res) {
       network,
       availability,
       accessibility,
-      latitude,
-      longitude,
+      latitude: parseFloat(latitude),   // convert to number
+      longitude: parseFloat(longitude),
       charger_type,
       chargers,
       status: true,
@@ -775,9 +775,18 @@ async function updateChargingStation(req, res) {
     const db = await database.connectToDatabase();
     const stationCollection = db.collection("charging_stations");
 
+    // Convert latitude and longitude to numbers if present
+    if (updates.latitude !== undefined) {
+      updates.latitude = parseFloat(updates.latitude);
+    }
+
+    if (updates.longitude !== undefined) {
+      updates.longitude = parseFloat(updates.longitude);
+    }
+
     updates.modified_at = new Date();
     updates.modified_by = modified_by;
-    updates.location_id = location_id;  // update location_id
+    updates.location_id = location_id;
 
     const result = await stationCollection.updateOne(
       { station_id },
@@ -795,6 +804,7 @@ async function updateChargingStation(req, res) {
     return res.status(500).json({ status: 'Failed', message: 'Internal server error' });
   }
 }
+
 
 
 

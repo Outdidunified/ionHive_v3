@@ -5,9 +5,9 @@ import 'package:ionhive/feature/more/presentation/pages/manage/presentation/page
 class AddVehicleRepository {
   final AddVehicleApicalls _api = AddVehicleApicalls();
 
-  Future<GetAllVehicleModel> fetchvehiclemodel(String authToken) async {
+  Future<GetAllVehicleModel> fetchvehiclemodel(String authToken,String emailid,int userid) async {
     try {
-      final responseJson = await _api.fetchvehiclemodel(authToken);
+      final responseJson = await _api.fetchvehiclemodel(authToken,emailid,userid);
       return GetAllVehicleModel.fromJson(responseJson);
     } catch (e) {
       debugPrint("Repository error in fetchvehiclemodel: $e");

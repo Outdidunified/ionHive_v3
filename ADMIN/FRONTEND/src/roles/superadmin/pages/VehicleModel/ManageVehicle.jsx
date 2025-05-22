@@ -224,15 +224,15 @@ const ManageVehicle = ({ userInfo, handleLogout }) => {
               <td>
                 {dataItem.vehicle_image ? (
                 <img
-  src={`/uploads/${dataItem.vehicle_image}`}
+  src={dataItem.vehicle_image}
   alt={dataItem.model || 'vehicle image'}
   style={{
     width: '100px',
     height: 'auto',
     objectFit: 'contain',
-    borderRadius: '15px' // ensures image is not rounded
+    borderRadius: '15px',
   }}
-  onError={(e) => { e.target.onerror = null; e.target.src = '/path/to/placeholder.png'; }} // optional fallback
+  
 />
 
                 ) : '-'}

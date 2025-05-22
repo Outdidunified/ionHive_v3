@@ -101,22 +101,31 @@ const handleEditVehicle = () => {
                  <div className="row viewDataCss" style={{ marginTop: '10px' }}>
   {/* Vehicle Image */}
   <div className="col-md-4">
-    <strong>Vehicle Image:</strong><br />
-    {vehicle.vehicle_image ? (
+  <strong>Vehicle Image:</strong><br />
+  {vehicle.vehicle_image ? (
+    <div style={{ width: '100px', height: '70px' }}>
       <img
-  src={`/uploads/${vehicle.vehicle_image}`}
-  style={{
-    width: '100px',
-    height: 'auto',
-    objectFit: 'contain',
-    borderRadius: '15px' // ensures image is not rounded
-  }}
-  onError={(e) => { e.target.onerror = null; e.target.src = '/path/to/placeholder.png'; }} // optional fallback
-/>
-    ) : (
-      <span>No Image Available</span>
-    )}
-  </div>
+        src={
+          vehicle.vehicle_image?.startsWith('/uploads/')
+            ? vehicle.vehicle_image
+            : `/uploads/${vehicle.vehicle_image}`
+        }
+        alt={vehicle.model || 'vehicle image'}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          borderRadius: '16px',
+          display: 'block',
+        }}
+       
+      />
+    </div>
+  ) : (
+    <span>No Image Available</span>
+  )}
+</div>
+
 
   {/* Created By */}
   <div className="col-md-4">

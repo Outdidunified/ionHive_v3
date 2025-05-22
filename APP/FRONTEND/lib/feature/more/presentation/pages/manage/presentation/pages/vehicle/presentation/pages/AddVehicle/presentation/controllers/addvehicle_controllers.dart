@@ -52,7 +52,9 @@ class AddvehicleControllers extends GetxController {
       errorMessage('');
 
       final authToken = sessionController.token.value;
-      final response = await _vehicleRepository.fetchvehiclemodel(authToken);
+      final emailid = sessionController.emailId.value;
+      final userid = sessionController.userId.value;
+      final response = await _vehicleRepository.fetchvehiclemodel(authToken,emailid,userid);
 
       // ✅ No 'error' or 'message' field in response, so just assign
       vehicleModels.assignAll(response.vehicleModels);

@@ -2801,7 +2801,8 @@ const CreateVehicleModel = async (req, res) => {
     return res.status(400).json({ status: 'Failed', message: 'Vehicle image is required' });
   }
 
-  const vehicle_image = req.file.filename;
+  // Prepend '/uploads/' to the filename before saving
+  const vehicle_image = `/uploads/${req.file.filename}`;
 
   try {
     if (
@@ -2833,7 +2834,7 @@ const CreateVehicleModel = async (req, res) => {
       vehicle_company,
       battery_size_kwh,
       charger_type,
-      vehicle_image,
+      vehicle_image,  // Now has the '/uploads/' prefix
       status: true,
       created_date: new Date(),
       created_by,         
@@ -2847,6 +2848,7 @@ const CreateVehicleModel = async (req, res) => {
     return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
   }
 };
+
 
 
 //Show all Vehicles
@@ -2877,7 +2879,7 @@ const UpdateVehicleModel = async (req, res) => {
     modified_by
   } = req.body;
 
-  const vehicle_image = req.file ? req.file.filename : null;
+const vehicle_image = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
     // Validate all required fields

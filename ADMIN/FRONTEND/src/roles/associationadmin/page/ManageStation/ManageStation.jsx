@@ -14,8 +14,8 @@ const ManageStation = ({ userInfo, handleLogout }) => {
     handleInputChange,isAlertVisible,modalErrorMessage,handlelocation,previouslySelectedChargerId,
     selectedStation,closeAssignModal,openRemoveModal,closeRemoveModal,removeModalOpen,removeChargerId,
     filteredStations,setModalErrorMessage,
-    isLoading,allocatedChargers,assignLoading,setRemoveChargerId,
-    loading,handlelatlongvalidation,
+    isLoading,allocatedChargers,assignLoading,setRemoveChargerId,setStationData,
+    loading,
     error,
     modalAddStyle,
     theadsticky,
@@ -88,15 +88,22 @@ const ManageStation = ({ userInfo, handleLogout }) => {
                 Location ID
               </span>
             </div>
-            <input
-              type="text"
-              name="location_id"
-              className="form-control"
-              placeholder="Enter Location ID"
-              value={stationData.location_id}
-              onChange={handlelocation}
-              maxLength={50}
-            />
+           <input
+  type="text"
+  name="location_id"
+  className="form-control"
+  placeholder="Enter Location ID"
+  value={stationData.location_id}
+  maxLength={50}
+  onChange={(e) => {
+    const value = e.target.value;
+    // Regex to allow only letters (a-z, A-Z) and numbers (0-9)
+    if (/^[a-zA-Z0-9]*$/.test(value)) {
+      setStationData(prev => ({ ...prev, location_id: value }));
+    }
+  }}
+/>
+
           </div>
 
           {/* Station Address */}
@@ -229,7 +236,12 @@ const ManageStation = ({ userInfo, handleLogout }) => {
     className="form-control"
     placeholder="Enter Latitude"
     value={stationData.latitude}
-    onChange={handlelatlongvalidation}
+    onChange={(e) => {
+      const value = e.target.value;
+      if (/^-?\d*\.?\d*$/.test(value)) {
+        setStationData(prev => ({ ...prev, latitude: value }));
+      }
+    }}
   />
 </div>
 
@@ -249,9 +261,15 @@ const ManageStation = ({ userInfo, handleLogout }) => {
     className="form-control"
     placeholder="Enter Longitude"
     value={stationData.longitude}
-    onChange={handlelatlongvalidation}
+    onChange={(e) => {
+      const value = e.target.value;
+      if (/^-?\d*\.?\d*$/.test(value)) {
+        setStationData(prev => ({ ...prev, longitude: value }));
+      }
+    }}
   />
 </div>
+
 
           {/* Charger Type */}
           <div className="input-group mb-3">
