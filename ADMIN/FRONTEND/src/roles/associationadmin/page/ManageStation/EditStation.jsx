@@ -98,6 +98,7 @@ const EditStation = ({ userInfo, handleLogout }) => {
                                 value={landmark}
                                 onChange={(e) => setLandmark(e.target.value)}
                                 maxLength={100}
+                                required
                               />
                             </div>
                           </div>

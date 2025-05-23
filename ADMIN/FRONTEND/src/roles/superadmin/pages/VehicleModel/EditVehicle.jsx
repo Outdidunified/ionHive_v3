@@ -195,7 +195,6 @@ const EditVehicle= ({ userInfo, handleLogout }) => {
     src={vehicleImage.startsWith('/uploads/') ? vehicleImage : `/uploads/${vehicleImage}`}
     alt="Vehicle"
     style={{ width: '50px', height: '50px', borderRadius: '5px', objectFit: 'cover', border: '1px solid #ccc' }}
-    onError={(e) => { e.target.onerror = null; e.target.src = '/path/to/placeholder.png'; }}
     title={vehicleImage}
   />
 )}
