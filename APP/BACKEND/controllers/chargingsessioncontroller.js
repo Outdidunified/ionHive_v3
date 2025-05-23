@@ -571,10 +571,37 @@ const endChargingSession = async (req, res) => {
         const chargerStatus = await chargerStatusCollection.findOne({ charger_id, connector_id });
 
         if (!chargerStatus) {
-            logger.loggerWarn(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - Charger status not found!`);
-            return res.status(404).json({
-                error: true,
-                message: 'Charger status not found!'
+            logger.loggerWarn(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - Charger status not found! Proceeding to clear active user.`);
+
+            const chargerDetails = await chargerDetailsCollection.findOne({ charger_id });
+
+            if (!chargerDetails) {
+                logger.loggerWarn(`ChargerID: ${charger_id} - Charger details not found!`);
+                return res.status(404).json({
+                    error: true,
+                    message: `ChargerID - ${charger_id} not found in charger_details`
+                });
+            }
+
+            const connectorField = `current_or_active_user_for_connector_${connector_id}`;
+
+            const result = await chargerDetailsCollection.updateOne(
+                { charger_id },
+                { $set: { [connectorField]: null } }
+            );
+
+            if (result.modifiedCount === 0) {
+                logger.loggerWarn(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - Failed to clear active user (no chargerStatus)`);
+                return res.status(500).json({
+                    error: true,
+                    message: 'Charger status not found, and failed to clear active user.'
+                });
+            }
+
+            logger.loggerSuccess(`ChargerID: ${charger_id}, ConnectorID: ${connector_id} - Charger status not found, but active user cleared.`);
+            return res.status(200).json({
+                error: false,
+                message: 'Charger status not found, but active user cleared successfully.'
             });
         }
 

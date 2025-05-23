@@ -416,8 +416,9 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
 
         const chargerStatuses = await chargerStatusCollection.find(
             { charger_id: { $in: chargerIds } },
-            { projection: { _id: 0, charger_id: 1, connector_id: 1, charger_status: 1 } }
+            { projection: { _id: 0, charger_id: 1, connector_id: 1, charger_status: 1, timestamp: 1 } }
         ).toArray();
+
 
         const chargersWithConfig = await Promise.all(chargerDetails.map(async charger => {
             const config = socketGunConfigs.find(cfg => cfg.charger_id === charger.charger_id) || {};
@@ -425,17 +426,19 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
             const connectors = Object.keys(config)
                 .filter(key => /^connector_\d+_type$/.test(key))
                 .map((key) => {
-                    const connectorIndex = key.match(/\d+/)[0];
+                    const connectorIndex = parseInt(key.match(/\d+/)[0]);
 
                     const matchingStatus = chargerStatuses.find(
-                        status => status.charger_id === charger.charger_id && status.connector_id === parseInt(connectorIndex)
+                        status =>
+                            String(status.charger_id) === String(charger.charger_id) &&
+                            parseInt(status.connector_id) === connectorIndex
                     );
-
                     return {
-                        connector_id: parseInt(connectorIndex),
+                        connector_id: connectorIndex,
                         connector_type: config[key] || null,
                         connector_type_name: config[`connector_${connectorIndex}_type_name`] || null,
-                        charger_status: matchingStatus ? matchingStatus.charger_status : " - "
+                        charger_status: matchingStatus?.charger_status || " - ",
+                        last_updated: matchingStatus?.timestamp || " - ",
                     };
                 });
 
