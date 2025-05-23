@@ -421,7 +421,7 @@ class ChargerCard extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            'Last used: $lastUsed',
+                            'Last updated: $lastUsed',
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: width * 0.028,
                               color: theme.textTheme.bodyLarge?.color?.withOpacity(0.6),

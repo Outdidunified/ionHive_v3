@@ -12,6 +12,7 @@ class QrScannerController extends GetxController with WidgetsBindingObserver {
   final RxBool isFlashlightOn = false.obs;
   final RxBool isLoading = false.obs;
   final RxString scannedCode = ''.obs;
+     
 
   final MobileScannerController scannerController = MobileScannerController();
   final sessionController = Get.find<SessionController>();

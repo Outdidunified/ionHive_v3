@@ -1,14 +1,14 @@
 class Connector {
-  final int connectorId;
-  final int connectorType;
-  final String connectorTypeName;
-  final String chargerStatus;
+  final int? connectorId;
+  final int? connectorType;
+  final String? connectorTypeName;
+  final String? chargerStatus;
 
   Connector({
-    required this.connectorId,
-    required this.connectorType,
-    required this.connectorTypeName,
-    required this.chargerStatus,
+    this.connectorId,
+    this.connectorType,
+    this.connectorTypeName,
+    this.chargerStatus,
   });
 
   factory Connector.fromJson(Map<String, dynamic> json) {
@@ -21,33 +21,34 @@ class Connector {
   }
 
   Map<String, dynamic> toJson() => {
-        'connector_id': connectorId,
-        'connector_type': connectorType,
-        'connector_type_name': connectorTypeName,
-        'charger_status': chargerStatus,
-      };
+    'connector_id': connectorId,
+    'connector_type': connectorType,
+    'connector_type_name': connectorTypeName,
+    'charger_status': chargerStatus,
+  };
 }
 
+
 class Charger {
-  final String chargerId;
-  final String model;
-  final String type;
+  final String? chargerId;
+  final String? model;
+  final String? type;
   final List<Connector> connectors;
-  final String vendor;
-  final String charger_type;
-  final int max_power;
-  final String address;
+  final String? vendor;
+  final String? charger_type;
+  final int? max_power;
+  final String? address;
   final bool status;
 
   Charger({
-    required this.chargerId,
-    required this.model,
-    required this.type,
+    this.chargerId,
+    this.model,
+    this.type,
     required this.connectors,
-    required this.vendor,
-    required this.charger_type,
-    required this.max_power,
-    required this.address,
+    this.vendor,
+    this.charger_type,
+    this.max_power,
+    this.address,
     required this.status,
   });
 
@@ -63,22 +64,23 @@ class Charger {
       charger_type: json['charger_type'],
       max_power: json['max_power'],
       address: json['address'],
-      status: json['status'],
+      status: json['status'] ?? false,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'charger_id': chargerId,
-        'model': model,
-        'type': type,
-        'connectors': connectors.map((e) => e.toJson()).toList(),
-        'vendor': vendor,
-        'charger_type': charger_type,
-        'max_power': max_power,
-        'address': address,
-        'status': status,
-      };
+    'charger_id': chargerId,
+    'model': model,
+    'type': type,
+    'connectors': connectors.map((e) => e.toJson()).toList(),
+    'vendor': vendor,
+    'charger_type': charger_type,
+    'max_power': max_power,
+    'address': address,
+    'status': status,
+  };
 }
+
 
 class FetchSpecificQrChargerResponse {
   final bool status;

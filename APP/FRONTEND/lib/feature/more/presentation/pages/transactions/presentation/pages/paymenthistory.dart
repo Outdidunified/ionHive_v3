@@ -46,7 +46,7 @@ class PaymentHistoryPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "PaymentHistory",
+          "Payment History",
           style: theme.textTheme.headlineMedium
               ?.copyWith(fontWeight: FontWeight.bold),
         ),

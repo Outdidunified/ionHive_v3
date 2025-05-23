@@ -350,6 +350,9 @@ class AuthController extends GetxController {
     // Reset validation error
     validationError.value = null;
     emailController.clear();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+     validationError.value = null;
+    });
   }
 
   // This is the dispose lifecycle method of the GetxController

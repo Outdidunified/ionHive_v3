@@ -47,7 +47,6 @@ class TransactionController extends GetxController {
     errorMessage.value = '';
     isLoading.value = true;
 
-
     try {
       final response = await _transactionrepository.fetchAllTransactions(
           email, userId, authToken);
@@ -220,20 +219,41 @@ class TransactionController extends GetxController {
 
   Future<void> applyFilters() async {
     try {
-      final response = await _transactionrepository.SaveFilter(
-        email,
-        userId,
-        authToken,
-        selectedDays.value,
-      );
+      // If selectedDays is 0 (none filter), we should fetch all transactions without filtering
+      if (selectedDays.value == 0) {
+        debugPrint("Applying 'None' filter - fetching all transactions");
+        final response = await _transactionrepository.SaveFilter(
+          email,
+          userId,
+          authToken,
+          selectedDays.value,
+        );
 
-      if (!response.error) {
-        if (response.days != null) {
-          selectedDays.value = response.days!;
+        if (!response.error) {
+          if (response.days != null) {
+            selectedDays.value = response.days!;
+          }
+          await fetchAllTransactions(); // Use fetchAllTransactions instead of fetchFilteredTransactions
+        } else {
+          debugPrint("Failed to apply filter: ${response.message}");
         }
-        await fetchFilteredTransactions();
       } else {
-        debugPrint("Failed to apply filter: ${response.message}");
+        // For other filters, proceed as normal
+        final response = await _transactionrepository.SaveFilter(
+          email,
+          userId,
+          authToken,
+          selectedDays.value,
+        );
+
+        if (!response.error) {
+          if (response.days != null) {
+            selectedDays.value = response.days!;
+          }
+          await fetchFilteredTransactions();
+        } else {
+          debugPrint("Failed to apply filter: ${response.message}");
+        }
       }
     } catch (e) {
       debugPrint("Error applying filter: $e");
@@ -280,22 +300,35 @@ class TransactionController extends GetxController {
       final response = await _transactionrepository.Clearsavedfilterrep(
           email, userId, authToken);
       if (!response.error) {
-        selectedDays.value = null;
+        selectedDays.value = null; // Set to null to indicate no filter
+        debugPrint("Transaction filter cleared successfully");
+
+        // Fetch all transactions without any filtering
         await fetchAllTransactions();
       } else {
         debugPrint("Failed to clear transaction filter: ${response.message}");
+
+        // Even if the API call fails, we should still try to show all transactions
+        selectedDays.value = null;
+        await fetchAllTransactions();
       }
     } catch (e) {
       debugPrint("Error clearing transaction filter: $e");
+
+      // Even if there's an error, we should still try to show all transactions
+      selectedDays.value = null;
+      await fetchAllTransactions();
     } finally {
       isLoading.value = false;
     }
   }
 
   bool _isWithinSelectedDays(String? timeString) {
+    // If no time string, or no selected days, or selected days is 0 (none filter), return all transactions
     if (timeString == null ||
         timeString.isEmpty ||
-        selectedDays.value == null) {
+        selectedDays.value == null ||
+        selectedDays.value == 0) {
       return true;
     }
     try {

@@ -85,21 +85,23 @@ class StationCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          title.length > 35
-                              ? '${title.substring(0, 35)}...'
-                              : title,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: titleFontSize,
-                                    color: isDarkTheme ? Colors.white70 : null,
-                                  ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        Icon(Icons.location_on),
+                        SizedBox(width: 8),
+                        Expanded( // 👈 This makes the Text take only the available space
+                          child: Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: titleFontSize,
+                              color: isDarkTheme ? Colors.white70 : null,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
+
                     SizedBox(height: verticalSpacing),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

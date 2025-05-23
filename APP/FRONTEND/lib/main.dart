@@ -103,26 +103,29 @@ class IonHive extends StatelessWidget {
       themeController.changeThemeMode(currentMode);
     });
 
-    return Obx(() => GetMaterialApp(
-          title: 'ionHive',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeController.themeMode.value,
-          initialRoute: '/',
-          navigatorObservers: [
-            SnackbarCloseObserver()
-          ], // Add observer to close snackbars on navigation
-          getPages: [
-            GetPage(name: '/', page: () => SplashScreen()),
-            GetPage(name: '/landing', page: () => LandingPage()),
-            GetPage(name: '/login', page: () => LoginPage()), // Must be defined
-            GetPage(name: '/start', page: () => GetStartedPage()),
-            GetPage(
-                name: '/noInternet',
-                page: () => NoInternetScreen()), // Add route
-            GetPage(name: '/qr-scanner', page: () => const QrScannerpage()),
-          ],
-        ));
+    return Obx(() => MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), // 🚫 Disable system font scaling
+      child: GetMaterialApp(
+            title: 'ionHive',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeController.themeMode.value,
+            initialRoute: '/',
+            navigatorObservers: [
+              SnackbarCloseObserver()
+            ], // Add observer to close snackbars on navigation
+            getPages: [
+              GetPage(name: '/', page: () => SplashScreen()),
+              GetPage(name: '/landing', page: () => LandingPage()),
+              GetPage(name: '/login', page: () => LoginPage()), // Must be defined
+              GetPage(name: '/start', page: () => GetStartedPage()),
+              GetPage(
+                  name: '/noInternet',
+                  page: () => NoInternetScreen()), // Add route
+              GetPage(name: '/qr-scanner', page: () => const QrScannerpage()),
+            ],
+          ),
+    ));
   }
 }

@@ -9,6 +9,8 @@ import 'package:ionhive/feature/ChargingStation/presentation/widgets/Chargingsta
 import 'package:ionhive/feature/home/presentation/pages/search/presentation/controllers/search_controllers.dart';
 import 'package:ionhive/feature/more/presentation/pages/help&support/presentation/pages/contact%20us.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
+
 
 // ignore: must_be_immutable
 class ChargingStationPage extends StatelessWidget {
@@ -30,6 +32,17 @@ class ChargingStationPage extends StatelessWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.setStation(station);
     });
+  }
+
+  String formatLastUsed(String? lastUsed) {
+    if (lastUsed == null || lastUsed.isEmpty || lastUsed == '-') return '-';
+
+    try {
+      final dateTime = DateTime.parse(lastUsed).toUtc().add(const Duration(hours: 5, minutes: 30)); // IST
+      return DateFormat('dd/MM/yyyy hh:mm a').format(dateTime);
+    } catch (e) {
+      return '-';
+    }
   }
 
   // Function to launch Google Maps for directions
@@ -459,512 +472,525 @@ class ChargingStationPage extends StatelessWidget {
         longitude >= -180 &&
         longitude <= 180);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          // Content
-          Column(
-            children: [
-              Image.asset(
-                'assets/Image/ionHive.png',
-                width: screenWidth,
-                height: screenHeight * 0.25,
-                fit: BoxFit.cover,
-              ),
-              // Header Section
-              StationHeader(
-                locationId: locationId,
-                stationAddress: stationAddress,
-                network: network,
-                chargerType: chargerType,
-                availability: availability,
-              ),
-              Divider(
-                color: theme.dividerColor,
-                thickness: screenHeight * 0.0005,
-                height: screenHeight * 0.01,
-                indent: screenWidth * 0.03,
-                endIndent: screenWidth * 0.03,
-              ),
-              Expanded(
-                child: Builder(builder: (context) {
-                  return Obx(() {
-                    debugPrint(
-                        'Rebuilding IndexedStack with tab index: ${controller.selectedTabIndex.value}');
-                    return IndexedStack(
-                      index: controller.selectedTabIndex.value,
-                      children: [
-                        // Charger Tab Content
-                        Builder(builder: (context) {
-                          return Obx(() {
-                            if (controller.isLoading.value) {
-                              return const ShimmerLoading();
-                            }
+    return WillPopScope(
+      onWillPop: () async {
+        final controller = Get.find<ChargingStationController>();
+        controller.hidePopup();
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: Stack(
+          children: [
+            // Content
+            Column(
+              children: [
+                Image.asset(
+                  'assets/Image/ionHive.png',
+                  width: screenWidth,
+                  height: screenHeight * 0.25,
+                  fit: BoxFit.cover,
+                ),
+                // Header Section
+                StationHeader(
+                  locationId: locationId,
+                  stationAddress: stationAddress,
+                  network: network,
+                  chargerType: chargerType,
+                  availability: availability,
+                ),
+                Divider(
+                  color: theme.dividerColor,
+                  thickness: screenHeight * 0.0005,
+                  height: screenHeight * 0.01,
+                  indent: screenWidth * 0.03,
+                  endIndent: screenWidth * 0.03,
+                ),
+                Expanded(
+                  child: Builder(builder: (context) {
+                    return Obx(() {
+                      debugPrint(
+                          'Rebuilding IndexedStack with tab index: ${controller.selectedTabIndex.value}');
+                      return IndexedStack(
+                        index: controller.selectedTabIndex.value,
+                        children: [
+                          // Charger Tab Content
+                          Builder(builder: (context) {
+                            return Obx(() {
+                              if (controller.isLoading.value) {
+                                return const ShimmerLoading();
+                              }
+      
+                              final details = controller.chargerDetails;
+      
+                              return ListView(
+                                padding: EdgeInsets.all(screenWidth * 0.04),
+                                children: [
+                                  if (details.isNotEmpty)
+                                    ...details.asMap().entries.map((entry) {
+                                      final i = entry.key;
+                                      final detail = entry.value;
+      
+                                      if (detail == null ||
+                                          detail is! Map<String, dynamic>) {
+                                        return const SizedBox.shrink();
+                                      }
+      
+                                      return Column(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () => controller
+                                                .toggleChargerDetails(i),
+                                            child: ChargerCard(
+                                              title:
+                                                  '${detail['address'] ?? 'Charger'} ${i + 1}',
+                                              power:
+                                                  '${detail['max_power'] ?? 'N/A'}W',
+                                              price:
+                                                  '₹ ${detail['unitPrice'] ?? '-'}/kWh',
+                                              lastUsed: formatLastUsed(
+                                                (detail['connectors'] as List?)?.isNotEmpty == true
+                                                    ? detail['connectors'][0]['last_updated']
+                                                    : null,
+                                              ),
 
-                            final details = controller.chargerDetails;
+                                              sessions: i == 0 ? '1k+' : null,
+                                              vendor:
+                                                  detail['vendor'] ?? 'Unknown',
+                                              chargerId:
+                                                  detail['charger_id'] ?? 'N/A',
+                                              chargerType:
+                                                  detail['charger_type'] ?? 'N/A',
+                                              connectors:
+                                                  detail['connectors'] != null
+                                                      ? (detail['connectors']
+                                                              as List<dynamic>)
+                                                          .map((connector) {
+                                                          return ConnectorInfo(
+                                                            name: connector[
+                                                                        'connector_id']
+                                                                    ?.toString() ??
+                                                                'N/A',
+                                                            type: connector[
+                                                                        'connector_type']
+                                                                    ?.toString() ??
+                                                                'N/A',
 
-                            return ListView(
+                                                            power:
+                                                                '${detail['max_power'] ?? 'N/A'}W',
+                                                            status: connector[
+                                                                    'charger_status'] ??
+                                                                ' - ',
+                                                          );
+                                                        }).toList()
+                                                      : [],
+                                              isExpanded: controller
+                                                      .expandedChargerIndex
+                                                      .value ==
+                                                  i,
+                                              index: i,
+                                            ),
+                                          ),
+                                          SizedBox(height: screenHeight * 0.02),
+                                        ],
+                                      );
+                                    })
+                                  else ...[
+                                    SizedBox(height: screenHeight * 0.2),
+                                    Center(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Image.asset(
+                                            'assets/icons/saved_device.png',
+                                            width: screenWidth * 0.1,
+                                            height: screenWidth * 0.1,
+                                            color: theme.iconTheme.color
+                                                ?.withOpacity(0.5),
+                                          ),
+                                          SizedBox(height: screenHeight * 0.02),
+                                          Text(
+                                            'There are no chargers available in this station',
+                                            style: theme.textTheme.bodyLarge
+                                                ?.copyWith(
+                                              color: theme
+                                                  .textTheme.bodyLarge?.color
+                                                  ?.withOpacity(0.6),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                  SizedBox(height: screenHeight * 0.02),
+                                ],
+                              );
+                            });
+                          }),
+                          // Details Tab Content (Google Map)
+                          SingleChildScrollView(
+                            child: Container(
                               padding: EdgeInsets.all(screenWidth * 0.04),
-                              children: [
-                                if (details.isNotEmpty)
-                                  ...details.asMap().entries.map((entry) {
-                                    final i = entry.key;
-                                    final detail = entry.value;
-
-                                    if (detail == null ||
-                                        detail is! Map<String, dynamic>) {
-                                      return const SizedBox.shrink();
-                                    }
-
-                                    return Column(
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () => controller
-                                              .toggleChargerDetails(i),
-                                          child: ChargerCard(
-                                            title:
-                                                '${detail['address'] ?? 'Charger'} ${i + 1}',
-                                            power:
-                                                '${detail['max_power'] ?? 'N/A'}W',
-                                            price:
-                                                '₹ ${detail['unitPrice'] ?? '-'}/kWh',
-                                            lastUsed: '24/04/2025',
-                                            sessions: i == 0 ? '1k+' : null,
-                                            vendor:
-                                                detail['vendor'] ?? 'Unknown',
-                                            chargerId:
-                                                detail['charger_id'] ?? 'N/A',
-                                            chargerType:
-                                                detail['charger_type'] ?? 'N/A',
-                                            connectors:
-                                                detail['connectors'] != null
-                                                    ? (detail['connectors']
-                                                            as List<dynamic>)
-                                                        .map((connector) {
-                                                        return ConnectorInfo(
-                                                          name: connector[
-                                                                      'connector_id']
-                                                                  ?.toString() ??
-                                                              'N/A',
-                                                          type: connector[
-                                                                      'connector_type']
-                                                                  ?.toString() ??
-                                                              'N/A',
-                                                          power:
-                                                              '${detail['max_power'] ?? 'N/A'}W',
-                                                          status: connector[
-                                                                  'charger_status'] ??
-                                                              ' - ',
-                                                        );
-                                                      }).toList()
-                                                    : [],
-                                            isExpanded: controller
-                                                    .expandedChargerIndex
-                                                    .value ==
-                                                i,
-                                            index: i,
-                                          ),
-                                        ),
-                                        SizedBox(height: screenHeight * 0.02),
-                                      ],
-                                    );
-                                  })
-                                else ...[
-                                  SizedBox(height: screenHeight * 0.2),
-                                  Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Image.asset(
-                                          'assets/icons/saved_device.png',
-                                          width: screenWidth * 0.1,
-                                          height: screenWidth * 0.1,
-                                          color: theme.iconTheme.color
-                                              ?.withOpacity(0.5),
-                                        ),
-                                        SizedBox(height: screenHeight * 0.02),
-                                        Text(
-                                          'There are no chargers available in this station',
-                                          style: theme.textTheme.bodyLarge
-                                              ?.copyWith(
-                                            color: theme
-                                                .textTheme.bodyLarge?.color
-                                                ?.withOpacity(0.6),
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Station Location',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.textTheme.titleLarge?.color,
+                                    ),
+                                  ),
+                                  SizedBox(height: screenHeight * 0.02),
+                                  Container(
+                                    height: screenHeight * 0.4,
+                                    decoration: BoxDecoration(
+                                      border:
+                                          Border.all(color: theme.dividerColor),
+                                      borderRadius: BorderRadius.circular(
+                                          screenWidth * 0.02),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(
+                                          screenWidth * 0.02),
+                                      child: areCoordinatesValid
+                                          ? GoogleMap(
+                                              initialCameraPosition:
+                                                  CameraPosition(
+                                                target:
+                                                    LatLng(latitude, longitude),
+                                                zoom: 15,
+                                              ),
+                                              markers: {
+                                                Marker(
+                                                  markerId:
+                                                      const MarkerId('station'),
+                                                  position:
+                                                      LatLng(latitude, longitude),
+                                                  icon: BitmapDescriptor
+                                                      .defaultMarkerWithHue(
+                                                          BitmapDescriptor
+                                                              .hueRed),
+                                                  infoWindow: InfoWindow(
+                                                    title: stationAddress,
+                                                    snippet: 'Tap for actions',
+                                                    onTap: () {
+                                                      showModalBottomSheet(
+                                                        context: context,
+                                                        backgroundColor:
+                                                            theme.cardTheme.color,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.vertical(
+                                                                  top: Radius.circular(
+                                                                      screenWidth *
+                                                                          0.04)),
+                                                        ),
+                                                        builder: (context) =>
+                                                            Container(
+                                                          padding: EdgeInsets.all(
+                                                              screenWidth * 0.04),
+                                                          child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize.min,
+                                                            children: [
+                                                              ListTile(
+                                                                leading: Icon(
+                                                                  Icons
+                                                                      .directions,
+                                                                  color: theme
+                                                                      .primaryColor,
+                                                                ),
+                                                                title: Text(
+                                                                  'Get Directions',
+                                                                  style: theme
+                                                                      .textTheme
+                                                                      .bodyLarge
+                                                                      ?.copyWith(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                    color: theme
+                                                                        .textTheme
+                                                                        .bodyLarge
+                                                                        ?.color,
+                                                                  ),
+                                                                ),
+                                                                onTap: () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  _launchDirections(
+                                                                      latitude,
+                                                                      longitude);
+                                                                },
+                                                              ),
+                                                              ListTile(
+                                                                leading: Icon(
+                                                                  Icons.share,
+                                                                  color: theme
+                                                                      .primaryColor,
+                                                                ),
+                                                                title: Text(
+                                                                  'Share Location',
+                                                                  style: theme
+                                                                      .textTheme
+                                                                      .bodyLarge
+                                                                      ?.copyWith(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                    color: theme
+                                                                        .textTheme
+                                                                        .bodyLarge
+                                                                        ?.color,
+                                                                  ),
+                                                                ),
+                                                                onTap: () {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                  _shareLocation(
+                                                                      latitude,
+                                                                      longitude,
+                                                                      stationAddress);
+                                                                },
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                  onTap: () {
+                                                    _mapController
+                                                        ?.showMarkerInfoWindow(
+                                                            const MarkerId(
+                                                                'station'));
+                                                  },
+                                                ),
+                                              },
+                                              onMapCreated: (GoogleMapController
+                                                  mapController) {
+                                                debugPrint('Google Map created');
+                                                _mapController = mapController;
+                                                // Apply map style based on theme
+                                                if (theme.brightness ==
+                                                    Brightness.dark) {
+                                                  mapController
+                                                      .setMapStyle(_darkMapStyle);
+                                                } else {
+                                                  mapController.setMapStyle(
+                                                      _lightMapStyle);
+                                                }
+                                                mapController
+                                                    .showMarkerInfoWindow(
+                                                        const MarkerId(
+                                                            'station'));
+                                              },
+                                            )
+                                          : Center(
+                                              child: Text(
+                                                'Invalid coordinates for this station',
+                                                style: theme.textTheme.bodyLarge
+                                                    ?.copyWith(
+                                                  color: theme
+                                                      .textTheme.bodyLarge?.color
+                                                      ?.withOpacity(0.6),
+                                                ),
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                  SizedBox(height: screenHeight * 0.02),
+                                  Text(
+                                    'Address: $stationAddress',
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: theme.textTheme.bodyLarge?.color
+                                          ?.withOpacity(0.8),
                                     ),
                                   ),
                                 ],
-                                SizedBox(height: screenHeight * 0.02),
-                              ],
-                            );
-                          });
-                        }),
-                        // Details Tab Content (Google Map)
-                        SingleChildScrollView(
-                          child: Container(
-                            padding: EdgeInsets.all(screenWidth * 0.04),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Station Location',
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.textTheme.titleLarge?.color,
-                                  ),
-                                ),
-                                SizedBox(height: screenHeight * 0.02),
-                                Container(
-                                  height: screenHeight * 0.4,
-                                  decoration: BoxDecoration(
-                                    border:
-                                        Border.all(color: theme.dividerColor),
-                                    borderRadius: BorderRadius.circular(
-                                        screenWidth * 0.02),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                        screenWidth * 0.02),
-                                    child: areCoordinatesValid
-                                        ? GoogleMap(
-                                            initialCameraPosition:
-                                                CameraPosition(
-                                              target:
-                                                  LatLng(latitude, longitude),
-                                              zoom: 15,
-                                            ),
-                                            markers: {
-                                              Marker(
-                                                markerId:
-                                                    const MarkerId('station'),
-                                                position:
-                                                    LatLng(latitude, longitude),
-                                                icon: BitmapDescriptor
-                                                    .defaultMarkerWithHue(
-                                                        BitmapDescriptor
-                                                            .hueRed),
-                                                infoWindow: InfoWindow(
-                                                  title: stationAddress,
-                                                  snippet: 'Tap for actions',
-                                                  onTap: () {
-                                                    showModalBottomSheet(
-                                                      context: context,
-                                                      backgroundColor:
-                                                          theme.cardTheme.color,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.vertical(
-                                                                top: Radius.circular(
-                                                                    screenWidth *
-                                                                        0.04)),
-                                                      ),
-                                                      builder: (context) =>
-                                                          Container(
-                                                        padding: EdgeInsets.all(
-                                                            screenWidth * 0.04),
-                                                        child: Column(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            ListTile(
-                                                              leading: Icon(
-                                                                Icons
-                                                                    .directions,
-                                                                color: theme
-                                                                    .primaryColor,
-                                                              ),
-                                                              title: Text(
-                                                                'Get Directions',
-                                                                style: theme
-                                                                    .textTheme
-                                                                    .bodyLarge
-                                                                    ?.copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  color: theme
-                                                                      .textTheme
-                                                                      .bodyLarge
-                                                                      ?.color,
-                                                                ),
-                                                              ),
-                                                              onTap: () {
-                                                                Navigator.pop(
-                                                                    context);
-                                                                _launchDirections(
-                                                                    latitude,
-                                                                    longitude);
-                                                              },
-                                                            ),
-                                                            ListTile(
-                                                              leading: Icon(
-                                                                Icons.share,
-                                                                color: theme
-                                                                    .primaryColor,
-                                                              ),
-                                                              title: Text(
-                                                                'Share Location',
-                                                                style: theme
-                                                                    .textTheme
-                                                                    .bodyLarge
-                                                                    ?.copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  color: theme
-                                                                      .textTheme
-                                                                      .bodyLarge
-                                                                      ?.color,
-                                                                ),
-                                                              ),
-                                                              onTap: () {
-                                                                Navigator.pop(
-                                                                    context);
-                                                                _shareLocation(
-                                                                    latitude,
-                                                                    longitude,
-                                                                    stationAddress);
-                                                              },
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                                onTap: () {
-                                                  _mapController
-                                                      ?.showMarkerInfoWindow(
-                                                          const MarkerId(
-                                                              'station'));
-                                                },
-                                              ),
-                                            },
-                                            onMapCreated: (GoogleMapController
-                                                mapController) {
-                                              debugPrint('Google Map created');
-                                              _mapController = mapController;
-                                              // Apply map style based on theme
-                                              if (theme.brightness ==
-                                                  Brightness.dark) {
-                                                mapController
-                                                    .setMapStyle(_darkMapStyle);
-                                              } else {
-                                                mapController.setMapStyle(
-                                                    _lightMapStyle);
-                                              }
-                                              mapController
-                                                  .showMarkerInfoWindow(
-                                                      const MarkerId(
-                                                          'station'));
-                                            },
-                                          )
-                                        : Center(
-                                            child: Text(
-                                              'Invalid coordinates for this station',
-                                              style: theme.textTheme.bodyLarge
-                                                  ?.copyWith(
-                                                color: theme
-                                                    .textTheme.bodyLarge?.color
-                                                    ?.withOpacity(0.6),
-                                              ),
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                                SizedBox(height: screenHeight * 0.02),
-                                Text(
-                                  'Address: $stationAddress',
-                                  style: theme.textTheme.bodyLarge?.copyWith(
-                                    color: theme.textTheme.bodyLarge?.color
-                                        ?.withOpacity(0.8),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                        // Reviews Tab Content (Disabled Navigation)
-                        Center(
-                          child: Text(
-                            'Reviews feature coming soon!',
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.textTheme.bodyLarge?.color
-                                  ?.withOpacity(0.6),
+                          // Reviews Tab Content (Disabled Navigation)
+                          Center(
+                            child: Text(
+                              'Reviews feature coming soon!',
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: theme.textTheme.bodyLarge?.color
+                                    ?.withOpacity(0.6),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  });
-                }),
-              ),
-            ],
-          ),
-          // Back Button
-          Positioned(
-            top: screenHeight * 0.05,
-            left: screenWidth * 0.04,
-            child: GestureDetector(
-              onTap: () => Get.back(),
-              child: Container(
-                padding: EdgeInsets.all(screenWidth * 0.02),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Colors.white,
-                  size: screenWidth * 0.04,
-                ),
-              ),
-            ),
-          ),
-          // Help Icon
-          Positioned(
-            top: screenHeight * 0.05,
-            right: screenWidth * 0.15,
-            child: GestureDetector(
-              onTap: () {
-                Get.to(() => ContactUs(), transition: Transition.rightToLeft);
-              },
-              child: Container(
-                padding: EdgeInsets.all(screenWidth * 0.02),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Image.asset(
-                  'assets/icons/Help1.png',
-                  color: Colors.white,
-                  height: screenWidth * 0.04,
-                ),
-              ),
-            ),
-          ),
-          // More Options
-          Positioned(
-            top: screenHeight * 0.05,
-            right: screenWidth * 0.04,
-            child: GestureDetector(
-              onTapDown: (TapDownDetails details) {
-                final tapPosition = details.globalPosition;
-                controller.showMoreOptionsPopup(
-                    context, tapPosition, stationId);
-              },
-              child: Container(
-                height: screenWidth * 0.08,
-                width: screenWidth * 0.08,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.more_vert,
-                  color: Colors.white,
-                  size: screenWidth * 0.04,
-                ),
-              ),
-            ),
-          ),
-          // "Charge Now" Button as Floating Container
-          Obx(() {
-            final selectedConnector = controller.chargerDetails
-                .asMap()
-                .entries
-                .where((entry) => entry.value['selectedConnectorIndex'] != -1)
-                .firstOrNull;
-            // Hide button if on Details tab (index 1)
-            if (selectedConnector != null &&
-                controller.selectedTabIndex.value != 1) {
-              final charger = selectedConnector.value;
-              final connectorIndex = charger['selectedConnectorIndex'];
-              final connector =
-                  (charger['connectors'] as List<dynamic>)[connectorIndex];
-              return Positioned(
-                left: 0,
-                right: 0,
-                bottom: screenHeight * 0.02,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.primaryColor,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.shadowColor.withOpacity(0.2),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Obx(() {
-                      final isLoading = searchpageController.isLoading.value;
-                      return ElevatedButton(
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                          controller.handleProtectedNavigation(
-                            isLoggedIn: sessionController.isLoggedIn,
-                            onAllowed: () {
-                              if (charger != null && connector != null) {
-                                searchpageController.handleStartCharging(
-                                  chargerId: charger['charger_id'],
-                                  chargerDetails: charger,
-                                  selectedConnectorId:
-                                  connector['connector_id'].toString(),
-                                  connectorDetailsMap: {
-                                    'type': connector['connector_type'].toString(),
-                                    'power': charger['max_power']?.toString() ?? 'N/A',
-                                    'status': connector['charger_status'] ?? ' - ',
-                                  },
-                                );
-                              } else {
-                                debugPrint("Charger or Connector data is missing");
-                                Get.snackbar(
-                                  'Error',
-                                  'Charger or Connector data is missing',
-                                  backgroundColor: theme.colorScheme.error,
-                                  colorText: theme.colorScheme.onError,
-                                );
-                              }
-                            },
-                          );
-                        },
-
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          padding: EdgeInsets.symmetric(
-                              vertical: screenHeight * 0.015),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          isLoading ? 'Processing...' : 'Charge Now',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: theme.colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        ],
                       );
-                    }),
+                    });
+                  }),
+                ),
+              ],
+            ),
+            // Back Button
+            Positioned(
+              top: screenHeight * 0.05,
+              left: screenWidth * 0.04,
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  padding: EdgeInsets.all(screenWidth * 0.02),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.white,
+                    size: screenWidth * 0.04,
                   ),
                 ),
-              );
-            }
-            return const SizedBox.shrink();
-          }),
-        ],
+              ),
+            ),
+            // Help Icon
+            Positioned(
+              top: screenHeight * 0.05,
+              right: screenWidth * 0.15,
+              child: GestureDetector(
+                onTap: () {
+                  Get.to(() => ContactUs(), transition: Transition.rightToLeft);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(screenWidth * 0.02),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Image.asset(
+                    'assets/icons/Help1.png',
+                    color: Colors.white,
+                    height: screenWidth * 0.04,
+                  ),
+                ),
+              ),
+            ),
+            // More Options
+            Positioned(
+              top: screenHeight * 0.05,
+              right: screenWidth * 0.04,
+              child: GestureDetector(
+                onTapDown: (TapDownDetails details) {
+                  final tapPosition = details.globalPosition;
+                  controller.showMoreOptionsPopup(
+                      context, tapPosition, stationId);
+                },
+                child: Container(
+                  height: screenWidth * 0.08,
+                  width: screenWidth * 0.08,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface.withOpacity(0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.more_vert,
+                    color: Colors.white,
+                    size: screenWidth * 0.04,
+                  ),
+                ),
+              ),
+            ),
+            // "Charge Now" Button as Floating Container
+            Obx(() {
+              final selectedConnector = controller.chargerDetails
+                  .asMap()
+                  .entries
+                  .where((entry) => entry.value['selectedConnectorIndex'] != -1)
+                  .firstOrNull;
+              // Hide button if on Details tab (index 1)
+              if (selectedConnector != null &&
+                  controller.selectedTabIndex.value != 1) {
+                final charger = selectedConnector.value;
+                final connectorIndex = charger['selectedConnectorIndex'];
+                final connector =
+                    (charger['connectors'] as List<dynamic>)[connectorIndex];
+                return Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: screenHeight * 0.02,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: theme.primaryColor,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.shadowColor.withOpacity(0.2),
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Obx(() {
+                        final isLoading = searchpageController.isLoading.value;
+                        return ElevatedButton(
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                            controller.handleProtectedNavigation(
+                              isLoggedIn: sessionController.isLoggedIn,
+                              onAllowed: () {
+                                if (charger != null && connector != null) {
+                                  searchpageController.handleStartCharging(
+                                    chargerId: charger['charger_id'],
+                                    chargerDetails: charger,
+                                    selectedConnectorId:
+                                    connector['connector_id'].toString(),
+                                    connectorDetailsMap: {
+                                      'type': connector['connector_type'].toString(),
+                                      'power': charger['max_power']?.toString() ?? 'N/A',
+                                      'status': connector['charger_status'] ?? ' - ',
+                                    },
+                                  );
+                                } else {
+                                  debugPrint("Charger or Connector data is missing");
+                                  Get.snackbar(
+                                    'Error',
+                                    'Charger or Connector data is missing',
+                                    backgroundColor: theme.colorScheme.error,
+                                    colorText: theme.colorScheme.onError,
+                                  );
+                                }
+                              },
+                            );
+                          },
+      
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: EdgeInsets.symmetric(
+                                vertical: screenHeight * 0.015),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            isLoading ? 'Processing...' : 'Charge Now',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
+          ],
+        ),
       ),
     );
   }

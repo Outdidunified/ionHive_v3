@@ -120,12 +120,18 @@ class SearchpageController extends GetxController {
         chargerDetails.value = response.data;
         connectorDetailsMap.clear();
         for (var connector in chargerDetails.value!.connectors) {
-          connectorDetailsMap[connector.connectorId] = connector;
+          // Provide default 0 if connectorId is null
+          connectorDetailsMap[connector.connectorId ?? 0] = connector;
         }
 
         if (Get.context != null) {
-          showConnectorBottomSheet(response.data!.chargerId,
-              response.data!.connectors, response.data!, Get.context!);
+          // Provide empty string fallback for chargerId if null
+          showConnectorBottomSheet(
+            response.data!.chargerId ?? '',
+            response.data!.connectors,
+            response.data!,
+            Get.context!,
+          );
           return true;
         } else {
           CustomSnackbar.showError(message: 'Context not available.');
@@ -143,6 +149,7 @@ class SearchpageController extends GetxController {
       isLoading.value = false;
     }
   }
+
 
   void showConnectorBottomSheet(String chargerId, List<Connector> connectors,
       Charger charger, BuildContext context) {
@@ -189,9 +196,10 @@ class SearchpageController extends GetxController {
             const SizedBox(height: 4),
             Column(
               children: connectors.map((connector) {
-                String statusText = connector.chargerStatus;
-                Color statusColor = _getStatusColor(connector.chargerStatus);
-                IconData statusIcon = _getStatusIcon(connector.chargerStatus);
+                String statusText = connector.chargerStatus ?? 'Unknown';
+                Color statusColor = _getStatusColor(connector.chargerStatus ?? 'Unknown');
+                IconData statusIcon = _getStatusIcon(connector.chargerStatus ?? 'Unknown');
+
                 String assetImage = connector.connectorType == 1
                     ? 'assets/icons/wall-socket.png'
                     : connector.connectorType == 2
@@ -325,17 +333,18 @@ class SearchpageController extends GetxController {
       case 'unavailable':
         return Icons.remove_circle_outline;
       case 'faulted':
-        return Icons.error_outline;
+        return Icons.error;
       case 'preparing':
         return Icons.hourglass_empty;
       case 'charging':
         return Icons.bolt;
       case 'finishing':
-        return Icons.done_all;
+        return Icons.flag;
       default:
         return Icons.help_outline;
     }
   }
+
 
   Future<List<String>> fetchPlaceSuggestions(String input) async {
     final apiKey = "AIzaSyDdBinCjuyocru7Lgi6YT3FZ1P6_xi0tco";
@@ -373,20 +382,29 @@ class SearchpageController extends GetxController {
             'longitude': loc['lng'] as double,
           };
         } else {
-          throw Exception('No coordinates found');
+          CustomSnackbar.showError(
+            message: 'We couldn’t find any matching places . Please check and try again.',
+            duration: const Duration(seconds: 3),
+          );
+          return null;
         }
       } else {
-        throw Exception('Failed to fetch coordinates');
+        CustomSnackbar.showError(
+          message: 'Unable to reach the location service. Please check your internet connection or try again later.',
+          duration: const Duration(seconds: 3),
+        );
+        return null;
       }
     } catch (e) {
       debugPrint('Error fetching coordinates: $e');
       CustomSnackbar.showError(
-        message: 'Failed to fetch coordinates: $e',
+        message: 'Something went wrong while finding the place. Please try again.',
         duration: const Duration(seconds: 3),
       );
       return null;
     }
   }
+
 
   void updateSuggestions(String query) async {
     suggestedLocations.clear();
@@ -498,10 +516,11 @@ class SearchpageController extends GetxController {
         'isCurrentLocation': isCurrentLocationSearch,
       });
     } else {
-      CustomSnackbar.showError(
-        message: 'Could not fetch coordinates for $location',
-        duration: const Duration(seconds: 3), // <-- Set duration here
-      );
+      debugPrint('Could not find any matching places for $location');
+      // CustomSnackbar.showError(
+      //   message: 'Could not find any matching places for $location',
+      //   duration: const Duration(seconds: 3), // <-- Set duration here
+      // );
     }
   }
 

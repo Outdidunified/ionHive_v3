@@ -430,17 +430,23 @@ class HeaderCard extends StatelessWidget {
                   SizedBox(height: context.rHeight(isLargeScreen ? 24 : 16)),
                   Obx(() => CustomButton(
                         text: "Save",
-                        onPressed: () {
-                          controller.updateProfile();
-                        },
+                        onPressed: controller.isFormValid.value &&
+                                !controller.isLoading.value
+                            ? () {
+                                controller.updateProfile();
+                              }
+                            : null, // Disable button when form is invalid or loading
                         isLoading: controller.isLoading.value,
                         borderRadius: context.rRadius(isLargeScreen ? 12 : 8),
                         textStyle: theme.textTheme.titleLarge!.copyWith(
                           fontSize: context.rFontSize(
                               isLargeScreen ? 18 : (isSmallScreen ? 12 : 16)),
                           fontWeight: FontWeight.bold,
-                          color:
-                              theme.colorScheme.onPrimary, // White on primary
+                          color: controller.isFormValid.value
+                              ? theme.colorScheme
+                                  .onPrimary // White on primary when enabled
+                              : theme.colorScheme.onSurface
+                                  .withOpacity(0.5), // Dimmed when disabled
                         ),
                         padding: EdgeInsets.symmetric(
                           vertical: context.rHeight(
@@ -448,11 +454,13 @@ class HeaderCard extends StatelessWidget {
                           horizontal: context.rWidth(
                               isLargeScreen ? 40 : (isSmallScreen ? 20 : 30)),
                         ),
-                        boxShadow: BoxShadow(
-                          color: theme.primaryColor.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
+                        boxShadow: controller.isFormValid.value
+                            ? BoxShadow(
+                                color: theme.primaryColor.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              )
+                            : null, // No shadow when disabled
                       )),
                   SizedBox(height: context.rHeight(isLargeScreen ? 16 : 8)),
                 ],

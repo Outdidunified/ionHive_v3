@@ -6,7 +6,7 @@ import 'package:ionhive/core/controllers/session_controller.dart';
 import 'package:ionhive/feature/more/presentation/pages/header/data/urls.dart';
 import 'package:ionhive/utils/exception/exception.dart';
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';// Exception thrown Handler
+import 'package:flutter/material.dart';
 
 class HeaderAPICalls {
   bool _tokenDialogShown = false;
@@ -31,16 +31,22 @@ class HeaderAPICalls {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
+    debugPrint('response status code: ${response.statusCode}');
+
     try {
       final responseBody = jsonDecode(response.body);
+      debugPrint('response body: $responseBody');
 
-      // ✅ Handle token invalidation (e.g. account deactivated)
       if (responseBody is Map<String, dynamic> &&
           responseBody['invalidateToken'] == true) {
-        _handleTokenExpired(responseBody['message'] ?? 'Your session is no longer valid. Please log in again.');
+        _handleTokenExpired(
+          responseBody['message'] ??
+              'Your session is no longer valid. Please log in again.',
+        );
         throw HttpException(
           response.statusCode,
-          responseBody['message'] ?? _getDefaultErrorMessage(response.statusCode),
+          responseBody['message'] ??
+              _getDefaultErrorMessage(response.statusCode),
         );
       }
 
@@ -48,22 +54,58 @@ class HeaderAPICalls {
         return responseBody;
       }
 
-      // ✅ Handle token expired based on status code and message
       if (response.statusCode == 403 &&
-          (responseBody['message']?.toString().toLowerCase().contains('token expired') ?? false)) {
-        _handleTokenExpired(responseBody['message'] ?? 'Your session has expired. Please log in again.');
+          (responseBody['message']
+                  ?.toString()
+                  .toLowerCase()
+                  .contains('token expired') ??
+              false)) {
+        _handleTokenExpired(
+          responseBody['message'] ??
+              'Your session has expired. Please log in again.',
+        );
       }
 
-      // 🚨 Throw for all other errors
-      throw HttpException(
-        response.statusCode,
-        responseBody['message'] ?? _getDefaultErrorMessage(response.statusCode),
-      );
-    } catch (e) {
+      // Always prioritize the message from the response body if it exists
+      if (responseBody is Map<String, dynamic> &&
+          responseBody.containsKey('message')) {
+        throw HttpException(
+          response.statusCode,
+          responseBody['message'],
+        );
+      }
+
       throw HttpException(
         response.statusCode,
         _getDefaultErrorMessage(response.statusCode),
       );
+    } catch (e) {
+      if (e is HttpException) {
+        throw e; // Re-throw if it's already an HttpException
+      }
+
+      try {
+        final fallbackBody = jsonDecode(response.body);
+
+        // Always prioritize the message from the response body if it exists
+        if (fallbackBody is Map<String, dynamic> &&
+            fallbackBody.containsKey('message')) {
+          throw HttpException(
+            response.statusCode,
+            fallbackBody['message'],
+          );
+        }
+
+        throw HttpException(
+          response.statusCode,
+          _getDefaultErrorMessage(response.statusCode),
+        );
+      } catch (_) {
+        throw HttpException(
+          response.statusCode,
+          _getDefaultErrorMessage(response.statusCode),
+        );
+      }
     }
   }
 
@@ -102,18 +144,12 @@ class HeaderAPICalls {
     final url = HeaderUrl.CompleteProfile;
 
     try {
-      // Create request body based on whether phone_number is provided
       Map<String, dynamic> requestBody = {
         "username": username,
         "email_id": email,
         "user_id": user_id,
         "phone_number": phone_number,
       };
-
-      // Only add phone_number to the request if it's not null
-      // if (phone_number != null) {
-      //   requestBody["phone_number"] = phone_number;
-      // }
 
       final response = await http
           .post(
@@ -130,6 +166,19 @@ class HeaderAPICalls {
           throw TimeoutException(408, 'Request timed out. Please try again.');
         },
       );
+
+      final data = jsonDecode(response.body);
+      debugPrint('update profile : $data');
+
+      // For 401 responses with "no changes found" message, return the response directly
+      // instead of throwing an exception
+      if (response.statusCode == 401 &&
+          data is Map<String, dynamic> &&
+          data.containsKey('message') &&
+          data['message'] == 'no changes found') {
+        return data;
+      }
+
       return _handleResponse(response);
     } on TimeoutException {
       throw HttpException(408, 'Request timed out. Please try again.');
@@ -138,7 +187,10 @@ class HeaderAPICalls {
           'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
-      throw HttpException(500, '$e');
+      if (e is HttpException) {
+        rethrow; // ✅ Keep original error message from backend
+      }
+      throw HttpException(500, 'Unexpected error: $e');
     }
   }
 
@@ -164,7 +216,10 @@ class HeaderAPICalls {
           'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
-      throw HttpException(500, '$e');
+      if (e is HttpException) {
+        rethrow;
+      }
+      throw HttpException(500, 'Unexpected error: $e');
     }
   }
 
@@ -190,7 +245,10 @@ class HeaderAPICalls {
           'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
-      throw HttpException(500, '$e');
+      if (e is HttpException) {
+        rethrow;
+      }
+      throw HttpException(500, 'Unexpected error: $e');
     }
   }
 
@@ -216,7 +274,10 @@ class HeaderAPICalls {
           'Unable to reach the server. \nPlease check your connection or try again later.');
     } catch (e) {
       debugPrint("Error: $e");
-      throw HttpException(500, '$e');
+      if (e is HttpException) {
+        rethrow;
+      }
+      throw HttpException(500, 'Unexpected error: $e');
     }
   }
 }

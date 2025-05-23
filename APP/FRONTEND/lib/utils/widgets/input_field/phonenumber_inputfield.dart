@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:intl_phone_field/countries.dart';
 
 class AdvancedPhoneNumberInput extends StatefulWidget {
   final TextEditingController controller;
@@ -39,7 +40,6 @@ class _AdvancedPhoneNumberInputState extends State<AdvancedPhoneNumberInput> {
         labelStyle: theme.textTheme.bodyMedium,
         filled: true,
         fillColor: theme.colorScheme.surface,
-
         contentPadding:
             const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
         errorText: _hasError ? "Enter a valid phone number" : null,
@@ -62,6 +62,22 @@ class _AdvancedPhoneNumberInputState extends State<AdvancedPhoneNumberInput> {
         counterText: "", // This hides the counter completely
       ),
       initialCountryCode: 'IN', // Default to India 🇮🇳
+      countries: const [
+        Country(
+          name: 'India',
+          flag: '🇮🇳',
+          nameTranslations: {'en': 'India'}, // Required parameter
+          code: 'IN',
+          dialCode: '91',
+          minLength: 10,
+          maxLength: 10,
+        )
+      ], // Only allow India
+      disableLengthCheck: true, // Don't check length automatically
+      dropdownIconPosition: IconPosition.trailing, // Position of dropdown icon
+      showDropdownIcon: false, // Hide the dropdown icon completely
+      flagsButtonPadding: const EdgeInsets.only(left: 8), // Adjust flag padding
+      enabled: true, // Keep the field enabled for input
       onChanged: (phone) {
         setState(() {
           _hasError = phone.number.length < 10;
@@ -72,7 +88,6 @@ class _AdvancedPhoneNumberInputState extends State<AdvancedPhoneNumberInput> {
       onCountryChanged: (country) =>
           widget.onCountryChanged?.call(country.code),
       keyboardType: TextInputType.phone,
-
       style: theme.textTheme.bodyLarge,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
     );
