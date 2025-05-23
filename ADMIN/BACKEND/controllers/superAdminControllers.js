@@ -1018,7 +1018,7 @@ async function fetchConnectorTypeName(req, res) {
         }
 
         const db = await database.connectToDatabase();
-        const OutputTypeCollection = db.collection('output-type_config');
+        const OutputTypeCollection = db.collection('output_type_config');
 
         const fetchResults = await OutputTypeCollection.find({
             output_type: connector_type,
@@ -2055,7 +2055,7 @@ const fetchAllOutputType = async (req, res) => {
         }
 
         const db = await database.connectToDatabase();
-        const OutputTypeCollection = db.collection('output-type_config');
+        const OutputTypeCollection = db.collection('output_type_config');
 
         if (id) {
             // Fetch details by ID
@@ -2093,7 +2093,7 @@ const createOutputType = async (req, res) => {
         }
 
         const db = await database.connectToDatabase();
-        const OutputTypeCollection = db.collection('output-type_config');
+        const OutputTypeCollection = db.collection('output_type_config');
 
         // Check if the output type already exists
         const existingType = await OutputTypeCollection.findOne({ output_type: output_type, output_type_name: output_type_name });
@@ -2140,7 +2140,7 @@ const updateOutputType = async (req, res) => {
         }
 
         const db = await database.connectToDatabase();
-        const OutputTypeCollection = db.collection('output-type_config');
+        const OutputTypeCollection = db.collection('output_type_config');
 
         // Check if the output type with the same name exists, excluding the current record being updated
         const existingType = await OutputTypeCollection.findOne({
@@ -2194,7 +2194,7 @@ const DeActivateOutputType = async (req, res) => {
         }
 
         const db = await database.connectToDatabase();
-        const OutputTypeCollection = db.collection('output-type_config');
+        const OutputTypeCollection = db.collection('output_type_config');
 
         // Perform the update operation (deactivate or activate the output type)
         const updateResult = await OutputTypeCollection.updateOne(
