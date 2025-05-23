@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   admin-frontend:
+    container_name: admin-frontend
     build: ./ADMIN/FRONTEND
     ports:
       - "3000:3000"
@@ -12,20 +13,26 @@ services:
       - appnet
 
   admin-backend:
+    container_name: admin-backend
     build: ./ADMIN/BACKEND
     ports:
       - "3001:3001"
     restart: always
     networks:
       - appnet
+    volumes:
+      - ./public:/app/public
 
   app-backend:
+    container_name: app-backend
     build: ./APP/BACKEND
     ports:
       - "3003:3003"
     restart: always
     networks:
       - appnet
+    volumes:
+      - ./public:/app/public
 
 networks:
   appnet:
