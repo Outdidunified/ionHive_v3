@@ -13,7 +13,7 @@ const ManageVehicle = ({ userInfo, handleLogout }) => {
         vehicleData,
         setVehicleData,
         handleInputChange,handleFileChange,
-        vehicleModels,
+        vehicleModels,fileInputRef,
         filteredModels,
         isloading,
         loading,
@@ -89,54 +89,72 @@ const ManageVehicle = ({ userInfo, handleLogout }) => {
           <h4 className="card-title" style={{ color: '#222' }}>Add Vehicle</h4>
         </div>
 
-        <div className="table-responsive pt-3">
-          {[
-            { label: 'Model', name: 'model', placeholder: 'Enter Model' },
-            { label: 'Type', name: 'type', placeholder: 'Enter Type' },
-            { label: 'Company', name: 'vehicle_company', placeholder: 'Enter Vehicle Company' },
-            { label: 'Battery Size (kWh)', name: 'battery_size_kwh', placeholder: 'Battery Size' },
-            { label: 'Charger Type', name: 'charger_type', placeholder: 'Enter Charger Type' },
-          ].map(({ label, name, placeholder }) => (
-            <div className="input-group mb-3" key={name}>
-              <div className="input-group-prepend">
-                <span
-                  className="input-group-text"
-                  style={{ width: '180px', color: '#444', fontWeight: 500 }}
-                >
-                  {label}
-                </span>
-              </div>
-              <InputField
-                placeholder={placeholder}
-                name={name}
-                value={vehicleData[name]}
-                onChange={handleInputChange}
-                maxLength={50}
-                required
-              />
-            </div>
-          ))}
+     <div className="table-responsive pt-3">
+  {[
+    { label: 'Model', name: 'model', placeholder: 'Enter Model' },
+    { label: 'Type', name: 'type', placeholder: 'Enter Type' },
+    { label: 'Company', name: 'vehicle_company', placeholder: 'Enter Vehicle Company' },
+    {
+      label: 'Battery Size (kWh)',
+      name: 'battery_size_kwh',
+      placeholder: 'Battery Size',
+      type: 'text',
+    },
+    { label: 'Charger Type', name: 'charger_type', placeholder: 'Enter Charger Type' },
+  ].map(({ label, name, placeholder, type }) => (
+    <div className="input-group mb-3" key={name}>
+      <div className="input-group-prepend">
+        <span
+          className="input-group-text"
+          style={{ width: '180px', color: '#444', fontWeight: 500 }}
+        >
+          {label}
+        </span>
+      </div>
+      <InputField
+        type={type || 'text'}
+        placeholder={placeholder}
+        name={name}
+        value={vehicleData[name]}
+        onChange={(e) => {
+          if (name === 'battery_size_kwh') {
+            const value = e.target.value;
+            // Allow only positive numbers with optional decimal point
+            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+              handleInputChange(e);
+            }
+          } else {
+            handleInputChange(e);
+          }
+        }}
+        maxLength={10}
+        required
+      />
+    </div>
+  ))}
 
-          {/* Vehicle Image Upload */}
-          <div className="input-group mb-3">
-            <div className="input-group-prepend">
-              <span
-                className="input-group-text"
-                style={{ width: '180px', color: '#444', fontWeight: 500 }}
-              >
-                Upload Image
-              </span>
-            </div>
-            <input
-              type="file"
-              name="vehicle_image_file"
-              accept="image/*"
-              className="form-control"
-              onChange={handleFileChange}
-              required
-            />
-          </div>
-        </div>
+  {/* Vehicle Image Upload */}
+  <div className="input-group mb-3">
+    <div className="input-group-prepend">
+      <span
+        className="input-group-text"
+        style={{ width: '180px', color: '#444', fontWeight: 500 }}
+      >
+        Upload Image
+      </span>
+    </div>
+    <input
+      type="file"
+      name="vehicle_image_file"
+      accept="image/*"
+      className="form-control"
+      onChange={handleFileChange}
+      ref={fileInputRef}
+      required
+    />
+  </div>
+</div>
+
 
         {error && <div className="text-danger mt-2">{error}</div>}
 

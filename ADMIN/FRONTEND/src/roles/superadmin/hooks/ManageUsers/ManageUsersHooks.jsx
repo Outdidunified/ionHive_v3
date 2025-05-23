@@ -189,6 +189,7 @@ const ManageUser = ( userInfo ) => {
         try {
             // const url = '/superadmin/FetchUsers';
             const res = await axiosInstance({method:'get',url:'/superadmin/FetchUsers'});
+            console.log('response',res.data)
             setData(res.data.data);
             setPosts(res.data.data); // Make sure to update 'posts' which is used in rendering
             setError(null);
@@ -210,14 +211,20 @@ const ManageUser = ( userInfo ) => {
 
     // Search data 
     const handleSearchInputChange = (e) => {
-        const inputValue = e.target.value.toUpperCase();
-        if (Array.isArray(data)) {
-            const filteredData = data.filter((item) =>
-                item.username.toUpperCase().includes(inputValue)
-            );
-            setPosts(filteredData);
+    const inputValue = e.target.value.toUpperCase();
+    if (Array.isArray(data)) {
+        if (!inputValue) {
+            setPosts(data); // Reset to full list when input is empty
+            return;
         }
-    };
+
+        const filteredData = data.filter((item) =>
+            item.username &&
+            item.username.toUpperCase().includes(inputValue)
+        );
+        setPosts(filteredData);
+    }
+};
 
     useEffect(() => {
         switch (data) {

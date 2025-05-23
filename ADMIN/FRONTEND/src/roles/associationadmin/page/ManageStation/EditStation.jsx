@@ -167,7 +167,7 @@ const EditStation = ({ userInfo, handleLogout }) => {
                                 value={network}
                                 onChange={(e) => setNetwork(e.target.value)}
                                 maxLength={50}
-
+                           required
                               />
                             </div>
                           </div>
@@ -181,7 +181,7 @@ const EditStation = ({ userInfo, handleLogout }) => {
                                 value={availability}
                                 onChange={(e) => setAvailability(e.target.value)}
                                  maxLength={50}
-
+                                required
                               />
                             </div>
                           </div>
@@ -195,8 +195,9 @@ const EditStation = ({ userInfo, handleLogout }) => {
         className="form-control"
         value={accessibility}
         onChange={(e) => setAccessibility(e.target.value)}
+          required
+
       >
-        <option value="">Select Accessibility</option>
         <option value="Public">Public</option>
         <option value="Private">Private</option>
         <option value="Captive">Captive</option>

@@ -75,12 +75,6 @@ if (dataItem) {
     return;
   }
 
-  // Battery Size: must be a valid positive number
-  if (isNaN(batterySizeKwh) || Number(batterySizeKwh) <= 0) {
-    setErrorMessage('Battery Size must be a positive number');
-    setLoading(false);
-    return;
-  }
 
   const vehicle_id = dataItem?.vehicle_id;
   if (!vehicle_id) {

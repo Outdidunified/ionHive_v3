@@ -114,13 +114,20 @@ const EditVehicle= ({ userInfo, handleLogout }) => {
                             <label className="col-sm-12 col-form-label labelInput">Battery Size (kWh)</label>
                             <div className="col-sm-12">
                               <InputField
-                                type="number"
-                                value={batterySizeKwh}
-                                onChange={(e) => setBatterySizeKwh(e.target.value)}
-                                min={0}
-                                step="0.01"
-                                required
-                              />
+  type="text" // use "text" to prevent browser spinner and allow better input control
+  value={batterySizeKwh}
+  onChange={(e) => {
+    const value = e.target.value;
+    // Allow only positive numbers with optional decimals (e.g., 10, 10.5, 0.25)
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setBatterySizeKwh(value);
+    }
+  }}
+  placeholder="Battery Size (kWh)"
+  maxLength={10}
+  required
+/>
+
                             </div>
                           </div>
                         </div>

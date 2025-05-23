@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect,useRef } from 'react';
 import { showErrorAlert, showSuccessAlert } from '../../../../utils/alert';
 import axiosInstance from '../../../../utils/utils';
 
@@ -13,6 +13,7 @@ const useManageVehicle = (userInfo) => {
     charger_type: '',
     vehicle_image: '',
   });
+  
 
   const [vehicleModels, setVehicleModels] = useState([]);
   const [filteredModels, setFilteredModels] = useState([]);
@@ -37,24 +38,32 @@ const useManageVehicle = (userInfo) => {
     setTheadfixed(theadfixed === 'fixed' ? 'transparent' : 'fixed');
     setTheadBackgroundColor(theadBackgroundColor === 'white' ? 'transparent' : 'white');
   };
+  const fileInputRef = useRef(null);
+
 
   // Close Add Modal
-  const closeAddModal = () => {
-    setVehicleData({
-      vehicle_id: '',
-      model: '',
-      type: '',
-      vehicle_company: '',
-      battery_size_kwh: '',
-      charger_type: '',
-      vehicle_image: '',
-    });
-    setShowAddForm(false);
-    setTheadsticky('sticky');
-    setTheadfixed('fixed');
-    setTheadBackgroundColor('white');
-    setError('');
-  };
+ const closeAddModal = () => {
+  setVehicleData({
+    vehicle_id: '',
+    model: '',
+    type: '',
+    vehicle_company: '',
+    battery_size_kwh: '',
+    charger_type: '',
+    vehicle_image: '',
+  });
+
+  if (fileInputRef.current) {
+    fileInputRef.current.value = '';
+  }
+
+  setShowAddForm(false);
+  setTheadsticky('sticky');
+  setTheadfixed('fixed');
+  setTheadBackgroundColor('white');
+  setError('');
+};
+
 
   // Handle Input Change
   const handleInputChange = (e) => {
@@ -79,9 +88,7 @@ const useManageVehicle = (userInfo) => {
     return showErrorAlert('Validation Error', 'All fields except Model are required');
   }
 
-  if (isNaN(battery_size_kwh) || Number(battery_size_kwh) <= 0) {
-    return showErrorAlert('Validation Error', 'Battery Size must be a positive number');
-  }
+ 
 
   try {
     setLoading(true);
@@ -211,7 +218,7 @@ const updateVehicleModelStatus = async (status, vehicle_id) => {
     closeAddModal,
     addVehicleModel,
     handleSearchInputChange,
-    fetchVehicleModels,updateVehicleModelStatus
+    fetchVehicleModels,updateVehicleModelStatus,fileInputRef
   };
 };
 

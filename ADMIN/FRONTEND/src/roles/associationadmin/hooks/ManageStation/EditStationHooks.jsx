@@ -17,7 +17,7 @@ const useEditChargingStation = (userInfo) => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [locationId, setLocationId] = useState(dataItem?.location_id || '');
-
+const [accessibilityError, setAccessibilityError] = useState('');
 
   const [stationId, setStationId] = useState(dataItem?.station_id || '');
   const [associationId, setAssociationId] = useState(dataItem?.association_id || '');
@@ -120,7 +120,7 @@ const handleLocationIdChange = (e) => {
       locationId, setLocationId, // <-- added here
 handleLocationIdChange,
     updateStation,
-    goBackToManageStations,
+    goBackToManageStations,accessibilityError, setAccessibilityError,
   };
 };
 

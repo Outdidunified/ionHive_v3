@@ -510,13 +510,14 @@ const ManageStation = ({ userInfo, handleLogout }) => {
         ) : (
           <>
             <option value="">-- Select Charger ID --</option>
-            {allocatedChargers
-              ?.find((station) => station.station_id === removeStationId)
-              ?.chargers?.map((chargerId) => (
-                <option key={chargerId} value={chargerId}>
-                  {chargerId}
-                </option>
-              ))}
+           {allocatedChargers
+  ?.filter((charger) => charger.station_id === removeStationId)
+  ?.map((charger) => (
+    <option key={charger.charger_id} value={charger.charger_id}>
+      {charger.charger_id}
+    </option>
+  ))}
+
           </>
         )}
       </select>

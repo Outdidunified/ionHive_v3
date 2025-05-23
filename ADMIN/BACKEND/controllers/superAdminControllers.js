@@ -2788,27 +2788,31 @@ const UpdateUserProfile = async (req, res) => {
 //Add vehicle
 
 const CreateVehicleModel = async (req, res) => {
-  const {
+  let {
     model,
     type,
     vehicle_company,
     battery_size_kwh,
     charger_type,
-    created_by  // new field
+    created_by
   } = req.body;
 
   if (!req.file) {
     return res.status(400).json({ status: 'Failed', message: 'Vehicle image is required' });
   }
 
-  // Prepend '/uploads/' to the filename before saving
+  // Trim only (preserve original casing)
+  model = model?.trim();
+  type = type?.trim();
+  vehicle_company = vehicle_company?.trim();
+  battery_size_kwh = battery_size_kwh?.trim();
+  charger_type = charger_type?.trim();
+  created_by = created_by?.trim();
+
   const vehicle_image = `/uploads/${req.file.filename}`;
 
   try {
-    if (
-      !model || !type || !vehicle_company ||
-      !battery_size_kwh || !charger_type || !vehicle_image || !created_by
-    ) {
+    if (!model || !type || !vehicle_company || !battery_size_kwh || !charger_type || !created_by) {
       return res.status(400).json({
         status: 'Failed',
         message: 'All fields are required including created_by'
@@ -2818,15 +2822,27 @@ const CreateVehicleModel = async (req, res) => {
     const db = await database.connectToDatabase();
     const vehicleCollection = db.collection("vehicle_models");
 
-    // Generate next vehicle_id
+    // Duplicate check (case-insensitive)
+    const duplicate = await vehicleCollection.findOne({
+      model: { $regex: `^${model}$`, $options: 'i' },
+      type: { $regex: `^${type}$`, $options: 'i' },
+      vehicle_company: { $regex: `^${vehicle_company}$`, $options: 'i' },
+      battery_size_kwh: battery_size_kwh,
+      charger_type: { $regex: `^${charger_type}$`, $options: 'i' }
+    });
+
+    if (duplicate) {
+      return res.status(409).json({
+        status: 'Failed',
+        message: 'Vehicle model with same details already exists'
+      });
+    }
+
+    // Generate new vehicle_id
     const lastVehicle = await vehicleCollection.find().sort({ vehicle_id: -1 }).limit(1).toArray();
     const vehicle_id = lastVehicle.length > 0 ? lastVehicle[0].vehicle_id + 1 : 1;
 
-    const existing = await vehicleCollection.findOne({ vehicle_id });
-    if (existing) {
-      return res.status(400).json({ status: 'Failed', message: 'Vehicle ID already exists' });
-    }
-
+    // Insert new vehicle model
     await vehicleCollection.insertOne({
       vehicle_id,
       model,
@@ -2834,20 +2850,22 @@ const CreateVehicleModel = async (req, res) => {
       vehicle_company,
       battery_size_kwh,
       charger_type,
-      vehicle_image,  // Now has the '/uploads/' prefix
+      vehicle_image,
       status: true,
       created_date: new Date(),
-      created_by,         
+      created_by,
       modified_date: null,
-      modified_by: null,  
+      modified_by: null
     });
 
     return res.status(201).json({ status: 'Success', message: 'Vehicle model created successfully' });
+
   } catch (error) {
     console.error('Error in CreateVehicleModel controller:', error);
     return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
   }
 };
+
 
 
 
@@ -2869,7 +2887,7 @@ const GetAllVehicleModels = async (req, res) => {
 
 //update the vehicles
 const UpdateVehicleModel = async (req, res) => {
-  const {
+  let {
     vehicle_id,
     model,
     type,
@@ -2879,10 +2897,9 @@ const UpdateVehicleModel = async (req, res) => {
     modified_by
   } = req.body;
 
-const vehicle_image = req.file ? `/uploads/${req.file.filename}` : null;
+  const vehicle_image = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
-    // Validate all required fields
     if (
       !vehicle_id || !model || !type || !vehicle_company ||
       !battery_size_kwh || !charger_type || !modified_by
@@ -2893,7 +2910,7 @@ const vehicle_image = req.file ? `/uploads/${req.file.filename}` : null;
       });
     }
 
-    // Convert vehicle_id to number
+    // Convert vehicle_id and validate
     const numericVehicleId = Number(vehicle_id);
     if (isNaN(numericVehicleId)) {
       return res.status(400).json({
@@ -2902,15 +2919,41 @@ const vehicle_image = req.file ? `/uploads/${req.file.filename}` : null;
       });
     }
 
+    // Trim only (preserve original casing)
+    model = model.trim();
+    type = type.trim();
+    vehicle_company = vehicle_company.trim();
+    battery_size_kwh = battery_size_kwh.trim();
+    charger_type = charger_type.trim();
+    modified_by = modified_by.trim();
+
     const db = await database.connectToDatabase();
     const vehicleCollection = db.collection("vehicle_models");
 
-    // Find existing vehicle by numeric ID
+    // Check if vehicle exists
     const existing = await vehicleCollection.findOne({ vehicle_id: numericVehicleId });
     if (!existing) {
-      return res.status(404).json({ status: 'Failed', message: 'Vehicle Id not found' });
+      return res.status(404).json({ status: 'Failed', message: 'Vehicle ID not found' });
     }
 
+    // Duplicate check excluding current vehicle
+    const duplicate = await vehicleCollection.findOne({
+      vehicle_id: { $ne: numericVehicleId },
+      model: { $regex: `^${model}$`, $options: 'i' },
+      type: { $regex: `^${type}$`, $options: 'i' },
+      vehicle_company: { $regex: `^${vehicle_company}$`, $options: 'i' },
+      battery_size_kwh: battery_size_kwh,
+      charger_type: { $regex: `^${charger_type}$`, $options: 'i' }
+    });
+
+    if (duplicate) {
+      return res.status(409).json({
+        status: 'Failed',
+        message: 'Another vehicle model with same details already exists'
+      });
+    }
+
+    // Prepare update object
     const updateData = {
       model,
       type,
@@ -2918,13 +2961,14 @@ const vehicle_image = req.file ? `/uploads/${req.file.filename}` : null;
       battery_size_kwh,
       charger_type,
       modified_date: new Date(),
-      modified_by,
+      modified_by
     };
 
     if (vehicle_image) {
       updateData.vehicle_image = vehicle_image;
     }
 
+    // Perform update
     const updateResult = await vehicleCollection.updateOne(
       { vehicle_id: numericVehicleId },
       { $set: updateData }
@@ -2948,6 +2992,7 @@ const vehicle_image = req.file ? `/uploads/${req.file.filename}` : null;
     return res.status(500).json({ status: 'Failed', message: 'Internal Server Error' });
   }
 };
+
 
 
 const UpdateVehicleModelStatus = async (req, res) => {
