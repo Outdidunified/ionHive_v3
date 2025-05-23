@@ -15,6 +15,7 @@ class HeaderController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxnString updateProfileValidationError = RxnString();
+  final RxBool isFormValid = true.obs; // Track if the form is valid
 
   // Store fetched profile data
   RxMap<String, dynamic>? profileData = RxMap();
@@ -27,7 +28,39 @@ class HeaderController extends GetxController {
     super.onInit();
     fetchHeaderData(); // Fetch all header data at once
 
+    // Add listeners to validate form
+    usernameController.addListener(_validateForm);
+    phoneNumberController.addListener(_validateForm);
+
     // fetchprofile(); // Fetch profile data on init
+  }
+
+  // Validate the form and update isFormValid
+  void _validateForm() {
+    final username = usernameController.text.trim();
+    final phoneNumber = phoneNumberController.text.trim();
+
+    // Username is required
+    if (username.isEmpty) {
+      isFormValid.value = false;
+      return;
+    }
+
+    // Phone number validation (only if entered)
+    if (phoneNumber.isNotEmpty) {
+      if (!RegExp(r'^\d{10}$').hasMatch(phoneNumber)) {
+        isFormValid.value = false;
+        return;
+      }
+    }
+
+    // If we get here, the form is valid
+    isFormValid.value = true;
+
+    // Clear any previous validation error
+    if (updateProfileValidationError.value != null) {
+      updateProfileValidationError.value = null;
+    }
   }
 
   /// **Update profile API call**
@@ -40,6 +73,8 @@ class HeaderController extends GetxController {
 
     // Basic validation - username is required
     if (newUsername.isEmpty) {
+      updateProfileValidationError.value = "Username cannot be empty";
+      isFormValid.value = false;
       CustomSnackbar.showError(message: "Username cannot be empty");
       return;
     }
@@ -48,6 +83,8 @@ class HeaderController extends GetxController {
     int? newPhoneNumber;
     if (phoneNumberText.isNotEmpty) {
       if (!RegExp(r'^\d{10}$').hasMatch(phoneNumberText)) {
+        updateProfileValidationError.value = "Phone number must be 10 digits";
+        isFormValid.value = false;
         CustomSnackbar.showError(message: "Phone number must be 10 digits");
         return;
       }
@@ -55,6 +92,8 @@ class HeaderController extends GetxController {
       try {
         newPhoneNumber = int.parse(phoneNumberText);
       } catch (e) {
+        updateProfileValidationError.value = "Invalid phone number";
+        isFormValid.value = false;
         CustomSnackbar.showError(message: "Invalid phone number");
         return;
       }
@@ -70,7 +109,14 @@ class HeaderController extends GetxController {
         authToken,
       );
 
-      if (!authenticateResponse.error) {
+      // Handle the "no changes found" message specifically
+      if (authenticateResponse.message == "no changes found") {
+        // Show the actual message from the backend
+        Get.back(); // Close modal
+        phoneNumberController.clear();
+        usernameController.clear();
+        CustomSnackbar.showInfo(message: authenticateResponse.message);
+      } else if (!authenticateResponse.error) {
         sessionController.username.value = newUsername;
         Get.back(); // Close modal
         phoneNumberController.clear();
@@ -78,17 +124,18 @@ class HeaderController extends GetxController {
         CustomSnackbar.showSuccess(message: "Profile updated successfully");
       } else {
         updateProfileValidationError.value = authenticateResponse.message;
+        isFormValid.value = false;
         CustomSnackbar.showError(message: authenticateResponse.message);
       }
     } catch (e) {
       updateProfileValidationError.value = e.toString();
+      isFormValid.value = false;
       debugPrint("Error updating profile: $e");
       CustomSnackbar.showError(message: "$e");
     } finally {
       isLoading.value = false;
     }
   }
-
 
   Future<void> fetchprofile() async {
     final authToken = sessionController.token.value;
@@ -237,8 +284,14 @@ class HeaderController extends GetxController {
 
   @override
   void onClose() {
+    // Remove listeners before disposing
+    usernameController.removeListener(_validateForm);
+    phoneNumberController.removeListener(_validateForm);
+
+    // Dispose controllers
     usernameController.dispose();
     phoneNumberController.dispose();
+
     super.onClose();
     SafeSnackbar.closeAll(); // Safely close all active snackbars
   }

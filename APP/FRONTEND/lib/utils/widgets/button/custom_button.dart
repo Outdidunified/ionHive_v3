@@ -3,7 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed; // Nullable to support disabled state
   final double borderRadius;
   final EdgeInsetsGeometry padding;
   final LinearGradient? gradient;
@@ -14,7 +14,7 @@ class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed, // Optional now
     this.borderRadius = 12.0,
     this.padding = const EdgeInsets.symmetric(vertical: 14),
     this.gradient,
@@ -29,8 +29,11 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDisabled = onPressed == null;
+    final bool isButtonDisabled = isLoading || isDisabled;
+
     return GestureDetector(
-      onTap: isLoading ? null : onPressed,
+      onTap: isButtonDisabled ? null : () => onPressed?.call(),
       child: LayoutBuilder(
         builder: (context, constraints) {
           double fullWidth = constraints.maxWidth;
@@ -38,35 +41,51 @@ class CustomButton extends StatelessWidget {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            width: fullWidth, // Shrink to 50 when loading
+            width: fullWidth,
             height: 50, // Fixed height for consistent animation
             decoration: BoxDecoration(
-              gradient: gradient ??
-                  LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColorDark,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+              gradient: isDisabled
+                  ? LinearGradient(
+                      colors: [
+                        Colors.grey.shade300,
+                        Colors.grey.shade400,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : gradient ??
+                      LinearGradient(
+                        colors: [
+                          Theme.of(context).primaryColor,
+                          Theme.of(context).primaryColorDark,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
               borderRadius: BorderRadius.circular(borderRadius),
-              boxShadow: boxShadow != null && !isLoading ? [boxShadow!] : [],
+              boxShadow:
+                  boxShadow != null && !isButtonDisabled ? [boxShadow!] : [],
             ),
             child: Center(
               child: isLoading
                   ? SpinKitThreeBounce(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      size: 20.0, // You can adjust the size
+                      color: isDisabled
+                          ? Colors.grey.shade600
+                          : Theme.of(context).colorScheme.onPrimary,
+                      size: 20.0,
                     )
                   : Text(
-                text,
-                style: textStyle.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary, // Matches button text color
-                  fontSize: Theme.of(context).textTheme.titleLarge?.fontSize ?? 16, // Aligns with titleLarge (16px)
-                  fontWeight: FontWeight.bold, // Kept bold as per theme's titleLarge
-                ),
-              ),
+                      text,
+                      style: textStyle.copyWith(
+                        color: isDisabled
+                            ? Colors.grey.shade600
+                            : Theme.of(context).colorScheme.onPrimary,
+                        fontSize:
+                            Theme.of(context).textTheme.titleLarge?.fontSize ??
+                                16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           );
         },

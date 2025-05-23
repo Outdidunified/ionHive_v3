@@ -404,5 +404,13 @@ $mapUrl
     update(['connectors']); // Ensure UI updates
   }
 
+  @override
+  void onClose() {
+    super.onClose();
+    hidePopup(); // Ensures the popup is closed when the controller is disposed
+  }
+
+
 
 }
+
