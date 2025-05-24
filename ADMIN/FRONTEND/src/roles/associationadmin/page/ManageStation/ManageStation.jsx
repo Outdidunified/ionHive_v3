@@ -215,7 +215,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
               <option value="">Select Accessibility</option>
               <option value="Public">Public</option>
               <option value="Private">Private</option>
-              <option value="Captivate ">Captivate</option>
+              <option value="Captivate ">Hybrid</option>
             </select>
           </div>
 

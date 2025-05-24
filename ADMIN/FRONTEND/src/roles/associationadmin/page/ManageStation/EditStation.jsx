@@ -200,7 +200,7 @@ const EditStation = ({ userInfo, handleLogout }) => {
       >
         <option value="Public">Public</option>
         <option value="Private">Private</option>
-        <option value="Captive">Captive</option>
+        <option value="Captive">Hybrid</option>
       </select>
     </div>
   </div>
