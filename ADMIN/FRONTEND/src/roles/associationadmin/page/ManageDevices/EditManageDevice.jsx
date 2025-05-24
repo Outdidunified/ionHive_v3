@@ -58,76 +58,54 @@ const EditManageDevice = ({ userInfo, handleLogout }) => {
                                                 <div className="card-body">
                                                     <h4 className="card-title">Manage Device</h4>
                                                     <form className="form-sample" onSubmit={editManageDevice}>
-    <div className="d-flex flex-column align-items-center">
-        {/* First Row: Charger Accessibility & Set Location */}
-        <div className="row mb-3 w-100 justify-content-center">
-            {/* Charger Accessibility */}
-            <div className="col-md-4">
-                <div className="form-group">
-                    {/* <label className="labelInput">Charger Accessibility</label>
-                    <select
-                        className="form-control"
-                        value={selectStatus}
-                        onChange={handleStatusChange}
-                        required
-                    >
-                        <option value="1">Public</option>
-                        <option value="2">Private</option>
-                    </select> */}
-                </div>
-            </div>
-
-            {/* Set Location */}
-            {/* <div className="col-md-4">
-                <div className="form-group">
-                    <label className="labelInput">Location</label>
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={() => {
-                            setTempLat(latitude);
-                            setTempLong(longitude);
-                            setTempAddress(address);
-                            setIsLocationModalOpen(true);
-                        }}
-                    >
-                        📍 Update Location
-                    </button>
-                </div>
-            </div> */}
-        </div>
-
-        {/* Second Row: WiFi Username & Password */}
-        <div className="row w-100 justify-content-center">
-            {/* WiFi Username */}
-            <div className="col-md-4">
-                <div className="form-group">
-                    <label className="labelInput">WiFi Username</label>
-                    <InputField
-                        value={wifiUsername}
-                        maxLength={25}
-                        onChange={(e) => setWifiUsername(e.target.value)}
-                    />
-                </div>
-            </div>
-
-            {/* WiFi Password */}
-            <div className="col-md-4">
-                <div className="form-group">
-                    <label className="labelInput">WiFi Password</label>
-                    <InputField
-                        value={wifiPassword}
-                        maxLength={15}
-                        onChange={(e) => setWifiPassword(e.target.value.replace(/\s/g, ''))}
-                    />
-                </div>
-            </div>
-        </div>
+   <div className="d-flex flex-column align-items-center">
+  {/* Single Row for Charger Accessibility, WiFi Username & Password */}
+  <div className="row mb-3 w-100 justify-content-center">
+    
+    {/* Charger Accessibility */}
+    <div className="col-md-4">
+      <div className="form-group">
+        <label className="labelInput">Charger Accessibility</label>
+        <select
+          className="form-control"
+          value={selectStatus}
+          onChange={handleStatusChange}
+          required
+        >
+          <option value="1">Public</option>
+          <option value="2">Private</option>
+          <option value="3">Hybrid</option>
+        </select>
+      </div>
     </div>
-    {/* <div style={{ textAlign: 'center', padding: '15px' }}>
-                                                            <button type="submit" className="btn btn-primary mr-2" disabled={!isModified}>Update</button>
-       
-       </div> */}
+
+    {/* WiFi Username */}
+    <div className="col-md-4">
+      <div className="form-group">
+        <label className="labelInput">WiFi Username</label>
+        <InputField
+          value={wifiUsername}
+          maxLength={25}
+          onChange={(e) => setWifiUsername(e.target.value)}
+        />
+      </div>
+    </div>
+
+    {/* WiFi Password */}
+    <div className="col-md-4">
+      <div className="form-group">
+        <label className="labelInput">WiFi Password</label>
+        <InputField
+          value={wifiPassword}
+          maxLength={15}
+          onChange={(e) => setWifiPassword(e.target.value.replace(/\s/g, ''))}
+        />
+      </div>
+    </div>
+    
+  </div>
+</div>
+
        <ReusableButton type="submit"
        loading={isLoading} disabled={!isModified}>Update</ReusableButton>
 </form>

@@ -87,22 +87,21 @@ navigate('/associationadmin/EditStation', { state: { stationData: station } });
                     </div>
 
                     <div className="row viewDataCss" style={{ marginTop: '10px' }}>
-                      <div className="col-md-4">
-                        <strong>Accessibility:</strong> <span>{station.accessibility || '-'}</span>
-                      </div>
+                  
                       <div className="col-md-4">
                         <strong>Latitude:</strong> <span>{station.latitude || '-'}</span>
                       </div>
                       <div className="col-md-4">
                         <strong>Longitude:</strong> <span>{station.longitude || '-'}</span>
                       </div>
+                       <div className="col-md-4">
+    <strong>Charger Type:</strong> <span>{station.charger_type || '-'}</span>
+  </div>
                     </div>
 
                <div className="row viewDataCss" style={{ marginTop: '10px' }}>
                 
-  <div className="col-md-4">
-    <strong>Charger Type:</strong> <span>{station.charger_type || '-'}</span>
-  </div>
+ 
   
   <div className="col-md-8">
     <strong>Chargers:</strong>{' '}

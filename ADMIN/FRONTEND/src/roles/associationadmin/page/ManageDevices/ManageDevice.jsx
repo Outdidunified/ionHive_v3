@@ -169,7 +169,17 @@ const ManageDevice = ({ userInfo, handleLogout }) => {
                         </td>
                         <td>{dataItem.client_commission ? `${dataItem.client_commission}%` : '-'}</td>
                         <td>{dataItem.unit_price || '-'}</td>
-<td>{dataItem.station_details?.accessibility || '-'}</td>
+<td>
+  {
+    dataItem.charger_accessibility === 1
+      ? 'Public'
+      : dataItem.charger_accessibility === 2
+      ? 'Private'
+      : dataItem.charger_accessibility === 3
+      ? 'Hybrid'
+      : '-'
+  }
+</td>
                         <td>
                             <button type="button" className="btn btn-outline-warning btn-icon-text" style={{ marginBottom: '10px', marginRight: '10px' }} onClick={() => openFinanceModal(dataItem)}>
                                 <i className="ti-file btn-icon-prepend"></i>Finance

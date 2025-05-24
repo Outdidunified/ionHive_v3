@@ -194,33 +194,9 @@ const ManageStation = ({ userInfo, handleLogout }) => {
             />
           </div>
 
-          {/* Accessibility */}
-          <div className="input-group mb-3">
-            <div className="input-group-prepend">
-              <span
-                className="input-group-text"
-                style={{ width: '120px', color: '#444', fontWeight: 500 }}
-              >
-                Accessibility
-              </span>
-            </div>
-            <select
-              name="accessibility"
-              className="form-control"
-              value={stationData.accessibility}
-              onChange={handleInputChange}
-              maxLength={50}
+        
 
-            >
-              <option value="">Select Accessibility</option>
-              <option value="Public">Public</option>
-              <option value="Private">Private</option>
-              <option value="Captivate ">Hybrid</option>
-            </select>
-          </div>
-
-          {/* Latitude */}
-         {/* Latitude */}
+        
 <div className="input-group mb-3">
   <div className="input-group-prepend">
     <span
@@ -361,11 +337,9 @@ const ManageStation = ({ userInfo, handleLogout }) => {
         <th>Landmark</th>
         <th>Network</th>
         <th>Availability</th>
-        <th>Accessibility</th>
         <th>Latitude</th>
         <th>Longitude</th>
         <th>Charger Type</th>
-        {/* <th>Chargers</th> */}
         <th>Status</th>
         <th>Options</th>
         <th>Remove Charger</th>
@@ -394,7 +368,6 @@ const ManageStation = ({ userInfo, handleLogout }) => {
             <td>{station.landmark || '-'}</td>
             <td>{station.network || '-'}</td>
             <td>{station.availability || '-'}</td>
-            <td>{station.accessibility || '-'}</td>
             <td>{station.latitude || '-'}</td>
             <td>{station.longitude || '-'}</td>
             <td>{station.charger_type || '-'}</td>
@@ -542,9 +515,7 @@ const ManageStation = ({ userInfo, handleLogout }) => {
             if (removeChargerId) {
               removeChargerFromStation(removeStationId, removeChargerId);
               closeRemoveModal();
-            } else {
-              alert('Please select a charger to remove.');
-            }
+            } 
           }}
           style={{
             backgroundColor: '#dc3545',
@@ -642,7 +613,6 @@ const ManageStation = ({ userInfo, handleLogout }) => {
           { label: 'Landmark', value: selectedStation.landmark },
           { label: 'Network', value: selectedStation.network },
           { label: 'Availability', value: selectedStation.availability },
-          { label: 'Accessibility', value: selectedStation.accessibility },
           { label: 'Latitude', value: selectedStation.latitude },
           { label: 'Longitude', value: selectedStation.longitude },
           { label: 'Charger Type', value: selectedStation.charger_type },

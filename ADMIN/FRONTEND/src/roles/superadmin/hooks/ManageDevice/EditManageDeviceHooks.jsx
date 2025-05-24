@@ -18,7 +18,7 @@ const useEditManageDevice = (userInfo) => {
     const navigate = useNavigate();
 
     const backManageDevice = () => {
-        navigate('/superadmin/Allocateddevice');
+        navigate('/superadmin/ManageDevice');
     };
 
     

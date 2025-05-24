@@ -11,7 +11,6 @@ const EditStation = ({ userInfo, handleLogout }) => {
     landmark, setLandmark,
     network, setNetwork,
     availability, setAvailability,locationId,setLocationId,
-    accessibility, setAccessibility,
     latitude, setLatitude,
     longitude, setLongitude,
     chargerType, setChargerType,
@@ -187,26 +186,7 @@ const EditStation = ({ userInfo, handleLogout }) => {
                           </div>
                         </div>
 
-                       <div className="col-md-6">
-  <div className="form-group row">
-    <label className="col-sm-12 col-form-label labelInput">Accessibility</label>
-    <div className="col-sm-12">
-      <select
-        className="form-control"
-        value={accessibility}
-        onChange={(e) => setAccessibility(e.target.value)}
-          required
-
-      >
-        <option value="Public">Public</option>
-        <option value="Private">Private</option>
-        <option value="Captive">Hybrid</option>
-      </select>
-    </div>
-  </div>
-</div>
-
-
+                
                         <div className="col-md-6">
                           <div className="form-group row">
                             <label className="col-sm-12 col-form-label labelInput">Status</label>

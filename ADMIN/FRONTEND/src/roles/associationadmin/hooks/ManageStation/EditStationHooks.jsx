@@ -25,7 +25,6 @@ const [accessibilityError, setAccessibilityError] = useState('');
   const [landmark, setLandmark] = useState(dataItem?.landmark || '');
   const [network, setNetwork] = useState(dataItem?.network || '');
   const [availability, setAvailability] = useState(dataItem?.availability || '');
-  const [accessibility, setAccessibility] = useState(dataItem?.accessibility || '');
   const [latitude, setLatitude] = useState(dataItem?.latitude || '');
   const [longitude, setLongitude] = useState(dataItem?.longitude || '');
   const [chargerType, setChargerType] = useState(dataItem?.charger_type || '');
@@ -40,7 +39,6 @@ const [status, setStatus] = useState(
   landmark !== dataItem?.landmark ||
   network !== dataItem?.network ||
   availability !== dataItem?.availability ||
-  accessibility !== dataItem?.accessibility ||
   latitude !== dataItem?.latitude ||
   longitude !== dataItem?.longitude ||
   locationId !== dataItem?.location_id || // <-- add this check
@@ -78,7 +76,6 @@ const handleLocationIdChange = (e) => {
   landmark,
   network,
   availability,
-  accessibility,
   latitude,
   longitude,
     location_id: locationId,
@@ -110,17 +107,16 @@ const handleLocationIdChange = (e) => {
     landmark, setLandmark,
     network, setNetwork,
     availability, setAvailability,
-    accessibility, setAccessibility,
     latitude, setLatitude,
     longitude, setLongitude,
     chargerType, setChargerType,
     chargers, setChargers,
     status, setStatus,
     isModified,
-      locationId, setLocationId, // <-- added here
+      locationId, setLocationId, 
 handleLocationIdChange,
     updateStation,
-    goBackToManageStations,accessibilityError, setAccessibilityError,
+    goBackToManageStations,
   };
 };
 

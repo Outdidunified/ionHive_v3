@@ -42,7 +42,6 @@ const useViewStation = () => {
         landmark: stationData.landmark || '',
         network: stationData.network || '',
         availability: stationData.availability || '',
-        accessibility: stationData.accessibility || '',
         latitude: stationData.latitude || '',
         longitude: stationData.longitude || '',
         charger_type: stationData.charger_type || '',

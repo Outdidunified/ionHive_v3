@@ -11,7 +11,6 @@ const useManageStation = (userInfo) => {
     landmark: '',
     network: '',
     availability: '',
-    accessibility: '',
     latitude: '',
     longitude: '',
     charger_type: '',
@@ -110,7 +109,6 @@ const closeRemoveModal = () => {
       !stationData.landmark ||
       !stationData.network ||
       !stationData.availability ||
-      !stationData.accessibility ||
       !stationData.latitude ||
       !stationData.longitude ||
       !stationData.charger_type ||

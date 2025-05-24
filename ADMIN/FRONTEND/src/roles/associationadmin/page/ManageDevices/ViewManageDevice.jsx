@@ -140,11 +140,24 @@ const ViewManageDevice = ({ userInfo, handleLogout }) => {
                                                             </div>
                                                         </div>
                                                         <div className="col-md-4">
-                                                            <div className="form-group row">
-                                                                <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Charger Accessibility: <span style={{ fontWeight: 'normal' }}>    {deviceData.station_details?.accessibility || '-'}
-</span></div> 
-                                                            </div>
-                                                        </div>
+  <div className="form-group row">
+    <div className="col-sm-12" style={{ fontWeight: 'bold' }}>
+      Charger Accessibility:{' '}
+      <span style={{ fontWeight: 'normal' }}>
+        {
+          deviceData.charger_accessibility === 1
+            ? 'Public'
+            : deviceData.charger_accessibility === 2
+            ? 'Private'
+            : deviceData.charger_accessibility === 3
+            ? 'Hybrid'
+            : '-'
+        }
+      </span>
+    </div>
+  </div>
+</div>
+
                                                         <div className="col-md-4">
                                                             <div className="form-group row">
                                                                 <div className="col-sm-12" style={{ fontWeight: 'bold' }}>Unit Price: <span style={{fontWeight: 'normal'}}>{deviceData.unit_price ? deviceData.unit_price : '-'}</span></div>
