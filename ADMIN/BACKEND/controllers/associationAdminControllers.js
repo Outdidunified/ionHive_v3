@@ -675,7 +675,6 @@ async function addChargingStation(req, res) {
       landmark,
       network,
       availability,
-      accessibility,
       latitude,
       longitude,
       charger_type,
@@ -690,7 +689,6 @@ async function addChargingStation(req, res) {
       !landmark ||
       !network ||
       !availability ||
-      !accessibility ||
       !created_by ||
       latitude === undefined ||
       longitude === undefined ||
@@ -726,7 +724,6 @@ async function addChargingStation(req, res) {
       landmark,
       network,
       availability,
-      accessibility,
       latitude: parseFloat(latitude),   // convert to number
       longitude: parseFloat(longitude),
       charger_type,
@@ -804,9 +801,6 @@ async function updateChargingStation(req, res) {
     return res.status(500).json({ status: 'Failed', message: 'Internal server error' });
   }
 }
-
-
-
 
 
 // POST /getStationsByAssociation
