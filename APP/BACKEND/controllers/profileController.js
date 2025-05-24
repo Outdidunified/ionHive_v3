@@ -683,7 +683,7 @@ const getAllvehicleModels = async (req, res) => {
         }
         const vehicleCollection = db.collection("vehicle_models");
 
-        const vehicleModels = await vehicleCollection.find({}).toArray();
+        const vehicleModels = await vehicleCollection.find({ status: true }).toArray();
         logger.loggerSuccess(`Fetched ${vehicleModels.length} vehicle models from database.`);
 
         return res.status(200).json({

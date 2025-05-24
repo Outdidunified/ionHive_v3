@@ -72,6 +72,7 @@ const SearchSpecificChargerDetails = async (req, res) => {
         );
 
         if (!charger) {
+            logger.loggerError(`Charger not found with the given charger_id: ${charger_id}`);
             return res.status(404).json({
                 error: true,
                 message: 'Charger not found with the given charger_id.',

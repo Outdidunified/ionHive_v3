@@ -373,10 +373,53 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
         const chargerStatusCollection = db.collection("charger_status");
         const financeDetailsCollection = db.collection("financeDetails");
 
+        // Initialize variables for user data
+        let userAuthenticated = false;
+        let userAssignedAssociation = null;
+
+        // Check for user data
+        try {
+            const hasUserId = user_id && (Number.isInteger(Number(user_id)) || typeof user_id === 'number');
+            const hasEmailId = email_id && typeof email_id === 'string';
+
+            if ((hasUserId || hasEmailId) && db) {
+                const usersCollection = db.collection("users");
+                let query = {};
+
+                if (hasUserId) query.user_id = parseInt(user_id);
+                if (hasEmailId) query.email_id = email_id;
+
+                logger.loggerInfo(`Looking up user with query: ${JSON.stringify(query)}`);
+                const user = await usersCollection.findOne(query);
+
+                if (user) {
+                    userAuthenticated = true;
+                    userAssignedAssociation = user.assigned_association;
+
+                    logger.loggerInfo(`User found: ID=${user.user_id}, Email=${user.email_id}. Assigned Association: ${userAssignedAssociation}`);
+
+                    if (user.status === false) {
+                        logger.loggerWarn(`User account is inactive: UserID: ${user.user_id}, Email ID: ${user.email_id}`);
+                        return res.status(403).json({
+                            error: true,
+                            message: 'Your account has been deactivated!',
+                            invalidateToken: true
+                        });
+                    }
+                } else {
+                    logger.loggerWarn(`User not found with provided credentials. Continuing without user data.`);
+                }
+            } else {
+                logger.loggerInfo('No valid user credentials provided. Continuing in guest mode.');
+            }
+        } catch (userError) {
+            logger.loggerError(`Error fetching user data: ${userError.message}`);
+        }
+
         // Fetch station's chargers
         const station = await stationsCollection.findOne(
             { station_id: Number(station_id), location_id: location_id },
-            { projection: { _id: 0, chargers: 1 } }
+            { projection: { _id: 0, chargers: 1, accessibility: 1 } }
         );
 
         if (!station || !station.chargers || station.chargers.length === 0) {
@@ -386,7 +429,8 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
             });
         }
 
-        const chargerDetails = await chargersCollection.find(
+        // Fetch charger details
+        let chargerDetails = await chargersCollection.find(
             { charger_id: { $in: station.chargers } }
         ).project({
             _id: 0,
@@ -405,8 +449,40 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
             finance_id: 1,
             status: 1,
             address: 1,
-            landmark: 1
+            landmark: 1,
+            charger_accessibility: 1,
+            assigned_association_id: 1 // Include for filtering
         }).toArray();
+
+        // Filter chargers based on accessibility and assigned_association_id
+        chargerDetails = chargerDetails.filter(charger => {
+            // Only include chargers with status: true
+            if (charger.status !== true) {
+                return false;
+            }
+
+            // Public chargers (charger_accessibility: 1) with non-null assigned_association_id
+            if (charger.charger_accessibility === 1 && charger.assigned_association_id !== null) {
+                return true;
+            }
+
+            // Private chargers (charger_accessibility: 2) with matching assigned_association_id
+            if (userAuthenticated && userAssignedAssociation !== null && charger.charger_accessibility === 2) {
+                return charger.assigned_association_id === userAssignedAssociation ||
+                    charger.assigned_association_id === undefined;
+            }
+
+            // Exclude private chargers if no user association
+            return false;
+        });
+
+        // If no chargers remain after filtering, return an appropriate response
+        if (chargerDetails.length === 0) {
+            return res.status(404).json({
+                error: true,
+                message: 'No accessible chargers found for this station based on your permissions.',
+            });
+        }
 
         const chargerIds = chargerDetails.map(charger => charger.charger_id);
 
@@ -418,7 +494,6 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
             { charger_id: { $in: chargerIds } },
             { projection: { _id: 0, charger_id: 1, connector_id: 1, charger_status: 1, timestamp: 1 } }
         ).toArray();
-
 
         const chargersWithConfig = await Promise.all(chargerDetails.map(async charger => {
             const config = socketGunConfigs.find(cfg => cfg.charger_id === charger.charger_id) || {};
@@ -492,11 +567,52 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
             };
         }));
 
+        // Check charger accessibility to determine station accessibility
+        let hasPublicChargers = false;
+        let hasPrivateChargers = false;
+
+        // Process each charger to determine accessibility
+        for (const charger of chargerDetails) {
+            if (charger.charger_accessibility === 1) {
+                hasPublicChargers = true;
+            } else if (charger.charger_accessibility === 2) { // Updated to match the 1/2 schema
+                hasPrivateChargers = true;
+            }
+        }
+
+        // Determine station accessibility based on filtered chargers
+        let stationAccessibility;
+        if (hasPublicChargers && hasPrivateChargers) {
+            stationAccessibility = "Hybrid";
+        } else if (hasPublicChargers) {
+            stationAccessibility = "Public";
+        } else if (hasPrivateChargers) {
+            stationAccessibility = "Private";
+        } else {
+            stationAccessibility = "Public"; // Default to Public if no chargers match
+        }
+
+        // // Update the station in the database if accessibility has changed
+        // try {
+        //     if (station.accessibility !== stationAccessibility) {
+        //         await stationsCollection.updateOne(
+        //             { station_id: Number(station_id), location_id: location_id },
+        //             { $set: { accessibility: stationAccessibility } }
+        //         );
+        //         logger.loggerInfo(`Updated station ${station_id} accessibility to ${stationAccessibility}`);
+        //     }
+        // } catch (updateError) {
+        //     logger.loggerError(`Error updating station accessibility: ${updateError.message}`);
+        // }
+
         logger.loggerSuccess(`Successfully retrieved charger details for station_id: ${station_id}`);
         return res.status(200).json({
             error: false,
             message: 'Charger details retrieved successfully.',
-            chargers: chargersWithConfig
+            chargers: chargersWithConfig,
+            station_accessibility: stationAccessibility,
+            has_public_chargers: hasPublicChargers,
+            has_private_chargers: hasPrivateChargers
         });
 
     } catch (error) {
@@ -508,7 +624,6 @@ const getSpecificStationsChargerDetailsWithConnector = async (req, res) => {
         });
     }
 };
-
 
 // MANAGE CHARGING SESSION FOR USER
 // Update Connector User

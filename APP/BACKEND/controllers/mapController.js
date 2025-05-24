@@ -213,23 +213,23 @@ const getNearbyStations = async (req, res) => {
         const lat = parseFloat(latitude);
         const lon = parseFloat(longitude);
         const stationsCollection = db.collection("charging_stations");
+        const chargerStatusCollection = db.collection("charger_status");
+        const financeDetailsCollection = db.collection("financeDetails");
 
         // Initialize variables for user data
         let savedStationIds = [];
         let userAuthenticated = false;
+        let userAssignedAssociation = null;
 
         // Check for user data
         try {
-            // Determine if we have enough user information to look up
             const hasUserId = user_id && (Number.isInteger(Number(user_id)) || typeof user_id === 'number');
             const hasEmailId = email_id && typeof email_id === 'string';
 
-            // If we have at least one identifier, try to find the user
             if ((hasUserId || hasEmailId) && db) {
                 const usersCollection = db.collection("users");
                 let query = {};
 
-                // Build query based on available data
                 if (hasUserId) query.user_id = parseInt(user_id);
                 if (hasEmailId) query.email_id = email_id;
 
@@ -240,12 +240,13 @@ const getNearbyStations = async (req, res) => {
                     userAuthenticated = true;
                     const favStations = user.favStations || [];
                     savedStationIds = favStations
-                        .filter(station => station.status === true) // Only include stations with status: true
+                        .filter(station => station.status === true)
                         .map(station => station.station_id);
 
-                    logger.loggerInfo(`User found: ID=${user.user_id}, Email=${user.email_id}. Found ${savedStationIds.length} saved stations.`);
+                    userAssignedAssociation = user.assigned_association;
 
-                    // Check if user status is false
+                    logger.loggerInfo(`User found: ID=${user.user_id}, Email=${user.email_id}. Found ${savedStationIds.length} saved stations. Assigned Association: ${userAssignedAssociation}`);
+
                     if (user.status === false) {
                         logger.loggerWarn(`User account is inactive: UserID: ${user.user_id}, Email ID: ${user.email_id}`);
                         return res.status(403).json({
@@ -262,22 +263,20 @@ const getNearbyStations = async (req, res) => {
             }
         } catch (userError) {
             logger.loggerError(`Error fetching user data: ${userError.message}`);
-            // Continue without user data
         }
 
         // Constants for distance calculation
-        const EARTH_RADIUS_KM = 6371; // Radius of Earth in KM
+        const EARTH_RADIUS_KM = 6371;
         const PI = Math.PI;
         const DEG_TO_RAD = PI / 180;
 
         const userLatRad = lat * DEG_TO_RAD;
         const userLonRad = lon * DEG_TO_RAD;
 
-        // Step 2: Fetch nearby stations
+        // Step 1: Fetch nearby stations with charger details
         const nearbyStations = await stationsCollection.aggregate([
             {
                 $addFields: {
-                    // Convert latitude and longitude to numbers if they are strings
                     lat_num: {
                         $convert: {
                             input: "$latitude",
@@ -338,13 +337,60 @@ const getNearbyStations = async (req, res) => {
                     }
                 }
             },
-            { $match: { distance: { $lte: 100 } } }, // RADIUS_KM can be replaced here
+            { $match: { distance: { $lte: 100 } } },
             {
                 $lookup: {
                     from: "charger_details",
                     localField: "chargers",
                     foreignField: "charger_id",
                     as: "charger_details"
+                }
+            },
+            // Step 2: Filter charger_details based on accessibility and assigned_association_id
+            {
+                $set: {
+                    charger_details: {
+                        $filter: {
+                            input: "$charger_details",
+                            as: "charger",
+                            cond: {
+                                $and: [
+                                    { $eq: ["$$charger.status", true] }, // Only include chargers with status: true
+                                    {
+                                        $or: [
+                                            // Public chargers (charger_accessibility: 1) with non-null assigned_association_id
+                                            {
+                                                $and: [
+                                                    { $eq: ["$$charger.charger_accessibility", 1] },
+                                                    { $ne: ["$$charger.assigned_association_id", null] }
+                                                ]
+                                            },
+                                            // Private chargers (charger_accessibility: 2) with matching assigned_association_id
+                                            userAuthenticated && userAssignedAssociation !== null
+                                                ? {
+                                                    $and: [
+                                                        { $eq: ["$$charger.charger_accessibility", 2] },
+                                                        {
+                                                            $or: [
+                                                                { $eq: ["$$charger.assigned_association_id", userAssignedAssociation] },
+                                                                { $eq: [{ $type: "$$charger.assigned_association_id" }, "missing"] } // Fixed: Check if field is missing
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                                : { $eq: [1, 2] } // Dummy condition to exclude private chargers if no user association
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            // Step 3: Log the filtered charger_details for debugging
+            {
+                $set: {
+                    charger_count: { $size: "$charger_details" } // Add a field to log the number of chargers after filtering
                 }
             },
             {
@@ -357,10 +403,11 @@ const getNearbyStations = async (req, res) => {
                     network: 1,
                     availability: 1,
                     accessibility: 1,
-                    latitude: "$lat_num", // Use the converted numeric value
-                    longitude: "$lon_num", // Use the converted numeric value
+                    latitude: "$lat_num",
+                    longitude: "$lon_num",
                     charger_type: 1,
                     distance: 1,
+                    charger_count: 1, // Include for debugging
                     charger_details: {
                         charger_id: 1,
                         model: 1,
@@ -377,29 +424,147 @@ const getNearbyStations = async (req, res) => {
                         finance_id: 1,
                         status: 1,
                         address: 1,
-                        landmark: 1
+                        landmark: 1,
+                        charger_accessibility: 1,
+                        assigned_association_id: 1 // Include for debugging
                     }
                 }
             },
             { $sort: { distance: 1 } }
         ]).toArray();
 
-        // Step 3: Add saved_station field to each nearby station
-        const updatedStations = nearbyStations.map(station => {
-            // Only mark stations as saved if user is authenticated
+        // Log the number of chargers per station for debugging
+        // nearbyStations.forEach(station => {
+        //     logger.loggerInfo(`Station ${station.station_id}: ${station.charger_count} chargers after filtering`);
+        // });
+
+        // Step 4: Process stations - add saved_station field, update accessibility, and enrich charger_details
+        const updatedStations = await Promise.all(nearbyStations.map(async station => {
             const isSaved = userAuthenticated ? savedStationIds.includes(station.station_id) : false;
+
+            // Enrich charger_details with status and unit_price
+            const enrichedChargerDetails = await Promise.all((station.charger_details || []).map(async charger => {
+                const chargerId = charger.charger_id;
+
+                // Fetch charger status
+                const status = await chargerStatusCollection.find({ charger_id: chargerId }).toArray();
+
+                // Calculate unit price
+                let unitPrice = null;
+                let PriceDetails = {};
+                const financeId = charger.finance_id;
+
+                if (financeId) {
+                    const financeRecord = await financeDetailsCollection.findOne({ finance_id: financeId });
+
+                    if (financeRecord) {
+                        const EB_fee = parseFloat(financeRecord.eb_charge) + parseFloat(financeRecord.margin);
+                        const additionalCharges = [
+                            parseFloat(financeRecord.parking_fee),
+                            parseFloat(financeRecord.convenience_fee),
+                            parseFloat(financeRecord.station_fee),
+                            parseFloat(financeRecord.processing_fee),
+                            parseFloat(financeRecord.service_fee)
+                        ];
+                        const totalAdditionalCharges = additionalCharges.reduce((sum, charge) => sum + (charge || 0), 0);
+                        const TotalEBPrice = (EB_fee + totalAdditionalCharges);
+                        const gstPercentage = financeRecord.gst;
+                        const gstAmount = (TotalEBPrice * gstPercentage) / 100;
+                        unitPrice = TotalEBPrice + gstAmount;
+
+                        PriceDetails = {
+                            EB_Fee: EB_fee,
+                            Parking_fee: parseFloat(financeRecord.parking_fee).toFixed(2),
+                            convenience_fee: parseFloat(financeRecord.convenience_fee).toFixed(2),
+                            station_fee: parseFloat(financeRecord.station_fee).toFixed(2),
+                            processing_fee: parseFloat(financeRecord.processing_fee).toFixed(2),
+                            service_fee: parseFloat(financeRecord.service_fee).toFixed(2),
+                            gst: parseFloat(gstAmount).toFixed(2),
+                            gstPercentage: gstPercentage
+                        };
+                    }
+                }
+
+                return {
+                    ...charger,
+                    status: status.length > 0 ? status : null,
+                    unit_price: unitPrice ? parseFloat(unitPrice).toFixed(2) : null,
+                    PriceDetails
+                };
+            }));
+
+            // Update charger_details with enriched data
+            station.charger_details = enrichedChargerDetails;
+
+            // Determine station accessibility based on chargers
+            let hasPublicChargers = false;
+            let hasPrivateChargers = false;
+
+            if (station.charger_details && station.charger_details.length > 0) {
+                for (const charger of station.charger_details) {
+                    if (charger.charger_accessibility === 1) {
+                        hasPublicChargers = true;
+                    } else if (charger.charger_accessibility === 2) {
+                        hasPrivateChargers = true;
+                    }
+                }
+
+                let stationAccessibility;
+                if (hasPublicChargers && hasPrivateChargers) {
+                    stationAccessibility = "Hybrid";
+                } else if (hasPublicChargers) {
+                    stationAccessibility = "Public";
+                } else if (hasPrivateChargers) {
+                    stationAccessibility = "Private";
+                } else {
+                    stationAccessibility = station.accessibility;
+                }
+
+                // if (stationAccessibility !== station.accessibility) {
+                //     try {
+                //         await stationsCollection.updateOne(
+                //             { station_id: station.station_id },
+                //             { $set: { accessibility: stationAccessibility } }
+                //         );
+                //         logger.loggerInfo(`Updated station ${station.station_id} accessibility to ${stationAccessibility}`);
+                //     } catch (updateError) {
+                //         logger.loggerError(`Error updating station accessibility: ${updateError.message}`);
+                //     }
+                // }
+
+                station.accessibility = stationAccessibility;
+            }
+
+            // Remove charger_count from the final response
+            delete station.charger_count;
+
             return {
                 ...station,
-                saved_station: isSaved // Add saved_station key with true/false
+                saved_station: isSaved
             };
-        });
+        }));
+
+        // Log accessibility statistics
+        const accessibilityStats = {
+            Public: updatedStations.filter(s => s.accessibility === "Public").length,
+            Private: updatedStations.filter(s => s.accessibility === "Private").length,
+            Hybrid: updatedStations.filter(s => s.accessibility === "Hybrid").length,
+            Other: updatedStations.filter(s => !["Public", "Private", "Hybrid"].includes(s.accessibility)).length
+        };
 
         logger.loggerSuccess(`Found ${updatedStations.length} nearby stations & retrieved successfully`);
+        logger.loggerInfo(`Station accessibility breakdown: ${JSON.stringify(accessibilityStats)}`);
 
         return res.status(200).json({
             error: false,
             message: "Nearby charging stations retrieved successfully",
             stations: updatedStations,
+            accessibility_stats: {
+                public_count: accessibilityStats.Public,
+                private_count: accessibilityStats.Private,
+                hybrid_count: accessibilityStats.Hybrid,
+                other_count: accessibilityStats.Other
+            }
         });
 
     } catch (error) {
@@ -411,7 +576,6 @@ const getNearbyStations = async (req, res) => {
         });
     }
 };
-
 // MANAGE ACTIVE CHARGER'S OF SPECIFIC USER
 // Fetch active charging sessions of a user
 const fetchActiveChargersOfUser = async (req, res) => {
